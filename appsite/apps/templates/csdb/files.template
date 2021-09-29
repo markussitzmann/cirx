@@ -1,0 +1,63 @@
+{% extends "base-service.html" %}
+
+{% block title %}CSDB Viewer{% endblock %}
+
+{% block header %}CSDB Viewer{% endblock %}
+
+{% block document-ready-script %}
+$('#home-button').button({text: false, icons: {primary: "ui-icon-home"}})
+$('#file-table').dataTable({
+	"aaData": [
+	{% for file in files %}
+		[{'id': '{{ file.id }}', 'url': '{% url "chemical.apps.views.csdb_file" file_id=file.id %}'},
+		"{{ file.name }}",
+		"{{ file.added|date:"Y-M-d" }}"],
+	{% endfor %}
+	],
+	"aoColumns": [
+		{"sTitle": "ID", "sWidth": "5%", "sType": "num-html", "fnRender": 
+			function(obj) {
+				var j = obj.aData[0]
+				return '<a href='+j.url+'>'+j.id+'</a>'
+			},
+		},
+		{"sTitle": "Name"},
+		{"sTitle": "Added"}
+	],
+	"sDom": '<"table-header"fpl>rt<"table-footer"i><"clear">',
+	"sPaginationType": "full_numbers",
+	"iDisplayLength": 20,
+	"aLengthMenu": [20,25,50,100,500,1000],
+});
+{% endblock %}
+
+
+{% block ribbon %}
+<div id="button-bar">
+<div id="button-bar-left">
+<ul>
+	<li><button id="home-button">Home</button></li>
+</ul>
+</div>
+</div>
+{% endblock %}
+
+
+{% block content %}
+<div class="section">
+
+	<h2>List of Files</h2>
+	<div class="paragraph">
+	<table id="file-table"></table>
+	</div>
+	
+
+</div>
+{% endblock %}
+
+
+
+
+
+
+

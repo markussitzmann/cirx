@@ -1,0 +1,18 @@
+{% extends "base-service.html" %}
+
+{% block title %}CSLS - Chemical Structure Lookup Service{% endblock %}
+
+{% block header %}Chemical Structure Lookup Service{% endblock %}
+
+
+{% block ribbon %}
+
+{% endblock %}
+
+
+{% block content %}
+<ul>
+	<li>Databases</li>
+	<li>Files</li>
+</ul>
+{% endblock %}

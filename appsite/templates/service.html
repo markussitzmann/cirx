@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<!--<meta http-equiv="X-UA-Compatible" content="chrome=1">-->
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7, IE=9" >
+	<title>{% block title %}No title{% endblock %}</title>
+	<meta name="robots" content="index, follow" />
+	<meta name="author" content="NCICADD Group, National Cancer Institute" />
+	<meta name="author-personal" content="{% block meta-author %}Markus Sitzmann, Igor Filippov, Marc Nicklaus{% endblock %}" />
+	<meta name="author-mail" content="{% block meta-author-mail %}webmaster@{{ host }}{% endblock %}"/>
+	<meta name="keywords" content="{% block meta-keywords %}{% endblock %}" />
+	<meta name="description" content="{% block meta-description %}{% endblock %}" />
+	{% block link %}
+	<link rel="stylesheet" href="/style/carbon.css" type="text/css" media="screen,projection" />
+	<!--<link rel="stylesheet" href="/style/browser.css" type="text/css" media="screen,projection">-->
+        <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>-->
+        <!--<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/black-tie/jquery-ui.css">-->
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/black-tie/jquery-ui.css">
+	<link rel="icon" href="/image/favicon.ico"  type="image/x-icon"/>
+	{% endblock %}
+	{% block script %}{% endblock %}
+	<script type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=HHS&subagency=NCI"></script>
+</head>
+
+<body>
+<div class="Header">
+
+	<div class="CenterArea" id="HeaderCenterArea">
+	<div id="HomeBorder"><a href="/">{{ host }}</a></div>
+	<div><h1>{% block header %}{% endblock %}</h1></div>
+
+	</div>
+
+</div>
+
+<div class="Ribbon">
+
+	<div class="CenterArea" id="RibbonCenterArea">
+	{% block ribbon %}{% endblock %}
+	</div>
+
+</div>
+
+<div class="Content">
+
+	<div class="CenterArea" id="ContentCenterArea">
+	{% block content %}{% endblock %}
+	</div>
+
+</div>
+
+<div class="Footer">
+	
+	<div class="CenterArea">
+	{% block footer %}
+	<div id="disclaimerPrivacyContainer" class="disclaimer"><p><a href="/ncicadd/contact.html">Contact</a> | <a href="/ncicadd/disclaimer.html">Disclaimer</a> | <a href="/ncicadd/privacy.html">Privacy Statement</a></p></div>
+	<!--<p>Markus Sitzmann (sitzmann+++helix.nih.gov)</p>-->
+	<p>NCI/CADD Group 2009-{% now "Y" %}</p>
+	<p>{% now "jS F Y H:i" %}</p>
+	{% endblock %}
+	</div>
+
+</div>
+
+</body>
+</html>

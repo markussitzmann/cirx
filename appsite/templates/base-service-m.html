@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=9, IE=8, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<title>{% block title %}No title{% endblock %}</title>
+
+<link rel="icon" href="/image/favicon.ico"  type="image/x-icon"/>
+<!--<link rel="stylesheet" href="/style/jquery.dataTables.css" type="text/css" media="screen,projection" />-->
+<link rel="stylesheet" href="/style/chemwriter-mod.css" type="text/css" media="screen,projection" />
+<!--<link rel="stylesheet" href="/style/chemwriter-mod.css" type="text/css" media="screen,projection" />-->
+<link href='//fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='//fonts.googleapis.com/css?family=Noto+Sans' rel='stylesheet' type='text/css'>
+<!--<link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>-->
+
+{% comment %}{% block link %}{% endblock %}{% endcomment %}
+
+<script type="text/javascript" src="/js/ChemDoodleWeb-libs.js"></script>
+<script type="text/javascript" src="/js/ChemDoodleWeb.js"></script>
+<script type="text/javascript" src="/js/chemwriter.js"></script>
+<!--<script type="text/javascript" src="http://chemwriter.com/sdk/chemwriter.js" data-chemwriter-license="https://81.169.173.47/license/cactus.nci.nih.gov.lic"></script>-->
+<!--<link rel="stylesheet" href="http://chemwriter.com/sdk/chemwriter.css" type="text/css" media="screen,projection" />-->
+<!--<script type="text/javascript" src="http://81.169.173.47/lib/package/jsme_2013-03-19/jsme.nocache.js"></script>-->
+<script type="text/javascript" src="/js/JSmol.min.js"></script>
+
+<script type="text/javascript" src="/js/loStorage.js"></script>
+
+<link rel="stylesheet" href="/style/g14.css" />
+<!--
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.0-alpha.2/jquery.mobile-1.4.0-alpha.2.min.css">
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+-->
+
+<link rel="stylesheet" href="//code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
+<script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+
+
+<!--
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+-->
+
+<!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
+<!--<script>
+	function jsmeOnLoad() {}
+</script>-->
+
+<script type="text/javascript">
+$(document).on('mobileinit', function(){
+		//$.event.special.swipe.horizontalDistanceThreshold = 100;
+		$.mobile.page.prototype.options.domCache = true
+		$.extend({
+    		distinct : function(anArray) {
+				var result = [];
+				$.each(anArray, function(i,v){
+					if ($.inArray(v, result) == -1) result.push(v);
+				});
+       			return result;
+    		},
+			distinctKeys : function(anArray,key) {
+				var result = [];
+				$.each(anArray, function(i,v){
+					if ($.inArray(v[key], result) == -1) result.push(v[key]);
+				});
+       			return result;
+    		},
+			unique_items : function(anArray,bnArray) {
+				var result = [];
+				$.each(anArray, function(i,v){
+					if ($.inArray(v, bnArray) == -1) result.push(v);
+				});
+       			return result;
+    		},
+			delete_item : function(anArray, item) {
+				var result = [];
+				$.each(anArray, function(i,v){
+					if (v != item) result.push(v);
+				});
+				return result;
+			},
+			sanitize_form_data : function(form_data) {
+				var form_data_cleaned = [];
+				$.each($.trim(form_data).split('\n'), function(index, string) {
+					try {
+						var detagged_string = $(string).text();
+					} catch(e) {
+						var detagged_string = string
+					}
+					if (detagged_string != '') {
+						string=detagged_string;
+					}
+					if(string!=''){
+						form_data_cleaned.push(string);
+					}
+				});
+				return form_data_cleaned
+			}
+		});
+		
+		function App() {
+			if (session.get('app') == null) {
+				session.set('app', {'current': 'cap', 'current_editor': 'chemwriter'});
+			}
+			if (session.get('user_data') == null) {
+				session.set('user_data', {
+					'last_term': '',
+					'term_array': [], 
+					'switch_array': ['model-switch-1','model-switch-2', 'model-switch-3','model-switch-4', 'model-switch-5']
+				});
+			}
+			this.page_bindings = {}
+			this.bind_page = function(page_id, binding_class) {
+				if (!this.page_bindings.hasOwnProperty(page_id)) {
+					this.page_bindings[page_id] = new binding_class();
+				}
+			}
+			this.push_status = function(success, failure) {
+				var _this = this;
+				$.when(
+					$.ajax({
+						beforeSend: function(){
+							$.mobile.showPageLoadingMsg();
+						},
+						type: "POST",
+        				url: '{% url "chemical.apps.views.response" %}',
+        				dataType: 'json',
+        				data: JSON.stringify({
+							'user_data': session.get('user_data'),
+							'app': session.get('app')['current']
+						}),
+					})
+				).then(
+					success,
+					failure
+				);
+			}
+			this.sort_list = function(selector, f) {
+				var l = $(selector).children("li").sort(f)
+				var reA = /[^a-zA-Z]/g;
+				var reN = /[^0-9]/g;
+				l.remove();
+				$(selector).html(l)
+			}
+			
+			var sort_functions = function() {
+				var _this = this
+				this.index_asc_sort = function(a, b) {
+					var iA = parseInt($(a).attr('sort-index'))
+					var iB = parseInt($(b).attr('sort-index'))
+					alert('blu');
+					return (iA > iB) ? 1 : -1;    
+				}
+				this.special_asc_sort = function(a, b) {
+					var nA = parseInt($(a).text().split(' ')[1])
+					var nB = parseInt($(b).text().split(' ')[1])
+					var intRegex = /^\d+$/;
+					if (intRegex.test(nA) && intRegex.test(nB)) {
+						return (nA > nB) ? 1 : -1;    
+					} else {
+						return _this.asc_sort(a, b);
+					}
+				}
+				this.asc_sort = function(a, b){
+					return ($(b).text()) < ($(a).text()) ? 1 : -1;    
+				}
+				this.desc_sort = function(a, b){
+    				return ($(b).text()) > ($(a).text()) ? 1 : -1;    
+				}
+			}
+			this.sort_functions = new sort_functions();
+
+			this.init_global_error_handler = function(callback) {
+				window.onerror = function() {
+  					callback();
+					return false;
+				};
+			}
+			this.reload = function() {
+				location.reload(true);
+			}
+		}
+		app = new App();
+		
+		
+		function AppSwitches() {
+			var _this = this
+			if (session.get('user_data')['switch_array']==null){
+				session.extend('user_data', {'switch_array': []});
+			}
+			this.add_switch = function(id) {
+				var button_array = session.get('user_data')['switch_array'];
+				button_array.push(id);
+				button_array = $.distinct(button_array);
+				session.extend('user_data', {'switch_array': button_array})
+			}
+			this.switch_is_on = function(button) {
+				return ($.inArray(button, session.get('user_data')['switch_array'])==-1 ? 0 : 1)
+			}
+			this.toggle = function(button) {
+				var button_val = ($('#' + button).val());
+				//alert(button + '|' + button_val);
+				var button_array = session.get('user_data')['switch_array']; 
+				if (button_val=='off') {
+					button_array = $.delete_item(button_array, button);
+					$('#' + button).val('off').slider('refresh');
+				} else if (button_val=='on') {
+					button_array.push(button);
+					$('#' + button).val('on').slider('refresh');
+				} else {
+					alert('unknown error');
+				}
+				button_array = $.distinct(button_array);
+				session.extend('user_data', {'switch_array': button_array});
+				//alert(JSON.stringify(session.get('user_data')['switch_array']));
+			}
+		}
+		app_switches = new AppSwitches();
+		
+		function ChemicalTermProcessor() {
+			var _this = this
+			this.form_data_cleaned=''
+			this.new_terms = []
+			this.term_array = []
+			this._sanitized = function(form_data) {
+				s = $.sanitize_form_data(form_data);
+				return s;
+			}
+			this.parse_string = function(term_data, list_data) {
+				var term_array = session.get('user_data')['term_array'];				
+				if (typeof(term_data)==='string') {
+					clean_term_data = $.sanitize_form_data(term_data);
+					_this.last_term_string = clean_term_data
+					session.extend('user_data', {'last_term': clean_term_data[0]});
+				} else {
+					clean_term_data = []
+					/*this_object.last_term_string = ''*/
+				}
+				if (typeof(list_data)==='string') {
+					clean_list_data = $.sanitize_form_data(list_data);
+				} else {
+					clean_list_data = []
+				}				
+				$.merge(term_array, clean_list_data);
+				$.merge(term_array, clean_term_data);
+				session.extend('user_data', {'term_array': $.distinct(term_array)});
+				return this
+			}
+			this.clear_term_array = function() {
+				session.extend('user_data', {term_array: []});
+			}
+			this.textarea_string = function() {
+				var tstring = session.get('user_data')['term_array'].join('\n');
+				return tstring;
+			}
+			this.last_term = function() {
+				// need a fix - ugly:
+				try {
+					return session.get('user_data')['last_term'];
+				} catch(error) {
+					alert(error);
+				}
+				return ''
+			}
+			this.clear_last_term = function() {
+				session.extend('user_data', {last_term: []});
+				return false;
+			}
+		}
+		chemical_term_processor = new ChemicalTermProcessor();
+
+		function ChemWriterBindings() {
+ 			var _this = this;
+ 			this.is_empty_molfile = function(string) {
+ 				if (string.match('0  0  0  0  0  0            999 V2000')==null) {
+ 					return false
+ 				}
+ 				return true
+ 			}
+ 			this.resize_editor = function () {
+ 				var h = $(window).height()-320;
+ 				var w = $(window).width()-20;
+				var min_h = Math.max(h,400);
+ 				var min_w = Math.max(w,600);
+ 				$('.chemwriter .editor').css({'width': min_w, 'height': min_h});	
+ 				$('.chemwriter .editor .canvas').css({'width': min_w-100, 'height': min_h});
+ 				$('.chemwriter .editor .canvas svg').css({'width': min_w-100, 'height': min_h});
+				$('#editor-line-box').css({'width': min_w-100, 'height': min_h});
+ 			}
+			this.draw_editor = function() {
+				var licensePath = '/license/cactus.nci.nih.gov.lic';
+				if (_this.editor_object == undefined) {
+					_this.editor_object = chemwriter.loadEditor('editor-box', {'hoverRadius': 0.4, 'licensePath': licensePath});
+				}
+				if (_this.structure != undefined) {
+					_this.editor_object.setMolfile(_this.structure);
+				}
+				_this.resize_editor();
+			}
+			this.show_editor = function() {
+				$.mobile.changePage('{% url "chemical.apps.views.editor" %}', {
+					transition: 'fade'
+				})
+			}
+			this.add_structure = function(callback) {
+				var molfile = _this.editor_object.getMolfile();
+				if (!molfile) {return;}
+				cir.resolve_chemwriter_molfile_to_smiles(molfile, 
+					function(smiles) {
+						chemical_term_processor.parse_string(smiles);
+						callback();
+					},
+					function() {
+						callback();
+					}
+				);
+			}
+			this.init_editor = function(string) {
+				if (string != undefined) {
+					cir.resolve_string_to_sdf(string, 
+						function(structure) {
+							_this.structure = structure;
+							_this.show_editor();
+						},
+						function() {
+							_this.structure = undefined
+							_this.show_editor();
+						}
+					);
+				} else {
+					_this.structure = undefined
+					_this.show_editor();
+				}
+			}
+		}
+		chemwriter_bindings = new ChemWriterBindings();
+	
+		function StructureEditor() {
+			var _this = this
+			this.bind = function(editor_bindings) {
+				_this.editor_bindings = editor_bindings
+			}
+			this.init = function(structure_identifier) {
+					$.mobile.showPageLoadingMsg();
+					_this.editor_bindings.init_editor(structure_identifier)
+			}
+			this.draw = function() {
+				try {
+					_this.editor_bindings.draw_editor();
+				} catch(error) {
+					//alert(error);
+					$('#editor-error').popup();
+					$('#editor-error').popup( "open" );
+				}
+			}
+			this.add_structure = function() {
+				$.mobile.showPageLoadingMsg();
+				_this.editor_bindings.add_structure(function() {
+					$.mobile.changePage("{% url 'chemical.apps.views.edit_structures' 'add' 'structure' %}", {
+						transition: 'fade',
+						reload: true,
+					})	
+				});
+			}
+			this.resize = function() {
+				_this.editor_bindings.resize_editor();
+			}
+			this.close = function() {
+				$.mobile.showPageLoadingMsg();
+				_this.editor_bindings.close_editor();
+			}
+		}
+		structure_editor = new StructureEditor();
+		
+		function CIR(string, success, failure) {
+			var _this = this;
+			this.resolve_chemwriter_molfile_to_smiles = function(string, success, failure) {
+				_this.string = string.replace(/\n/g, '\\n') + '$$$$\\n';
+				var url = '{{ structure_base_url }}/' + encodeURI(_this.string) + '/smiles?resolver=SDFile&operator=add_hydrogens';
+				this._resolve(url, success, failure);
+			};
+			this.resolve_string_to_sdf = function(string, success, failure) {
+				_this.string = string
+				var url =  '{{ structure_base_url }}/' + encodeURI(_this.string) + '/file?format=sdf&operator=remove_hydrogens';
+				this._resolve(url, success, failure);
+			}
+			this.resolve_string_to_iupac_name = function(string, success, failure) {
+				_this.string = string
+				var url =  '{{ structure_base_url }}/' + encodeURI(_this.string) + '/iupac_name';
+				this._resolve(url, success, failure);
+			}
+			this._resolve = function(url, success, failure) {
+				$.when(
+					$.ajax({url: url})
+				).then(
+					success,
+					failure
+				);
+			}
+		}
+		cir = new CIR();
+
+		// improve this here:
+		structure_editor.bind(chemwriter_bindings);
+
+		function Panel() {
+			var _this = this;
+			this.init = function() {
+				$('.primary-panel').panel('close');
+				_this.open = function() {
+					$('.primary-panel').panel('open');
+				}
+				$('.panel-button').on('click', function() {
+					_this.open();
+				});
+			}
+		}		
+		panel = new Panel();
+
+		function HistoryButton() {
+			this.init = function() {
+				$('.history-back').on('click', function() {
+					history.go(-1);
+				});
+				$('.history-forward').on('click', function() {
+					history.go(+1);
+				});
+				$('.history-refresh').on('click', function() {
+					location.reload(true);
+				});
+			}
+		}
+		history_button = new HistoryButton();
+});
+</script>
+<!--<script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>-->
+<script src="//code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+<!--<script src="http://code.jquery.com/mobile/1.4.0-alpha.2/jquery.mobile-1.4.0-alpha.2.min.js"></script>-->
+
+<!--<link rel="stylesheet" href="http://81.169.173.47/lib/css/jqm-icon-pack-2.0-original.css" />-->
+<link rel="stylesheet" href="/style/nitrogen.css" type="text/css" media="screen,projection" />
+<script type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=HHS&subagency=NCI"></script>
+</head>
+
+<body>
+<div class="{% block body_class %}{% endblock %}">
+{% block pages %}{% endblock %}
+</div><!-- body class -->
+</body>
+</html>

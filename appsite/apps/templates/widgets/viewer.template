@@ -1,0 +1,25 @@
+<div class="viewer">
+
+<h2>{{ file.object.display_name }}</h2>
+
+<div id="tabs-area">
+	
+	<ul class="tabs">
+		<li><a href="#">Stream</a></li>
+		<li><a href="#">Structures</a></li>
+		<li><a href="#">Databases</a></li>
+		<li><a href="#">Identifiers</a></li>
+	</ul>
+
+	<div class="panes">
+		<div>{% include "stream-tab.template" %}</div>
+		<div>{% include "structure-tab.template" %}</div>
+		<div>{% include "database-tab.template" %}</div>
+		<div>{% include "identifier-tab.template" %}</div>
+	</div>
+
+</div>
+	<!-- close entire tabs area -->
+
+</div>
+

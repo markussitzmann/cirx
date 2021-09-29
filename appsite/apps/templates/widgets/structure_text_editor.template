@@ -1,0 +1,325 @@
+<div id="structure-text-editor">
+	<div id="text">{{ textinput }}</div>
+	
+	<div id="menu">
+		<div id="editor-button" rel="#editor-overlay">Draw/Edit Structures</div>
+		<div id="clear-button">Clear</div>
+	</div>
+
+</div>
+
+<div class="overlay" id="editor-overlay">
+	
+	<div class="overlay-content">
+		<!--<h1>Draw/Edit Chemical Structures</h1>-->
+
+
+		<ul class="tabs" id="">
+			<li>Structures</li>
+			<li>Editor</li>
+			<li>Info</li>
+		</ul>
+
+		<div class="panes">
+
+			<div id="structure-browser-pane">
+				<div id="structure-browser">
+					<div id="structure-browser-list"></div>
+				</div>
+			</div>	
+
+			<div id="editor-pane"> 				
+				<div id="editor-box"></div>
+				<div class="sub-button-box">
+					<div class="sbutton" id="add-button">Add to Structure List</div>
+					<div class="sbutton" id="replace-button">Replace Current Structure</div>
+				</div>
+			</div>
+
+			<div id="info-pane">
+				<div id="info-box"></div>
+			</div>
+				
+		</div>
+
+
+		<div class="button-box">
+			<div class="sbutton" id="done-button">Done</div>
+		</div>
+
+		
+		
+	</div> <!-- overlay content -->
+
+</div> <!-- overlay -->
+
+
+<script>
+
+	$('#structure-text-editor #clear-button').click(function() {
+		$('#structure-text-editor #text > *').val('');
+	});
+
+	$('#structure-text-editor #clear-button').click(function() {
+		$('#structure-text-editor #text > *').val('');
+	});
+
+	$('#structure-text-editor #editor-button').click(function() {
+		if (!editor_overlay.overlay().isOpened()) {
+			editor_overlay.overlay().load();
+		}
+	});
+
+	$('#editor-overlay #add-button').click(function(){
+		add_structure_to_list();
+	});
+
+	editor_overlay_tabs = $('#editor-overlay ul.tabs').tabs('div.panes > div', {
+		'effect': 'fade',
+		'onClick': function(object,index){
+			if (index==1 && $('#editor-box').children().length==0) {
+				editor_object = chemwriter.loadEditor('editor-box', {'hoverRadius': 0.4});
+			} else {
+				if (typeof(editor_object)!="undefined") {
+					editor_object.autocenter();
+				}
+			}
+		}	
+	});
+
+	editor_overlay = $('#editor-overlay').overlay({
+		top: '0',
+		fixed: true,
+		closeOnClick: false,
+		mask: {
+			color: '#000',
+			loadSpeed: 200,
+			opacity: 0.7,
+		},
+		onBeforeLoad: function() {
+			/*$("html,body").css("overflow","hidden");*/
+			$('#editor-overlay #structure-browser-list').empty();
+			$('#editor-overlay #editor-box').empty();
+			
+		},
+		onLoad: function() {	
+			
+			
+
+			var w = $('#editor-overlay').width();
+			var h = $('#editor-overlay').height();
+			
+			/*$('#editor-overlay #scrollable .items').css({'width': 3 * w});
+			$('#editor-overlay #scrollable .items > div').css({'width': w, 'height': h});
+			$('#editor-overlay #scrollable').css({'height': h*0.7});
+			$('#editor-overlay #structure-browser').css({'height': h*0.65, 'width': w*0.9});*/
+
+
+			
+
+
+			/*$('#editor-box').css({'width': '1000px', 'height': h * 0.9});*/
+			/*$('.chemwriter .editor').css({'width': '1000px !important', 'height': '800px !important'});*/
+
+			/*
+			$('.chemwriter .editor').css({'width': w*0.85, 'height': h*0.6});
+			$('.chemwriter .editor .canvas').css({'width': w*0.75, 'height': h*0.55});
+			$('.chemwriter .editor .canvas svg').css({'width': w*0.75, 'height': h*0.55});
+			*/
+			
+			prepare_structure_browser();
+			$('#structure-browser-list').fadeIn();
+
+			
+			
+		},
+		onClose: function() {
+			/*$("html,body").css("overflow","auto");*/
+		}
+	});
+
+	function EditorTabs(dom_object) {
+		this.dom_object = dom_object
+		
+		this.api = dom_object.data("tabs");
+		this.switchTo = function(position) {
+			this.api.click(position);
+		}
+		return this;
+	}
+	editor_tabs = EditorTabs($('#editor-overlay .tabs'));
+	
+
+
+	function prepare_structure_browser() {
+		var test_empty = $.trim($('#structure-text-editor textarea').val());
+		
+		
+
+
+		if (test_empty.length==0) {
+			/*editor_overlay.overlay().load();*/
+			/*$('#editor-overlay #scrollable').scrollable()*/
+			editor_tabs.switchTo(1);
+			return false
+		};
+
+		block_interface('Loading structures');
+		block_editor_overlay();		
+		var string_array = $.trim($('#structure-text-editor textarea').val()).split('\n');
+		if (string_array.length > 0) {
+			/*$('#editor-overlay #scrollable').scrollable()*/
+			editor_tabs.switchTo(0);
+			/*editor_scrollable_api.seekTo(0);*/
+			callback = function prepare_structure_browser_list(data) {
+				/*var structure_browser_list = $('#editor-overlay #structure-browser-list')*/
+				/*var replace_button = $('#editor-overlay #replace-button')*/
+				
+				$('#editor-overlay #structure-browser-list').empty();
+				
+
+				for (s in string_array) {
+										
+					$.each(data[string_array[s]], function(interpretation,media) {
+						click_cmd = (function(media, key, string) {return function() {
+								editor_object.setMolfile(media[key].replace(/\\n/g, '\n'));
+								
+								$('#editor-overlay #replace-button').text('Replace \'' + string + '\'')
+								/*$('#editor-overlay #scrollable').scrollable()*/
+								editor_tabs.switchTo(1);
+								$('#editor-overlay #structure-browser-list .active-molecule').removeClass('active-molecule')
+								$(this).addClass('active-molecule');
+							}
+						}(media[0], '07c6c4160b0ff903bdc0de9c18036a25', string_array[s]));
+						var l = string_array[s].length
+						if ( interpretation=='unkown' ) { 
+							var c = 'unknown-string'
+						} else {
+							var c = 'string'
+						}
+						
+						$('#editor-overlay #structure-browser-list').append(
+							$('<div class=' + c + ' structure_browser_list_index=' + s + '>' + string_array[s] + '<p><span class=' + c + '>' + interpretation + '</span></p></div>').click(click_cmd)
+						);
+					});			
+				}
+
+				unblock_editor_overlay();
+				unblock_interface();
+			}
+
+			$('#editor-overlay #replace-button').click(function(event){
+				index = $('#editor-overlay #structure-browser-list .active-molecule').attr('structure_browser_list_index')
+				event.stopImmediatePropagation();
+				replace_structure_at_list(index);
+			});
+
+			media_config_array = ['07c6c4160b0ff903bdc0de9c18036a25']
+			var update_structure_list = MediaFromChemicalStringArray(string_array, media_config_array, callback)
+
+		} else {
+			/*$('#editor-overlay #scrollable').scrollable()*/
+			editor_tabs.switchTo(1)
+
+			/*editor_overlay.overlay().load();*/
+		}
+	}
+
+	/*
+	function fetch_structure_browser_data(string_list, config_list) {
+		var query_string = build_query(string_list, config_list)
+		var call_url = '{{ media_base_url }}?' + query_string
+		$.getJSON(call_url, function(data) {
+			editor_overlay.overlay().load();
+			prepare_structure_browser_list(string_list, data);
+		});
+	}
+	*/
+
+	function MediaFromChemicalStringArray(string_array, media_config_array, callback) {
+		var thisObject = this;
+		this.string_array = string_array
+		this.media_config_array = media_config_array
+		this.build_query = function build_query() {
+			var s = "";
+			for (index in this.string_array) {
+				s += "&string=" + escape(string_array[index]);
+			}
+			for (index in this.media_config_array) {
+				s += "&config=" + escape(media_config_array[index]);
+			}
+			return s.substring(1)
+		}
+		$.when(
+			$.getJSON('{{ media_base_url }}?' + this.build_query())
+		).then(
+			function(ajax_result, ajax_status, xhr) {
+				thisObject.media = ajax_result;
+				if (callback) {callback(thisObject.media)};
+			}
+		);
+	}
+
+	function ChemWriterMolfileResolver(string, callback) {
+		var thisObject = this;
+		this.string = string.replace(/\n/g, '\\n') + '$$$$\\n';
+		$.when(
+			$.ajax({url: '{{ structure_base_url }}/' + encodeURI(this.string) + '/smiles?resolver=SDFile&operator=add_hydrogens',})
+		).then(
+			function(ajax_result, ajax_status, xhr) {
+				thisObject.smiles = ajax_result;
+				if (callback) {callback(thisObject.smiles)};
+			}
+		);
+	}
+			
+	function add_structure_to_list() {
+		block_buttons();
+		var molfile = editor_object.getMolfile();
+		if (!molfile) {return;}
+		callback = function(string) {
+			string_array = $.trim($('#structure-text-editor textarea').val());
+			$('#structure-text-editor textarea').val(string_array + "\n" + string);
+			prepare_structure_browser()
+			unblock_buttons();
+		}
+		var update_editor = ChemWriterMolfileResolver(molfile, callback);
+	}
+
+	function replace_structure_at_list(index) {
+		block_buttons();
+		var molfile = editor_object.getMolfile();
+		if (!molfile) {return;}
+		callback = function(string) {
+			$('#structure-text-editor textarea').val(string_array + "\n" + string);
+			string_array[index] = string;
+			$('#structure-text-editor textarea').val(string_array.join('\n'));
+			prepare_structure_browser()
+			unblock_buttons();
+		}
+		var update_editor = ChemWriterMolfileResolver(molfile, callback);
+	}
+
+	function block_buttons() {
+		$('#editor-overlay .sbutton').block({message: null});
+	}
+
+	function unblock_buttons() {
+		$('#editor-overlay .sbutton').unblock();
+	}
+
+	function block_editor_overlay(){$('#editor-overlay').block({
+		message: null,
+		css: { 
+			border: 'none', 
+			padding: '40px',
+			backgroundColor: '#000',  
+			opacity: .8, 
+			color: '#fff',
+        } 
+	})};
+	
+	function unblock_editor_overlay(){$('#editor-overlay').unblock()};
+
+
+</script>

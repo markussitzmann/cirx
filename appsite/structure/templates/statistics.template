@@ -1,0 +1,142 @@
+{% extends "service.html" %}
+
+{% block title %}NCI/CADD Chemical Identifier Resolver{% endblock %}
+
+{% block meta-keywords %}chemical identifier, resolver, InChI, InChIKey, SMILES, GIF, database, chemical names, inchikey resolver, InChIKey resolver{% endblock %}
+{% block meta-description %}Chemical Identifier Resolver{% endblock %}
+
+{% block script %}
+
+<!-- <script type="text/javascript" src="/js/chemwriter.js"></script> -->
+<!-- <link rel="stylesheet" href="/style/chemwriter.css" type="text/css" media="screen,projection" /> -->
+<script type="text/javascript" src="http://chemwriter.com/sdk/chemwriter.js" data-chemwriter-license="https://81.169.173.47/license/cactus.nci.nih.gov.lic"></script>
+<link rel="stylesheet" href="http://chemwriter.com/sdk/chemwriter.css" type="text/css" media="screen,projection" />
+
+<script type="text/javascript" src="/js/ChemDoodleWeb-libs.js"></script>
+<script type="text/javascript" src="/js/ChemDoodleWeb.js"></script>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script type="text/javascript" src="http:/js/highcharts.js"></script>
+{% endblock %}
+
+{% block header %}Chemical Identifier Resolver <i>beta 4</i>{% endblock %}
+
+{% block ribbon %}
+{% endblock %}
+	
+{% block content %}
+	
+	
+	<div id="chart_live_beat" style="height:400px;width=800px"></div>
+	<div id="chart_requests" style="height:400px;width=800px"></div>
+
+
+	<script>
+	
+	
+	var data = {{ data|safe }}
+	var chart_requests;
+	var chart_live_beat;
+
+	function request_data() {
+		$.ajax({
+			url:'/TEST_chemical/structure/statistic/seconds',
+			success: function(count) {
+				var series = chart_live_beat.series[0], shift = series.data.length > 20;
+				var date = new Date;
+				var time = date.getTime();
+				var point = [time, count];
+				chart_live_beat.series[0].addPoint(point, true, shift);
+				setTimeout(request_data, 10000);
+			},
+			cache: false
+		});
+	}
+
+
+	$(document).ready(function() {
+		
+		Highcharts.setOptions({
+			global: {
+				useUTC: false
+			}
+		})
+		
+		
+		chart_live_beat = new Highcharts.Chart({
+			chart: {
+				renderTo: 'chart_live_beat',
+				defaultSeriesType: 'column',
+				marginRight: 10,
+				events: {
+					load: request_data
+				}
+			},
+			title: {
+				text: 'Live Usage'
+			},
+			yAxis: {
+         		title: {
+		            text: 'Count'
+         		},
+         		plotLines: [{
+		            value: 0,
+        		    width: 1,
+		            color: '#808080'
+        		 }],
+				min: 0,
+				max: 50
+		    },
+			xAxis: {
+				type: 'datetime',
+				tickPixelInterval: 100
+			},
+			series: [{
+				name: 'Number of Requests (10 seconds intervals)',
+				data: []
+			}]
+		});
+		
+		
+		
+		chart_requests = new Highcharts.Chart({
+			chart: {
+				renderTo: 'chart_requests',
+				defaultSeriesType: 'line'
+			},
+			title: {
+				text: 'Number of Requests per Month'
+			},
+			yAxis: [
+				{labels: {style: {color: '#AA4643'}}, title: {text: "User Count (IP Adresses)", style: {color: '#AA4643'}}}, {labels: {style: {color: '#4572A7'}}, title: {text: "Request Count", style: {color: '#4572A7'}}, opposite: true}
+			],
+			xAxis: {
+				categories: data["month_year"]
+			},
+			series: [{
+				name: 'Number of Requests',
+				data: data["requests"],
+				yAxis: 1
+			},{
+				name: 'Number of Unique IP Addresses',
+				data: data["ip_counts"],
+				
+			}]
+		});
+	});
+
+	</script>
+
+{% endblock %}
+
+{% block footer %}
+
+	<div id="navigation_container" class="Navigation"><p><a id="getting_started_link" href="/chemical/structure">Getting started ...</a> | <a id="doc_link" href="/chemical/structure/documentation">Documentation</a> | <a href="/blog">Blog</a> | <a href="/ncicadd/contact.html">Contact</a> | <a href="/ncicadd/disclaimer.html">Disclaimer</a> | <a href="/ncicadd/privacy.html">Privacy Statement</a></p></div>
+	<p>Markus Sitzmann (sitzmann+++helix.nih.gov)</p>
+	<p>NCI/CADD Group 2009-{% now "Y" %}</p>
+	<p>{% now "jS F Y H:i" %}</p>
+
+{% endblock %}
+
+

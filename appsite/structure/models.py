@@ -1,0 +1,564 @@
+import re
+import pickle
+#from sets import Set
+from operator import itemgetter
+
+from django.db import models
+from django.db.models import Q
+from django.utils import simplejson
+
+import djangosphinx
+
+from chemical.structure import inchi
+from chemical.structure import ncicadd
+from chemical.database.models import *
+
+
+class Structure(models.Model):
+	id = models.IntegerField(primary_key=True)
+	hashisy = models.IntegerField(unique=True)
+	minimol = models.TextField(max_length=1500)
+	names = models.ManyToManyField('Name', through='StructureName', related_name="structure")
+	standard_inchis = models.ManyToManyField('StandardInChI', through='StructureStandardInChI', related_name="structure_set")
+
+	class Meta:
+		db_table = u'`chemical_structure`.`structure`'
+
+	def get_short_display_names(self, query = None):
+		structure_names = NameCache(self)
+		return_list = structure_names.get_display_list()
+		return return_list
+		
+	def get_hashcode(self):
+		hashcode = ncicadd.identifier.Identifier(integer = self.hashisy)
+		return hashcode.hashcode
+			
+	def get_standard_inchi(self):
+		inchi_string = inchi.identifier.String(string = self.standard_inchis.get().string)
+		return inchi_string
+		
+	def get_standard_inchikey(self):
+		inchi_key = inchi.identifier.Key(
+			layer1 = self.standard_inchis.get().key_layer1,
+			layer2 = self.standard_inchis.get().key_layer2,
+			layer3 = self.standard_inchis.get().key_layer3
+		)
+		return inchi_key
+	
+	def __str__(self):
+		return 'NCICADD:SID=%s' % self.id
+
+
+class StructureImage(models.Model):
+	id = models.IntegerField(primary_key=True)
+	hashisy = models.IntegerField(unique=True)
+	small = models.TextField(max_length=65535)
+	medium = models.TextField(max_length=65535)
+	large = models.TextField(max_length=65535)
+	
+	class Meta:
+		db_table = u'`chemical_structure_image`'
+
+
+#class StandardInChIStructureManager(models.Manager):
+#	
+#	def get_query_set(self):
+#		#i = inchi.identifier.Key(key='ADVPTQAUNPRNPO')
+#		query_set = super(StandardInChIStructureManager, self).get_query_set()
+#		return query_set
+
+class Formula(models.Model):
+	id = models.IntegerField(primary_key=True)
+	formula = models.CharField(max_length=50)
+	
+	class Meta:
+		db_table = u'`chemical_formula`.`formula`'
+
+
+class StandardInChI(models.Model):
+	id = models.IntegerField(primary_key=True)
+	version = models.IntegerField(db_column = 'version_id')
+	key_layer1 = models.CharField(max_length=14, db_column= 'key_layer1')
+	key_layer2 = models.CharField(max_length=10, db_column= 'key_layer2')
+	key_layer3 = models.CharField(max_length=1, db_column= 'key_layer3')
+	string = models.CharField(max_length=1500)
+
+	#objects = models.Manager()
+	#inchi_set = StandardInChIStructureManager()
+
+	class Meta:
+		db_table = u'`chemical_inchi`.`standard_inchi`'
+		
+	def get_structure(self):
+		# .all()[0] is dirty but there are some issues (there are stdinchis
+		# with more than one of our unique structures
+		return self.structurestandardinchi_set.all()[0].structure
+	
+	def get_structures(self, query):
+		# cleaner method
+		t = StandardInChI.objects.filter(**i.query())
+		return t
+	
+	
+	#def __repr__(self):
+	#	key = inchi.identifier.Key(layer1 = self.key_layer1, layer2 = self.key_layer2, layer3 = self.key_layer3)
+	#	string = inchi.identifier.String(string = self.string)
+	#	return (key.well_formatted, string.well_formatted)
+	
+	#def get_well_formatted_inchi(self):
+	#	return self.__repr__()[1]
+	
+	#def get_well_formatted_inchikey(self):
+	#	return self.__repr__()[0]
+
+
+class Name(models.Model):
+	id = models.IntegerField(primary_key=True)
+	name = models.TextField(max_length=1500, unique=True)
+	classification_list = None
+	
+	class Meta:
+		db_table = u'`chemical_name`.`name`'
+		
+	def get_structure(self):
+		return self.structure.get()
+
+	def __str__(self):
+		return "Name='%s' (%s)" % (self.name, self.classification_list)
+	
+	def __repr__(self):
+		return self.name
+
+
+class Name_Fulltext(models.Model):
+	name = models.CharField(max_length = 1000)
+	objects = models.Manager()
+	search = djangosphinx.SphinxSearch(index="structure_names")
+	
+	class Meta:
+		db_table = u'`chemical_name`.`name`'
+
+
+class Name(models.Model):
+	id = models.IntegerField(primary_key=True)
+	name = models.TextField(max_length=1500, unique=True)
+	classification_list = None
+	
+	class Meta:
+		db_table = u'`chemical_name`.`name`'
+
+
+class StructureName(models.Model):
+	name = models.ForeignKey('Name')
+	structure = models.ForeignKey('Structure')
+	classification = models.ManyToManyField('NameClassification', through='StructureNameClassification', db_column='id')
+	
+	class Meta:
+		db_table = u'`chemical_name`.`structure_names`'
+
+
+class StructureNameClassification(models.Model):
+	structure_names = models.ForeignKey('StructureName', related_name='name_classifications')
+	name_classification = models.ForeignKey('NameClassification')
+	
+	class Meta:
+		db_table = u'`chemical_name`.`structure_name_classification`'
+
+
+class NameClassification(models.Model):
+	id = models.IntegerField(primary_key=True)
+	string = models.TextField(max_length=45, unique=True)
+	
+	class Meta:
+		db_table = u'`chemical_name`.`name_classification`'
+
+
+class StructureStandardInChI(models.Model):
+	structure = models.ForeignKey('Structure')
+	standard_inchi = models.ForeignKey('StandardInChI', db_column='standard_inchi_id')
+	
+	class Meta:
+		db_table = u'`chemical_inchi`.`structure_standard_inchi`'
+
+
+class Record(models.Model):
+	id = models.IntegerField(primary_key=True)
+	cocoa_id = models.IntegerField(db_column="cocoa_structure_id")
+	release = models.ForeignKey(Release)
+	database = models.ForeignKey(Database)
+	ficts_compound = models.IntegerField(db_column = 'ficts_compound_id')
+	ficus_compound = models.IntegerField(db_column = 'ficus_compound_id')
+	uuuuu_compound = models.IntegerField(db_column = 'uuuuu_compound_id')
+	database_record_external_identifier = models.CharField(max_length=100)
+	release_record_external_identifier = models.CharField(max_length=100)
+	revision =  models.IntegerField(db_column="revision_id")
+
+	class Meta:
+		db_table = u'`chemical`.`record_lookup`'
+		
+	def get_structure(self):
+		a = self.compound_associations.get(type=1)
+		return a.compound.structure
+	
+	def __str__(self):
+		return "NCICADD:RID=%s" % self.id
+
+
+#class RecordExternalIdentifier(models.Model):
+#	id = models.AutoField(primary_key=True)
+#	record = models.ForeignKey('Record', related_name = 'external_id')
+#	type = models.ForeignKey('ExternalIdentifierType')
+#	string = models.CharField(max_length = 100)
+#	
+#	class Meta:
+#		db_table = u'`chemical`.`record_external_identifier`'
+
+
+#class ExternalIdentifierType(models.Model):
+#	id =  models.AutoField(primary_key=True)
+#	string = models.CharField(max_length = 48)
+#	display_string = models.CharField(max_length = 48)
+#	
+#	class Meta:
+#		db_table = u'`chemical`.`external_identifier_type`'
+
+
+class Compound(models.Model):
+	id  = models.IntegerField(primary_key=True)
+	structure = models.OneToOneField('Structure', related_name="compound")
+	
+	class Meta:
+		db_table = u'`chemical`.`compound`'
+		
+	def __str__(self):
+		return "NCICADD:CID=%s" % self.id
+	
+	def __repr__(self):
+		return "NCICADD:CID=%s" % self.id
+
+	def get_structure(self):
+		return self.structure
+	
+	def retrieve_distinct_record_set(self):
+		record_set = Set()
+		record_list = Record.objects.filter(compound_associations__compound__id = self.id)
+		record_set.update(record_list)
+		return record_set
+	
+	def record_relevance(self, record):
+		relevance = 1
+		if record['ficts_compound'] == self.id:
+			relevance += 10000
+		if record['ficus_compound'] == self.id:
+			relevance += 1000
+		if record['uuuuu_compound'] == self.id:
+			relevance += 100
+		relevance += int(record['release']['date_released'].strftime('%Y'))
+		relevance = -1 * relevance 
+		return relevance
+
+	def get_records(self, group_key = None, database = None, release = None, context = None, max_records = 10000, public = True):
+		record_set = set()
+		for identifier in ['ficts','ficus','uuuuu']: 
+			filter_string = '%s_compound = %s' % (identifier,self.id)
+			if release:
+				filter_string += ', release = %s' % (release.id,)
+			if database:
+				filter_string += ', database = %s' % (database.id,)
+			if context:
+				filter_string += ', database__context__id = %s' % (context.id,)
+			query_string = "Record.objects.select_related().filter(%s)[0:%s]" % (filter_string, max_records)
+			record_list = eval(query_string)
+			record_set.update(record_list)
+		
+		# build the matchlist
+		matchlist = {}
+		matchlist['content'] = {}
+		matchlist['metadata'] = {}
+		matchlist['metadata']['size'] = 0
+		matchlist['metadata']['database_set'] = []
+		
+		cached_databases = DatabaseDataCache()
+		
+		for recordObject in record_set:
+			if public and recordObject.release.classification == "internal":
+				continue
+			if recordObject.release.status == "inactive":
+				continue
+			matchlist['metadata']['size'] += 1
+			matchlist['metadata']['database_set'].append(recordObject.database)
+			record = {}
+			record['object'] = recordObject
+			record['key'] = recordObject.__str__()
+			record['release'] = cached_databases['releases'][recordObject.release.id]
+			record['database'] = cached_databases['databases'][recordObject.database.id]
+			record['ficts_compound'] = recordObject.ficts_compound
+			record['ficus_compound'] = recordObject.ficus_compound
+			record['uuuuu_compound'] = recordObject.uuuuu_compound
+			record['ficts_compound_key'] = "NCICADD:CID=%s" % recordObject.ficts_compound
+			record['ficus_compound_key'] = "NCICADD:CID=%s" % recordObject.ficus_compound
+			record['uuuuu_compound_key'] = "NCICADD:CID=%s" % recordObject.uuuuu_compound
+			record['release_record_external_identifier'] = recordObject.release_record_external_identifier
+			record['database_record_external_identifier'] = recordObject.database_record_external_identifier
+			record['relevance'] = self.record_relevance(record)
+			if group_key:
+				try:
+					cmd = 'matchlist["content"][recordObject.%s].append(record)' % (group_key,)
+					exec(cmd)
+				except:
+					cmd = 'matchlist["content"][recordObject.%s] = [record,]' % (group_key,)
+					exec(cmd)
+			else:
+				try:
+					matchlist["content"]["records"].append(record)
+				except:
+					matchlist["content"]["records"] = [record,]
+		
+		database_set = set(matchlist['metadata']['database_set'])
+		matchlist['metadata']['database_set'] = database_set
+		matchlist['metadata']['database_count'] = len(database_set)
+		return matchlist
+
+
+class AssociationType(models.Model):
+	id = models.IntegerField(primary_key=True)
+	string = models.CharField(max_length=48)
+	property = models.CharField(max_length=48)
+	display_name = models.CharField(max_length=48)
+
+	class Meta:
+		db_table = u'`chemical`.`association_type`'
+
+
+class Association(models.Model):
+	record = models.ForeignKey('Record', related_name = 'compound_associations')
+	compound = models.ForeignKey('Compound', related_name = 'record_associations')
+	type = models.ForeignKey('AssociationType')
+	
+	class Meta:
+		db_table = u'`chemical`.`association`'
+
+
+class Access(models.Model):
+	id = models.AutoField(primary_key=True)
+	host = models.ForeignKey('AccessHost')
+	client = models.ForeignKey('AccessClient')
+	timestamp = models.DateTimeField(auto_now=True, db_column="dateTime")
+	
+	class Meta:
+		db_table = u'chemical_structure_access'
+
+
+class AccessClient(models.Model):
+	id = models.AutoField(primary_key=True)
+	string = models.CharField(max_length=255, unique=True)
+
+	class Meta:
+		db_table = u'chemical_structure_access_client'
+
+
+class AccessHost(models.Model):
+	id = models.AutoField(primary_key=True)
+	string = models.CharField(max_length=255, unique=True)
+	blocked = models.IntegerField()
+	lock_timestamp = models.DateTimeField(db_column="lock_time")
+	current_sleep_period = models.IntegerField()
+	force_sleep_period = models.IntegerField()
+	force_block = models.IntegerField()
+	organization = models.ManyToManyField('AccessOrganization', through='AccessHostOrganization')
+
+
+	class Meta:
+		db_table = u'chemical_structure_access_host'
+
+
+class AccessOrganization(models.Model):
+	id = models.AutoField(primary_key=True)
+	string = models.CharField(max_length=255, unique=True)
+
+	class Meta:
+		db_table = u'chemical_structure_access_organization'
+
+
+class AccessHostOrganization(models.Model):
+	host = models.ForeignKey(AccessHost, primary_key=True)
+	organization = models.ForeignKey(AccessOrganization, primary_key=True)
+	
+	class Meta:
+		db_table = u'chemical_structure_access_host_organization'
+		unique_together = (('host', 'organization'),)
+	
+
+class ResponseType(models.Model):
+	id = models.AutoField(primary_key=True)
+	parent_type = models.ForeignKey('ResponseType')
+	url = models.CharField(max_length=128)
+	method = models.CharField(max_length=255)
+	parameter = models.CharField(max_length=1024)
+	base_mime_type = models.CharField(max_length=255)
+	
+	def child_types(self):
+		return RespondType.objects.get(parent_type = self.pk)
+	
+	class Meta:
+		db_table = u'chemical_structure_response_type'
+
+
+class Response(models.Model):
+	id = models.AutoField(primary_key=True)
+	type = models.ForeignKey('ResponseType')
+	fromString = models.TextField()
+	response = models.TextField(db_column = 'string')
+	responseFile = models.FileField(max_length=255, upload_to="/tmp")
+
+	class Meta:
+		db_table = u'chemical_structure_response'
+
+	def json(self):
+		d = {'type': self.type, 'from': self.fromString, 'string': self.string}
+		return simplejson.dumps(d)
+	
+	#def __repr__(self):
+	#	return self.response
+	
+class UsageMonthList(models.Manager):
+	def get_query_set(self):
+		return super(UsageMonthList, self).get_query_set().order_by('-year', '-month')[1:13].values()
+
+class UsageMonth(models.Model):
+	month_year = models.CharField(primary_key=True, max_length=2)
+	month = models.IntegerField()
+	year = models.IntegerField()
+	requests = models.IntegerField()
+	ip_counts =  models.IntegerField()
+	average = models.DecimalField(decimal_places=2,max_digits=5)
+	
+	objects = models.Manager()
+	all_months_data = UsageMonthList()
+	
+	@staticmethod
+	def get_data_dictionary():
+		data = UsageMonth.all_months_data.values()
+		data_dictionary = {}
+		data_dictionary['month_year'] = []
+		data_dictionary['requests'] = []
+		data_dictionary['ip_counts'] = []
+		for element in data:
+			data_dictionary['month_year'].append(element['month_year'])
+			data_dictionary['requests'].append(element['requests'])
+			data_dictionary['ip_counts'].append(element['ip_counts'])
+		data_dictionary['month_year'].reverse()
+		data_dictionary['requests'].reverse()
+		data_dictionary['ip_counts'].reverse()
+		return data_dictionary
+	
+	class Meta:
+		db_table = u'`chemical_structure_usage_month`'
+	
+	
+class UsageMonthDayList(models.Manager):
+	def get_query_set(self):
+		return super(UsageMonthDayList, self).get_query_set().order_by('month', 'day').values()
+
+class UsageMonthDay(models.Model):
+	month_day = models.CharField(primary_key=True, max_length=2)
+	month = models.IntegerField()
+	day = models.IntegerField()
+	requests = models.IntegerField()
+	ip_counts =  models.IntegerField()
+	
+	objects = models.Manager()
+	all_month_day_data = UsageMonthDayList()
+	
+	@staticmethod
+	def get_data_dictionary():
+		data = UsageMonthDay.all_month_day_data.values()
+		data_dictionary = {}
+		data_dictionary['month_day'] = []
+		data_dictionary['requests'] = []
+		data_dictionary['ip_counts'] = []
+		for element in data:
+			data_dictionary['month_day'].append(element['month_day'])
+			data_dictionary['requests'].append(element['requests'])
+			data_dictionary['ip_counts'].append(element['ip_counts'])
+		data_dictionary['month_day'].reverse()
+		data_dictionary['requests'].reverse()
+		data_dictionary['ip_counts'].reverse()
+		return data_dictionary
+	
+	class Meta:
+		db_table = u'`chemical_structure_usage_month_day`'
+	
+
+class UsageSeconds(models.Model):
+	requests = models.IntegerField(primary_key=True)
+		
+	class Meta:
+		db_table = u'chemical_structure_usage_seconds'
+
+		
+		
+
+############
+
+class NameCache:
+	
+	def __init__(self, structure):
+		self.attributes = {}
+		self.attributes['structure'] = structure
+		self.attributes['structure_names'], self.attributes['name_set'], self.attributes['classified_name_sets'], self.attributes['classified_name_object_sets'] = self.get_structure_names()
+	
+	def get_structure_names(self):
+		try:
+			return self.attributes['names']
+		except:
+			structure_names = StructureName.objects.select_related('name').filter(structure = self['structure'])
+			names = []
+			name_set = set()
+			classified_name_sets = {}
+			classified_name_object_sets = {}
+			for n in structure_names:
+				name_dict = {}
+				name_dict['name_object'] = n.name
+				name_dict['name_string'] = name_dict['name_object'].name
+				name_dict['structure_name_object'] = n
+				name_dict['classifications'] = n.classification.all().values()
+				names.append(name_dict)
+				name = name_dict['name_string']
+				name_set.add(name)
+				name_object = name_dict['name_object']
+				for classification in name_dict['classifications']:
+					class_name = classification['id']
+					try:
+						classified_name_sets[class_name].add(name)
+						classified_name_object_sets[class_name].add(name_object)
+					except:
+						classified_name_sets[class_name] = set([name,])
+						classified_name_object_sets[class_name] = set([name_object,])
+			return [names, name_set, classified_name_sets, classified_name_object_sets]
+					
+	def get_display_list(self, query_string = None):
+		name_set_1 = set()
+		name_set_2 = set()
+		if query_string and query_string in self.attributes['name_set']:
+			name_set_1 = set([query_string,])
+		name_sets = self.attributes['classified_name_sets']
+		try:
+			name_set_1.update(list(name_sets[1]))
+		except:
+			pass
+		for key_length in [(2,5),(3,1),(4,1),(5,1),(6,3),(7,8)]:
+			key = key_length[0]
+			length = key_length[1]
+			try:
+				name_set_2.update(list(name_sets[key])[0:length])
+			except:
+				pass
+		add_list = list(name_set_2)
+		add_list.sort()
+		return_list = list(name_set_1) + add_list
+		return return_list
+		
+	def __getitem__(self, key):
+		return self.attributes[key]
+	

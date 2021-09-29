@@ -1,0 +1,129 @@
+{% extends "base-service-m.html" %}
+
+{% block body_class %}{% endblock %}
+
+{% block title %}NCI/CADD Chemical Structure Apps{% endblock %}
+
+{% block header %}Chemical Structure Apps{% endblock %}
+
+{% block pages %}
+<div data-role="page" id="editor" data-dom-cache="true">
+	
+	<div data-role="content" data-theme="c">
+
+		<div class="navigation">
+
+			<div class="navigation-left-button-group">
+
+				<div data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+					<a data-role="button" data-theme="c" data-icon="arrow-l" data-mini="true" data-inline="true" id="chemwriter-add-button" href="{% url "chemical.apps.views.qterm" %}">Add Structures</a>
+				</div>
+
+				<div data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+					<a data-role="button" data-theme="c" data-icon="bars" data-mini="true" data-inline="true" href="#editor-panel">Menu</a>
+				</div>
+
+			</div>
+
+			<div class="navigation-right-button-group">
+				<div data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+					<select data-theme="c" data-icon="arrow-d" data-native-menu="false" name="{{ app_name }}-editor-page-selector-chemwriter" id="{{ app_name }}-editor-page-selector-chemwriter">
+						<option value="chemwriter">ChemWriter</option>
+						<option value="jsme">JSME</option>
+					</select>
+				</div>
+			</div>
+
+
+		</div>
+
+		<div data-role="popup" id="editor-failure-popup" data-theme="h">
+			<div class="ui-content">
+			<p>Sorry, structure lookup failed</p>
+			</div>
+		</div>
+		
+		<div class="editor-box" id="chemwriter-box"></div>
+	</div>
+
+	<script>
+		function ChemWriterBindings() {
+ 			this_object = this;
+ 			this.is_empty_molfile = function(string) {
+ 				if (string.match('0  0  0  0  0  0            999 V2000')==null) {
+ 					return false
+ 				}
+ 				return true
+ 			}
+ 			this.submit = function() {
+ 				var molfile = editor_object.getMolfile();
+ 				if (!molfile) {return;}
+ 				$.mobile.showPageLoadingMsg();
+ 				onsuccess = function(string) {
+ 					//session.set('editor_structure', {'molfile': molfile, 'smiles': string});
+ 					//$.mobile.hidePageLoadingMsg();
+ 					chemical_term_processor.parse_string(string);
+ 					$.mobile.changePage('{% url "chemical.apps.views.summary" %}');
+ 				}
+ 				onfailure = function() {
+ 					$.mobile.hidePageLoadingMsg();
+ 					$("#editor-failure-popup").popup("open");
+ 				}
+ 				ChemWriterMolfileResolver(molfile, onsuccess, onfailure);	
+ 			}
+ 			this.add_smiles = function() {
+ 					
+ 			}
+ 			this.resize_structure_editor = function () {
+ 				var h = $(window).height()-160;
+ 				var w = $(window).width()-80;
+ 				var min_h = Math.max(h,400);
+ 				var min_w = Math.max(w,600);
+ 				$('.chemwriter .editor').css({'width': min_w, 'height': min_h});	
+ 				$('.chemwriter .editor .canvas').css({'width': min_w-100, 'height': min_h-40});
+ 				$('.chemwriter .editor .canvas svg').css({'width': min_w-100, 'height': min_h-40});
+ 			}
+ 			$('#editor-submit-button').on('click', function(){this_object.submit()});
+ 			//$('#editor-add-button').on('click', this.addition);
+ 			//$('#editor-structure-button').on('click', this.addition);
+ 		}
+ 		chemwriter_bindings = new ChemWriterBindings();
+
+		$('#chemwriter').on('pageinit', function() {
+			$('#{{ app_name }}-editor-page-selector-chemwriter').on('change', function(event, ui) {
+				var editor_name = $('#{{ app_name }}-editor-page-selector-chemwriter').val();
+ 				$.mobile.changePage('{% url "chemical.apps.views.editor" %}/' + editor_name, {transition: 'fade'});
+				$('#{{ app_name }}-editor-page-selector-chemwriter').val(editor_name).selectmenu('refresh');
+			});
+			$('#chemwriter').on('pagebeforeshow', function() {
+				$('#{{ app_name }}-editor-page-selector-chemwriter').val("chemwriter").selectmenu('refresh');
+				editor_page_bindings.current_editor='chemwriter';
+			});
+			$('#chemwriter').on('pageshow', function() {
+				if ($('#chemwriter-box').children().length==0) {		
+					var licensePath = '/license/cactus.nci.nih.gov.lic'
+					editor_object = chemwriter.loadEditor('chemwriter-box', {'hoverRadius': 0.4, 'licensePath': licensePath});
+					chemwriter_bindings.resize_structure_editor();
+				}
+			});
+		});
+
+		$(document).on('orientationchange', function(){
+			chemwriter_bindings.resize_structure_editor();
+		});
+		$(window).resize(function() {
+    		if(this.resizeTO) clearTimeout(this.resizeTO);
+    			this.resizeTO = setTimeout(function() {
+        		$(this).trigger('resizeEnd');
+    		}, 500);
+		});
+		$(window).on('resizeEnd', function() {
+			chemwriter_bindings.resize_structure_editor();
+		});
+	</script>
+
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,17 @@
+<p>
+The water solubility is defined as the amount of a chemical in mg/L that will dissolve in liquid water
+to form a homogeneous solution. The GUSAR models are based on a data set of 4016 compounds obtained
+from the TEST program [1]. The models were developed using the Multilevel and Quantitative Neighborhoods
+of Atoms descriptors [2,3] and Radial Basis Function Self-Consistent Regression. The total number of 
+models was 10: 5 MNA-based models and 5 QNA-based models. The consensus
+model was validated with a test set of 1004 compounds, for which it achieved R<sup>2</sup> = 0.89 and RMSE = 0.72.
+</p>
+
+<div>
+<ol>
+<li><a href="http://www.epa.gov/nrmrl/std/qsar/qsar.html">http://www.epa.gov/nrmrl/std/qsar/qsar.html</a></li>
+<li>Lagunin A, Zakharov A, Filimonov D, Poroikov V. QSAR Modelling of Rat Acute Toxicity on the Basis of PASS Prediction. Mol. Informatics. 2011; 30(2-3):241–50.</li>
+<li>Filimonov DA, Zakharov AV, Lagunin AA, Poroikov VV. QNA-based “Star Track” QSAR approach. Sar Qsar Environ. Res. 2009 Oct; 20(7-8):679–709.</li>
+</ol>
+<p>RMSE = root medium square error (in units of the predictions)</p>
+</div>

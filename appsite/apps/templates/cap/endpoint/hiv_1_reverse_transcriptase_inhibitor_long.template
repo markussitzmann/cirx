@@ -1,0 +1,18 @@
+<p>
+QSAR models for inhibition of HIV-1 reverse transcriptase were built using GUSAR. The data set
+for model building consisted of 3309 compounds with –log10(IC<sub>50</sub>) values obtained from the
+NIAID database [1]. 2647 compounds were used as the training set and 662 were used as the test set.
+The models were developed using the Multilevel and Quantitative Neighborhoods of Atoms descriptors [2,3]
+and Radial Basis Function Self-Consistent Regression. The total number of models was 6: 3 MNA-based
+models and 3 QNA-based models. The consensus model was
+validated with the test set of 662 compounds, for which it achieved R<sup>2</sup> = 0.67 and RMSE = 0.737.
+</p>
+
+<div>
+<ol>
+<li><a href="http://chemdb.niaid.nih.gov/">http://chemdb.niaid.nih.gov/</a></li>
+<li>Lagunin A, Zakharov A, Filimonov D, Poroikov V. QSAR Modelling of Rat Acute Toxicity on the Basis of PASS Prediction. Mol. Informatics. 2011; 30(2-3):241–50.</li>
+<li>Filimonov DA, Zakharov AV, Lagunin AA, Poroikov VV. QNA-based “Star Track” QSAR approach. Sar Qsar Environ. Res. 2009 Oct; 20(7-8):679–709.</li>
+</ol>
+<p>RMSE = root medium square error (in units of the predictions)</p>
+</div>

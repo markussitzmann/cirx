@@ -1,0 +1,13 @@
+#!/bin/bash
+
+scp app.env .env
+
+if [ -z $(docker network ls --filter name=^${APP_NAME}-backend$ --format="{{ .Name }}") ] ; then
+     echo "dreating Docker network"
+     docker network create cactvs-app-backend ;
+fi
+
+echo "Done."
+
+
+exit 0

@@ -1,0 +1,13 @@
+
+<div>bla{{ viewer.file }}</div>
+<table>
+{% for structure in viewer.file.file.structures %}
+<tr>
+	<td>{{ structure.record }}</td>
+	<td>{{ structure.ncicadd_identifier.ficts }}</td>
+	<td>{{ structure.ncicadd_identifier.ficus }}</td>
+	<td>{{ structure.ncicadd_identifier.uuuuu }}</td>
+	<td></td>
+</tr>
+{% endfor %}
+</table>

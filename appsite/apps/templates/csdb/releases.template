@@ -1,0 +1,72 @@
+{% extends "base-service.html" %}
+
+{% block title %}CSDB Viewer{% endblock %}
+
+{% block header %}CSDB Viewer{% endblock %}
+
+{% block ribbon %}
+<div id="button-bar">
+	<div id="button-bar-left">
+	<ul>
+		<li><button id="home-button">Home</button></li>
+	</ul>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block document-ready-script %}
+
+
+$('#release-table').dataTable({
+	"aaData": [
+		{% for release in releases %}
+			[
+			{'id': '{{ release.id }}', 'url': '{% url "chemical.apps.views.csdb_release" release.id %}'},
+			"{{ release.database.id }}",
+			"{{ release.database.name }}",
+			"{{ release.date_released|date:"m/Y" }}",
+			"{{ release.unique_count.database_record_count }}",
+			],
+		{% endfor %}
+		],
+	"aoColumns": [
+			{"sTitle": "Release ID", "sWidth": "5%", "sType": "num-html", "fnRender": 
+				function(obj) {
+					var j = obj.aData[0]
+					return '<a href='+j.url+'>'+j.id+'</a>'
+				},
+			},
+			{"sTitle": "Dabase ID", "sWidth": "5%"},
+			{"sTitle": "Database Name"},
+			{"sTitle": "Downloaded / Released", "sWidth": "10%"},
+			{"sTitle": "Database RegID Count", "sWidth": "10%"}
+		],
+	"sDom": '<"table-header"fpl>rt<"table-footer"i><"clear">',
+	"sPaginationType": "full_numbers",
+	"iDisplayLength": 1000,
+	"aLengthMenu": [20,25,50,100,500,1000],
+});
+
+$('#home-button').button({text: false, icons: {primary: "ui-icon-home"}})
+{% endblock %}
+
+
+{% block content %}
+<div clas="section">
+	
+	<h2>List of Database Releases</h2>
+
+	<div class="paragraph">
+		<table id="release-table"></table>
+	</div>
+
+</div>
+{% endblock %}
+
+
+
+
+
+
+

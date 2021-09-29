@@ -1,0 +1,50 @@
+{% extends "service.html" %}
+
+{% block title %}NCI/CADD Name Search{% endblock %}
+
+{% block meta-keywords %}chemical name search{% endblock %}
+{% block meta-description %}Chemical Name Search{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="/js/prototype.js"></script>
+<script type="text/javascript" src="/js/scriptaculous.js"></script>
+{% endblock %}
+
+{% block header %}Chemical Name Search <i>alpha</i>{% endblock %}
+
+
+{% block ribbon %}
+
+	<form action="/chemical/structure/name" method="POST">
+	<div class="Search">
+		{{ form }}
+	<input type="submit" value="Search">
+	</div>
+	</form>
+
+{% endblock %}
+
+	
+{% block content %}
+	
+	<div class="Box"><p>Result: <em>{{ metadata.total_found }}</em> structure names matches (most relevant listed):</p></div>
+	<ul>
+	{% for structure in structure_names|dictsort:"rank" %}
+		<li>{{ structure.structure.compound }}
+				<a href="/TEST_chemical/structure/{{ structure.structure }}/image">image</a>
+				<a href="/TEST_chemical/structure/{{ structure.structure }}/sdf">sdf</a>
+				<a href="/TEST_chemical/structure/{{ structure.structure }}/sdf?get3d=True">sdf (3D)</a>
+			<ul>
+			{% for name in structure.names %}
+				<li>{{ name.name }}</li>
+			{% endfor %}
+			</ul>
+		</li>
+	{% endfor %}
+	</ul>
+
+
+{% endblock %}
+
+
+

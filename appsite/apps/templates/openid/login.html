@@ -1,0 +1,68 @@
+{% extends "base-service.html" %}
+{% load i18n %}
+
+{% block script %}
+{% endblock %}
+
+{% block link %}
+<style type="text/css">
+input.openid {
+    background: url({% url "openid-logo" %}) no-repeat;
+    background-position: 0 50%;
+    background-color: white;
+	padding-left: 16px;
+	width: 600px;
+}
+
+
+</style>
+{% endblock %}
+
+{% block header %}Login http://{{ host }}{% endblock %}
+
+
+{% block ribbon %}
+{% endblock %}
+
+
+
+{% block content %}
+<div class="content service" style="padding:40px">
+<h2>Sign in with your OpenID</h2>
+<div class="section">
+{% if form.errors %}
+	<p class="errors">{% trans "Please correct errors below:" %}<br />
+	{% if form.openid_identifier.errors %}
+	<span class="error">{{ form.openid_identifier.errors|join:", " }}</span>
+	{% endif %}
+	{% if form.next.errors %}
+	<span class="error">{{ form.next.errors|join:", " }}</span>
+	{% endif %}
+	</p>
+{% endif %}
+<form name="fopenid" action="{{ action }}" method="post">
+{% csrf_token %}
+	
+	<div class="form-row">
+	<label for="id_openid_identifier">{% trans "OpenID:" %}</label><br />
+	{{ form.openid_identifier }}
+	<a href="http://openid.net/get-an-openid">Get an OpenID</a>
+	</div>
+	
+	<button id="submit-login" name="bsignin" type="submit" value="{% trans "Sign in" %}">Submit</button>
+	
+	{% if next %}
+	<input type="hidden" name="next" value="{{ next }}" />
+	{% endif %}
+
+</form>
+
+</div>
+</div>
+
+<script>
+$('#submit-login').button();
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,136 @@
+{% extends "base-service.html" %}
+
+{% block title %}CSDB Viewer{% endblock %}
+
+{% block header %}CSDB Viewer{% endblock %}
+
+
+{% block document-ready-script %}
+$('#ribbon-home-button')
+	.button({text: false, icons: {primary: "ui-icon-home"}})
+	.click(function() {
+		window.location = '';
+	})
+$('#ribbon-buttonset').buttonset();
+$('#previous-record-button')
+	.button({text: true, icons: {primary: "ui-icon-triangle-1-w"}})
+	{% if previous %}
+		.click(
+			function() {
+				window.location = '{% url "chemical.apps.views.csdb_record" previous.id %}';
+			});
+	{% else %}
+		.attr("disabled", true)
+	{% endif %}
+
+$('#next-record-button')
+	.button({text: true, icons: {primary: "ui-icon-triangle-1-e"}})
+	{% if next %}
+		.click(
+			function() {
+				window.location = '{% url "chemical.apps.views.csdb_record" next.id %}';
+			});
+	{% else %}
+		.attr("disabled", true)
+	{% endif %}
+
+var unique_count_table = $('#related-record-table').dataTable({
+	"aaData": [
+		{% for r, from_rel in related_records.items %}
+		[	
+			"{{ r.id }}",
+			"{{ r.database.name }} {{ r.database.release.version }}",
+			"{{ r.database_record.regid_string|cut:"None" }}",
+			"{{ from_rel }}",
+			"{{ r.date_released|date:"m/Y" }}",
+			"{{ r.date_deprecated|date:"m/Y" }}",
+		],
+		{% endfor %}
+		
+		],
+	"aoColumns": [
+			{"sTitle": "CSDB RID"},
+			{"sTitle": "Source"},
+			{"sTitle": "RegID"},
+			{"sTitle": "Linked by"},
+			{"sTitle": "Downloaded / Added"},
+			{"sTitle": "Deprecated"},
+		],
+	"sDom": '<"table-header"fpl>rt<"table-footer"i><"clear">',
+	"sPaginationType": "full_numbers",
+	"iDisplayLength": 25,
+	"aLengthMenu": [20,25,50,100,500,1000],
+	"aaSorting": [[5, "desc"]]
+});
+
+{% endblock %}
+
+
+{% block ribbon %}
+<div id="button-bar">
+	<div id="button-bar-left">
+	<ul>
+		<li><button id="ribbon-home-button">Home</button></li>
+		<li>
+			<div id="ribbon-buttonset">
+				<button id="previous-record-button" type="button">Previous</button>
+				<button id="next-record-button" type="button">Next</button>
+			</div>
+		</li>
+	</ul>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block content %}
+<h2>{{ record.id }}</h2>
+
+<div class="section">
+
+	<img  width="800px" height="250px" src="data:image/gif;base64,{{ record.ficts_compound.structure.image.string_base64 }}" />
+
+	<table>
+		<tr><th>SMILES</th><td>{{ record.ficts_compound.structure.smiles.string }}</td></tr>
+		<tr><th>FICTS Compound ID</th><td>{{ record.ficts_compound.structure.id }}</td></tr>
+		<tr><th>FICuS Compound ID</th><td>{{ record.ficus_compound.structure.id }}</td></tr>
+		<tr><th>uuuuu Compound ID</th><td>{{ record.uuuuu_compound.structure.id }}</td></tr>
+
+	</table>
+
+</div>
+
+
+
+<div class="section">
+
+	<div class="paragraph">
+	<table>
+		<tr><th>Database</th><td>{{ record.database.name }}</td></tr>
+		<tr><th>RegID</th><td>{{ record.database_record.regid_string }}</td></tr>
+		<tr><th>Added</th><td>{{ record.database_record.added }}</td></tr>
+		<tr><th>Deprecated</th><td>{{ record.database_record.deprecated }}</td></tr>
+
+	</table>
+	</div>
+
+</div>
+
+<div class="section">
+	
+	<h2>Related Compounds</h2>
+
+	<div class="paragraph">
+	<table id="related-record-table"></table>
+	</div>
+	
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+

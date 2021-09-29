@@ -1,0 +1,309 @@
+{% extends "service.html" %}
+
+{% block title %}NCI/CADD Chemical Identifier Resolver{% endblock %}
+
+{% block meta-keywords %}chemical identifier, resolver, InChI, InChIKey, SMILES, GIF, database, chemical names, inchikey resolver, InChIKey resolver{% endblock %}
+{% block meta-description %}Chemical Identifier Resolver{% endblock %}
+
+{% block script %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/js/jquery.form.js"></script>
+{% endblock %}
+
+{% block header %}Chemical Identifier Resolver <i>documentation</i>{% endblock %}
+
+{% block ribbon %}<div id="navigation_container" class="Navigation"><p><a href="/chemical/structure">Getting started ...</a> | <a href="/blog">Blog</a></div>{% endblock %}
+
+{% block content %}
+	{% include 'structure_ajax_script.template' %}
+	<div id="service_description">
+	
+	<div class="Headline">
+	<h2>Overview</h2>
+	</div>
+	<div class="Section">
+		<p class="runningText">
+		This service works as a resolver for different chemical structure identifiers and allows one to convert a 
+		given structure identifier into another representation or structure identifier. You can either use 
+		the resolver web form above or the following simple URL API scheme:
+		</p>
+		
+		<p id="bigLeftURL">http://{{ host }}/chemical/structure/<span class="highlighted_span highlighted_span_1">"structure identifier"</span>/<span class="highlighted_span highlighted_span_2">"representation"</span></p>
+
+		<p class="runningText">
+		The service returns the requested new structure representation with a corresponding MIME-Type specification
+		(in most cases <span class="term">MIME-Type: "text/plain"</span>). If a requested URL is not resolvable for the 
+		service an <span class="term">HTML 404 status</span> message is returned. In the (unlikely) case of an error, 
+		an <span class="term">HTML 500 status</span> message is generated.
+		</p>
+	</div>
+
+	<div class="Headline">
+	<h2>Structure Identifiers</h2>
+	</div>
+
+	<div class="Section">
+	<p class="textBox">For new developments and recent additions please read also our 
+	<a href="/blog/?cat=10">blog</a></p>
+
+	<p class="runningText">
+	The service is able to resolve any of the chemical structure identifier types listed in the following table</p>
+	<table>
+		<tr>
+			<th class="column0">Structure Identifier Type</th><th>Description</th>
+		</tr>
+		<tr>
+			<td class="column0">Structure identifier string resolvable by <a href="http://www.xemistry.com">CACTVS</a></td>
+			<td>
+			<p class="runningText">The part of the URL encoding the chemical structure identifier is passed to the structure decoder
+			available in <a href="http://www.xemistry.com">CACTVS</a>. This works for molecular structure encoded as:</p>
+			<ul>
+				<li>SMILES</li>
+				<li>InChI/Standard InChI</li>
+				<li>different CACTVS formats like CACTVS Minimol, CACTVS Serialized Object String</li>
+			</ul>
+			<div class="Box">
+				<p class="runningText"><em>Note:</em> Triple bonds in SMILES strings represented by '#' have to be 
+				URL-escaped as '%23' (e.g. the SMILES string of <span class="term">ethyne</span> has to be specified 
+				as 'C%23C' instead of 'C#C' if encoded as part of a URL).
+				</p>
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="column0">Standard InChIKeys</td>
+			<td>
+			<p class="runningText"><a href="https://iupac.org/who-we-are/divisions/division-details/inchi/">Standard InChIKeys</a> are a hashed
+			structure representation. The service can be used as a Standard InChIKey resolver which converts Standard InChIKeys
+			into a full structure representation by a database lookup. The service currently has approx. 100 million unique 
+			Standard InChIKeys and their corresponding chemical structures on file.
+			</p>
+			<div class="Box">
+			<p class="runningText"><em>Note:</em> A Standard InChIKey is accepted by the service both prefixed by 
+			'<span class="term">InChIKey='</span> or prefix-less. The current version of the service only accepts full 
+			Standard InChIKeys with all three InChIKey layers specified. This will change in future versions.
+			</p>
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="column0">NCI/CADD Identifiers (FICTS, FICuS, uuuuu) and CACTVS HASHISY hashcodes</td>
+			<td>
+			<p class="runningText">Like Standard InChIKeys, NCI/CADD Structure Identifiers are  also a hashed structure
+			representation and are resolved into a full structure representation by a database
+			lookup. The database currently holds 96 million unique chemical structures and their NCI/CADD Identifiers.
+			</p>
+			</td>
+		</tr>
+		<tr>
+			<td class="column0">Chemical names</td>
+			<td>
+			<p class="runningText">Chemical names are resolved by a database lookup into a full structure representation. The
+			service has currently approx. 68 million chemical names available linked to 
+			approx. 16 million unique structure records. The set of available names includes trivial names,
+			synonyms, systematic names, registry numbers, etc.
+			</p>
+			<div class="Box">
+			<p class="runningText"><em>Note:</em> Chemical names are currently resolved only by a full string search. To specify
+			a chemical name as part of a URL you need to embed spaces in the usual way in the URL field of your web browser 
+			(e.g. 'sodium chloride').
+			</p>
+			<p class="runningText"><em>Disclaimer:</em> Although we already took great care to make the 
+			<span class="term">chemical name/registry numbers</span> to <span class="term">structure</span> conversion working well, 
+			we are still working on improvements of this functionality. A known issue for us is that names which include information about the
+			stereo configuration of a compound, might return a structure lacking stereochemistry completely.
+			</p> 
+			</div>
+			</td>
+		</tr>
+	</table>
+	<p class="runningText">
+	If no specific resolver module is named the resolver tries to recognize the type of a given identifier string 
+	in the order of identifier types as listed in the table. In case a structure identifier is ambiguous, i.e. the specified 
+	structure identifier string can be regarded as more than one of the aforementioned identifier types, only the result 
+	of the highest precedence identifier type is returned. However, the results for any lower precedence identifier strings 
+	can be obtained by using the xml format of the service described in the following.
+	</p>
+	<div class="Box">
+	<h3>XML Format</h3>
+	<p class="runningText">For an XML-formatted response add "<span class="term">/xml </span>" to the URL scheme:</p>
+	<p id="smallURL">http://{{ host }}/chemical/structure/<span class="highlighted_span highlighted_span_1">"structure identifier"</span>/<span class="highlighted_span highlighted_span_2">"representation"</span>/<span class="highlighted_span highlighted_span_3">xml</span></p>
+	<p><em>Example: </em>The structure identifier "<span class="term">CCO</span>" can be resolved as SMILES string,
+	however, can also be found as chemical name string (scroll down to the end of the received XML document):</p>
+	<p><a href="/chemical/structure/CCO/names/xml">http://{{ host }}/chemical/structure/CCO/names/xml</a></p>
+
+	</div>
+	</div>
+
+	<div class="Headline">
+	<h2>Representation Methods</h2>
+	</div>
+
+        <div class="Section">
+        <p class="textBox">For recent additions to the list of available representation methods please read also our
+        <a href="/blog/?cat=10">blog</a></p>
+	
+	<div class="Section">
+	<p class="runningText">The following describes which methods are available as "representation" part of the URL scheme above.</p> 
+	</div>
+
+	<h3>Method: stdinchi</h3>
+	<div class="Section">
+	<p class="runningText">
+	Returns the Standard InChI of the structure. 
+	</p>
+	<div class="Box">
+		<p><em>Example:</em> Standard InChI for chemical name string "<span class="term">aspirin</span>":</p>
+		<p><a href="/chemical/structure/aspirin/stdinchi">http://{{ host }}/chemical/structure/aspirin/stdinchi</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3>Method: stdinchikey</h3>
+	<div class="Section">
+	<p class="runningText">
+	Returns the Standard InChIKey of the structure.
+	</p>
+	<div class="Box">
+		<p><em>Example: </em>Standard InChIKey of "<span class="term">ethanol</span>" specified as SMILES string 
+		"<span class="term">CCO</span>":</p>
+		<p><a href="/chemical/structure/CCO/stdinchikey">http://{{ host }}/chemical/structure/CCO/stdinchikey</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+	
+	<h3>Method: smiles</h3>
+	<div class="Section">
+		<p class="runningText">
+		Returns the Unique SMILES of the structure as calculated by the chemoinformatics toolkit
+		<a href="http://www.xemistry.com">CACTVS</a>. A Unique SMILES calculated by CACTVS might
+		be different from a SMILES string calculated by Daylight's official implementation which has not 
+		been fully published. CACTVS can only resemble the calculation of Unique SMILES. However,
+		as long as a SMILES string has been calculated by the <span class="term">Chemical Structure Identifier Resolver</span> 
+		it is unique for a specific structure.
+		</p>
+		<div class="Box">
+		<p><em>Example:</em> Unique SMILES string of chemical name string "<span class="term">benzene</span>":</p>
+		<p><a href="/chemical/structure/benzene/smiles">http://{{ host }}/chemical/structure/benzene/smiles</a></p>
+		<div class="rightComment"><span >(MIME-Type: "text/plain")</span></div>
+		<p class="runningText"></p>
+		<p><em>Example:</em> Unique SMILES string of the non-unique SMILES string "<span class="term">C(O)C</span>" (ethanol):</p>
+		<p><a href="/chemical/structure/C(O)C/smiles">http://{{ host }}/chemical/structure/C(O)C/smiles</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3 id="ficts">Method: ficts</h3>
+	<div class="Section">
+	<p class="runningText">
+	Returns the NCI/CADD FICTS identifier. For this method a timeout can occur, in which case the CACTVS HASHISY 
+	hashcode instead of the full NCI/CADD Identifier is returned (see method <a href="#hashisy">hashisy</a>).
+	</p>
+	<div class="Box">
+		<p><em>Example: </em>FICTS for SMILES string"<span class="term">c1ccccc1</span>":</p>
+		<p><a href="/chemical/structure/c1ccccc1/ficts">http://{{ host }}/chemical/structure/c1ccccc1/ficts</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3 id="ficus">Method: ficus</h3>
+	<div class="Section">
+	<p class="runningText">
+	Returns the NCI/CADD FICuS identifier. For this method a timeout can occur, in which case the CACTVS 
+	HASHISY hashcode instead of the full NCI/CADD Identifier is returned <a href="#hashisy">hashisy</a>).
+	</p>
+	<div class="Box">
+		<p><em>Example: </em>FICuS for chemical name string "<span class="term">aspirin</span>":</p>
+		<p><a href="/chemical/structure/aspirin/ficus">http://{{ host }}/chemical/structure/aspirin/ficus</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3 id="uuuuu">Method: uuuuu</h3>
+	<div class="Section">
+	<p class="runningText">
+	Returns the NCI/CADD uuuuu identifier. For this method a timeout can occur, in which case the CACTVS 
+	HASHISY hashcode instead of the full NCI/CADD Identifier is returned (see method <a href="#hashisy">hashisy</a>).
+	</p>
+	<div class="Box">
+		<p><em>Example: </em>uuuuu for Standard InChIKey "<span class="term">InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N</span>":</p>
+		<p><a href="/chemical/structure/InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N/uuuuu">http://{{ host }}/chemical/structure/InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N/uuuuu</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3>Method: sdf</h3>
+	<div class="Section">
+		<p class="runningText">
+		Returns the SD file of the structure. For other file formats than SD file, please read this blog article: 
+		<a href="/blog/?p=68">http://{{ host }}/blog/?p=68</a>
+		</p>
+		<div class="Box">
+		<p><em>Example:</em> SD File for chemical name string "<span class="term">morphine</span>":</p>
+		<p><a href="/chemical/structure/morphine/file?format=sdf">http://{{ host }}/chemical/structure/morphine/file?format=sdf</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3>Method: names</h3>
+	<div class="Section">
+		<p class="runningText">
+		Returns a list of chemical names for the structure. The names currently available via this method comprises trivial names, systematic names, 
+		registry numbers and original structure provider IDs. Note that not all entries in our database have a name associated with them.
+		</p>
+		<div class="Box">
+		<p><em>Example:</em> Chemical names for Standard InChIKey "<span class="term">InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N</span>"
+		(Standard InChIKey of "<span class="term">ethanol</span>"):</p>
+		<p><a href="/chemical/structure/InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N/names">http://{{ host }}/chemical/structure/InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N/names</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+		<p class="runningText"></p>
+		<p><em>Example:</em> Synonyms for chemical name string "<span class="term">aspirin</span>":</p>
+		<p><a href="/chemical/structure/aspirin/names">http://{{ host }}/chemical/structure/aspirin/names</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3 id="hashisy">Method: hashisy</h3>
+	<div class="Section">
+	<p class="runningText">
+	Returns the CACTVS HASHISY hashcode of the given chemical structure identifier. The HASHISY hashcode 
+	is a 16-digit hexadecimal (64-bit) hashcode representation of a chemical structure and also represents
+	the hashcode part of the NCI/CADD Structure Identifiers (FICTS, FICuS, uuuuu), however, this methods
+	provides only some raw structure normalization steps compared to methods <a href="#ficts">ficts</a>, 
+	<a href="#ficus">ficus</a>, and <a href="#uuuuu">uuuuu</a>.
+	</p>
+	<div class="Box">
+		<p><em>Example: </em>FICTS for SMILES string"<span class="term">c1ccccc1</span>":</p>
+		<p><a href="/chemical/structure/c1ccccc1/hashisy">http://{{ host }}/chemical/structure/c1ccccc1/hashisy</a></p>
+		<div class="rightComment"><span>(MIME-Type: "text/plain")</span></div>
+	</div>
+	</div>
+
+	<h3 id="iamge">Method: image</h3>
+	<div class="Section">
+	<p class="runningText">
+	Returns a GIF or PNG image of the structure identifier. There are several options available to control
+	in which way the image is generated. An overview is available in this blog article:
+	<a href="/blog/?p=136">http://{{ host }}/blog/?p=136</a>
+	</p>
+	<div class="Box">
+		<p><em>Example: </em>GIF for "<span class="term">aspirin</span>":</p>
+		<p><a href="/chemical/structure/aspirin/image">http://{{ host }}/chemical/structure/aspirin/image</a></p>
+		<div class="rightComment"><span>(MIME-Type: "image/gif")</span></div>
+	</div>
+	</div>
+	</div>
+
+{% endblock %}
+
+{% block footer %}
+
+	<div id="navigation_container" class="Navigation"><p><a href="/chemical/structure">Getting started ...</a> | <a id="doc_link" href="">Documentation</a> | <a href="/blog">Blog</a> | <a href="/ncicadd/contact.html">Contact</a> | <a href="/ncicadd/disclaimer.html">Disclaimer</a> | <a href="/ncicadd/privacy.html">Privacy Statement</a></p></div>
+	<p>Markus Sitzmann (sitzmann+++helix.nih.gov)</p>
+	<p>NCI/CADD Group 2009</p>
+	<p>{% now "jS F Y H:i" %}</p>
+
+{% endblock %}
+
+

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<request string="{{ string }}" representation="{{ representation }}">
+{% for r in response %}
+	{% if r.response %}
+	<data id="{{ r.index }}" resolver="{{ r.structure.metadata.query_type }}" string_class="{{ r.structure.metadata.query_search_string }}" notation="{{ r.structure.metadata.description }}">	
+		{% for item in r.response %}
+			{% ifequal r.base_mime_type "text" %}
+			<item id="{{ forloop.counter }}">{{ item }}</item>
+			{% endifequal %}
+			{% ifequal r.base_mime_type "image" %}
+			<item id="{{ forloop.counter }}"><img src="{{ host }}{% url chemical.structure.views.identifier item,'image' %}"></img></item>
+			{% endifequal %}
+		{% endfor %}
+	</data>	
+	{% endif %}
+	{% if r.names %}
+	<data id="{{ r.index }}" resolver="{{ r.structure.metadata.query_type }}" string_class="{{ r.structure.metadata.query_search_string }}" notation="{{ r.structure.metadata.description }}">	
+	{% for n in r.names %}
+		<item id="{{ forloop.counter }}" classification="{{ n.class }}">{{ n.name }}</item>
+	{% endfor %}
+	</data>
+	{% endif %}
+	{% if r.url_records %}
+	<data id="{{ r.index }}" resolver="{{ r.structure.metadata.query_type }}" string_class="{{ r.structure.metadata.query_search_string }}" notation="{{ r.structure.metadata.description }}">	
+	{% for record in r.url_records %}
+		<item id="{{ forloop.counter }}" classification="{{ record.classification }}" record="{{ record.key }}" database="{{ record.database_name }}" publisher="{{ record.publisher }}" publisher_record_id="{{ record.external_id }}">{{ record.url_scheme.string|escape }}{{ record.external_id }}</item>
+	{% endfor %}
+	</data>
+	{% endif %}
+{% endfor %}
+</request>
+
+

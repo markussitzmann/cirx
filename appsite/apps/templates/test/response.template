@@ -1,0 +1,61 @@
+
+
+
+{{ app_views.query_data }}
+
+<table>
+{% for g,i in app_views.grouped_response_page.items %}
+<tr>
+	<td>{{ g }}</td><td>{{ g.query }}|{{ g.query_type }}</td><td>{{ i }}</td> 
+</tr>
+{% endfor %}
+</table>
+
+<div> ----- </div>
+
+<table>
+{% for i in app_views.query_data_with_response %}
+<tr>
+	<td>{{ i }}</td> 
+</tr>
+{% endfor %}
+</table>
+
+
+
+
+{% comment %}
+
+<div> ----- </div>
+
+<div>{{ new }}</div>
+
+<div> # app session -------------- </div>
+
+<table>
+{% for k,v in app_views.items %}
+<tr><th>{{ k }}</th><td>{{ v }}</td></tr>
+{% endfor %}
+</table>
+
+<div> # response item -------------- </div>
+
+<table>
+{% for v in response_item_list %}
+<tr><th>item</th><td>{{ v }}</td></tr>
+{% endfor %}
+</table>
+
+<div> # response -------------- </div>
+
+<table>
+{% for k,v in response.items %}
+<tr><th>{{ k }}</th><td>{{ v }}</td></tr>
+{% endfor %}
+</table>
+
+
+
+<div>{{ response }}</div>
+
+{% endcomment %}

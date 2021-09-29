@@ -1,0 +1,22 @@
+<div class="structure" id="structure-record-{{ structure.record }}">
+
+<div class="structure-head"><span class="structure-id">{{ structure.record }}</span><span>{{ structure.object.structure.compound }}</span></div>
+<div class="structure-properties">
+	<div>{{ structure.top_prop_1 }}</div>
+	<div>{{ structure.top_prop_2 }}</div>
+</div>
+
+{% if structure.object.error %}
+	<div class="structure-image"><div class="structure-error">read error</div></div>
+{% else %}
+	<div class="structure-image"><img height="220" width="265" src="data:image/gif;base64,{{ structure.image.medium }}" /></div>
+{% endif %}
+
+<div class="structure-properties">
+	<div>{{ structure.bottom_prop_1 }}</div>
+	<div>{{ structure.database_count }}</div>
+</div>
+
+</div>
+
+

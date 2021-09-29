@@ -1,0 +1,117 @@
+<div class="Search">
+<form id="submit-form" enctype="multipart/form-data">
+	
+	<table>
+
+		<!-- row -->
+		<tr>
+			<th class="LeftColumn">
+				<label for="id_identifier">Structure Identifier:</label>
+			</th>
+			<td class="MiddleColumn FirstRow" id="form_identifier_field">
+				<div id="input_editor_box">
+					<div id="input_box">{{ form.identifier }}</div>
+				</div>
+			</td>
+			<td class="RightColumn FirstRow" id="editor_button_field">
+				<div id="editor-button-pane" editor_for="id_identifier"></div>
+			</td>
+			</div>
+		</tr>
+
+		<!-- row -->
+		<tr>
+			<th class="LeftColumn">
+				<label for="id_representation">convert to:</label>
+			</th>
+			<td class="MiddleColumn">
+				<div id="representation_field">{{ form.representation }}</div>
+			</td>
+			<td>
+			</td>
+		</tr>
+		
+		<!-- row -->
+		<tr>
+			<th class="LeftColumn"></th>
+			<td class="MiddleColumn">
+				<button type="submit" id="submit-button" value="Submit" />Submit</button>
+			</td>
+			<td>
+			</td>
+		</tr>
+
+	</table>
+
+</form>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	
+    //$("#submit-form").ajaxForm();
+
+	$('#getting_started_link').click(function (){
+		$('#getting_started_response_box_content').hide();
+		$('#getting_started_response_box_text').fadeIn();
+	});
+
+	$('#submit-button').button().click(function() {
+		var string = $('#id_identifier').val();
+		var representation = $('#id_representation').val();
+		var url = '/chemical/structure/' + encodeURI(string) + '/' + representation;
+		if (representation == "twirl") {
+			var call_url = url + '?div_id=getting_started_response_box_data';
+		} else if (representation == "image") {
+			var call_url = url + '?width=278&height=278';
+		} else {
+			var call_url = url;
+		}
+		var show_url = '{{ host }}' + url;
+		var url_anchor = '<a href=\"' + show_url + '\">' + show_url + '</a>';
+		if (!string) {
+			$('#id_identifier').css({'background-color': '#fef0f0'});
+			//$('#id_identifier').labelify({ text: "test"});
+			$('#id_identifier').focus();
+			setInterval(function () {
+				$('#id_identifier').css({'background-color': 'white'});
+			}, 2000);
+			return false;
+		}
+		$.ajax({
+			url: call_url,
+			beforeSend: function(data) {
+				$('#getting_started_response_box_text').hide();
+				$('#getting_started_response_box_description').text('');
+				$('#getting_started_url').text('');
+				$('#getting_started_response_box_data').html('<img src="/image/load.gif" />');
+				$('#getting_started_response_box_content').show();
+			},
+			success: function(data) {
+				if (representation == "image") {
+					$('#getting_started_url').html(url_anchor);
+					$('#getting_started_response_box_data').html('<img src=\"' + call_url + '\"/>')
+				} else if (representation == "twirl") {
+					$('#getting_started_url').html(url_anchor);
+					$('#getting_started_response_box_description').text('Click and drag to rotate (left mouse button), zoom/twist (right button) or translate (middle button).');
+					$('#getting_started_response_box_data').text('')
+				} else {
+					$('#getting_started_url').html(url_anchor);
+					$('#getting_started_response_box_data').html('<pre>' + data + '</pre>')
+				}
+			},
+			error: function(data) {
+				$('#getting_started_response_box_data').html('<div class="ErrorMessage">Sorry, your structure identifier could not be resolved (the request returned a HTML 404 status message)</div>')
+			}
+		});
+	});
+	
+	$('#submit-form').submit(function() {
+		//$(this).ajaxSubmit();
+		return false;
+	});
+
+});
+</script>
+
+{% include 'structure_editor.template' %}

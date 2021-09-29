@@ -1,0 +1,94 @@
+{% extends "base-service-m.html" %}
+
+{% block body_class %}{% endblock %}
+
+{% block title %}NCI/CADD Chemical Structure Apps{% endblock %}
+
+{% block header %}Chemical Structure Apps{% endblock %}
+
+{% block pages %}
+<div data-role="page" data-dom-chache="true" id="search-list">
+	
+	<div data-role="header" data-theme="a" data-position="fixed" id="add-structure-header">
+		<a data-icon="home" data-iconpos="notext" data-transition="slide" data-direction="reverse" href="{% url "chemical.apps.views.home" %}"></a>		
+		<h1>Add Structures</h1>
+		<a data-icon="gear" data-icon="home" data-iconpos="notext" data-direction="reverse"></a>
+	</div>
+
+	<div data-role="content" data-theme="f">
+
+		<div class="content-inner-border">
+
+		<div id="list-switcher" data-role="controlgroup" data-type="horizontal">
+			<a data-role="button" data-transition="slide" data-direction="reverse" href="{% url "chemical.apps.views.qterm" %}">Term</a>			
+			<a data-role="button" class="ui-btn-active">List</a>
+		</div>
+
+		<form id="list-form">
+
+			<label for="id_structure_list_input" class="ui-hidden-accessible">Input Chemical Structure Identifier</label>
+			<div id="id_list_input-box">
+				{{ form.structure_list_input }}
+			</div>
+
+			<div class="icon-box">
+				<a data-role="button" data-icon="info" data-theme="g" data-iconpos="notext" class="info"  href="{% url "chemical.apps.views.info" %}">Info</a>
+				<a data-role="button" data-icon="edit" data-theme="g" data-iconpos="notext" data-transition="slideup" id="term-editor-button" >Structure Editor</a>
+				<a data-role="button" data-icon="trash" data-theme="g" data-iconpos="notext">Delete List</a>
+			</div>
+
+			<div class="page-content-button-bar">
+				<button id="list-submit-button" data-role="button" data-inline="true" data-theme="f">Submit</button>				
+			</div>
+
+		</form>
+
+		</div>		
+
+	</div>
+
+	<script>
+		function SearchListPageBindings() {
+			this.update_textarea = function() {
+				var value = session.get('user_data')['term_array'].join('\n');
+				$('#id_list_input-box textarea').val(value);
+				return false;
+			}
+			this.clear_textarea = function() {
+				$('#id_list_input-box textarea').val('');
+				return false;
+			}
+			$('#list-submit-button:not(.click-bound)').addClass('click-bound').on('click', function(event){
+				var textarea_data = $('#id_list_input-box textarea').val();
+ 				//session.set('string_list', textarea_data);
+				chemical_term_processor.parse_string(textarea_data)
+				$.mobile.changePage('{% url "chemical.apps.views.summary" %}', {transition: 'slide'}) 
+				return false;
+			});
+			$('#list-clear-button:not(.click-bound)').addClass('click-bound').on('click', function(event){
+ 				$('#li-term-search').clear();
+				$('#li-list-search').clear();
+				session.clear_term_list()
+				return false;
+			});
+			$('#list-structure-button:not(.click-bound)').addClass('click-bound').on('click', function(event){
+ 				
+				return false;
+			});
+			$('#search-list:not(.swipeleft-bound)').addClass('swipeleft-bound').on('swipeleft', function(){
+ 				$.mobile.changePage('{% url "chemical.apps.views.summary" %}', {transition: 'slide'});
+ 				return false;
+ 			});
+ 			$('#search-list:not(.swiperight-bound)').addClass('swiperight-bound').on('swiperight', function(){
+ 				$.mobile.changePage('{% url "chemical.apps.views.qterm" %}', {transition: 'slide', reverse: true});
+ 				return false;
+ 			});
+		}
+		$('#search-list').on('pageshow', function() {
+			var search_list_page_bindings = new SearchListPageBindings();
+			search_list_page_bindings.update_textarea();			
+		});
+	</script>
+</div>
+
+{% endblock %}

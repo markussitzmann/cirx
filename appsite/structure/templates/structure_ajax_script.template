@@ -1,0 +1,72 @@
+
+<script type="text/javascript">
+	/*
+	//<![CDATA[
+		document.observe('dom:loaded', function() {
+			element = $('id_identifier').up();
+			function sendForm(event) {
+				Event.stop(event);
+				var form_data = $('submit_form').serialize(true);
+				if (form_data['identifier'] != "") {
+					var identifier = form_data['identifier']
+					var representation = form_data['representation']
+					if ((editorOpen) && (editorOpen === true)) {
+						identifier = document.JME.smiles();
+					};
+					var url =  '/chemical/structure/' + escape(identifier) + '/' + representation;
+					if (representation == "twirl") {
+						var call_url = url + '?div_id=getting_started_response_box_data';
+					} else if (representation == "image") {
+						var call_url = url + '?width=278&height=278';
+					} else {
+						var call_url = url;
+					}
+					var show_url = '{{ host }}' + url;
+					var url_anchor = '<a href=\"' + show_url + '\">' + show_url + '</a>';
+					new Ajax.Request(call_url, {
+						method: 'get',
+						evalScripts: true,
+						evalJS: true,
+						onCreate: function(transport) {
+							$('getting_started_response_box_text').hide();
+							$('getting_started_response_box_description').update('');
+							$('getting_started_url').update('');
+							$('getting_started_response_box_data').update('<img src="/image/load.gif" />');
+							$('getting_started_response_box_content').show();
+						},
+						onSuccess: function(transport) {
+							if (representation == "image") {
+								$('getting_started_url').update(url_anchor);
+								$('getting_started_response_box_data').update('<img src=\"' + call_url + '\"/>')
+							} else if (representation == "twirl") {
+								$('getting_started_url').update(url_anchor);
+								$('getting_started_response_box_description').update('Click and drag to rotate (left mouse button), zoom/twist (right button) or translate (middle button).');
+								$('getting_started_response_box_data').update('')
+							} else {
+								$('getting_started_url').update(url_anchor);
+								$('getting_started_response_box_data').update('<pre>' + transport.responseText + '</pre>')
+							}
+						},
+						onFailure: function(transport) {
+							$('getting_started_response_box_data').update('<div class="ErrorMessage">Sorry, your structure identifier could not be resolved (the request returned a HTML 404 status message)</div>')
+						}
+					});
+				} 
+				else 
+				{
+					
+					new Effect.Highlight('id_identifier', {startcolor: '#ff0000'});
+				}
+			};
+			function loadGettingStarted(event) {
+				Event.stop(event);
+				$('getting_started_response_box_content').hide();
+				$('getting_started_response_box_text').show();
+			}
+			Event.observe('submitButton', 'click', sendForm, false);
+			Event.observe('getting_started_link', 'click', loadGettingStarted, false);
+	
+		});
+	//]]>
+	*/
+</script>	

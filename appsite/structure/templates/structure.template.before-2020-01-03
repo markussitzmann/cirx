@@ -1,0 +1,95 @@
+{% extends "service.html" %}
+
+{% block title %}NCI/CADD Chemical Identifier Resolver{% endblock %}
+
+{% block meta-keywords %}chemical identifier, resolver, InChI, InChIKey, SMILES, GIF, database, chemical names, inchikey resolver, InChIKey resolver{% endblock %}
+{% block meta-description %}Chemical Identifier Resolver{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/js/chemwriter.js"></script>
+<link rel="stylesheet" href="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/style/chemwriter-mod.css" type="text/css" media="screen,projection" />
+
+<script type="text/javascript" src="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/js/ChemDoodleWeb-libs.js"></script>
+<script type="text/javascript" src="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/js/ChemDoodleWeb.js"></script>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">google.load("jquery", "1.4.4");</script>
+<script type="text/javascript">google.load("jqueryui", "1.8.9");</script>
+<script type="text/javascript" src="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/js/jquery.form.js"></script>
+{% endblock %}
+
+
+{% comment %}
+{% block script %}
+<script type="text/javascript" src="/js/chemwriter.js" data-chemwriter-license="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/license/cactus.nci.nih.gov.lic"></script>
+<link rel="stylesheet" href="/style/chemwriter-mod.css" type="text/css" media="screen,projection" />
+<!--<script type="text/javascript" src="http://chemwriter.com/sdk/chemwriter.js" data-chemwriter-license="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/license/cactus.nci.nih.gov.lic"></script>-->
+<!--<link rel="stylesheet" href="http://chemwriter.com/sdk/chemwriter-mod.css" type="text/css" media="screen,projection" />-->
+
+<script type="text/javascript" src="/js/ChemDoodleWeb-libs.js"></script>
+<script type="text/javascript" src="/js/ChemDoodleWeb.js"></script>
+
+<!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>-->
+<!--<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>-->
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">google.load("jquery", "1.4.4");</script>
+<script type="text/javascript">google.load("jqueryui", "1.8.9");</script>
+<script type="text/javascript" src="/js/jquery.form.js"></script>
+{% endblock %}
+{% endcomment %}
+
+{% block header %}Chemical Identifier Resolver{% endblock %}
+
+{% block ribbon %}
+	{% include 'structure_form.template' %}
+{% endblock %}
+	
+{% block content %}
+	<div id="service_description">
+	<div class="Box" id="getting_started">
+	<div class="Section">
+		<div id="getting_started_response_box">
+			<div id="getting_started_response_box_text">
+				<h2>Getting started ...</h2>
+				<p class="runningText">
+				This service works as a resolver for different chemical structure identifiers and allows one to convert a 
+				given structure identifier into another representation or structure identifier. It can help you identify
+				and find the chemical structure if you have an identifier such as an InChIKey. You can either use 
+				the resolver web form above or use the following simple URL API scheme:
+				</p>
+		
+				<p id="bigCenterURL">{{ host }}/chemical/structure/<span class="highlighted_span highlighted_span_1">"structure identifier"</span>/<span class="highlighted_span highlighted_span_2">"representation"</span></p>
+				<div id="quickExample"><p><em>Example: </em>Chemical name to Standard InChIKey:</p> <p><a href="/chemical/structure/aspirin/stdinchikey">{{ host }}/chemical/structure/aspirin/stdinchikey</a></p></div>
+				<p class="runningText">
+				The service returns the requested new structure representation with a corresponding MIME-Type specification
+				(in most cases <span class="term">MIME-Type: "text/plain"</span>). If a requested URL is not resolvable for the 
+				service an <span class="term">HTML 404 status</span> message is returned. In the (unlikely) case of an error, 
+				an <span class="term">HTML 500 status</span> message is generated. 
+                                
+				<em>Note:</em> Triple bonds in SMILES strings represented by '#' have to be URL-escaped as '%23' (e.g. the SMILES string of <span class="term">ethyne</span> has to be specified as 'C%23C' instead of 'C#C' if encoded as part of a URL).
+                                
+                                
+				</p>
+
+			</div>
+			<div id="getting_started_response_box_content" style="display:none">
+				<div id="getting_started_url_box"><em>URL</em>: <span id="getting_started_url"></span></div>
+				<div id="getting_started_response_box_description"></div>
+				<div id="getting_started_response_box_data" height="320" width="860"></div>
+			</div>
+		</div>
+	</div>
+	</div>
+
+{% endblock %}
+
+{% block footer %}
+
+	<div id="navigation_container" class="Navigation"><p><a id="getting_started_link" href="/chemical/structure">Getting started ...</a> | <a id="doc_link" href="/chemical/structure_documentation">Documentation</a> | <a href="/blog">Blog</a> | <a href="/ncicadd/contact.html">Contact</a> | <a href="/ncicadd/disclaimer.html">Disclaimer</a> | <a href="/ncicadd/privacy.html">Privacy Statement</a></p></div>
+	<!--<p>Markus Sitzmann (markus.sitzmann+++gmail.com)</p>-->
+	<p>NCI/CADD Group 2009-{% now "Y" %}</p>
+	<p>{% now "jS F Y H:i" %}</p>
+
+{% endblock %}
+
+

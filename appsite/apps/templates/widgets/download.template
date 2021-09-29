@@ -1,0 +1,54 @@
+
+<div class="overlay" id="download-widget">
+
+	<div class="close"></div>
+	
+	<form id="download-file-form" action="" enctype="multipart/form-data" method="POST">
+	
+	<div class="content">
+
+		<h1>Download "{{ file.display_name }}"</h1>
+
+			<h2>File Format</h2>
+			<div class="section">
+			<p>Please choose a file format for the download:</p>
+			<div class="subsection">
+				<div id="download-format-button">
+				<input type="radio" id="sdf-radio" name="download-format-choice" value="sdf" checked="checked"/><label for="sdf-radio">SD File (sdf)</label>
+				<!--<input type="radio" id="cdxml-radio" name="download-format-choice" value="cdxml"/><label for="cdxml-radio">ChemDraw (cdxml)</label>-->
+				<input type="radio" id="smi-radio" name="download-format-choice" value="smi"/><label for="smi-radio">SMILES (smi)</label>
+				<input type="radio" id="pdb-radio" name="download-format-choice" value="pdb"/><label for="pdb-radio">PDB (pdb)</label>
+				<input type="radio" id="mrv-radio" name="download-format-choice" value="mrv"/><label for="mrv-radio">ChemAxon (mrv)</label>
+				<button id="download-widget-format-more-button">more</button>
+				</div>
+			</div>
+			</div>
+			<h2></h2>
+ 			<h2>3D Coordinates</h2>
+			<div class="section">
+			<p>Calculation of 3D coordinates:</p>
+			<div class="subsection">
+				<div id="get3d-button">
+				<input type="radio" id="3d-off" name="get3d" value="0" checked="checked"/><label for="3d-off">Off</label>
+				<input type="radio" id="3d-on" name="get3d" value="1"/><label for="3d-on">On</label>
+				</div>
+			</div>
+			</div>
+
+	</form>
+	
+	<div id="status-message-line">
+		<div id="status-message"><strong>The service is building your download file - please stand by ...</strong> <span class="process-image"><img src="/image/load.gif" /></span></div>
+	</div>
+
+	</div>
+
+	<div class="button-bar">
+		<button id="download-widget-submit-button" type="submit" value="Submit">Download</button>
+		<button id="download-widget-close-button" class="close">Close</button>
+		<span class="ui-state-error ui-corner-all" id="download-widget-warning-pane">This is a warning</span>
+	</div>
+		
+</div>
+
+

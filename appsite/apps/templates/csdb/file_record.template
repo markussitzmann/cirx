@@ -1,0 +1,145 @@
+{% extends "base-service.html" %}
+
+{% block title %}CSDB Viewer{% endblock %}
+
+{% block header %}CSDB Viewer{% endblock %}
+
+
+{% block document-ready-script %}
+
+$('#ribbon-home-button')
+	.button({text: false, icons: {primary: "ui-icon-home"}})
+	.click(function() {
+		window.location = '{% url "chemical.apps.views.csdb" %}';
+	})
+$('#ribbon-buttonset').buttonset();
+$('#previous-file-record-button')
+	.button({text: true, icons: {primary: "ui-icon-triangle-1-w"}})
+	{% if previous %}
+		.click(
+			function() {
+				window.location = '{% url "chemical.apps.views.csdb_file_record" previous.id %}';
+			});
+	{% else %}
+		.attr("disabled", true)
+	{% endif %}
+
+$('#next-file-record-button')
+	.button({text: true, icons: {primary: "ui-icon-triangle-1-e"}})
+	{% if next %}
+		.click(
+			function() {
+				window.location = '{% url "chemical.apps.views.csdb_file_record" next.id %}';
+			});
+	{% else %}
+		.attr("disabled", true)
+	{% endif %}
+
+
+
+{% endblock %}
+
+
+{% block ribbon %}
+<div id="button-bar">
+	<div id="button-bar-left">
+	<ul>
+		<li><button id="ribbon-home-button">Home</button></li>
+		<li>
+			<div id="ribbon-buttonset">
+				<button id="previous-file-record-button" type="button">Previous</button>
+				<button id="next-file-record-button" type="button">Next</button>
+			</div>
+		</li>
+	</ul>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block content %}
+<h2>File Record {{ file_record.id }}</h2>
+
+<div class="section">
+
+
+	<!--<img height="250px" width="800px" src="data:image/gif;base64,{{ file_record.compound.ficts_compound.structure.media.20f6ad910b6ffbc247bf1bdc5f565f5a.string }}" />-->
+
+	<div class="paragraph" style="position:relative">
+	
+	<div class="doodle-widget" id="doodle-3d">
+		<script type="text/javascript">
+
+			var w = $('#doodle-3d').width()
+
+			var doodle_3d = new ChemDoodle.TransformCanvas3D('viewer', w, 340);
+			doodle_3d.specs.set3DRepresentation('Stick');
+			doodle_3d.specs.backgroundColor = 'black';
+
+			var doodle_3d_file = '{{ file_record.compound.ficts_compound.structure.media.8335046ce672718be07db112f38d5ccf.string }}';
+			var doodle_3d_structure = ChemDoodle.readMOL(doodle_3d_file, 1);
+
+			doodle_3d.loadMolecule(doodle_3d_structure);
+		</script>
+	</div>
+		
+	<div class="doodle-widget" id="doodle-acs" style="position:absolute;top:40px;left:40px">
+		<script type="text/javascript">
+			var doodle_acs = new ChemDoodle.ViewerCanvas('acs', 280, 280);
+			doodle_acs.specs.backgroundColor = 'transparent';
+			doodle_acs.specs.atoms_color = 'white';
+			doodle_acs.specs.bonds_color = 'white';
+			doodle_acs.specs.bonds_width_2d = 2.0;
+			var doodle_acs_file = '{{ file_record.compound.ficts_compound.structure.media.07c6c4160b0ff903bdc0de9c18036a25.string }}';
+			var doodle_acs_structure = ChemDoodle.readMOL(doodle_acs_file, 1);
+			doodle_acs_structure.scaleToAverageBondLength(20);
+			doodle_acs.loadMolecule(doodle_acs_structure);
+		</script>
+	</div>
+
+	</div>
+
+</div>
+
+<div class="section">
+
+	<h3>General Information</h3>
+	<div class="paragraph">
+	<table>
+		<tr><th>File Record ID</th><td>{{ file_record.id }}</td></tr>
+		<tr><th>File ID</th><td><a href='{% url "chemical.apps.views.csdb_file" file_record.file.id %}'>{{ file_record.file.id }}</a></td></tr>
+		<tr><th>SMILES</th><td>{{ file_record.compound.ficts_compound.structure.smiles.string }}</td></tr>
+		<tr><th>Database Records</th>
+			<td>
+			<table>
+			{% for database_record in file_record.database_records %}
+			<tr><td>{{ database_record.database.name }}</td><td>{{ database_record.database_record.regid_string }}</td></tr>
+			{% endfor %}
+			</table>
+			</td>
+		<tr><th>Added:</th><td>{{ file_record.added|date:"Y-M-d h:m:s" }}</td></tr>
+		<tr><th>Blocked:</th><td>{{ file_record.blocked|date:"Y-M-d h:m:s" }}</td></tr>
+	</table>
+	</div>
+
+</div>
+
+
+
+<div class="section">
+
+	<h3>File Content</h3>
+	<div class="paragraph">
+	<pre class="with-border">{{ file_record.raw_content.unpack }}</pre>
+	</div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+

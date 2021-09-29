@@ -1,0 +1,112 @@
+{% extends "base-service-m.html" %}
+
+{% block title %}NCI/CADD {{ app_name|upper }}{% endblock %}
+
+{% block header %}{{ app_string }}{% endblock %}
+
+
+{% block pages %}
+<div data-role="page" data-dom-chache="true" data-theme="{{ app_theme }}" id="{{ app_name }}-splash" class="apps {{ app_name }} splash">
+
+	{% comment %}{% include 'common/header.template' %}{% endcomment %}
+	{% comment %}<div data-role="header" data-theme="{{ app_theme }}" id="{{ app_name }}-{{ page }}-header">
+		<a data-icon="home" data-iconpos="notext" data-transition="fade" data-direction="reverse" href="{%url "chemical.apps.views.home" %}">{{ app_string }} Home</a>		
+		<h1></h1>
+		<!--<a data-icon="gear" data-iconpos="notext"></a>-->
+	</div>{% endcomment %}
+
+	<div data-role="panel" id="splash-panel" data-display="overlay" data-position="left" data-theme="g">
+	<img src="/image/nci-logo-full.svg"></img>
+	<h3>NCI/CADD Apps</h3>
+	<ul data-role="listview" data-theme="g" data-dividertheme="g">
+		<li data-icon="plus"><a href="{% url 'chemical.apps.views.edit_structures' 'add' 'structure' %}"><h4>Add/Edit Structures</h4></a></li>
+		<li><a href="{% url 'chemical.apps.views.browse' 1 %}"><h4>Browse Structures</h4></a></li>
+		<li><a href="{% url 'chemical.apps.views.cap_manual' 'config' %}"><h4>Settings</h4></a></li>
+		<li data-icon="grid"><a data-transition="slide" data-direction="reverse" href="{% url 'chemical.apps.views.home' %}"><h4>Switch App</h4></a></li>
+	</ul>
+	{% if app_name == 'cap' %}
+	<h3>Chemical Activity Predictor</h3>
+	<ul data-role="listview" data-theme="g" data-dividertheme="g">
+		<li><a href="{% url 'chemical.apps.views.cap_manual' 'categories' %}"><h4>Categories</h4></a></li>
+		<li><a href="{% url 'chemical.apps.views.cap_manual' 'models' %}"><h4>Models</h4></a></li>
+		<li><a href="{% url 'chemical.apps.views.cap_manual' 'endpoints' %}"><h4>Endpoints</h4></a></li>
+	</ul>
+	{% endif %}
+	{% if app_name == 'csls' %}
+	<h3>CSLS</h3>
+	<ul data-role="listview" data-theme="g" data-dividertheme="g">
+		<li><a data-transition="fade" href="{% url "chemical.apps.views.csls_manual" 'databases' %}"><h4>Databases</h4></a></li>
+		<li><a data-transition="fade" href="{% url "chemical.apps.views.csls_manual" 'releases' %}"><h4>Releases</h4></a></li>
+	</ul>
+	{% endif %}
+	
+    </div><!-- panel -->
+
+	<div data-role="content" data-theme="{{ app_theme }}" class="splash-content"> 
+		<div class="splash-spacer"></div>
+		<a href="#about">
+		<h1>{{ app_string }}</h1>
+		</a>
+		<div class="splash-buttons">
+			<div data-role="controlgroup" data-type="horizontal" data-inline="true">
+			<a data-role="button" data-theme="{{ app_theme }}" data-transition="fade" id="{{ app_name }}-open-button" href="{% url 'chemical.apps.views.edit_structures' 'add' 'structure' %}">Open</a>
+			</div>
+			<div data-role="controlgroup" data-type="horizontal" data-inline="true">
+			<a data-role="button" data-theme="{{ app_theme }}" data-icon="bars" id="{{ app_name }}-menu-button" href="#splash-panel">Menu</a>
+			</div>
+		</div>
+	</div><!-- content -->
+
+	<script>
+		splash_page_bindings = function SplashPage() {
+			var _this = this
+			this.hide_content_elements = function() {
+				$('.ui-content').hide();
+			}
+			this.fade_in_content_elements = function() {
+				$('.ui-content').fadeIn();
+			}
+			this.push_status = function() {
+				app.push_status();
+			}
+			$(document).on("pageinit", '#{{ app_name }}-splash', function() { 
+				panel.init();
+			});
+			$(document).on("pagebeforeshow", '#{{ app_name }}-splash', function() {		
+				_this.hide_content_elements();
+				session.extend('app', 'current', '{{ app_name }}');
+			});
+			$(document).on("pageshow", '#{{ app_name }}-splash', function() {
+				_this.fade_in_content_elements();
+			});
+		}
+		app.bind_page('{{ app_name }}-splash', splash_page_bindings)
+	</script>
+
+</div>
+
+<div data-role="page" data-dom-chache="true" data-theme="a" id="about" class="{{ app_name }} splash-about">
+
+	
+	
+	<div data-role="content">
+	<div class="splash-spacer"></div>
+	<img src="/image/nci-logo-full.svg"></img>
+	<div class="app-legend">
+		<p id="app-legend-text">A web app developed at the</p>
+		<p><a rel="external" href="/ncicadd/about.html">NCI/CADD Group</a></p>
+		<p><a href="http://ccr.cancer.gov/labs/lab.asp?LabID=101">Chemical Biology Laboratory</a></p>
+		<p><a href="http://frederick.cancer.gov">Frederick National Laboratory for Cancer Research</a></p>
+		<p><a href="http://www.cancer.gov">National Cancer Institute</a></p>
+		<p><a href="http://www.nih.gov">National Institutes of Health</a></p>
+		<p id="app-legend-text">NCI/CADD Group 2013</p>
+	</div>
+	<div data-role="controlgroup" data-type="horizontal" data-inline="true">
+	<a data-role="button" data-theme="a" href="#{{ app_name }}-splash">Close</a>
+	</div>
+
+	</div>
+</div>
+
+
+{% endblock %}

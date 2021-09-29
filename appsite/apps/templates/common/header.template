@@ -1,0 +1,9 @@
+	<div data-role="header" data-theme="g" data-position="fixed" data-id="{{ app_name }}-header">
+		<a class="panel-button" data-role="button" data-theme="g" data-icon="bars" data-iconpos="notext" data-iconshadow="false" data-shadow="false" data-mini="true" data-inline="true">Menu</a>
+		<h1 class="app-string">{{ app_string }}</h1>
+		<div class="from-right history" data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+			<a class="history-back" data-role="button" data-theme="g" data-icon="arrow-l" data-iconpos="notext" data-mini="true"></a>
+			<a class="history-refresh" data-role="button" data-theme="g" data-icon="refresh" data-iconpos="notext" data-mini="true"></a>
+			<a class="history-forward" data-role="button" data-theme="g" data-icon="arrow-r" data-iconpos="notext" data-mini="true"></a>
+		</div>
+	</div>

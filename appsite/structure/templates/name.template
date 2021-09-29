@@ -1,0 +1,146 @@
+{% extends "service.html" %}
+
+{% block title %}NCI/CADD Name Search{% endblock %}
+
+{% block meta-keywords %}chemical name search{% endblock %}
+{% block meta-description %}Chemical Name Search{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="/js/prototype.js"></script>
+<script type="text/javascript" src="/js/scriptaculous.js"></script>
+{% endblock %}
+
+{% block header %}Chemical Name Search <i>alpha</i>{% endblock %}
+
+
+{% block ribbon %}
+
+	<form action="/chemical/structure/name" method="POST">
+	<div id="structure_name" class="Search">
+		{{ form }}
+	<input type="submit" value="Search">
+	</div>
+	</form>
+
+{% endblock %}
+	
+{% block content %}
+	
+	<div id="service_description">
+	
+	<div class="Headline">
+	<h2>How to search ...</h2>
+	</div>
+	<div class="Section">
+		<p class="runningText">
+		This service works like a Google-like search on our name index which currently holds approx. 70 million records. The service
+		regards a chemical name like "<span class="term">(p-Nitrobenzoyl)acetone</span>" internally as a sentence consisting of the 
+		three words "<span class="term">p</span>", "<span class="term">nitrobenzoyl</span>", and "<span class="term">acetone</span>".
+		The search for chemical names is perfomed by the <a href="http://sphinxsearch.com">Sphinx SQL full-text search engine</a>.
+		</p>
+	
+	
+		
+	<div class="Box">
+	<div class="Section">
+	</div>
+	<div class="Section">
+	<em>Examples</em>
+	</div>
+	<div class="Section">
+	<p class="runningText">Search for all names that contain the word "<span class="term">morphine</span>":</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name 'morphine' %}">morphine</a>
+	</div>
+	</div>
+
+
+	<div class="Section">
+	<p class="runningText">Search for all names that contain the words "<span class="term">morphine</span>" and "<span class="term">methyl</span>":</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name '+morphine +methyl' %}">+morphine +methyl</a>
+	</div>
+	</div>
+
+
+	<div class="Section">
+	<p class="runningText">Search for all names that contain the words "<span class="term">morphine</span>" and "<span class="term">methyl</span>" but not "<span class="term">ester</span>" :</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name '+morphine +methyl -ester' %}">+morphine +methyl -ester</a>
+	</div>
+	</div>
+
+
+	<div class="Section">
+	<p class="runningText">Search for all names that contain substring "<span class="term">morphine</span>" (as a word end):</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name '*morphine' %}">*morphine</a>
+	</div>
+	</div>
+
+	<div class="Section">
+	<p class="runningText">Search for all names that contain substring "<span class="term">morphine</span>" (somewhere) :</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name '*morphine*' %}">*morphine*</a>
+	</div>
+	</div>
+
+	<div class="Section">
+	<p class="runningText">Search for all names that contain substring "<span class="term">*morphine*</span>" and the literal string ' "<span class="term">3-methyl ether</span> "':</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name '+*morphine* +"3-methyl ether"' %}">+*morphine* +"3-methyl ether"</a>
+	</div>
+	</div>
+
+	<div class="Section">
+	<em>Fancy things</em>
+	</div>
+	
+	<div class="Section">
+	<p class="runningText">Search for all names that contain the word - or like in this example - a single character "<span class="term">m</span>" and the word "<span class="term">benzene</span>" in a maximum distance of 3 words (nice to find smaller aromatic ring systems):</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name '"m benzene"~3' %}">"m benzene"~3</a>
+	</div>
+	</div>
+
+	<div class="Section">
+	<p class="runningText">Search for all names that contain the words "<span class="term">magnesium</span>" or "<span class="term">sodium</span>" and the word "<span class="term">chloride</span>":</p>
+	<div class="Example_Box">
+		<a href="{% url chemical.structure.views.name '(magnesium|sodium) +chloride' %}">(magnesium|sodium) +chloride</a>
+	</div>
+	</div>
+
+	<div class="Section">
+	<em>Test the limits and the speed:</em>
+	</div>
+
+	<div class="Section">
+	<p class="runningText">Search for all names that contain the substring "<span class="term"> *ethyl* </span>"  (this covers all chemical names that contain "<span class="term"> ethyl </span>" and "<span class="term"> methyl </span>"):</p>
+	<div class="Example_Box">
+		<p><a href="{% url chemical.structure.views.name '*ethyl*' %}">*ethyl*</a> (it should take ~20sec, otherwise too many other people are testing it, too :-) )
+	</div>
+	</div>
+
+	<div class="Section">
+	<em>(Long) Chemical names</em>
+	</div>
+
+	<div class="Section">
+	<p class="runningText">If you want to search for "<span class="term">"[2-[[(1R)-1-(benzyl)-2-keto-propyl]amino]-2-keto-ethyl]-[4-(difluoromethoxy)benzyl]-methyl-ammonium"</span>" you have to search for it quoted:</p>
+	<div class="Example_Box">
+		<p><a href="{% url chemical.structure.views.name '"[2-[[(1R)-1-(benzyl)-2-keto-propyl]amino]-2-keto-ethyl]-[4-(difluoromethoxy)benzyl]-methyl-ammonium"' %}">"[2-[[(1R)-1-(benzyl)-2-keto-propyl]amino]-2-keto-ethyl]-[4-(difluoromethoxy)benzyl]-methyl-ammonium"</a>
+	</div>
+	<p class="runningText">and if you are uncertain about the correct spelling you might find it also by:</p>
+	<div class="Example_Box">
+		<p><a href="{% url chemical.structure.views.name '+benzyl +keto +propyl +amino +ethyl +difluoromethoxy +ammonium' %}">+benzyl +keto +propyl +amino +ethyl +difluoromethoxy +ammonium</a>
+	</div>
+	</div>
+	
+	</div>
+	</div>	
+
+
+{% endblock %}
+
+
+

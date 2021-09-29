@@ -1,0 +1,54 @@
+{% extends "base-service-m.html" %}
+
+{% block body_class %}{% endblock %}
+
+{% block title %}Apps{% endblock %}
+
+{% block header %}Apps{% endblock %}
+
+{% block pages %}
+<div data-role="page" id="summary" data-theme="f" data-dom-chache="true">
+	
+	<div data-role="header" data-theme="a" id="summary-header">
+		<a data-icon="home" data-iconpos="notext" data-prefetch data-transition="slide" data-direction="reverse" href="{%url "chemical.apps.views.home" %}">Chemical Apps Home</a>		
+		<h1></h1>
+		<a data-icon="gear" data-iconpos="notext"></a>		
+	</div>
+
+	
+	<div data-role="content">
+		
+		<label for="endpoint-category-choice" class="ui-hidden-accessible">Switch Endpoint Category:</label>
+		<select data-native-menu="false" name="endpoint-category-choice" data-theme="f" id="endpoint-category-choice">
+   			{% for category,rows in endpoints %}
+			<option value="{{ category.sign }}">{{ category.name }}</option>
+			{% endfor %}
+		</select>
+
+
+		{% for category,rows in endpoints %}
+		
+		<table data-role="table" data-mode="columntoggle" id="cap-model-table">
+		<thead>
+			<tr><td>ID</td><td>Name</td><td>Unit</td><td>Data Type</td><td>Model</td></tr>
+		</thead>
+		<tbody>
+		
+		{% for row in rows %}
+			<tr><td>{{ row.id }}</td><td>{{ row.name }}</td><td>{{ row.unit }}</td><td>{{ row.type }}</td><td>{{ row.model_name }}</td></tr>
+		{% endfor %}
+		
+		</tbody>
+		</table>
+		{% endfor %}
+	</div>
+
+</div>
+{% endblock %}
+
+
+
+
+
+
+

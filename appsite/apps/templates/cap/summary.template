@@ -1,0 +1,42 @@
+{% for g in response.group_list reversed %}
+
+	<li data-role="list-divider">{{ g.query }}<span class="ui-li-count">{{ g.item_list|length }}</span></li>		
+	{% for i in g.item_list %}
+		{% for d in i.data %}		
+		<li><a href="">
+			<div class="list-item-image">
+				<div class="doodle-widget" id="doodle-acs-{{ d.unique_key }}" molfile="{{ d.image }}">
+					<canvas height="220px" width="220px" id="canvas-doodle-acs-{{ d.unique_key }}"></canvas>	
+				</div>
+			</div>
+			<div class="list-item-data">
+				
+				<p>Resolved as {{ i.query_type }}</p>
+				<p><span>NCICADD:CID:</span>{{ d.compound.id }}</p>
+
+				<table class="bottom-table">
+					<tr><td><p>SMILES</p></td><td><p>{{ d.structure.smiles.string }}</p></td></tr>
+					<tr><td><p>Std. InChIKey</p></td><td><p>{% with d.structure.inchikey as inchi %}{{ inchi.key_block_1 }}-{{ inchi.key_block_2 }}-{{ inchi.key_block_3 }}{% endwith %}</p></td></tr>
+					<tr><td><p>MW</p></td><td><p>{{ d.structure.weight.value }}</p></td></tr>
+				</table>
+				
+				<table>
+				{% with d.prediction.results.activities as a %}
+					
+					{% for aa in a.activity %}
+							
+					<tr><td>Name</td><td>{{ aa.name }}</td></tr>
+					<tr><td>Prediction</td><td>{{ aa.prediction }}</td></tr>
+					<tr><td>AD</td><td>{{ aa.AD }}</td></tr>
+							
+					{% endfor %}
+		
+				{% endwith %}
+				</table>
+
+			</div>
+		</a></li>
+		{% endfor %}
+	{% endfor %}
+{%endfor %}
+

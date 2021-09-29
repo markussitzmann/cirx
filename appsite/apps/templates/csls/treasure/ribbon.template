@@ -1,0 +1,45 @@
+<div id="button-bar">
+<div id="button-bar-left">
+<ul>
+	<li><button id="home-button">Home</button></li>
+	<!--<li><button id="file-view-button">View</button></li>-->
+	<li>{{ chemical_string_form.string }}<button id="structure-lookup-button">Lookup</button><button id="structure-editor-button">Editor</button></li>
+	<li>
+		<div id="file-buttonset">
+			<button id="upload-button" rel="#upload-widget" type="button">Upload</button>
+			<button id="files-button" rel="#files-widget" type="button">Files</button>
+			<button id="download-button" rel="#download-widget" type="button">Download</button>
+		</div>
+	</li>
+</ul>
+</div>
+
+<div id="button-bar-right">
+<ul>
+	<li><input type="checkbox" id="structure-list-order" name="structure-list-order" /><label for="structure-list-order">Last Record First</label></li>
+	<!--<li>
+		<div id="mode" title="sdgdsgdsG">
+		<input type="radio" id="new-mode-radio" name="mode-radio" value="new"/><label for="new-mode-radio">New</label>
+		<input type="radio" id="add-mode-radio" name="mode-radio" value="add" checked="checked"/><label for="add-mode-radio">Add</label>
+		</div>
+	</li>-->
+</ul>
+</div>
+</div>
+
+
+<!--
+<div id="file-view-menu">
+	<div id="file-list-button">
+	{% for file in user_file_list reversed %}
+		<div class="menu-line">
+		{% ifequal file user_file %}
+		<a href="{{ base_url }}/{{ file.key.upload }}"><strong>{{ file.name }}</strong> ({{ file.records }} records)</a>
+		{% else %}
+		<a href="{{ base_url }}/{{ file.key.upload }}"><strong>{{ file.name }}</strong> ({{ file.records }} records)</a>
+		{% endifequal %}
+		</div>
+	{% endfor %}
+	</div>
+</div>
+-->

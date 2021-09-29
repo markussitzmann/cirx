@@ -1,0 +1,81 @@
+{% extends "base-service.html" %}
+
+{% block title %}CSDB Viewer - Files{% endblock %}
+
+{% block header %}CSDB Viewer - Files alpha{% endblock %}
+
+
+{% block document-ready-script %}
+
+$('#ribbon-home-button')
+	.button({text: false, icons: {primary: "ui-icon-home"}})
+	.click(function() {
+		window.location = '{% url "chemical.apps.views.csdb_files" %}';
+	})
+$('#ribbon-buttonset').buttonset();
+$('#previous-file-button')
+	.button({text: true, icons: {primary: "ui-icon-triangle-1-w"}})
+	{% if previous %}
+		.click(
+			function() {
+				window.location = '{% url "chemical.apps.views.csdb_file" previous.id %}';
+			});
+	{% else %}
+		.attr("disabled", true)
+	{% endif %}
+
+$('#next-file-button')
+	.button({text: true, icons: {primary: "ui-icon-triangle-1-e"}})
+	{% if next %}
+		.click(
+			function() {
+				window.location = '{% url "chemical.apps.views.csdb_file" next.id %}';
+			});
+	{% else %}
+		.attr("disabled", true)
+	{% endif %}
+
+{% endblock %}
+
+
+{% block ribbon %}
+<div id="button-bar">
+	<div id="button-bar-left">
+	<ul>
+		<li><button id="ribbon-home-button">Home</button></li>
+		<li>
+			<div id="ribbon-buttonset">
+				<button id="previous-file-button" type="button">Previous</button>
+				<button id="next-file-button" type="button">Next</button>
+			</div>
+		</li>
+	</ul>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block content %}
+<h2>{{ file.name }}</h2>
+
+<table>
+	<tr><th>Size:</th><td>{{ file.metadata.count }}</td></tr>
+	<tr><th>Added:</th><td>{{ file.added|date:"Y-M-d h:m:s" }}</td></tr>
+	<tr><th>Blocked:</th><td>{{ file.blocked|date:"Y-M-d h:m:s" }}</td></tr>
+</table>
+
+<table>
+	<tr><th>Field</th><th>Cactvs Property</th><tr>
+{% for field in file.fields %}
+	<tr><td>{{ field.name }}</td><td>{{ field.cactvs_property.name }}</td></tr>
+{% endfor %}
+</table>
+
+{% endblock %}
+
+
+
+
+
+
+

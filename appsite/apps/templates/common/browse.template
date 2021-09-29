@@ -1,0 +1,212 @@
+{% extends "base-service-m.html" %}
+{% load beautify %}
+
+{% block body_class %}{% endblock %}
+
+{% block title %}Browse Data{% endblock %}
+
+{% block header %}Browse Data{% endblock %}
+
+{% block pages %}
+<div data-role="page" data-theme="f" id="{{ app_name }}-browse-page-{{ page }}" class="browse {{ app_name }}">
+	
+	{% include 'common/header.template' %}
+
+	<div class="primary-panel" data-role="panel" id="browse-panel" data-display="overlay" data-position="left" data-theme="g">
+		<h3>NCI/CADD Apps</h3>
+		<ul data-role="listview" data-theme="g" data-dividertheme="g">
+			<li data-icon="plus"><a href="{% url "chemical.apps.views.edit_structures" 'add' 'structure' %}"><h4>Add/Edit Structures</h4></a></li>
+			<li><a href="{% url "chemical.apps.views.cap_manual" 'config' %}"><h4>Settings</h4></a></li>
+			<li data-icon="home"><a href="{% url "chemical.apps.views.splash" app_name %}"><h4>Home</h4></a></li>
+			<li data-icon="grid"><a data-transition="slide" data-direction="reverse" href="{% url "chemical.apps.views.home" %}"><h4>Switch App</h4></a></li>
+		</ul>
+		{% if app_name == 'cap' %}
+		<h3>Chemical Activity Predictor</h3>
+		<ul data-role="listview" data-theme="g" data-dividertheme="g">
+			<li><a href="{% url "chemical.apps.views.cap_manual" 'categories' %}"><h4>Categories</h4></a></li>
+			<li><a href="{% url "chemical.apps.views.cap_manual" 'models' %}"><h4>Models</h4></a></li>
+			<li><a href="{% url "chemical.apps.views.cap_manual" 'endpoints' %}"><h4>Endpoints</h4></a></li>
+		</ul>
+		{% endif %}
+    </div>
+
+	<div data-role="panel" id="browse-page-panel" data-display="reveal" data-position="left" data-theme="g" data-position-fixed="true">
+		{% if page != 'empty' %}
+		<h3>Pages</h3>
+		<ul data-role="listview" data-theme="g">
+		{% for p in response.page_list %}
+		{% if p != page %}
+			<li data-theme="g"><a href="{% url "chemical.apps.views.browse" p %}"><h4>Page {{ p }}</h4></a></li>
+		{% else %}
+			<li data-theme="o"><h4>Page {{ p }}</h4></li>
+		{% endif %}
+		{% endfor %}
+		{% endif %}
+        </ul>
+	</div>
+
+	<div data-role="content" data-theme="m">
+
+		{% if page != 'empty' %}
+		{% if response.response_with_timestamp.as_list|length > 0 %}
+		<div class="h1-border">
+		<h1>Browse Structures</h1>
+		<p>
+			{% if response.page_num > 1 %}
+			<span><a href="#browse-page-panel">Page {{ page }} of {{ response.page_num }}</a></span>
+			{% endif %}
+			{% if response.page_num > 1 %}
+				{% if response.response.item_list|length > 1 %}
+				<span>|</span>
+				{% endif %}
+			{% endif %}
+			{% if response.response_with_timestamp.as_list|length > 1 %}
+			<span>{{ response.response_with_timestamp.as_list|length }} of {{ response.response.item_list|length }} Structures</span>
+			{% else %}
+			<span>1 Structure</span>
+			{% endif %}
+		</p>
+		</div>
+		{% else %}
+		<div class="h1-border">
+		<h1>No Structures</h1>
+		<p>Please add structures:</p>
+		<div data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+			<a data-role="button" data-icon="plus" data-mini="true" data-theme="c" href="{% url "chemical.apps.views.edit_structures" 'add' 'structure' %}">Add Structures</a>
+		</div>
+		</div>
+		{% endif %}
+
+		<div class="browser">
+		<ul data-role="listview" class="inset-list" id="browser-listview-{{ page }}" data-count-theme="m">
+		{% for i in response.response_with_timestamp.as_list %}
+		{% if i.item.index0 %}
+		<li data-role="list-divider" data-theme="f">
+			{{ i.group.query|beautify:"operator_string"|capfirst }} 
+			<span class="ui-li-count">{{ i.group.item_list|length }} Structure{{ i.group.item_list|pluralize }}</span>
+		</li>
+		{% else %}
+			{% if i.item_page_index = 1 %}
+			<li data-role="list-divider" data-theme="f">
+				<span>{{ i.group.query|beautify:"operator_string"|capfirst }} (continued)</span>
+				<span class="ui-li-count">{{ i.group.item_list|length }} Structure{{ i.group.item_list|pluralize }}</span>
+			</li>
+			{% endif %}
+		{% endif %}
+		<li data-theme="f" sort-index="{{ i.index }}">
+			<a href="{% url "chemical.apps.views.details" 'details' i.item.random_key %}">
+			{% comment %}<strong>qq {{ i.query_index }} | i0 {{ i.item.index0 }} | pp {{ i.item_page_index }} | {{ i.timestamp|timesince }} ago</strong>{% endcomment %}
+			<div class="column">
+				<div class="doodle-widget" id="doodle-{{ i.item.random_key }}" molfile="{{ i.item.media.sdf_hspecial }}">
+				<canvas height="140px" width="140px" id="detail-canvas-doodle-{{ i.item.random_key }}"></canvas>	
+				</div>
+			</div>
+			<div class="column">
+			<h2>{{ i.item.resolver_data.chemical_string_notation|capfirst }}</h2>
+			<p>"{{ i.query|beautify:"strip_operator_string" }}" resolved as {{ i.item.resolver_data.chemical_string_type|beautify:"chemical_string_type" }}</p>
+			</div>
+			<div class="column">
+			<p></p>
+			</div>
+			</a>
+		</li>
+		{% endfor %}
+		</ul>
+		</div>
+		{% else %}
+		<div class="h1-border">
+			<h1>No Structures</h1>
+			<p>Please add structures:</p>
+			<div data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+				<a data-role="button" data-icon="plus" data-mini="true" data-theme="f" href="{% url "chemical.apps.views.edit_structures" 'add' 'structure' %}">Add Structures</a>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+
+	<div class="page-footer" data-role="footer" data-theme="m" data-position="fixed" data-id="{{ app_name }}-footer" data-tap-toggle="false">
+		
+		<div class="ui-bar footer-navigation navigation">
+			{% if response.response_with_timestamp.as_list|length > 0 %}
+			<div>
+				<div data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+				<a class="footer-nav-button" data-role="button" data-theme="f" data-icon="plus" data-inline="true" href="{% url "chemical.apps.views.edit_structures" 'add' 'structure' %}">Add Structures</a>
+				</div>
+			</div>
+			{% endif %}
+			
+			{% if response.page_num > 1 %}
+			<div>
+				<div id="page-switcher" data-role="controlgroup" data-type="horizontal" data-inline="true" data-mini="true">
+				{% if page_object.has_previous %}
+					<a data-role="button" data-theme="f" data-icon="arrow-l" data-iconpos="notext" href="{% url "chemical.apps.views.browse" page_object.previous_page_number %}"></a>
+				{% else %}
+					<a class="ui-disabled" data-role="button" data-theme="f" data-icon="arrow-l" data-iconpos="notext"></a>
+				{% endif %}
+				<a class="narrow-button" data-role="button" data-theme="f" href="#browse-page-panel">Page {{ page }}</a>
+				{% if page_object.has_next %}
+					<a data-role="button" data-theme="f" data-icon="arrow-r" data-iconpos="notext" href="{% url "chemical.apps.views.browse" page_object.next_page_number %}"></a>
+				{% else %}
+					<a class="ui-disabled" data-role="button" data-theme="f" data-icon="arrow-r" data-iconpos="notext"></a>
+				{% endif %}
+				</div>
+			</div>
+			{% endif %}
+
+			<div class="info-bar">
+				<div><span><a rel="external" href="/">{{ host }}</a></span><span>NCI/CADD Group 2013</span><span>Structure Images rendered by <a href="http://www.chemdoodle.com/">ChemDoodle</a></span></div>
+			</div>
+		</div>
+	</div>
+
+	{% if page != 'empty' %}
+	<script>
+		var browse_page_bindings = function BrowsePage() {
+			var _this = this;
+			this.page = {{ page }};
+			this.show_structures = function() {
+				$('#{{ app_name }}-browse-page-{{ page }} .doodle-widget').each(function(index, object) {
+					molfile = $(object).attr('molfile');
+					id = $(object).attr('id');
+					$(object).append("<script>\
+						doodle_acs = new ChemDoodle.ViewerCanvas('detail-canvas-" + id + "', 140, 140);\
+						doodle_acs.specs.backgroundColor = undefined;\
+						doodle_acs_structure = ChemDoodle.readMOL('"+molfile+"', 1);\
+						doodle_acs_structure.scaleToAverageBondLength(20);\
+						doodle_acs.loadMolecule(doodle_acs_structure);\
+					<\/script>");
+				})
+				return this;
+			}
+			this.init_page_selector = function(page) {
+				$('#{{ app_name }}-browse-page-' + page + ':not(.change-bound-' + page +')').addClass('change-bound-' + page).on('change', function(event, ui) {
+					var new_page_number = $('#{{ app_name }}-browse-page-selector-' + page).val();
+ 					var new_page_url = '{{ apps_base_url }}/browse/' + new_page_number;
+					$.mobile.changePage(new_page_url, {
+						transition: 'fade',
+					});
+				});
+				return this;
+			}
+			this.refresh_page_selector = function(page) {
+				$('#{{ app_name }}-browse-page-selector-{{ page }}').val(_this.page).selectmenu('refresh');
+				return this;
+			}
+			$(document).on("pageinit", '#{{ app_name }}-browse-page-{{ page }}', function (event){ 
+				panel.init();
+				history_button.init();
+				_this.init_page_selector({{ page }})
+			});
+			$(document).on("pagebeforeshow", '#{{ app_name }}-browse-page-{{ page }}', function(event) {
+				_this.refresh_page_selector({{ page }});
+			});
+			$(document).on("pageshow", '#{{ app_name }}-browse-page-{{ page }}', function(event) {
+				_this.show_structures();
+			});
+		}
+		app.bind_page('{{ app_name }}-browse-page-{{ page }}', browse_page_bindings);
+	</script>
+	{% endif %}
+
+</div>
+{% endblock %}

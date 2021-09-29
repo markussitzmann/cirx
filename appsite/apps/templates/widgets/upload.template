@@ -1,0 +1,65 @@
+<div class="overlay" id="upload-widget">
+
+	<div class="close"></div>
+	
+	<form id="upload-file-form" action="" enctype="multipart/form-data" method="POST">
+	
+	<div class="content">
+	
+		<h1>Upload or Create a File</h1>
+	
+		<div class="column left-column">
+			
+			<h2>Upload File</h2>
+			<div class="section">
+			<p>
+			Upload a molecular structure file (SDF, Molfile, SMILES, ChemDraw, Marvin Sketch, PDB, etc.)
+			</p>
+			<div class="subsection">
+			<span id="file_input_span">{{ file_form.file }}</span>
+			</div>
+			<button id="upload-file-clear-button">Clear</button>
+			</div>
+			
+			<h2>Create a File</h2>
+			<div class="section">
+			<p>
+			Create a file by pasteing a list of chemical names, SMILES, database IDs, structure identifiers 
+			(Std. InChI/InChIKey, NCICADD Structure Identifier)
+			</p>
+			<div class="subsection">
+			{{ file_form.string }}
+			</div>
+			<button id="create-file-clear-button">Clear</button>
+			</div>
+				
+		</div>
+		
+		<div class="column right-column">
+			
+			<h2>File Stats</h2>
+			<div class="section">
+			<div class="subsection">
+				<div id="progressbar"></div><div><span>Upload Progress: </span><strong id="percentage">0%</strong></div>
+			</div>
+			<div id="file-processing">
+				<div class="sub-header">Processing file ... <span class="process-image"><img src="/image/load.gif" /></span></div>
+				<div id="status-pane"></div>
+				</div>
+			</div>	
+
+		</div>	
+		
+	</div>
+	
+	</form>	
+
+	<div class="button-bar">
+		<button id="upload-widget-submit-button" type="submit" value="Submit">Submit</button>
+		<button id="upload-widget-close-button" class="close">Close</button>
+		<span class="ui-state-error ui-corner-all" id="upload-widget-warning-pane">This is a warning</span>
+	</div>
+	
+</div>
+
+

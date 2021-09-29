@@ -1,0 +1,39 @@
+{% extends "service.html" %}
+
+{% block title %}NCI/CADD Chemical Identifier Resolver{% endblock %}
+
+{% block meta-keywords %}chemical identifier, resolver, InChI, InChIKey, SMILES, GIF, database, chemical names, inchikey resolver, InChIKey resolver{% endblock %}
+{% block meta-description %}Chemical Identifier Resolver{% endblock %}
+
+{% block script %}
+<!-- <script type="text/javascript" src="/js/chemwriter.js"></script> -->
+<!-- <link rel="stylesheet" href="/style/chemwriter.css" type="text/css" media="screen,projection" /> -->
+<script type="text/javascript" src="http://chemwriter.com/sdk/chemwriter.js" data-chemwriter-license="https://fr-s-ccr-cactusweb-d.ncifcrf.gov/license/cactus.nci.nih.gov.lic"></script>
+<link rel="stylesheet" href="http://chemwriter.com/sdk/chemwriter.css" type="text/css" media="screen,projection" />
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/js/jquery.base64.min.js"></script>
+
+{% endblock %}
+
+{% block header %}Chemical Identifier Resolver <i>beta 3</i>{% endblock %}
+
+{% block ribbon %}
+{% endblock %}
+	
+{% block content %}
+{% include 'structure_form.template' %}
+{% include 'editor_chemwriter.template' %}
+{% endblock %}
+
+{% block footer %}
+
+	<div id="navigation_container" class="Navigation"><p><a id="getting_started_link" href="/chemical/structure">Getting started ...</a> | <a id="doc_link" href="/chemical/structure/documentation">Documentation</a> | <a href="/blog">Blog</a> | <a href="/ncicadd/contact.html">Contact</a> | <a href="/ncicadd/disclaimer.html">Disclaimer</a> | <a href="/ncicadd/privacy.html">Privacy Statement</a></p></div>
+	<p>Markus Sitzmann (sitzmann+++helix.nih.gov)</p>
+	<p>NCI/CADD Group 2009-{% now "Y" %}</p>
+	<p>{% now "jS F Y H:i" %}</p>
+
+{% endblock %}
+
+
