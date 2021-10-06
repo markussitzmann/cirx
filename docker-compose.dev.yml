@@ -9,7 +9,7 @@ services:
       - ${APP_HOME}:/home/app
       - ${APP_HOME}/nginx:/home/nginx
     ports:
-      - ${APP_CONNECTION_PORT}:80
+      - "8123:8000"
     networks:
       - app_network
     environment:
@@ -28,9 +28,8 @@ services:
       - LETSENCRYPT_TEST
     depends_on:
       - postgres
-    entrypoint: [ "/home/app/docker-entrypoint.sh" ]
-    command: [ "/home/nginx/run.sh" ]
-
+    entrypoint: [ ]
+    command: python /home/app/appsite/manage.py runserver 0.0.0.0:8000
 
   postgres:
     image: postgres:latest

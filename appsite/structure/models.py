@@ -367,7 +367,6 @@ class AccessHost(models.Model):
 	force_block = models.IntegerField()
 	organization = models.ManyToManyField('AccessOrganization', through='AccessHostOrganization')
 
-
 	class Meta:
 		db_table = u'chemical_structure_access_host'
 
