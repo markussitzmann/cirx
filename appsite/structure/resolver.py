@@ -2,7 +2,7 @@ import sys
 import re
 # from sets import Set
 
-import urllib2
+import urllib.request
 import urllib
 
 from models import *
@@ -16,8 +16,6 @@ import file.sdf
 import smiles, minimol, formula, packstring
 
 from external.resolver import ExternalResolver
-
-# ExternalResolver.connector_dir = '/work3/sitzmann/projects/django/trunk/chemical/structure/external/'
 
 try:
     from jpype import *

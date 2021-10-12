@@ -28,7 +28,7 @@ services:
       - LETSENCRYPT_TEST
     depends_on:
       - postgres
-    entrypoint: [ ]
+    entrypoint: [ "/home/app/docker-entrypoint.sh" ]
     command: python /home/app/appsite/manage.py runserver 0.0.0.0:8000
 
   postgres:
