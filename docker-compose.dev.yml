@@ -28,7 +28,7 @@ services:
       - LETSENCRYPT_TEST
     depends_on:
       - postgres
-    entrypoint: [ "/home/app/docker-entrypoint.sh" ]
+    entrypoint: [ "/home/app/docker-entrypoint.dev.sh" ]
     command: python /home/app/appsite/manage.py runserver 0.0.0.0:8000
 
   postgres:
@@ -38,6 +38,8 @@ services:
       - postgres_db_volume:/var/lib/postgresql
     #  - ${APP_HOME}/postgres-init.d:/docker-entrypoint-initdb.d
     #restart: always
+    ports:
+      - "5432:5432"
     networks:
       - app_network
     environment:

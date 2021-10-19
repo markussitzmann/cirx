@@ -185,7 +185,7 @@ class Key:
             self.prefix = identifier["prefix"]
             self.layer1 = identifier["layer1"]
             self.key = key
-            self.well_formatted_no_prefix = '%s' % (prefix, self.layer1)
+            self.well_formatted_no_prefix = '%s-%s' % (prefix, self.layer1)
             self.well_formatted = '%s%s' % (prefix, self.layer1)
             self.html_formatted = self.well_formatted.replace('-', '-<wbr>')
             return True
@@ -199,7 +199,7 @@ class Key:
             self.layer1 = identifier["layer1"]
             self.layer2 = identifier["layer2"]
             self.key = key
-            self.well_formatted_no_prefix = '%s-%s' % (prefix, self.layer1, self.layer2)
+            self.well_formatted_no_prefix = '%s-%s-%s' % (prefix, self.layer1, self.layer2)
             self.well_formatted = '%s%s-%s' % (prefix, self.layer1, self.layer2)
             self.html_formatted = self.well_formatted.replace('-', '-<wbr>')
             return True

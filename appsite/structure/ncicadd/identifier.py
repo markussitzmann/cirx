@@ -134,7 +134,7 @@ class Identifier:
         self.integer = None
 
     def _test_type(self, type):
-        pattern = re.compile('(?P<type>FICTS|FICuS|FICTU|FICUU|Parent|uuuTS|uuuuS|uuuTu|uuuuu|Parent)$', re.IGNORECASE)
+        pattern = re.compile('(?P<type>FICTS|FICuS|FICTU|FICUU|Parent|uuuTS|uuuuS|uuuTu|uuuuu)$', re.IGNORECASE)
         match = pattern.search(str(type))
         if match:
             self.type = type.upper().replace("U", "u")

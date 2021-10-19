@@ -14,5 +14,5 @@ mkdir -p /home/app/logging
 
 chown -R app.app /home/app
 
-exec "$@"
-
+#exec "$@"
+gosu app "$@"

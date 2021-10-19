@@ -2,4 +2,4 @@ requests
 django
 djangorestframework
 django-extensions
-django-dbbackup>=3
+#django-dbbackup>=3

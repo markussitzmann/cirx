@@ -159,7 +159,6 @@ class Organization(models.Model):
         db_table = 'cir_database_organization'
         #db_table = u'`chemical_database`.`organization`'
 
-
     def __str__(self):
         return self.name
 

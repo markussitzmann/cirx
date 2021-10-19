@@ -1,6 +1,9 @@
+from django.db import models
+
 import json
 
-from database.models import *
+from database.models import Database, Release, DatabaseDataCache
+
 from structure.inchi import identifier as inchi
 from structure.ncicadd import identifier as ncicadd
 
