@@ -17,7 +17,7 @@ from structure.ncicadd import identifier as ncicadd
 
 class Structure(models.Model):
     id = models.IntegerField(primary_key=True)
-    hashisy = models.IntegerField(unique=True)
+    hashisy = models.BigIntegerField(unique=True)
     minimol = models.TextField(max_length=1500)
     names = models.ManyToManyField('Name', through='StructureName', related_name="structure")
     standard_inchis = models.ManyToManyField('StandardInChI',

@@ -1,6 +1,7 @@
 import logging
 
 from django.test import TestCase, SimpleTestCase
+
 from pycactvs import Ens
 from resolver import ChemicalStructure
 

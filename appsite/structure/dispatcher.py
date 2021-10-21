@@ -1,8 +1,11 @@
+from pycactvs import Ens, Dataset
+
 from django.core.files import File
 from django.core.paginator import Paginator
 from django.http import HttpRequest, QueryDict
 
-from resolver import *
+from structure.models import ResponseType, NameType, NameCache
+from structure.resolver import ChemicalString
 
 
 # if settings.TEST:
@@ -96,7 +99,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -175,7 +178,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -227,7 +230,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -277,7 +280,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -327,7 +330,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -376,7 +379,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -427,7 +430,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -477,7 +480,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -520,7 +523,7 @@ class URLmethod:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -563,7 +566,7 @@ class URLmethod:
         if resolver_list:
             resolver_list = resolver_list.split(',')
 
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -576,9 +579,9 @@ class URLmethod:
                     if hasattr(structure, 'ens'):
                         ens = structure.ens
                     else:
-                        ens = Ens(cactvs, structure.object.minimol)
+                        ens = Ens(structure.object.minimol)
                     # dataset is used to have the same object as below for the plain text output
-                    dataset = Dataset(cactvs, enslist=[ens, ])
+                    dataset = Dataset([ens, ])
                     if base_mime_type == 'text':
                         response_list = dataset.get(propname, parameters=parameters, new=True)
                     elif base_mime_type == 'image':
@@ -620,7 +623,7 @@ class URLmethod:
                     paginator = Paginator(ens_list, page_size)
                     ens_list = paginator.page(page).object_list
                 # dummy
-            dataset = Dataset(cactvs, enslist=ens_list)
+            dataset = Dataset(ens_list)
             if base_mime_type == 'text':
                 self.mime_type = "text/plain"
                 response_list = dataset.get(propname, parameters=parameters, new=True)
@@ -657,14 +660,14 @@ class URLmethod:
         resolver_list = parameters.get('resolver', None)
         structure_index = parameters.get('structure_index', None)
         response_index = parameters.get('index', None)
-        filter = parameters.get('filter', None)
-        if filter:
-            filter = filter.lower()
+        filter_parameter = parameters.get('filter', None)
+        if filter_parameter:
+            filter_parameter = filter_parameter.lower()
         mode = parameters.get('mode', 'simple')
         parameters = self.url_parameters
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -679,7 +682,7 @@ class URLmethod:
                 for key, value in name_sets.items():
                     key_string = classification_strings.filter(id=key)[0].string.lower()
                     for n in list(value):
-                        if filter and not filter == key_string.lower():
+                        if filter_parameter and not filter_parameter == key_string.lower():
                             continue
                         names.append({'class': key_string, 'name': n.name})
                 names_list.append(names)
@@ -702,8 +705,8 @@ class URLmethod:
             response_list = []
             for names in names_list:
                 for n in names:
-                    if filter:
-                        if not n['class'] == str(filter):
+                    if filter_parameter:
+                        if not n['class'] == str(filter_parameter):
                             continue
                     response_list.append(str(n['name']))
             self.mime_type = "text/plain"
@@ -713,61 +716,61 @@ class URLmethod:
                 self.response_list = [self.response_list[i], ]
         return representation_list
 
-    def chemspider_id(self, string):
-        # cactvs = self.cactvs
-        base_mime_type = self.base_mime_type
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
-        response_index = parameters.get('index', None)
-        mode = parameters.get('mode', 'simple')
-        parameters = self.url_parameters
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, cactvs=cactvs).interpretations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        for interpretation in interpretations:
-            chemspider_id_list = []
-            chemspider = ExternalResolver(name="chemspider",
-                                          url_scheme="http://www.chemspider.com/inchi-resolver/REST.ashx?q=%s\&of=%s")
-            for structure in interpretation.structures:
-                ens = structure.ens
-                smiles = ens.get('smiles').replace('#', '%23')
-                response = chemspider.resolve(smiles, 'csid')
-                if response['status'] and response['string']:
-                    chemspider_id_raw_list = self._unique(response['string'].split())
-                    for chemspider_id in chemspider_id_raw_list:
-                        chemspider_id_list.append(chemspider_id)
-                else:
-                    continue
-                for chemspider_id in chemspider_id_raw_list:
-                    if self.output_format == 'xml':
-                        representation = {
-                            'base_mime_type': self.base_mime_type,
-                            'id': interpretation.id,
-                            'string': string,
-                            'structure': structure,
-                            'response': [chemspider_id, ],
-                            'resolver': structure.metadata['query_type'],
-                            'index': index,
-                            'description': structure.metadata['description']
-                        }
-                        representation_list.append(representation)
-                        index += 1
-        # end of interpretation loop
-        if self.output_format == 'plain':
-            if structure_index:
-                i = int(structure_index)
-                chemspider_id_list = [chemspider_id_list[i], ]
-            self.mime_type = "text/plain"
-            self.response_list = self._unique(chemspider_id_list)
-            if response_index:
-                i = int(response_index)
-                self.response_list = [self.response_list[i], ]
-        return representation_list
+    # def chemspider_id(self, string):
+    #     # cactvs = self.cactvs
+    #     base_mime_type = self.base_mime_type
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     structure_index = parameters.get('structure_index', None)
+    #     response_index = parameters.get('index', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     parameters = self.url_parameters
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     for interpretation in interpretations:
+    #         chemspider_id_list = []
+    #         chemspider = ExternalResolver(name="chemspider",
+    #                                       url_scheme="http://www.chemspider.com/inchi-resolver/REST.ashx?q=%s\&of=%s")
+    #         for structure in interpretation.structures:
+    #             ens = structure.ens
+    #             smiles = ens.get('smiles').replace('#', '%23')
+    #             response = chemspider.resolve(smiles, 'csid')
+    #             if response['status'] and response['string']:
+    #                 chemspider_id_raw_list = self._unique(response['string'].split())
+    #                 for chemspider_id in chemspider_id_raw_list:
+    #                     chemspider_id_list.append(chemspider_id)
+    #             else:
+    #                 continue
+    #             for chemspider_id in chemspider_id_raw_list:
+    #                 if self.output_format == 'xml':
+    #                     representation = {
+    #                         'base_mime_type': self.base_mime_type,
+    #                         'id': interpretation.id,
+    #                         'string': string,
+    #                         'structure': structure,
+    #                         'response': [chemspider_id, ],
+    #                         'resolver': structure.metadata['query_type'],
+    #                         'index': index,
+    #                         'description': structure.metadata['description']
+    #                     }
+    #                     representation_list.append(representation)
+    #                     index += 1
+    #     # end of interpretation loop
+    #     if self.output_format == 'plain':
+    #         if structure_index:
+    #             i = int(structure_index)
+    #             chemspider_id_list = [chemspider_id_list[i], ]
+    #         self.mime_type = "text/plain"
+    #         self.response_list = self._unique(chemspider_id_list)
+    #         if response_index:
+    #             i = int(response_index)
+    #             self.response_list = [self.response_list[i], ]
+    #     return representation_list
 
     def twirl(self, string):
         url_parameters = self.url_parameters.copy()

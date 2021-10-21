@@ -6,13 +6,21 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.db import NotSupportedError
 from pycactvs import Ens
 
-import cas.number
-import file.sdf
-import inchi.identifier
-import minimol
-import ncicadd.identifier
-import packstring
-import smiles
+from structure.cas.number import String as CasNumber
+from structure.inchi.identifier import String as InChI
+from structure.inchi.identifier import Key as InChIKey
+from structure.minimol import Minimol
+from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
+from structure.packstring import PackString
+from structure.smiles import SMILES
+
+
+#import cas.number
+#import file.sdf
+#import inchi.identifier
+#import ncicadd.identifier
+#import packstring
+#import smiles
 
 from database.models import Database
 from structure.models import Structure, Record, Compound, StandardInChI, Name, StructureName
@@ -82,11 +90,11 @@ class ChemicalStructure:
         #     self.cactvs = settings.CACTVS
         if resolved and not ens:
             ens = Ens(resolved.minimol)
-            hashisy = ncicadd.identifier.Identifier(hashcode=ens.get('E_HASHISY')).integer
+            hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.ens = ens
             self.hashisy = hashisy
         elif ens and not resolved:
-            hashisy = ncicadd.identifier.Identifier(hashcode=ens.get('E_HASHISY')).integer
+            hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.hashisy = hashisy
             try:
                 self.resolved = Structure.objects.get(hashisy=hashisy)
@@ -94,7 +102,7 @@ class ChemicalStructure:
                 self.resolved = Structure(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
         elif ens and resolved:
             h1 = resolved.hashisy
-            h2 = ncicadd.identifier.Identifier(hashcode=ens['hashisy']).integer
+            h2 = Identifier(hashcode=ens['hashisy']).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')
 
@@ -147,7 +155,7 @@ class ChemicalString:
         def __repr__(self):
             return "<< %s (number of structures: %s) >>" % (self.type, self.structures)
 
-    def __init__(self, string: str, operator=None, resolver_list=None, operator_list=None, debug=False):
+    def __init__(self, string, operator=None, resolver_list=None, operator_list=None, debug=False):
         # self.cactvs = settings.CACTVS.client_is_up(return_instance=True)
         # if not cactvs:
         #	self.cactvs = Cactvs()
@@ -262,7 +270,7 @@ class ChemicalString:
         return False
 
     def _resolver_ncicadd_rid(self, interpretation_object):
-        record_id = ncicadd.identifier.RecordID(string=self.string)
+        record_id = RecordID(string=self.string)
         record = Record.objects.get(id=record_id.rid)
         chemical_structure = ChemicalStructure(resolved=record.get_structure())
         if chemical_structure:
@@ -279,7 +287,7 @@ class ChemicalString:
         return False
 
     def _resolver_ncicadd_cid(self, interpretation_object):
-        compound_id = ncicadd.identifier.CompoundID(string=self.string)
+        compound_id = CompoundID(string=self.string)
         compound = Compound.objects.get(id=compound_id.cid)
         structure = compound.get_structure()
         chemical_structure = ChemicalStructure(resolved=structure)
@@ -316,7 +324,7 @@ class ChemicalString:
         return False
 
     def _resolver_ncicadd_identifier(self, interpretation_object):
-        identifier = ncicadd.identifier.Identifier(string=self.string)
+        identifier = Identifier(string=self.string)
         structure = Structure.objects.get(hashisy=identifier.integer)
         chemical_structure = ChemicalStructure(resolved=structure)
         if chemical_structure:
@@ -333,7 +341,7 @@ class ChemicalString:
         return False
 
     def _resolver_stdinchikey(self, interpretation_object):
-        identifier = inchi.identifier.Key(key=self.string)
+        identifier = InChIKey(key=self.string)
         # if not k.is_standard:
         #	return False
         inchikey_query = identifier.query()
@@ -342,7 +350,7 @@ class ChemicalString:
         description_list = []
         for inchikey in inchikeys:
             structures = inchikey.structure_set.all()
-            full_key = inchi.identifier.Key(
+            full_key = InChIKey(
                 layer1=inchikey.key_layer1,
                 layer2=inchikey.key_layer2,
                 layer3=inchikey.key_layer3,
@@ -365,7 +373,7 @@ class ChemicalString:
         return False
 
     def _resolver_stdinchi(self, interpretation_object):
-        identifier = inchi.identifier.String(string=self.string)
+        identifier = InChI(string=self.string)
         if identifier and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
             chemical_structure.metadata = {
@@ -697,7 +705,7 @@ class ChemicalString:
             match = pattern.search(self.string)
             if match:
                 return False
-            cas_number = cas.number.String(string=self.string)
+            cas_number = CasNumber(string=self.string)
             return False
         except:
             pass
@@ -739,7 +747,7 @@ class ChemicalString:
         return False
 
     def _resolver_smiles(self, interpretation_object):
-        smiles_string = smiles.SMILES(string=self.string, strict_testing=True)
+        smiles_string = SMILES(string=self.string, strict_testing=True)
         if smiles_string and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
             chemical_structure.metadata = {
@@ -753,21 +761,21 @@ class ChemicalString:
         return False
 
     def _resolver_minimol(self, interpretation_object):
-        minimol_string = minimol.Minimol(string=self.string)
+        minimol = Minimol(string=self.string)
         if minimol and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
             chemical_structure.metadata = {
                 'query_type': 'minimol',
                 'query_search_string': 'Cactvs minimol',
-                'query_object': minimol_string,
+                'query_object': minimol,
                 'query_string': self.string,
-                'description': minimol_string.string
+                'description': minimol.string
             }
             return True
         return False
 
     def _resolver_packstring(self, interpretation_object):
-        pack_string = packstring.PackString(string=self.string)
+        pack_string = PackString(string=self.string)
         if pack_string and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
             chemical_structure.metadata = {
@@ -818,14 +826,13 @@ class ChemicalString:
             interpretation_object.query_object = ens
             interpretation_object.ens = ens
             try:
-                hashcode = ncicadd.identifier.Identifier(hashcode=ens['hashisy'])
+                hashcode = Identifier(hashcode=ens['hashisy'])
                 try:
                     structure = Structure.objects.get(hashisy=hashcode.integer)
                     chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
                     interpretation_object.structures.append(chemical_structure)
                 except (Structure.DoesNotExist, RuntimeError):
-                    ficts = ncicadd.identifier.Identifier(
-                        hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
+                    ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
                     try:
                         structure = Structure.objects.get(hashisy=ficts.integer)
                         chemical_structure = ChemicalStructure(resolved=structure, ens=ens)

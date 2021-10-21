@@ -1,0 +1,277 @@
+
+<div id="editor-widget">
+	<div id="editor-widget-dialog" title="Structure Editor">
+		<div id="editor-box" style="height:400px;position:relative;">
+		</div>
+		<div id="editor-message-pane" style="z-index:501;position:absolute;color:white;background-color:black;left:200px;top:200px;margin:10px;">
+			<div style="padding:10px;width:200px">
+				<div style="float:right" id="progress-wheel"><img src="/image/ajax-wheel-white.gif" /></div>
+				<div style="padding-left:10px" id="progress-status"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--
+<script type="text/javascript" language="javascript" src="/js/jsme/jsme.nocache.js"></script>
+<script>
+    function jsmeOnLoad() {
+        loadJmeFile();
+        loadMolFile();    }
+</script>
+-->
+<script type="text/javascript">
+
+	function editor_message(string, interval) {
+		var editor_status_message = $('#editor-widget-dialog').find('#progress-status');
+		var editor_status_wheel = $('#editor-widget-dialog').find('#progress-wheel');
+		var editor_message_pane = $('#editor-message-pane');
+		if (string) {
+			editor_message_pane.show();
+			editor_status_message.text(string);
+			if (interval) {
+				setInterval(function() {
+					editor_status_message.text('');
+					editor_message_pane.hide();
+				}, interval);
+			}
+		} else {
+			editor_message_pane.hide();
+			editor_status_message.text('');
+		}
+	}
+
+	function prepare_jme(identifier) {
+
+//		jsmeApplet = new JSApplet.JSME("editor-box");
+
+//		editor_dialog_button_state('Done', 'disable');
+//		$('#editor-box').empty();
+//		var jme = '<div style="padding-left:45px"><applet name="JME" code="JME.class" archive="/editor/JME.jar" width=520 height=400><param name="options" value="hides nohydrogens autoez nocanonize norbutton"></param></applet></div>'
+//		if (identifier) {
+//			var url =  '/chemical/structure/' + encodeURI(identifier) + '/file?format=jme';
+//			$.ajax({
+//				url: url,
+//				beforeSend: function() {
+//					editor_message('loading structure');
+//				},
+//				success: function(data) {	
+//					$('#editor-box').show(0, function() {
+//						$('#editor-box').html(jme);
+//					});
+//					editor_message('');
+//					document.JME.readMolecule(data);
+//					editor_dialog_button_click('Done', finish_jme_cmd);
+//					editor_dialog_button_state('Done', 'enable');
+//				},
+//				error: function(data) {
+//					editor_message('sorry, structure identifier not resolvable!', 3000);
+//					$('#editor-box').show(0, function() {
+//						$('#editor-box').html(jme);
+//					});
+//					editor_dialog_button_click('Done', finish_jme_cmd);
+//					editor_dialog_button_state('Done', 'enable');
+//				}
+//			});
+//		} else {
+//			$('#editor-box').fadeIn(500);
+//			$('#editor-box').show(0, function() {
+//				$('#editor-box').html(jme);
+//			});
+//			editor_message('');
+//			editor_dialog_button_click('Done', finish_jme_cmd);
+//			editor_dialog_button_state('Done', 'enable');
+//		}
+		return false;
+	}
+
+	function prepare_chemwriter(identifier) {
+		editor_dialog_button_state('Done', 'disable');
+		$('#editor-box').empty();
+		var licensePath = '/license/fr-s-ccr-cactusweb-d.ncifcrf.gov'
+		if (identifier) {
+			//editor_message('loading structure');
+			var url =  '/chemical/structure/' + encodeURI(identifier) + '/file?format=sdf&operator=remove_hydrogens';
+			$.ajax({
+				url: url,
+				beforeSend: function() {
+					editor_message('loading structure');
+				},
+				success: function(data) {	
+					$('#editor-box').fadeIn(500);
+					editor_object = chemwriter.loadEditor(editor_box_id, {'molfile': data, 'licensePath': licensePath});
+					editor_message('');
+					editor_dialog_button_click('Done', finish_chemwriter_cmd);
+					editor_dialog_button_state('Done', 'enable');
+				},
+				error: function(data) {
+					$('#editor-box').fadeIn(500);
+					editor_object = chemwriter.loadEditor(editor_box_id, {'licensePath': licensePath});
+					editor_message('sorry, structure identifier not resolvable!', 3000);
+					editor_dialog_button_click('Done', finish_chemwriter_cmd);
+					editor_dialog_button_state('Done', 'enable');
+				}
+			});
+			editor_dialog_button_click('Done', finish_chemwriter_cmd);
+		} else {
+			$('#chemwriter-editor').fadeIn(500);
+			$('#editor-box').fadeIn(500);
+			editor_object = chemwriter.loadEditor(editor_box_id, {'licensePath': licensePath});
+			editor_message('');
+			editor_dialog_button_click('Done', finish_chemwriter_cmd);
+			editor_dialog_button_state('Done', 'enable');
+		}
+		return false;
+	}
+
+	function get_insert_element() {
+		insert_to_element_name = $('#editor-button-pane').attr('editor_for');
+		insert_to_element = $('#' + insert_to_element_name );
+		return insert_to_element;
+	}
+
+	var finish_chemwriter_cmd = function(insert_to_element) {
+		editor_dialog_button_state('Done', 'disable');
+		var molfile = editor_object.getMolfile();
+		if (!molfile) {return;}
+		molfile = molfile.replace(/\n/g, '\\n');
+		molfile = molfile + '$$$$\\n';
+		var url =  '/chemical/structure/' + encodeURI(molfile) + '/smiles?operator=add_hydrogens';
+		var to_element = get_insert_element()
+		$.ajax({
+			type: 'POST',
+			url: url,
+			beforeSend: function() {
+				editor_message('converting to SMILES');
+			},
+			success: function(data) {	
+				to_element.val(data);
+				$('#editor-widget-dialog').dialog('close', function() {
+					$('#editor-box').empty();
+				});
+			},
+			error: function(data) {
+				$('#editor-widget-dialog').dialog('close');
+			}
+		});
+	}
+
+	var finish_jme_cmd = function(insert_to_element) {
+		editor_dialog_button_state('Done', 'disable');
+		var smiles = document.JME.smiles();
+		var to_element = get_insert_element();
+		if (smiles) {
+			to_element.val(smiles);
+		} else {
+			to_element.val('');
+		}
+		$('#editor-widget-dialog').dialog('close');
+		$('#editor-box').empty();
+		return false;
+	}
+
+	function editor_dialog_button_click(button, cmd) {
+		$('#editor-widget-dialog ~ .ui-dialog-buttonpane .ui-dialog-buttonset')
+			.children("button:contains("+button+")").button().unbind('click');
+		$('#editor-widget-dialog ~ .ui-dialog-buttonpane .ui-dialog-buttonset')
+			.children("button:contains("+button+")").button().bind('click', cmd); 
+	}
+
+	function editor_dialog_button_state(button, state) {
+		switch (state) {
+			case 'enable': {
+				$('#editor-widget-dialog ~ .ui-dialog-buttonpane .ui-dialog-buttonset')
+					.children("button:contains("+button+")").button('enable'); 
+				break;
+			}
+			case 'disable': {
+				$('#editor-widget-dialog ~ .ui-dialog-buttonpane .ui-dialog-buttonset')
+					.children("button:contains("+button+")").button('disable');
+				break;
+			}
+		}
+	}
+
+	function show_editor(from_element) {
+		$('#editor-box').hide()
+		editor_dialog_button_state('Done', 'disable');
+		editor_dialog.dialog("open");
+		editor_message('initializing');
+		var identifier = from_element.val()
+		var editor_choice = $("input[name='editor-choice']:checked").val();
+		switch (editor_choice) {
+			case 'chemwriter': {prepare_chemwriter(identifier); break;}
+			case 'jme': {prepare_jme(identifier); break;}
+			default: {prepare_chemwriter(identifier); break;}
+		}
+	}
+
+	var editor_box_id = $('#editor-box').get(0).id;
+
+	var editor_dialog = $('#editor-widget-dialog').dialog({
+		autoOpen: false,
+		zindex: 500,
+		height: 550,
+		width: 640,
+		modal: true,
+		disabled: false,
+		show: 'fade',
+		hide: 'fade',
+		speed: 500,
+		resizable: false,
+		buttons: [
+			{
+				text: "Done"
+			}
+		]
+	});
+
+	$('#editor-button-pane').html('\
+		<div><button id="editor-button">Structure</button><button id="editor-select">Select</button></div>\
+		<ul style="padding:5px">\
+		<li style="padding:5px"><input type="radio" id="chemwriter-radio" name="editor-choice" value="chemwriter" checked="checked"/><label for="chemwriter-radio">ChemWriter</label></li>\
+		<li style="padding:5px"><input type="radio" id="jme-radio" name="editor-choice" value="jme"/><label for="jme-radio">JME</label></li>\
+		</ul>\
+	');
+
+	$(function() {
+		$( "#editor-button" )
+			.button()
+			.click(function() {
+				from_element_name = $('#editor-button-pane').attr('editor_for');
+				from_element = $('#' + from_element_name);
+				show_editor(from_element);
+				return false;
+		});
+		$( "#editor-select" )
+			.button({
+				text: false,
+				icons: {
+					primary: "ui-icon-triangle-1-s"
+				}
+			})
+			.click( function() {
+				var menu = $(this).parent().next().show().position({
+					my: "right top",
+					at: "right bottom",
+					of: this
+				});
+				$(document).one("click", function() {
+					menu.fadeOut('100');
+				});
+				return false;
+			})
+			.parent()
+				.buttonset()
+			.next()
+				.hide()
+				.menu();
+	});
+
+</script>
+
+<style>
+	.ui-menu { position: absolute; width: 160px; }
+</style>
+
+
