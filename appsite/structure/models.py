@@ -39,15 +39,14 @@ class Structure2(models.Model):
 
 
 
-
-class StructureCactvsHash(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    hashisy = CactvsHashField(unique=True)
-    minimol = models.BinaryField(null=True)
-    name = models.TextField(max_length=255)
-
-    class Meta:
-        db_table = 'cir_structure_hash'
+# class StructureCactvsHash(models.Model):
+#     #id = models.IntegerField(primary_key=True)
+#     hashisy = CactvsHashField(unique=True)
+#     minimol = models.BinaryField(null=True)
+#     name = models.TextField(max_length=255)
+#
+#     class Meta:
+#         db_table = 'cir_structure_hash'
 
 
 class Structure(models.Model):
