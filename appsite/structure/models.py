@@ -1,11 +1,16 @@
+from pycactvs import Ens
+
 from django.db import models
 
 import json
 
+from custom.cactvs import CactvsHash, CactvsMinimol
 from database.models import Database, Release, DatabaseDataCache
 
 from structure.inchi import identifier as inchi
 from structure.ncicadd import identifier as ncicadd
+
+from custom.fields import CactvsHashField, CactvsMinimolField
 
 
 # from django.utils import simplejson
@@ -13,6 +18,36 @@ from structure.ncicadd import identifier as ncicadd
 
 
 # import djangosphinx
+
+class Structure2Manager(models.Manager):
+    def createFromEns(self, ens: Ens):
+        structure = self.create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
+        return structure
+
+
+class Structure2(models.Model):
+    hashisy = CactvsHashField(unique=True)
+    minimol = CactvsMinimolField(null=False)
+
+    objects = Structure2Manager()
+
+    def to_ens(self):
+        return self.minimol.ens()
+
+    class Meta:
+        db_table = 'cir_structure_2'
+
+
+
+
+class StructureCactvsHash(models.Model):
+    #id = models.IntegerField(primary_key=True)
+    hashisy = CactvsHashField(unique=True)
+    minimol = models.BinaryField(null=True)
+    name = models.TextField(max_length=255)
+
+    class Meta:
+        db_table = 'cir_structure_hash'
 
 
 class Structure(models.Model):
