@@ -28,6 +28,8 @@ class Structure2Manager(models.Manager):
 class Structure2(models.Model):
     hashisy = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
+    names = models.ManyToManyField('Name', through='StructureName', related_name="structure")
+    standard_inchis = models.ManyToManyField('StandardInChI', through='StructureStandardInChI', related_name="structure_set")
 
     objects = Structure2Manager()
 
@@ -49,46 +51,46 @@ class Structure2(models.Model):
 #         db_table = 'cir_structure_hash'
 
 
-class Structure(models.Model):
-    id = models.IntegerField(primary_key=True)
-    hashisy = models.BigIntegerField(unique=True)
-    minimol = models.TextField(max_length=1500)
-    names = models.ManyToManyField('Name', through='StructureName', related_name="structure")
-    standard_inchis = models.ManyToManyField('StandardInChI',
-                                             through='StructureStandardInChI',
-                                             related_name="structure_set")
-
-    class Meta:
-        db_table = 'cir_structure'
-        #db_table = u'`chemical_structure`.`structure`'
-
-    def get_short_display_names(self, query=None):
-        structure_names = NameCache(self)
-        return_list = structure_names.get_display_list()
-        return return_list
-
-    def get_hashcode(self):
-        hashcode = ncicadd.Identifier(integer=self.hashisy)
-        return hashcode.hashcode
-
-    def get_standard_inchi(self):
-        inchi_string = inchi.String(string=self.standard_inchis.get().string)
-        return inchi_string
-
-    def get_standard_inchikey(self):
-        inchi_key = inchi.Key(
-            layer1=self.standard_inchis.get().key_layer1,
-            layer2=self.standard_inchis.get().key_layer2,
-            layer3=self.standard_inchis.get().key_layer3
-        )
-        return inchi_key
-
-    def __str__(self):
-        return 'NCICADD:SID=%s' % self.id
+# class Structure(models.Model):
+#     id = models.IntegerField(primary_key=True)
+#     hashisy = models.BigIntegerField(unique=True)
+#     minimol = models.TextField(max_length=1500)
+#     names = models.ManyToManyField('Name', through='StructureName', related_name="structure")
+#     standard_inchis = models.ManyToManyField('StandardInChI',
+#                                              through='StructureStandardInChI',
+#                                              related_name="structure_set")
+#
+#     class Meta:
+#         db_table = 'cir_structure'
+#         #db_table = u'`chemical_structure`.`structure`'
+#
+#     # def get_short_display_names(self, query=None):
+#     #     structure_names = NameCache(self)
+#     #     return_list = structure_names.get_display_list()
+#     #     return return_list
+#     #
+#     # def get_hashcode(self):
+#     #     hashcode = ncicadd.Identifier(integer=self.hashisy)
+#     #     return hashcode.hashcode
+#     #
+#     # def get_standard_inchi(self):
+#     #     inchi_string = inchi.String(string=self.standard_inchis.get().string)
+#     #     return inchi_string
+#     #
+#     # def get_standard_inchikey(self):
+#     #     inchi_key = inchi.Key(
+#     #         layer1=self.standard_inchis.get().key_layer1,
+#     #         layer2=self.standard_inchis.get().key_layer2,
+#     #         layer3=self.standard_inchis.get().key_layer3
+#     #     )
+#     #     return inchi_key
+#
+#     def __str__(self):
+#         return 'NCICADD:SID=%s' % self.id
 
 
 class StructureImage(models.Model):
-    id = models.IntegerField(primary_key=True)
+    #id = models.IntegerField(primary_key=True)
     hashisy = models.IntegerField(unique=True)
     small = models.TextField(max_length=65535)
     medium = models.TextField(max_length=65535)
@@ -100,7 +102,7 @@ class StructureImage(models.Model):
 
 
 class Formula(models.Model):
-    id = models.IntegerField(primary_key=True)
+    #id = models.IntegerField(primary_key=True)
     formula = models.CharField(max_length=50)
 
     class Meta:
@@ -109,7 +111,7 @@ class Formula(models.Model):
 
 
 class StandardInChI(models.Model):
-    id = models.IntegerField(primary_key=True)
+    #id = models.IntegerField(primary_key=True)
     version = models.IntegerField(db_column='version_id')
     key_layer1 = models.CharField(max_length=14, db_column='key_layer1')
     key_layer2 = models.CharField(max_length=10, db_column='key_layer2')
@@ -135,7 +137,7 @@ class StandardInChI(models.Model):
 
 
 class Name(models.Model):
-    id = models.IntegerField(primary_key=True)
+    #id = models.IntegerField(primary_key=True)
     name = models.TextField(max_length=1500, unique=True)
     #classification_list = None
 
@@ -173,25 +175,26 @@ class Name(models.Model):
 
 class StructureName(models.Model):
     name = models.ForeignKey('Name', on_delete=models.CASCADE)
-    structure = models.ForeignKey('Structure', on_delete=models.CASCADE)
-    name_type = models.ManyToManyField('NameType', through='StructureNameTypes', db_column='id')
+    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
+    name_type = models.ForeignKey('NameType', on_delete=models.CASCADE)
 
     class Meta:
+        unique_together = (('name', 'structure', 'name_type'),)
         db_table = 'cir_structure_names'
         #db_table = u'`chemical_name`.`structure_names`'
 
 
-class StructureNameTypes(models.Model):
-    structure_names = models.ForeignKey('StructureName', related_name='name_types', on_delete=models.CASCADE)
-    name_type = models.ForeignKey('NameType', on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'cir_structure_name_types'
-        #db_table = u'`chemical_name`.`structure_name_classification`'
+# class StructureNameTypes(models.Model):
+#     structure_name = models.ForeignKey('StructureName', related_name='name_types', on_delete=models.CASCADE)
+#     name_type = models.ForeignKey('NameType', on_delete=models.CASCADE)
+#
+#     class Meta:
+#         db_table = 'cir_structure_name_types'
+#         #db_table = u'`chemical_name`.`structure_name_classification`'
 
 
 class NameType(models.Model):
-    id = models.IntegerField(primary_key=True)
+    #id = models.IntegerField(primary_key=True)
     string = models.TextField(max_length=45, unique=True)
 
     class Meta:
@@ -200,7 +203,7 @@ class NameType(models.Model):
 
 
 class StructureStandardInChI(models.Model):
-    structure = models.ForeignKey('Structure', on_delete=models.CASCADE)
+    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
     standard_inchi = models.ForeignKey('StandardInChI', db_column='standard_inchi_id', on_delete=models.CASCADE)
 
     class Meta:
@@ -209,7 +212,7 @@ class StructureStandardInChI(models.Model):
 
 
 class Record(models.Model):
-    id = models.IntegerField(primary_key=True)
+    #id = models.IntegerField(primary_key=True)
     #cocoa_id = models.IntegerField(db_column="cocoa_structure_id")
     release = models.ForeignKey(Release, on_delete=models.CASCADE)
     database = models.ForeignKey(Database, on_delete=models.CASCADE)
@@ -233,8 +236,8 @@ class Record(models.Model):
 
 
 class Compound(models.Model):
-    id = models.IntegerField(primary_key=True)
-    structure = models.OneToOneField('Structure', related_name="compound", on_delete=models.CASCADE)
+    #id = models.IntegerField(primary_key=True)
+    structure = models.OneToOneField('Structure2', related_name="compound", on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'cir_compound'
@@ -326,7 +329,7 @@ class Compound(models.Model):
 
 
 class AssociationType(models.Model):
-    id = models.IntegerField(primary_key=True)
+    #id = models.IntegerField(primary_key=True)
     string = models.CharField(max_length=48)
     property = models.CharField(max_length=48)
     display_name = models.CharField(max_length=48)
@@ -348,7 +351,7 @@ class Association(models.Model):
 
 
 class Access(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     host = models.ForeignKey('AccessHost', on_delete=models.CASCADE)
     client = models.ForeignKey('AccessClient', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True, db_column="dateTime")
@@ -359,7 +362,7 @@ class Access(models.Model):
 
 
 class AccessClient(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     string = models.CharField(max_length=255, unique=True)
 
     class Meta:
@@ -368,7 +371,7 @@ class AccessClient(models.Model):
 
 
 class AccessHost(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     string = models.CharField(max_length=255, unique=True)
     blocked = models.IntegerField()
     lock_timestamp = models.DateTimeField(db_column="lock_time")
@@ -383,7 +386,7 @@ class AccessHost(models.Model):
 
 
 class AccessOrganization(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     string = models.CharField(max_length=255, unique=True)
 
     class Meta:
@@ -402,11 +405,11 @@ class AccessHostOrganization(models.Model):
 
 
 class ResponseType(models.Model):
-    id = models.AutoField(primary_key=True)
-    parent_type = models.ForeignKey('ResponseType', on_delete=models.CASCADE)
+    #id = models.AutoField(primary_key=True)
+    parent_type = models.ForeignKey('ResponseType', null=True, blank=True, on_delete=models.CASCADE)
     url = models.CharField(max_length=128)
-    method = models.CharField(max_length=255)
-    parameter = models.CharField(max_length=1024)
+    method = models.CharField(max_length=255, null=True, blank=True)
+    parameter = models.CharField(max_length=1024, null=True, blank=True)
     base_mime_type = models.CharField(max_length=255)
 
     def child_types(self):
@@ -418,7 +421,7 @@ class ResponseType(models.Model):
 
 
 class Response(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     type = models.ForeignKey('ResponseType', on_delete=models.CASCADE)
     fromString = models.TextField()
     response = models.TextField(db_column='string')

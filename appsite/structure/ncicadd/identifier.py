@@ -172,7 +172,6 @@ class Identifier:
         else:
             self.checksum = correct_checksum
             return True
-        return False
 
     def _test_long_string(self, string):
         pattern = re.compile('(?P<hashcode>^.{16})-(?P<type>.{5,6})-(?P<version>.{2})-(?P<checksum>.{2}$)',

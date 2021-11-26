@@ -37,8 +37,6 @@ services:
     container_name: ${APP_NAME}-postgres
     volumes:
       - postgres_db_volume:/var/lib/postgresql
-    #  - ${APP_HOME}/postgres-init.d:/docker-entrypoint-initdb.d
-    #restart: always
     networks:
       - app_network
     environment:

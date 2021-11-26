@@ -3,7 +3,7 @@ from django.core.exceptions import *
 
 
 class Context(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     record_string = models.TextField(max_length=1500)
     database_string = models.TextField(max_length=1500)
 
@@ -16,7 +16,7 @@ class Context(models.Model):
 
 
 class URL(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     string = models.URLField()
 
     class Meta:
@@ -24,7 +24,6 @@ class URL(models.Model):
         ordering = ['string']
         db_table = 'cir_database_url'
         #db_table = u'`chemical_database`.`url`'
-
 
     def get_string(self):
         return self.string
@@ -37,7 +36,7 @@ class URL(models.Model):
 
 
 class RecordURLScheme(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     string = models.URLField()
 
     class Meta:
@@ -54,7 +53,7 @@ class RecordURLScheme(models.Model):
 
 
 class Database(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     publisher = models.ForeignKey('Publisher', null=True, on_delete=models.CASCADE)
     context = models.ForeignKey('Context', blank=True, null=True, on_delete=models.CASCADE)
     url = models.ForeignKey('URL', blank=True, null=True, verbose_name="URL", on_delete=models.CASCADE)
@@ -77,7 +76,7 @@ class Database(models.Model):
 
 
 class Release(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     publisher = models.ForeignKey('Publisher', null=True, on_delete=models.CASCADE)
     url = models.ForeignKey('URL', blank=True, null=True, verbose_name="URL", on_delete=models.CASCADE)
@@ -131,7 +130,7 @@ class Release(models.Model):
 
 
 class Publisher(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     url = models.ForeignKey('URL', blank=True, null=True, verbose_name="URL", on_delete=models.CASCADE)
     organization = models.ForeignKey('Organization', blank=True, null=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -148,7 +147,7 @@ class Publisher(models.Model):
 
 
 class Organization(models.Model):
-    id = models.AutoField(primary_key=True)
+    #id = models.AutoField(primary_key=True)
     url = models.ForeignKey('URL', blank=True, null=True, verbose_name="URL", on_delete=models.CASCADE)
     name = models.CharField(max_length=1500)
     date_added = models.DateTimeField(blank=True)

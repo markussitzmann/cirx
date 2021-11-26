@@ -1,11 +1,13 @@
 import re
 import urllib
 
+import logging
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import NotSupportedError
 from pycactvs import Ens
 
+from custom.cactvs import CactvsHash
 from structure.cas.number import String as CasNumber
 from structure.inchi.identifier import String as InChI
 from structure.inchi.identifier import Key as InChIKey
@@ -13,6 +15,9 @@ from structure.minimol import Minimol
 from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
 from structure.packstring import PackString
 from structure.smiles import SMILES
+
+logger = logging.getLogger('cirx')
+
 
 
 #import cas.number
@@ -23,7 +28,7 @@ from structure.smiles import SMILES
 #import smiles
 
 from database.models import Database
-from structure.models import Structure, Record, Compound, StandardInChI, Name, StructureName
+from structure.models import Structure2, Record, Compound, StandardInChI, Name, StructureName
 
 
 # from sets import Set
@@ -97,12 +102,12 @@ class ChemicalStructure:
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.hashisy = hashisy
             try:
-                self.resolved = Structure.objects.get(hashisy=hashisy)
-            except (MultipleObjectsReturned, NotSupportedError, Structure.DoesNotExist):
-                self.resolved = Structure(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
+                self.resolved = Structure2.objects.get(hashisy=hashisy)
+            except (MultipleObjectsReturned, NotSupportedError, Structure2.DoesNotExist):
+                self.resolved = Structure2(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
         elif ens and resolved:
-            h1 = resolved.hashisy
-            h2 = Identifier(hashcode=ens['hashisy']).integer
+            h1 = resolved.hashisy.int()
+            h2 = Identifier(hashcode=ens.get('E_HASHISY')).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')
 
@@ -171,25 +176,25 @@ class ChemicalString:
         else:
             resolver_list = [
                 'smiles',
-                'stdinchikey',
-                'stdinchi',
-                'ncicadd_identifier',
-                'hashisy',
+                #'stdinchikey',
+                #'stdinchi',
+                #'ncicadd_identifier',
+                #'hashisy',
                 # 'chemspider_id',
-                'chemnavigator_sid',
-                'pubchem_sid',
-                'emolecules_vid',
-                'ncicadd_rid',
-                'ncicadd_cid',
-                'ncicadd_sid',
-                'cas_number',
-                'nsc_number',
-                'zinc_code',
-                'opsin',
+                #'chemnavigator_sid',
+                #'pubchem_sid',
+                #'emolecules_vid',
+                #'ncicadd_rid',
+                #'ncicadd_cid',
+                #'ncicadd_sid',
+                #'cas_number',
+                #'nsc_number',
+                #'zinc_code',
+                #'opsin',
                 'name',
-                'SDFile',
-                'minimol',
-                'packstring',
+                #'SDFile',
+                #'minimol',
+                #'packstring',
             ]
 
         if operator_list:
@@ -235,7 +240,9 @@ class ChemicalString:
                         i += 1
                     else:
                         del interpretation
-                except:
+                except Exception as e:
+                    logger.error(e)
+                    print(e)
                     pass
             else:
                 resolver_method = getattr(self, '_resolver_' + resolver)
@@ -256,7 +263,7 @@ class ChemicalString:
         match = pattern.search(self.string)
         hashcode = match.group('hashcode')
         hashcode_int = int(match.group('hashcode'), 16)
-        chemical_structure = ChemicalStructure(resolved=Structure.objects.get(hashisy=hashcode_int))
+        chemical_structure = ChemicalStructure(resolved=Structure2.objects.get(hashisy=hashcode_int))
         if chemical_structure:
             chemical_structure.metadata = {
                 'query_type': 'hashisy',
@@ -309,7 +316,7 @@ class ChemicalString:
         match = pattern.search(self.string)
         if match:
             structure_id = match.group('sid')
-            structure = Structure.objects.get(id=structure_id)
+            structure = Structure2.objects.get(id=structure_id)
             chemical_structure = ChemicalStructure(resolved=structure)
             if chemical_structure:
                 chemical_structure.metadata = {
@@ -325,7 +332,7 @@ class ChemicalString:
 
     def _resolver_ncicadd_identifier(self, interpretation_object):
         identifier = Identifier(string=self.string)
-        structure = Structure.objects.get(hashisy=identifier.integer)
+        structure = Structure2.objects.get(hashisy=identifier.integer)
         chemical_structure = ChemicalStructure(resolved=structure)
         if chemical_structure:
             identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
@@ -826,18 +833,19 @@ class ChemicalString:
             interpretation_object.query_object = ens
             interpretation_object.ens = ens
             try:
-                hashcode = Identifier(hashcode=ens['hashisy'])
+                hashcode = Identifier(hashcode=ens.get('E_HASHISY'))
                 try:
-                    structure = Structure.objects.get(hashisy=hashcode.integer)
+                    structure = Structure2.objects.get(hashisy=CactvsHash(hashcode.integer))
                     chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
                     interpretation_object.structures.append(chemical_structure)
-                except (Structure.DoesNotExist, RuntimeError):
-                    ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
+                except (Structure2.DoesNotExist, RuntimeError):
+                    #ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
+                    ficts = Identifier(hashcode=ens.get('E_FICTS_ID'))
                     try:
-                        structure = Structure.objects.get(hashisy=ficts.integer)
+                        structure = Structure2.objects.get(hashisy=CactvsHash(ficts.integer))
                         chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
                         interpretation_object.structures.append(chemical_structure)
-                    except (Structure.DoesNotExist, RuntimeError):
+                    except (Structure2.DoesNotExist, RuntimeError):
                         chemical_structure = ChemicalStructure(ens=ens)
                         interpretation_object.structures.append(chemical_structure)
             except RuntimeError:

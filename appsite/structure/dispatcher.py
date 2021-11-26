@@ -626,7 +626,8 @@ class URLmethod:
             dataset = Dataset(ens_list)
             if base_mime_type == 'text':
                 self.mime_type = "text/plain"
-                response_list = dataset.get(propname, parameters=parameters, new=True)
+                #response_list = dataset.get(propname, parameters=parameters, new=True)
+                response_list = dataset.get(propname)
                 response_list = self._unique(response_list)
             elif base_mime_type == 'image':
                 # unique for structures that come from different resolvers:

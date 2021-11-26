@@ -6,7 +6,7 @@ source .env
 docker tag cactvs-django-app-server:1.0 $APP_NAME:$APP_VERSION
 
 if [ -z $(docker network ls --filter name=^${APP_NAME}-backend$ --format="{{ .Name }}") ] ; then
-     echo "dreating Docker network"
+     echo "creating Docker network"
      docker network create cirx-backend ;
 fi
 

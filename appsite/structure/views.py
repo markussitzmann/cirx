@@ -56,44 +56,44 @@ def resolve_to_response(request, string, representation, operator_parameter=None
     if operator_parameter:
         string = "%s:%s" % (operator_parameter, string)
 
-    speed_factor = 3
-    now = datetime.datetime.now()
-    one_minute = datetime.timedelta(minutes=1)
-    one_hour = datetime.timedelta(minutes=60)
-    try:
-        host, new_host = AccessHost.objects.get_or_create(string=request.META['REMOTE_ADDR'])
-    except Exception as inst:
-        print(type(inst))
-        print(inst)
-        raise inst
-
-    try:
-        client, new_client = AccessClient.objects.get_or_create(string=request.META['HTTP_USER_AGENT'])
-    except:
-        client, dummy = AccessClient.objects.get_or_create(string="None")
-    host, new_host = AccessHost.objects.get_or_create(string=request.META['REMOTE_ADDR'])
-    access = Access(host=host, client=client, timestamp=now)
-    access.save()
-
-    host_access_count_one_minute = Access.objects.filter(host=host, timestamp__gte=(now - one_minute)).count()
-    host_access_count_one_hour = Access.objects.filter(host=host, timestamp__gte=(now - one_hour)).count()
-    sleep_period_1m = host_access_count_one_minute / (60 * speed_factor)
-    sleep_period_1h = host_access_count_one_hour / (3600 * speed_factor)
-
-    try:
-        host_time_limit_exceeded = (now - host.lock_timestamp).seconds > 10
-    except TypeError:
-        host_time_limit_exceeded = True
-    if (not host.blocked) or host_time_limit_exceeded:
-        host.blocked = 1
-        host.lock_timestamp = now
-        host_blocked = True
-        time.sleep(sleep_period_1h)
-    else:
-        host_blocked = False
-        time.sleep(sleep_period_1m)
-    host.save()
-
+    # speed_factor = 3
+    # now = datetime.datetime.now()
+    # one_minute = datetime.timedelta(minutes=1)
+    # one_hour = datetime.timedelta(minutes=60)
+    # try:
+    #     host, new_host = AccessHost.objects.get_or_create(string=request.META['REMOTE_ADDR'])
+    # except Exception as inst:
+    #     print(type(inst))
+    #     print(inst)
+    #     raise inst
+    #
+    # try:
+    #     client, new_client = AccessClient.objects.get_or_create(string=request.META['HTTP_USER_AGENT'])
+    # except:
+    #     client, dummy = AccessClient.objects.get_or_create(string="None")
+    # host, new_host = AccessHost.objects.get_or_create(string=request.META['REMOTE_ADDR'])
+    # access = Access(host=host, client=client, timestamp=now)
+    # access.save()
+    #
+    # host_access_count_one_minute = Access.objects.filter(host=host, timestamp__gte=(now - one_minute)).count()
+    # host_access_count_one_hour = Access.objects.filter(host=host, timestamp__gte=(now - one_hour)).count()
+    # sleep_period_1m = host_access_count_one_minute / (60 * speed_factor)
+    # sleep_period_1h = host_access_count_one_hour / (3600 * speed_factor)
+    #
+    # try:
+    #     host_time_limit_exceeded = (now - host.lock_timestamp).seconds > 10
+    # except TypeError:
+    #     host_time_limit_exceeded = True
+    # if (not host.blocked) or host_time_limit_exceeded:
+    #     host.blocked = 1
+    #     host.lock_timestamp = now
+    #     host_blocked = True
+    #     time.sleep(sleep_period_1h)
+    # else:
+    #     host_blocked = False
+    #     time.sleep(sleep_period_1m)
+    # host.save()
+    #
     #	print " 9 jeff /www/django/chemical/structure/views.py PAUL Got to URLMethod"
     url_method = URLmethod(representation=representation, request=request, output_format=format)
     resolved_string, representation, response, mime_type = url_method.parser(string)
@@ -102,11 +102,11 @@ def resolve_to_response(request, string, representation, operator_parameter=None
     else:
         host_string = 'http://' + request.get_host()
 
-    if host_blocked:
-        host.blocked = 0
-        host.save()
+    # if host_blocked:
+    #     host.blocked = 0
+    #     host.save()
 
-    if request.META.has_key('QUERY_STRING'):
+    if 'QUERY_STRING' in request.META:
         url_parameter_string = request.META['QUERY_STRING']
     else:
         url_parameter_string = None
@@ -136,7 +136,8 @@ def resolve_to_response(request, string, representation, operator_parameter=None
         #		print " 10 jeff /www/django/chemical/structure/views.py PAUL Got to if format == plain"
         if repr(url_method) == '':
             raise Http404
-        return HttpResponse(repr(url_method), mimetype=mime_type)
+        #return HttpResponse(repr(url_method), mimetype=mime_type)
+        return HttpResponse(repr(url_method))
     elif format == 'xml':
         return render(request, 'structure.xml', {
             'response': response,
