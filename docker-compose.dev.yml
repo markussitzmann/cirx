@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
 
-  app:
+  cirx:
     image: ${APP_NAME}:${APP_VERSION}
     container_name: ${APP_NAME}
     volumes:
@@ -27,11 +27,11 @@ services:
       - LETSENCRYPT_EMAIL
       - LETSENCRYPT_TEST
     depends_on:
-      - postgres
+      - cirx-postgres
     entrypoint: [ "/home/app/docker-entrypoint.dev.sh" ]
     command: python /home/app/appsite/manage.py runserver 0.0.0.0:8000
 
-  postgres:
+  cirx-postgres:
     image: postgres:latest
     container_name: ${APP_NAME}-postgres
     volumes:
@@ -46,6 +46,7 @@ services:
 
 volumes:
   postgres_db_volume:
+    name: ${APP_NAME}-postgres-db-volume
 
 networks:
   app_network:
