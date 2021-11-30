@@ -40,10 +40,12 @@ def _loader():
         ens = Ens(name)
         logger.info("tuples: %s", name)
         name_obj, created = Name.objects.get_or_create(name=name)
-        structure_obj, created = Structure2.objects.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
+        structure_obj, structure_created = Structure2.objects.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
-        structure_name_obj = StructureName(name=name_obj, structure=structure_obj, name_type=name_type_obj)
-        structure_name_obj.save()
+        #structure_name_obj = StructureName(name=name_obj, structure=structure_obj, name_type=name_type_obj)
+        #structure_name_obj.save()
+
+        structure_name_obj, name_created = StructureName.objects.get_or_create(name=name_obj, structure=structure_obj, name_type=name_type_obj)
 
         #structure_obj.names.add(StructureName(name=name_obj, structure=structure_obj, name_type=name_type_obj))
 

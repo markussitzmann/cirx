@@ -94,7 +94,7 @@ class ChemicalStructure:
         # if not self.cactvs:
         #     self.cactvs = settings.CACTVS
         if resolved and not ens:
-            ens = Ens(resolved.minimol)
+            ens = resolved.minimol.ens()
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.ens = ens
             self.hashisy = hashisy
@@ -102,8 +102,8 @@ class ChemicalStructure:
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.hashisy = hashisy
             try:
-                self.resolved = Structure2.objects.get(hashisy=hashisy)
-            except (MultipleObjectsReturned, NotSupportedError, Structure2.DoesNotExist):
+                self.resolved = Structure2.objects.get(hashisy=CactvsHash(hashisy))
+            except Exception as e:
                 self.resolved = Structure2(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
         elif ens and resolved:
             h1 = resolved.hashisy.int()
@@ -226,6 +226,7 @@ class ChemicalString:
         else:
             self.operator = operator
         i = 1
+
         for resolver in resolver_list:
             if not debug:
                 try:
@@ -838,18 +839,21 @@ class ChemicalString:
                     structure = Structure2.objects.get(hashisy=CactvsHash(hashcode.integer))
                     chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
                     interpretation_object.structures.append(chemical_structure)
-                except (Structure2.DoesNotExist, RuntimeError):
+                except (Structure2.DoesNotExist, RuntimeError) as e1:
+                    logger.error(e1)
                     #ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
                     ficts = Identifier(hashcode=ens.get('E_FICTS_ID'))
                     try:
                         structure = Structure2.objects.get(hashisy=CactvsHash(ficts.integer))
                         chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
                         interpretation_object.structures.append(chemical_structure)
-                    except (Structure2.DoesNotExist, RuntimeError):
+                    except (Structure2.DoesNotExist, RuntimeError) as e2:
+                        logger.error(e2)
                         chemical_structure = ChemicalStructure(ens=ens)
                         interpretation_object.structures.append(chemical_structure)
-            except RuntimeError:
-                chemical_structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
+            except Exception as e3:
+                logger.error(e3)
+                chemical_structure = ChemicalStructure(ens=ens)
                 interpretation_object.structures.append(chemical_structure)
                 interpretation_object.string = self.string
         return True

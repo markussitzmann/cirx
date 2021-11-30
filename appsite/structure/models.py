@@ -1,3 +1,4 @@
+from django.db.models import UniqueConstraint
 from pycactvs import Ens
 
 from django.db import models
@@ -179,7 +180,10 @@ class StructureName(models.Model):
     name_type = models.ForeignKey('NameType', on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = (('name', 'structure', 'name_type'),)
+        constraints = [
+            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
+        ]
+        #unique_together = (('name', 'structure', 'name_type'),)
         db_table = 'cir_structure_names'
         #db_table = u'`chemical_name`.`structure_names`'
 
