@@ -1,4 +1,7 @@
-from django.db.models import UniqueConstraint
+import uuid
+
+from django.core.exceptions import FieldError
+from django.db.models import UniqueConstraint, Index
 from pycactvs import Ens
 
 from django.db import models
@@ -8,8 +11,10 @@ import json
 from custom.cactvs import CactvsHash, CactvsMinimol
 from database.models import Database, Release, DatabaseDataCache
 
-from structure.inchi import identifier as inchi
-from structure.ncicadd import identifier as ncicadd
+from structure.inchi.identifier import InChIKey, InChIString
+
+#from structure.inchi import identifier as inchi
+#from structure.ncicadd import identifier as ncicadd
 
 from custom.fields import CactvsHashField, CactvsMinimolField
 
@@ -119,11 +124,23 @@ class StandardInChI(models.Model):
     key_layer3 = models.CharField(max_length=1, db_column='key_layer3')
     string = models.CharField(max_length=1500)
 
+    indexes = Index(
+        fields=['version', 'key_layer1', 'key_layer2', 'key_layer3', 'string'],
+        name='index_standard_inchi'
+    )
+
     # objects = models.Manager()
     # inchi_set = StandardInChIStructureManager()
 
     class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['version', 'key_layer1', 'key_layer2', 'key_layer3'],
+                name='unique_standard_inchi_key'
+            ),
+        ]
         db_table = 'cir_structure_standard_inchi'
+
         #db_table = u'`chemical_inchi`.`standard_inchi`'
 
     def get_structure(self):
@@ -135,6 +152,80 @@ class StandardInChI(models.Model):
     #     # cleaner method
     #     t = StandardInChI.objects.filter(**i.query())
     #     return t
+
+
+class InChI(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    version = models.IntegerField(default=1)
+    version_string = models.CharField(max_length=64)
+    block1 = models.CharField(max_length=14)
+    block2 = models.CharField(max_length=10)
+    block3 = models.CharField(max_length=1)
+    key = models.CharField(max_length=27, blank=True, null=True)
+    string = models.CharField(max_length=32768, blank=True, null=True)
+    is_standard = models.BooleanField(default=False)
+    safe_options = models.CharField(max_length=2, default=None, null=True)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    indexes = Index(
+        fields=['version', 'block1', 'block2', 'block3'],
+        name='inchi_index'
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['version', 'block1', 'block2', 'block3'],
+                name='unique_inchi_constraint'
+            ),
+        ]
+        verbose_name = "InChI"
+        db_table = 'cir_inchi'
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        if 'url_prefix' in kwargs:
+            inchiargs = kwargs.pop('url_prefix')
+            inchi = cls(*args, inchiargs)
+        else:
+            inchi = cls(*args, **kwargs)
+        k = None
+        s = None
+        if 'key' in kwargs and kwargs['key']:
+            k = InChIKey(kwargs['key'])
+
+        if 'string' in kwargs and kwargs['string']:
+            s = InChIString(kwargs['string'])
+            e = Ens(kwargs['string'])
+            if s.is_standard:
+                _k = e.get('E_STDINCHIKEY')
+            else:
+                _k = e.get('E_INCHIKEY')
+            if k:
+                if not k.element['well_formatted'] == _k.element['well_formatted']:
+                    raise FieldError("InChI key does not represent InChI string")
+            else:
+                key = _k
+
+        inchi.key = key.element['well_formatted_no_prefix']
+        inchi.version = key.element['version']
+        inchi.is_standard = key.element['is_standard']
+        inchi.block1 = key.element['block1']
+        inchi.block2 = key.element['block2']
+        inchi.block3 = key.element['block3']
+        if s:
+            inchi.string = s.element['well_formatted']
+        inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+            inchi.key,
+            str(kwargs.get('safe_options', None)),
+        ]))
+        return inchi
+
+    def __str__(self):
+        return self.key
+
+
 
 
 class Name(models.Model):

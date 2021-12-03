@@ -9,8 +9,7 @@ from pycactvs import Ens
 
 from custom.cactvs import CactvsHash
 from structure.cas.number import String as CasNumber
-from structure.inchi.identifier import String as InChI
-from structure.inchi.identifier import Key as InChIKey
+from structure.inchi.identifier import InChIString, InChIKey, InChIError
 from structure.minimol import Minimol
 from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
 from structure.packstring import PackString
