@@ -5,7 +5,7 @@ from django.test import TestCase, SimpleTestCase
 from pycactvs import Ens
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from structure.models import StructureCactvsHash, Structure2
+from structure.models import Structure2, InChI
 from resolver import ChemicalStructure
 
 logger = logging.getLogger('cirx')
@@ -24,16 +24,6 @@ class StructureTests(TestCase):
         structure = ChemicalStructure(ens=ens)
         self.assertEqual(CactvsHash(structure.hashisy).padded(), hashisy)
 
-    def test_cactvs_hash(self):
-        hashisy = CactvsHash('FF')
-        name = "FF"
-
-        structure_cactvs_hash = StructureCactvsHash(hashisy=hashisy, name=name)
-        structure_cactvs_hash.save()
-
-        from_db = StructureCactvsHash.objects.get(hashisy=hashisy)
-        self.assertEqual(from_db.name, name)
-
     def test_minimol(self):
         ens1 = Ens("CCO")
         minimol = CactvsMinimol(ens1).minimol()
@@ -43,10 +33,51 @@ class StructureTests(TestCase):
 
     def test_structure_db_fetch(self):
         ens = Ens("CCO")
-        Structure2.objects.createFromEns(ens)
+        structure_obj = Structure2.objects.get_or_create_from_ens(ens)
+        structure_obj.save()
 
         hashisy = CactvsHash(ens)
         structure = Structure2.objects.get(hashisy=hashisy)
 
-        logger.info(">>> %s %s", structure, structure.to_ens().get("E_SMILES"))
+        logger.info(">>> %s %s" % (structure, structure.to_ens().get("E_SMILES")))
+        fetched = structure.to_ens()
+        self.assertEqual(ens.get('E_HASHISY'), fetched.get('E_HASHISY'))
+
+
+    def test_inchi_model(self):
+        ens = Ens("CCO")
+        inchi_key = ens.get("E_INCHIKEY")
+        inchi_string = ens.get("E_INCHI")
+
+        inchi_key_obj = InChI.create(key=inchi_key)
+        inchi_string_obj = InChI.create(string=inchi_string)
+
+        inchi_key_obj.save()
+
+        i, created = InChI.objects.get_or_create(inchi_string_obj)
+        i.string = inchi_string
+        i.save()
+
+
+        test_inchi = InChI.objects.get(id=i.id)
+        logger.info("x>>> %s | %s" % (test_inchi, test_inchi.string))
+
+        self.assertEqual(inchi_string, test_inchi.string)
+
+    def test_inchi_model(self):
+        ens = Ens("CCO")
+        inchi_key = ens.get("E_INCHIKEY")
+        inchi_string = ens.get("E_INCHI")
+        inchi_string_obj = InChI.create(key=inchi_key, string=inchi_string)
+        logger.info("x>>> %s | %s" % (inchi_string_obj, inchi_string_obj))
+        logger.info("k>>> %s" % (inchi_string_obj.__dict__,))
+        z = InChI.create(**inchi_string_obj.__dict__.pop('_state'))
+
+        logger.info("z>>> %s" % (z,))
+
+
+    def test_inchi_model2(self):
+        ens = Ens("CCO")
+        inchi = InChI.objects.get_or_create_from_ens(ens)
+        logger.info("i >>> %s", inchi)
 

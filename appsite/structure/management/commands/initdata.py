@@ -4,10 +4,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from structure.models import Structure2, Name, NameType, StructureName, ResponseType, StandardInChI
-
-from structure.inchi.identifier import Key as InChIKey
-from structure.inchi.identifier import String as InChI
+from structure.models import Structure2, Name, NameType, StructureName, ResponseType, InChI, StructureInChIs
 
 from pycactvs import Ens
 
@@ -33,10 +30,9 @@ def _loader():
         ens = Ens(name)
         logger.info("tuples: %s", name)
         name_obj, created = Name.objects.get_or_create(name=name)
-        structure_obj, structure_created = Structure2.objects.get_or_create(
-            hashisy=CactvsHash(ens),
-            minimol=CactvsMinimol(ens)
-        )
+
+        structure_obj, structure_created = Structure2.objects.get_or_create_from_ens(ens)
+        logger.info("Structure: %s %s" % (structure_obj, structure_created))
 
         structure_name_obj, name_created = StructureName.objects.get_or_create(
             name=name_obj,
@@ -44,18 +40,25 @@ def _loader():
             name_type=name_type_obj
         )
 
-        #print(">>>> %s", ens.get('E_STDINCHIKEY'))
-        inchikey = InChIKey(ens.get('E_STDINCHIKEY'))
-        inchi = InChI(ens.get('E_STDINCHI'))
+        inchi_obj, inchi_created = InChI.objects.get_or_create_from_ens(ens)
+        logger.info("InChI: %s %s" % (inchi_obj, inchi_created))
 
-        inchikey_obj, inchikey_created = StandardInChI.objects.get_or_create(
-            version=inchi.
-            key_layer1=inchikey.layer1,
-            key_layer2=inchikey.layer2,
-            key_layer3=inchikey.layer3,
-            string=inchi
+        structure_inchi_obj, structure_inchi_created = StructureInChIs.objects.get_or_create(
+            structure=structure_obj,
+            inchi=inchi_obj
         )
 
+
+
+        # inchikey = ens.get('E_STDINCHIKEY')
+        # inchi = ens.get('E_STDINCHI')
+        #
+        # logger.info("1 >>> %s | %s" % (inchikey, inchi))
+        #
+        # io = InChI.objects.get_or_create(key=inchikey)
+        # logger.info("2 >>> %s | %s" % (io, io))
+
+        #io.save()
 
 
 def init_response_type_data():

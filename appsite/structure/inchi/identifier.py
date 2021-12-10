@@ -11,8 +11,8 @@ class InChIString:
 
     def __init__(self, string=None):
         self.element = {'string': string}
-        patternList = [InChIString.PATTERN_STRING, InChIString.PATTERN_STRING_WITH_PREFIX]
-        if not bool([self._validate(string, pattern) for pattern in patternList if self._validate(string, pattern)]):
+        pattern_list = [InChIString.PATTERN_STRING, InChIString.PATTERN_STRING_WITH_PREFIX]
+        if not bool([self._validate(string, pattern) for pattern in pattern_list if self._validate(string, pattern)]):
             raise InChIError('string is not resolvable')
         [setattr(self, k, v) for k, v in self.element.items()]
 
@@ -27,10 +27,12 @@ class InChIString:
             self.element['version'] = self.element['version'][:1]
             if self.element['is_standard']:
                 self.element['well_formatted'] = '%s%sS/%s' % (
-                self.element['prefix'], self.element['version'], self.element['layers'])
+                    self.element['prefix'], self.element['version'], self.element['layers']
+                )
             else:
                 self.element['well_formatted'] = '%s%s/%s' % (
-                self.element['prefix'], self.element['version'], self.element['layers'])
+                    self.element['prefix'], self.element['version'], self.element['layers']
+                )
             return True
         return False
 
@@ -47,7 +49,8 @@ class InChIKey:
 
     DEFAULT_PREFIX = "InChIKey="
     PATTERN_STRING = '(?P<block1>[A-Z]{14})-(?P<block2>[A-Z]{8}(S|N)[A-Z]{1})-(?P<block3>[A-Z]{1}$)'
-    PATTERN_STRING_WITH_PREFIX = '(?P<prefix>^%s)(?P<block1>[A-Z]{14})-(?P<block2>[A-Z]{8}(S|N)[A-Z]{1})-(?P<block3>[A-Z]{1}$)' % DEFAULT_PREFIX
+    PATTERN_STRING_WITH_PREFIX = \
+        '(?P<prefix>^%s)(?P<block1>[A-Z]{14})-(?P<block2>[A-Z]{8}(S|N)[A-Z]{1})-(?P<block3>[A-Z]{1}$)' % DEFAULT_PREFIX
 
     def __init__(self, string=None, block1=None, block2=None, block3=None):
         if string is None and block1 is not False:
@@ -58,8 +61,8 @@ class InChIKey:
                 string += "-%s" % block3
 
         self.element = {'string': string}
-        patternList = [InChIKey.PATTERN_STRING, InChIKey.PATTERN_STRING_WITH_PREFIX]
-        if not bool([self._validate(string, pattern) for pattern in patternList if self._validate(string, pattern)]):
+        pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PATTERN_STRING_WITH_PREFIX]
+        if not bool([self._validate(string, pattern) for pattern in pattern_list if self._validate(string, pattern)]):
             raise InChIKeyError('InChIKey is not resolvable')
         [setattr(self, k, v) for k, v in self.element.items()]
 
@@ -84,7 +87,6 @@ class InChIKey:
         selfh = self.element['well_formatted_no_prefix']
         otherh = self.element['well_formatted_no_prefix']
         return selfh == otherh
-
 
     def __str__(self):
         return self.element['well_formatted_no_prefix']
