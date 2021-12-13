@@ -41,6 +41,12 @@ class Structure2(models.Model):
         through='StructureStandardInChI',
         related_name="structure_set"
     )
+    inchis = models.ManyToManyField(
+        'InChI',
+        through='StructureInChIs',
+        related_name="structures"
+    )
+
 
     objects = Structure2Manager()
 
@@ -172,11 +178,9 @@ class StructureStandardInChI(models.Model):
 class InChIManager(models.Manager):
 
     def get_or_create_from_ens(self, ens: Ens):
-
         inchikey = ens.get('E_STDINCHIKEY')
         inchi = ens.get('E_STDINCHI')
         i = InChI.create(key=inchikey, string=inchi)
-
         d = model_to_dict(i)
         return self.get_or_create(id=i.id, **d)
 

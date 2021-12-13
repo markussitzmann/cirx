@@ -81,3 +81,7 @@ class StructureTests(TestCase):
         inchi = InChI.objects.get_or_create_from_ens(ens)
         logger.info("i >>> %s", inchi)
 
+    def test_inchi_structure(self):
+        inchi: InChI = InChI.objects.all()
+        logger.info("%s", inchi)
+

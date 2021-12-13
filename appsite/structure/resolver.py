@@ -2,6 +2,8 @@ import re
 import urllib
 
 import logging
+from typing import List
+
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import NotSupportedError
@@ -27,7 +29,7 @@ logger = logging.getLogger('cirx')
 #import smiles
 
 from database.models import Database
-from structure.models import Structure2, Record, Compound, StandardInChI, Name, StructureName
+from structure.models import Structure2, Record, Compound, StandardInChI, Name, StructureName, InChI
 
 
 # from sets import Set
@@ -121,30 +123,30 @@ class ChemicalStructureError(Exception):
 
 
 class ChemicalString:
-    available_resolver_list = [
-        'smiles',
-        'stdinchikey',
-        'stdinchi',
-        'ncicadd_identifier',
-        'hashisy',
-        'chemspider_id',
-        'chemnavigator_sid',
-        'pubchem_sid',
-        'emolecules_vid',
-        'ncicadd_rid',
-        'ncicadd_cid',
-        'ncicadd_sid',
-        'cas_number',
-        'nsc_number',
-        'zinc_code',
-        'opsin',
-        'chemspider_name',
-        'name_pattern',
-        'name',
-        'SDFile',
-        'minimol',
-        'packstring',
-    ]
+    # available_resolver_list = [
+    #     'smiles',
+    #     'stdinchikey',
+    #     'stdinchi',
+    #     'ncicadd_identifier',
+    #     'hashisy',
+    #     'chemspider_id',
+    #     'chemnavigator_sid',
+    #     'pubchem_sid',
+    #     'emolecules_vid',
+    #     'ncicadd_rid',
+    #     'ncicadd_cid',
+    #     'ncicadd_sid',
+    #     'cas_number',
+    #     'nsc_number',
+    #     'zinc_code',
+    #     'opsin',
+    #     'chemspider_name',
+    #     'name_pattern',
+    #     'name',
+    #     'SDFile',
+    #     'minimol',
+    #     'packstring',
+    # ]
 
     class Interpretation:
 
@@ -175,8 +177,8 @@ class ChemicalString:
         else:
             resolver_list = [
                 'smiles',
-                #'stdinchikey',
-                #'stdinchi',
+                'stdinchikey',
+                'stdinchi',
                 #'ncicadd_identifier',
                 #'hashisy',
                 # 'chemspider_id',
@@ -242,7 +244,6 @@ class ChemicalString:
                         del interpretation
                 except Exception as e:
                     logger.error(e)
-                    print(e)
                     pass
             else:
                 resolver_method = getattr(self, '_resolver_' + resolver)
@@ -348,20 +349,22 @@ class ChemicalString:
         return False
 
     def _resolver_stdinchikey(self, interpretation_object):
-        identifier = InChIKey(key=self.string)
+        #identifier = InChIKey(key=self.string)
+        identifier = InChI.create(key=self.string)
         # if not k.is_standard:
         #	return False
-        inchikey_query = identifier.query()
-        inchikeys = StandardInChI.objects.filter(**inchikey_query)
+        #inchikey_query = identifier.query()
+        inchikeys = InChI.objects.filter(id=identifier.id)
         structure_set = []
         description_list = []
         for inchikey in inchikeys:
-            structures = inchikey.structure_set.all()
+            #structures = inchikey.structure_set.all()
+            structures: List[Structure2] = inchikey.structures.all()
             full_key = InChIKey(
-                layer1=inchikey.key_layer1,
-                layer2=inchikey.key_layer2,
-                layer3=inchikey.key_layer3,
-                version=inchikey.version
+                block1=identifier.block1,
+                block2=identifier.block2,
+                block3=identifier.block3,
+                version=identifier.version
             )
             for structure in structures:
                 # ens = Ens(self.cactvs, structure.object.minimol)
@@ -821,8 +824,10 @@ class ChemicalString:
             string = string.replace("\\n", '\n')
             # TODO: hadd is missing
             #ens = Ens(string, mode='hadd')
+            logger.info(string)
             ens = Ens(string)
-        except RuntimeError:
+        except Exception as e:
+            logger.error(e)
             return False
         else:
             # TODO: is_search_structure needs replacement

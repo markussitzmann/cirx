@@ -19,7 +19,8 @@ sys.setdlopenflags(os.RTLD_GLOBAL|os.RTLD_NOW)
 
 from pycactvs import cactvs
 CACTVS_SETTINGS = cactvs
-CACTVS_SETTINGS['python_object_autodelete'] = True
+#CACTVS_SETTINGS['python_object_autodelete'] = True
+CACTVS_SETTINGS['lookup_hosts'] = []
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -181,5 +182,6 @@ LOGGING = {
 
 ### THE WE HAVE TO GET RID OF THIS SECTION
 
-BASE_URL='/chemical'
+BASE_URL =  \
+    '/chemical'
 STRUCTURE_BASE_URL=BASE_URL + '/structure'
