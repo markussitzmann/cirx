@@ -176,11 +176,11 @@ class ChemicalString:
             pass
         else:
             resolver_list = [
-                'smiles',
+                #'smiles',
                 'stdinchikey',
                 'stdinchi',
-                #'ncicadd_identifier',
-                #'hashisy',
+                'ncicadd_identifier',
+                'hashisy',
                 # 'chemspider_id',
                 #'chemnavigator_sid',
                 #'pubchem_sid',
@@ -364,7 +364,6 @@ class ChemicalString:
                 block1=identifier.block1,
                 block2=identifier.block2,
                 block3=identifier.block3,
-                version=identifier.version
             )
             for structure in structures:
                 # ens = Ens(self.cactvs, structure.object.minimol)
@@ -374,7 +373,7 @@ class ChemicalString:
                     'query_search_string': 'Standard InChIKey',
                     'query_object': identifier,
                     'query_string': self.string,
-                    'description': full_key.well_formatted
+                    'description': full_key.element['well_formatted']
                 }
                 structure_set.append(chemical_structure)
         if inchikeys:

@@ -4,7 +4,6 @@ from pycactvs import Ens
 class CactvsMinimol:
 
     def __init__(self, source):
-
         if isinstance(source, bytes):
             try:
                 self._minimol = Ens(source).get('E_MINIMOL')
@@ -16,7 +15,7 @@ class CactvsMinimol:
             except RuntimeError:
                 raise ValueError('no valid CACTVS ens')
         else:
-            raise ValueError('no CACTVS ensemble hash available')
+            raise ValueError('CACTVS ensemble can not be created from source')
 
     def ens(self) -> Ens:
         return Ens(self._minimol)

@@ -9,7 +9,7 @@ services:
       - ${APP_HOME}:/home/app
       - ${APP_HOME}/nginx:/home/nginx
     ports:
-      - "8123:8000"
+      - "8000:8000"
     networks:
       - app_network
     environment:
