@@ -3,4 +3,5 @@ requests
 django==4.0rc1
 djangorestframework
 django-extensions
+parameterized
 #django-dbbackup>=3

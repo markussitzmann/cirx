@@ -33,7 +33,7 @@ class URLmethod:
         self.method = response_type.method
         self.url_parameters = request.GET.copy()
         self.representation = representation
-        self.mime_type = None
+        self.content_type = None
         self.output_format = output_format
         self.response_list = []
         if not parameters:
@@ -45,10 +45,10 @@ class URLmethod:
         response = ''
         if not self.response_list:
             return ''
-        if self.mime_type == 'image/gif':
+        if self.content_type == 'image/gif':
             response = self.response_list
         else:
-            response_list = self.response_list
+            #response_list = self.response_list
             for item in self.response_list:
                 response = response + "%s\n" % (item,)
         return response[0:-1]
@@ -76,25 +76,20 @@ class URLmethod:
             return response
 
     def parser(self, string):
-        # self.cactvs = settings.CACTVS.client_is_up(return_instance=True)
         parse = getattr(self, self.method, self.parameters)
-        response = parse(string)
-        mime_type = self.mime_type
+        parser_response = parse(string)
+        mime_type = self.content_type
         representation = self.representation
-        response = [string, representation, response, mime_type]
-        # try:
-        #	self.cactvs.__del__()
-        # except:
-        #	pass
+        response = [string, representation, parser_response, mime_type]
         return response
 
     def urls(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -103,10 +98,10 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         for interpretation in interpretations:
-            structure_response_list = []
+            #structure_response_list = []
             response_list = []
             for structure in interpretation.structures:
                 try:
@@ -163,17 +158,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = self._unique(self.response_list)
         return representation_list
 
     def pubchem_sid(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -182,7 +177,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -203,7 +198,6 @@ class URLmethod:
                                 response = str(record['release_record_external_identifier'])
                                 response_list.append(response)
                                 all_interpretation_response_list.append(response)
-                # dummy
                 representation = {
                     'base_mime_type': self.base_mime_type,
                     'id': interpretation.id,
@@ -215,17 +209,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = all_interpretation_response_list
         return representation_list
 
     def emolecules_vid(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -234,7 +228,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -253,7 +247,6 @@ class URLmethod:
                                 response = str(record['database_record_external_identifier'])
                                 response_list.append(response)
                                 all_interpretation_response_list.append(response)
-                # dummy
                 representation = {
                     'base_mime_type': self.base_mime_type,
                     'id': interpretation.id,
@@ -265,17 +258,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = all_interpretation_response_list
         return representation_list
 
     def zinc_id(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -284,7 +277,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -315,17 +308,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = all_interpretation_response_list
         return representation_list
 
     def nsc_number(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -334,7 +327,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -364,17 +357,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = self._unique(all_interpretation_response_list)
         return representation_list
 
     def chemnavigator_sid(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -383,7 +376,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -415,17 +408,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = all_interpretation_response_list
         return representation_list
 
     def ncicadd_record_id(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -434,7 +427,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -465,17 +458,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = all_interpretation_response_list
         return representation_list
 
     def ncicadd_compound_id(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -484,7 +477,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -508,17 +501,17 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = all_interpretation_response_list
         return representation_list
 
     def ncicadd_structure_id(self, string):
         # cactvs = self.cactvs
-        propname = self.parameters
-        base_mime_type = self.base_mime_type
+        #propname = self.parameters
+        #base_mime_type = self.base_mime_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
+        #structure_index = parameters.get('structure_index', None)
         # filter = parameters.get('filter', None)
         mode = parameters.get('mode', 'simple')
         if resolver_list:
@@ -527,7 +520,7 @@ class URLmethod:
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
-        full_ensemble_list = []
+        #full_ensemble_list = []
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
@@ -548,7 +541,7 @@ class URLmethod:
                 representation_list.append(representation)
                 index += 1
         if self.output_format == 'plain':
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = all_interpretation_response_list
         return representation_list
 
@@ -565,7 +558,6 @@ class URLmethod:
         rows = parameters.get('rows', None)
         if resolver_list:
             resolver_list = resolver_list.split(',')
-
         interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
@@ -597,6 +589,8 @@ class URLmethod:
                     }
                     representation_list.append(representation)
                     index += 1
+                else:
+                    pass
         # end of interpretation loop
         if self.output_format == 'plain':
             if structure_index:
@@ -617,15 +611,15 @@ class URLmethod:
                 parameters.update({'rows': rows, 'columns': columns})
                 if not user_rows == rows:
                     rows = user_rows
-                    if rows > 25: rows = 25
+                    if rows > 25:
+                        rows = 25
                     parameters.update({'rows': rows, })
                     page_size = rows * columns
                     paginator = Paginator(ens_list, page_size)
                     ens_list = paginator.page(page).object_list
-                # dummy
             dataset = Dataset(ens_list)
             if base_mime_type == 'text':
-                self.mime_type = "text/plain"
+                self.content_type = "text/plain"
                 #response_list = dataset.get(propname, parameters=parameters, new=True)
                 response_list = dataset.get(propname)
                 response_list = self._unique(response_list)
@@ -638,9 +632,11 @@ class URLmethod:
                 image_file.url = image.file
                 image_file.image = f.read()
                 response_list = image_file.image
-                self.mime_type = "image/gif"
+                self.content_type = "image/gif"
             self.response_list = response_list
-        return representation_list
+        else:
+            pass
+        return self.response_list
 
     def cas(self, string):
         url_parameters = self.url_parameters.copy()
@@ -710,7 +706,7 @@ class URLmethod:
                         if not n['class'] == str(filter_parameter):
                             continue
                     response_list.append(str(n['name']))
-            self.mime_type = "text/plain"
+            self.content_type = "text/plain"
             self.response_list = self._unique(response_list)
             if response_index:
                 i = int(response_index)

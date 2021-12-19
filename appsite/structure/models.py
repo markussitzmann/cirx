@@ -47,14 +47,16 @@ class Structure2(models.Model):
         related_name="structures"
     )
 
+    class Meta:
+        db_table = 'cir_structure_2'
 
     objects = Structure2Manager()
 
     def to_ens(self):
         return self.minimol.ens()
 
-    class Meta:
-        db_table = 'cir_structure_2'
+    def __str__(self):
+        return self.hashisy.padded()
 
 
 
@@ -540,12 +542,15 @@ class ResponseType(models.Model):
     parameter = models.CharField(max_length=1024, null=True, blank=True)
     base_mime_type = models.CharField(max_length=255)
 
-    def child_types(self):
-        return ResponseType.objects.get(parent_type=self.pk)
-
     class Meta:
         db_table = 'cir_response_type'
         #db_table = u'chemical_structure_response_type'
+
+    def child_types(self):
+        return ResponseType.objects.get(parent_type=self.pk)
+
+    def __str__(self):
+        return self.url + ":" + self.method
 
 
 class Response(models.Model):

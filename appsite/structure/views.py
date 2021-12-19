@@ -33,7 +33,7 @@ def structure(request, string=None):
     if request.method == 'POST':
         form = ChemicalResolverInput(request.POST)
         if form.is_valid():
-            string = form.cleaned_data['string'].replace('#', '%23')
+            #string = form.cleaned_data['string'].replace('#', '%23')
             representation = form.cleaned_data['representation']
             redirectedURL = '%s/%s/%s' % (settings.STRUCTURE_BASE_URL, identifier, representation)
             return HttpResponseRedirect(redirectedURL)
@@ -56,61 +56,16 @@ def resolve_to_response(request, string, representation, operator_parameter=None
     if operator_parameter:
         string = "%s:%s" % (operator_parameter, string)
 
-    # speed_factor = 3
-    # now = datetime.datetime.now()
-    # one_minute = datetime.timedelta(minutes=1)
-    # one_hour = datetime.timedelta(minutes=60)
-    # try:
-    #     host, new_host = AccessHost.objects.get_or_create(string=request.META['REMOTE_ADDR'])
-    # except Exception as inst:
-    #     print(type(inst))
-    #     print(inst)
-    #     raise inst
-    #
-    # try:
-    #     client, new_client = AccessClient.objects.get_or_create(string=request.META['HTTP_USER_AGENT'])
-    # except:
-    #     client, dummy = AccessClient.objects.get_or_create(string="None")
-    # host, new_host = AccessHost.objects.get_or_create(string=request.META['REMOTE_ADDR'])
-    # access = Access(host=host, client=client, timestamp=now)
-    # access.save()
-    #
-    # host_access_count_one_minute = Access.objects.filter(host=host, timestamp__gte=(now - one_minute)).count()
-    # host_access_count_one_hour = Access.objects.filter(host=host, timestamp__gte=(now - one_hour)).count()
-    # sleep_period_1m = host_access_count_one_minute / (60 * speed_factor)
-    # sleep_period_1h = host_access_count_one_hour / (3600 * speed_factor)
-    #
-    # try:
-    #     host_time_limit_exceeded = (now - host.lock_timestamp).seconds > 10
-    # except TypeError:
-    #     host_time_limit_exceeded = True
-    # if (not host.blocked) or host_time_limit_exceeded:
-    #     host.blocked = 1
-    #     host.lock_timestamp = now
-    #     host_blocked = True
-    #     time.sleep(sleep_period_1h)
-    # else:
-    #     host_blocked = False
-    #     time.sleep(sleep_period_1m)
-    # host.save()
-    #
-    #	print " 9 jeff /www/django/chemical/structure/views.py PAUL Got to URLMethod"
     url_method = URLmethod(representation=representation, request=request, output_format=format)
     resolved_string, representation, response, mime_type = url_method.parser(string)
     if request.is_secure():
         host_string = 'https://' + request.get_host()
     else:
         host_string = 'http://' + request.get_host()
-
-    # if host_blocked:
-    #     host.blocked = 0
-    #     host.save()
-
     if 'QUERY_STRING' in request.META:
         url_parameter_string = request.META['QUERY_STRING']
     else:
         url_parameter_string = None
-
     if representation == 'twirl' or representation == 'chemdoodle':
         if not parameters.has_key('width'):
             parameters['width'] = 1000
@@ -122,22 +77,21 @@ def resolve_to_response(request, string, representation, operator_parameter=None
             mime_type = 'text/javascript'
         else:
             mime_type = 'text/html'
-        return render(request, '3d.template', {
-            'library': representation,
-            'string': string,
-            'response': url_method.response_list,
-            'parameters': parameters,
-            'url_parameter_string': url_parameter_string,
-            'base_url': settings.STRUCTURE_BASE_URL,
-            'host': host_string},
-                                  mimetype=mime_type)
+        return render(
+            request, '3d.template', {
+                'library': representation,
+                'string': string,
+                'response': url_method.response_list,
+                'parameters': parameters,
+                'url_parameter_string': url_parameter_string,
+                'base_url': settings.STRUCTURE_BASE_URL,
+                'host': host_string
+            }, content_type=mime_type)
 
     if format == 'plain':
-        #		print " 10 jeff /www/django/chemical/structure/views.py PAUL Got to if format == plain"
-        if repr(url_method) == '':
+        if not url_method.__repr__():
             raise Http404
-        #return HttpResponse(repr(url_method), mimetype=mime_type)
-        return HttpResponse(repr(url_method))
+        return HttpResponse(url_method.__repr__())
     elif format == 'xml':
         return render(request, 'structure.xml', {
             'response': response,
@@ -145,17 +99,6 @@ def resolve_to_response(request, string, representation, operator_parameter=None
             'representation': representation,
             'base_url': settings.STRUCTURE_BASE_URL,
             'host': host_string})
-
-
-
-
-
-
-
-
-
-
-
 
 #
 # # print " 1 jeff /www/django/chemical/structure/views.py"
@@ -203,7 +146,6 @@ def resolve_to_response(request, string, representation, operator_parameter=None
 #     return HttpResponse(smiles, mimetype='text/plain')
 #
 #
-
 
 
 #
