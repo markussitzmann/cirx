@@ -41,11 +41,11 @@ class DispatcherTests(TestCase):
         url_method = URLmethod(request=request, representation=representation)
         logger.info("u > %s " % (url_method, ))
 
-        resolved_string, representation, response, mime_type = url_method.parser(string)
-        logger.info("r > %s : %s : %s : %s" % (resolved_string, representation, response, mime_type))
+        resolved_string, representation, response, content_type = url_method.parser(string)
+        logger.info("r > %s : %s : %s : %s" % (resolved_string, representation, response, content_type))
 
         self.assertEqual(response, expected[0])
-        self.assertEqual(mime_type, expected[1])
+        self.assertEqual(content_type, expected[1])
 
 
 class StructureClientTests(TestCase):
