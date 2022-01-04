@@ -1,0 +1,226 @@
+# tkserver Property Definition by Markus Sitzmann 2009
+NAME E_MNA
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "Oct 30 11:23:49 2010"
+PUBKEY 
+DESCRIPTION "MNA set"
+OUTMODE P_OUT_YES
+KEYTYPE P_INT
+OUTLEVEL 4
+KEY UDEFPROP
+MAGIC ???
+DEFAULT ???
+VALTYPE P_STRINGVECTOR
+INVALIDATION
+DEPENDS
+ATTACHMENT P_ENS
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+PORT 16520
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME "mna" 8
+
+proc mna_symbol {atomSymbol what} {
+	foreach element {He Ne Ar Kr Xe Rn Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Db Jl} {
+		dict set mnaAtomSymbol $element [list symbol $element weight 0]
+	}
+	foreach element {D T H C N O F Si P S Cl Ca As Se Br} weight {1 1 1 2 3 4 5 6 7 8 9 10 11 12 13} {
+		dict set mnaAtomSymbol $element [list symbol $element weight $weight]
+	}
+	dict set mnaAtomSymbol Sn {symbol "\[SnPb\]" weight 14}
+	dict set mnaAtomSymbol Pb {symbol "\[SnPb\]" weight 14}
+	dict set mnaAtomSymbol Os {symbol "\[OsIr\]" weight 15}
+	dict set mnaAtomSymbol Ir {symbol "\[OsIr\]" weight 15}
+	dict set mnaAtomSymbol Li {symbol "\[LiNa\]" weight 16}
+	dict set mnaAtomSymbol Na {symbol "\[LiNa\]" weight 16}
+	dict set mnaAtomSymbol B {symbol "\[BRe\]" weight 17}
+	dict set mnaAtomSymbol Re {symbol "\[BRe\]" weight 17}
+	dict set mnaAtomSymbol Mg {symbol "\[MgMn\]" weight 18}
+	dict set mnaAtomSymbol Mn {symbol "\[MgMn\]" weight 18}
+	dict set mnaAtomSymbol Te {symbol "\[TePo\]" weight 19}
+	dict set mnaAtomSymbol Po {symbol "\[TePo\]" weight 19}
+	dict set mnaAtomSymbol I {symbol "\[IAt\]" weight 20}
+	dict set mnaAtomSymbol At {symbol "\[IAt\]" weight 20}
+	dict set mnaAtomSymbol Sc {symbol "\[ScTiZr\]" weight 21}
+	dict set mnaAtomSymbol Ti {symbol "\[ScTiZr\]" weight 21}
+	dict set mnaAtomSymbol Zr {symbol "\[ScTiZr\]" weight 21}
+	dict set mnaAtomSymbol Fe {symbol "\[FeHfTa\]" weight 22}
+	dict set mnaAtomSymbol Hf {symbol "\[Fe HfTa\]" weight 22}
+	dict set mnaAtomSymbol Ta {symbol "\[FeHfTa\]" weight 22}
+	dict set mnaAtomSymbol Sr {symbol "\[SrBaRa\]" weight 23}
+	dict set mnaAtomSymbol Ba {symbol "\[SrBaRa\]" weight 23}
+	dict set mnaAtomSymbol Ra {symbol "\[SrBaRa\]" weight 23}
+	dict set mnaAtomSymbol Co {symbol "\[CoSbW\]" weight 24}
+	dict set mnaAtomSymbol Sb {symbol "\[CoSbW\]" weight 24}
+	dict set mnaAtomSymbol W {symbol "\[CoSbW\]" weight 24}
+	dict set mnaAtomSymbol Pd {symbol "\[PdPtAu\]" weight 25}
+	dict set mnaAtomSymbol Pt {symbol "\[PdPtAu\]" weight 25}
+	dict set mnaAtomSymbol Au {symbol "\[PdPtAu\]" weight 25}
+	dict set mnaAtomSymbol Be {symbol "\[BeZnCdHg\]" weight 26}
+	dict set mnaAtomSymbol Zn {symbol "\[BeZnCdHg\]" weight 26}
+	dict set mnaAtomSymbol Cd {symbol "\[BeZnCdHg\]" weight 26}
+	dict set mnaAtomSymbol Hg {symbol "\[BeZnCdHg\]" weight 26}
+	dict set mnaAtomSymbol K {symbol "\[KRbCsFr\]" weight 27}
+	dict set mnaAtomSymbol Rb {symbol "\[KRbCsFr\]" weight 27}
+	dict set mnaAtomSymbol Cs {symbol "\[KRbCsFr\]" weight 27}
+	dict set mnaAtomSymbol Fr {symbol "\[KRbCsFr\]" weight 27}
+	dict set mnaAtomSymbol V {symbol "\[VCrNbMoTc\]" weight 28}
+	dict set mnaAtomSymbol Cr {symbol "\[VCrNbMoTc\]" weight 28}
+	dict set mnaAtomSymbol Nb {symbol "\[VCrNbMoTc\]" weight 28}
+	dict set mnaAtomSymbol Mo {symbol "\[VCrNbMoTc\]" weight 28}
+	dict set mnaAtomSymbol Tc {symbol "\[VCrNbMoTc\]" weight 28}
+	dict set mnaAtomSymbol Ni {symbol "\[NiCuGeRuRhAgBi\]" weight 29}
+	dict set mnaAtomSymbol Cu {symbol "\[NiCuGeRuRhAgBi\]" weight 29}
+	dict set mnaAtomSymbol Ge {symbol "\[NiCuGeRuRhAgBi\]" weight 29}
+	dict set mnaAtomSymbol Ru {symbol "\[NiCuGeRuRhAgBi\]" weight 29}
+	dict set mnaAtomSymbol Rh {symbol "\[NiCuGeRuRhAgBi\]" weight 29}
+	dict set mnaAtomSymbol Ag {symbol "\[NiCuGeRuRhAgBi\]" weight 29}
+	dict set mnaAtomSymbol Bi {symbol "\[NiCuGeRuRhAgBi\]" weight 29}
+	dict set mnaAtomSymbol In {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol La {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol Ce {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol Pr {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol Nd {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol Pm {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol Sm {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol Eu {symbol "\[InLaCePrNdPmSmEu\]" weight 30}
+	dict set mnaAtomSymbol Al {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Ga {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Y {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Gd {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Tb {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Dy {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Ho {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Er {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Tm {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Yb {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Lu {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	dict set mnaAtomSymbol Tl {symbol "\[AlGaYGdTbDyHoErTmYbLuTl\]" weight 31}
+	switch $what {
+		weight {
+			return [dict get $mnaAtomSymbol $atomSymbol weight]
+		}
+		symbol {
+			return [dict get $mnaAtomSymbol $atomSymbol symbol]
+		}
+	}
+}
+
+proc get_atom_mna {ehandle atom level} {
+	set dup [ens dup $ehandle]
+	ens hadd $dup
+	set mnaSphere [get_mna_atom_sphere $ehandle $atom $level]
+	ens delete $dup
+	return [list $atom $mnaSphere]
+}
+
+proc get_mna_atom_sphere {ehandle atom {level 0} {rlevel 0} {excludeAtom {}}} {
+	set returnList {}
+	if {$level == 0} {
+		return {}
+	} 
+	set atomNeighborList [sort_mna_sphere $ehandle [atom neighbors $ehandle $atom !complexbond [list exclude $excludeAtom] 1] $level]
+	if {$rlevel < $level} {
+		set rlist {}
+		foreach atomNeighbor $atomNeighborList {
+			set atomSphere [get_mna_atom_sphere $ehandle $atomNeighbor $level [expr $rlevel + 1] $atomNeighbor]
+			if {[lempty $atomSphere]} {
+				set rlist [concat $rlist $atomNeighbor]
+			} else {
+				set rlist [concat $rlist [list $atomNeighbor $atomSphere]]
+			}
+		}
+		set returnList [concat $returnList $rlist]
+	}
+	return $returnList
+}
+
+proc get_mna_atom_weight {ehandle atom level} {
+	set weight [mna_symbol [atom get $ehandle $atom A_SYMBOL] weight]
+	if {$level > 1 && ![atom filter $ehandle $atom ringatom]} {
+		incr weight 32
+	}
+	return $weight
+}
+
+proc sort_mna_sphere {ehandle sphere level} {
+	set sortList {}
+	set returnList {}
+	foreach atom $sphere {
+		set atomWeight [expr [get_mna_atom_weight $ehandle $atom $level] * 10000000000]
+		set sortList {}
+		set nSphereSize 0
+		foreach natom [atom neighbors $ehandle $atom {} {} 1] {
+			set nAtomWeight [get_mna_atom_weight $ehandle $natom $level]
+			lappend sortList [list $atom $nAtomWeight]
+			incr nSphereSize
+		}
+		set sortedSphere [lsort -index 1 -integer $sortList]
+		set weightSortedList {}
+		foreach nAtomWeight $sortedSphere factor {100000000 1000000 10000 100 1} {
+			if {$nAtomWeight == ""} {
+				continue
+			}
+			lassign $nAtomWeight a w
+			incr atomWeight [expr $w * $factor]
+		}
+		lappend atomWeightList [list $atom $atomWeight]
+	}
+	foreach atomWeight [lsort -index 1 -integer $atomWeightList] {
+		lassign $atomWeight atom weight
+		lappend returnList $atom
+	}
+	return $returnList
+}
+
+proc get_mna_string {ehandle mnaSphere level} {
+	if {[llength $mnaSphere] == 1} {
+		return [getMNAatomSymbol $ehandle $mnaSphere $level]
+	}
+	set mnaSphereDictionary [eval dict create $mnaSphere]
+	set returnList {}
+	dict for {atomSymbol atomSphere} $mnaSphereDictionary {
+		append returnList [get_mna_atom_symbol $ehandle $atomSymbol $level]
+		if {[string first \{ $atomSphere] != -1} {
+			set a [get_mna_string $ehandle $atomSphere $level]
+			if {$level >= 2} {
+				append returnList "($a)"
+			} else {
+				append returnList "$a"
+			}
+		} else {
+			if {$level >= 2} {append returnList "("}
+			foreach atom $atomSphere {
+				append returnList [get_mna_atom_symbol $ehandle $atom $level]
+			}
+			if {$level >= 2} {append returnList ")"}
+		}
+	}
+	return $returnList
+}
+
+proc get_mna_atom_symbol {ehandle atom level} {
+	#puts $mnaAtomSymbol
+	set atomSymbol [atom get $ehandle $atom A_SYMBOL]
+	set symbol [mna_symbol $atomSymbol symbol]
+	if {$level >= 2 && ![atom filter $ehandle $atom ringatom]} {
+		return "-$symbol"
+	}
+	return $symbol
+}
+
+proc mna {ehandle} {
+	foreach atom [ens atoms $ehandle] {
+		foreach level [list 1 2] {
+			if {[mol atoms $ehandle [atom mol $ehandle $atom] {} count] <= 3} {continue}
+			set mna_sphere [get_atom_mna $ehandle $atom $level]
+			set mna_string [get_mna_string $ehandle $mna_sphere $level]
+			set mna_array($mna_string) 1
+		}
+	}
+	ens set $ehandle E_MNA [split [array names mna_array]]
+}

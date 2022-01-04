@@ -1,0 +1,46 @@
+# tkserver Property Definition by Markus Sitzmann 2010
+NAME E_STRUCTURE_IMAGE_BASE64
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "Oct 30 11:23:49 2010"
+PUBKEY 
+DESCRIPTION "Special Structure Image"
+OUTMODE P_OUT_YES
+KEYTYPE P_INT
+OUTLEVEL 4
+KEY UDEFPROP
+VALTYPE P_STRING
+INVALIDATION
+DEPENDS
+ATTACHMENT P_ENS
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+PORT 16520
+ACCESS PA_NONE
+PARAMETERS width 250 height 250 asymbol xsymbol bonds 9 hsymbol special csymbol special bgcolor white border 8 bondcolor black	 atomcolor A_COLOR hcolor {} header {} footer {} headercolor black footercolor black interlace 1 commenttype property comment E_NAME structure none metadata 1 filename {} highlightcolor red highlightbonds {} httpheader 0 crop -1 wedges 1 wiggles all format gif markcolor blue logofile {} logoscale 1 dashes 1 headerproperty {} footerproperty {} bead 1 beadcolor1 black beadcolor2 gray60 showcharge 1 showradical 1 showstereo 1 font arialn symbolfontsize 10 annotationfontsize -1 antialiasing 1 highlightgroups {} boxgroups {} groupcolor purple showisotope 1 isotopemapping none showstereoh 1 suppressedmols {} linewidth 1 showempty 0 voronoicolorproperty {} voronoifilter {} showmapping 0 annotationcolor {} showchirality none frame 0 linespacing 2.0 headerfontsize -1 footerfontsize -1 circlecolorproperty {} circlefilter {} wigglecount 6 wiggleamplitude 2.0 fixiepngsize 1 rawcoordinates 0 checkintersection 0
+DEFAULTPARAMS width 250 height 250 asymbol xsymbol bonds 9 hsymbol special csymbol special bgcolor white border 8 bondcolor black	 atomcolor A_COLOR hcolor {} header {} footer {} headercolor black footercolor black interlace 1 commenttype property comment E_NAME structure none metadata 1 filename {} highlightcolor red highlightbonds {} httpheader 0 crop -1 wedges 1 wiggles all format gif markcolor blue logofile {} logoscale 1 dashes 1 headerproperty {} footerproperty {} bead 1 beadcolor1 black beadcolor2 gray60 showcharge 1 showradical 1 showstereo 1 font arialn symbolfontsize 10 annotationfontsize -1 antialiasing 1 highlightgroups {} boxgroups {} groupcolor purple showisotope 1 isotopemapping none showstereoh 1 suppressedmols {} linewidth 1 showempty 0 voronoicolorproperty {} voronoifilter {} showmapping 0 annotationcolor {} showchirality none frame 0 linespacing 2.0 headerfontsize -1 footerfontsize -1 circlecolorproperty {} circlefilter {} wigglecount 6 wiggleamplitude 2.0 fixiepngsize 1 rawcoordinates 0 checkintersection 0
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME "get_structure_image_base64" 1
+
+proc get_structure_image_base64 {ehandle} {
+	
+	prop dup E_GIF E_BLOB_GIF
+	prop set E_BLOB_GIF datatype blob
+	prop set E_BLOB_GIF parameters [prop get E_STRUCTURE_IMAGE_BASE64 parameters]
+	
+	#prop setparam E_BLOB_GIF linespacing [expr [prop getparam E_STRUCTURE_IMAGE_BASE64 linewidth] * 2]
+	ens get $ehandle B_CIP_STEREO
+	foreach bond [ens bonds $ehandle pstereobond] {
+		if {![bond filter $ehandle $bond stereobond]} {
+			bond set $ehandle $bond B_FLAGS crossed
+		}
+	}
+	if {[catch {ens new $ehandle E_BLOB_GIF}]} {
+		error "image creation failed"
+	} else {
+		ens set $ehandle E_STRUCTURE_IMAGE_BASE64 [encode -rfc2045 [ens get $ehandle E_BLOB_GIF]]
+	}
+	prop delete E_BLOB_GIF
+}

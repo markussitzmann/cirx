@@ -1,0 +1,48 @@
+# tkserver Property Definition by Markus Sitzmann 2010
+NAME D_MOLFILESTRING
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "Oct 30 11:23:49 2010"
+PUBKEY 
+DESCRIPTION "Molfile String"
+OUTMODE P_OUT_YES
+KEYTYPE P_INT
+OUTLEVEL 4
+KEY UDEFPROP
+MAGIC ???
+DEFAULT ???
+VALTYPE P_STRING
+INVALIDATION
+DEPENDS
+ATTACHMENT P_DATASET
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+PORT 16520
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+PARAMETERS "format sdf get3d 0 force2d 1"
+DEFAULTPARAMS "format sdf get3d 0 force2d 1"
+FUNCNAME "get_molfilestring" 1
+
+proc get_molfilestring {dhandle} {
+	set dup [dataset dup $dhandle]
+	set format [prop getparam D_MOLFILESTRING format]
+	if {[prop getparam D_MOLFILESTRING get3d]} {
+		prop setparam D_MOLFILESTRING force2d 0
+	}
+	if {![prop getparam D_MOLFILESTRING force2d]} { 
+		catch {dataset need $dup A_XYZ}
+		if {![catch {molfile string $dup writeflags write3d format $format} molfilestring]} {
+			dataset set $dhandle D_MOLFILESTRING [list $molfilestring]
+		} else {
+			dataset need $dup A_XY
+			dataset set $dhandle D_MOLFILESTRING [list [molfile string $dup writeflags write2d format $format]]
+		}
+	} else {
+		dataset need $dup A_XY
+		dataset set $dhandle D_MOLFILESTRING [list [molfile string $dup writeflags write2d format $format]]
+	}
+	dataset delete $dup
+}

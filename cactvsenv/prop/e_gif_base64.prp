@@ -1,0 +1,33 @@
+# tkserver Property Definition by Markus Sitzmann 2010
+NAME E_GIF_BASE64
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "Oct 30 11:23:49 2010"
+PUBKEY 
+DESCRIPTION "base64 encode E_GIF"
+OUTMODE P_OUT_YES
+KEYTYPE P_INT
+OUTLEVEL 4
+KEY UDEFPROP
+VALTYPE P_STRING
+INVALIDATION
+DEPENDS
+ATTACHMENT P_ENS
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+PORT 16520
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME get_gif_base64 1
+
+proc get_gif_base64 {ehandle} {
+	if ![prop exists E_GIF_BLOB] {	
+		prop dup E_GIF E_GIF_BLOB
+		prop set E_GIF_BLOB datatype blob
+	}
+	prop set E_GIF_BLOB parameters [prop get E_STRUCTURE_IMAGE parameters]
+	set image [ens new $ehandle E_GIF_BLOB]
+	ens set $ehandle E_GIF_BASE64 [encode -base64 $image]
+}

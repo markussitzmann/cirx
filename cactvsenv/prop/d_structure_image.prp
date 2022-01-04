@@ -1,0 +1,45 @@
+# tkserver Property Definition by Markus Sitzmann 2010
+NAME D_STRUCTURE_IMAGE
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "Oct 30 11:23:49 2010"
+PUBKEY 
+DESCRIPTION "Special Structure Image"
+OUTMODE P_OUT_YES
+KEYTYPE P_INT
+OUTLEVEL 4
+KEY UDEFPROP
+VALTYPE P_STRINGVECTOR
+INVALIDATION
+DEPENDS
+ATTACHMENT P_DATASET
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+PORT 16520
+ACCESS PA_NONE
+PARAMETERS ncols 3 nrows 4 bgcolor white framecolor gray framewidth 1 boxwidth 300 boxheight 300 header {} footer {} headerheight 0 footerheight 0 comment {} commenttype text filename {} format gif httpheader 0 headercolor black footercolor black antialiasing 3 font arialn annotationfontsize -1 interlace 0 offset 0 imgproperty E_GIF padding 1 boxbgcolor transparent boxhighlightcolor red selectlist {}
+DEFAULTPARAMS ncols 3 nrows 4 bgcolor white framecolor gray framewidth 1 boxwidth 300 boxheight 300 header {} footer {} headerheight 0 footerheight 0 comment {} commenttype text filename {} format gif httpheader 0 headercolor black footercolor black antialiasing 3 font arialn annotationfontsize -1 interlace 0 offset 0 imgproperty E_GIF padding 1 boxbgcolor transparent boxhighlightcolor red selectlist {}
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME "get_image" 1
+
+proc get_image {dhandle} {
+	prop set E_GIF parameters [prop get E_STRUCTURE_IMAGE parameters]
+	prop set D_GIF parameters [prop get D_STRUCTURE_IMAGE parameters]
+	set ens_count [llength [dataset ens $dhandle]]
+	prop setparam E_GIF linespacing [expr [prop getparam E_GIF linewidth] * 2]
+	dataset get $dhandle B_CIP_STEREO
+	foreach ehandle [dataset ens $dhandle] { 
+		foreach bond [ens bonds $ehandle pstereobond] {
+			if {![bond filter $ehandle $bond stereobond]} {
+				bond set $ehandle $bond B_FLAGS crossed
+			}
+		}
+	}
+	if {[catch {dataset new $dhandle D_GIF} filename]} {
+		#error "image creation failed"
+	} else {
+		dataset set $dhandle D_STRUCTURE_IMAGE $filename
+	}
+}

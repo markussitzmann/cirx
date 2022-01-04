@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import *
 from django.shortcuts import render
 
-from structure.dispatcher import URLmethod
+from structure.dispatcher import Dispatcher
 from structure.forms import *
 from structure.models import *
 
@@ -56,8 +56,8 @@ def resolve_to_response(request, string, representation, operator_parameter=None
     if operator_parameter:
         string = "%s:%s" % (operator_parameter, string)
 
-    url_method = URLmethod(representation=representation, request=request, output_format=format)
-    resolved_string, representation, response, mime_type = url_method.parser(string)
+    url_method = Dispatcher(representation=representation, request=request, output_format=format)
+    resolved_string, representation, response, mime_type = url_method.parse(string)
     if request.is_secure():
         host_string = 'https://' + request.get_host()
     else:

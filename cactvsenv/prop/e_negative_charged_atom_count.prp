@@ -1,0 +1,30 @@
+# tkserver Property Definition by Markus Sitzmann 2009
+NAME E_NEGATIVE_CHARGED_ATOM_COUNT
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "2010-05-19"
+PUBKEY 
+DESCRIPTION "number of negative charged atoms"
+OUTMODE P_OUT_YES
+OUTLEVEL 4
+MAGIC -1
+DEFAULT 0
+VALTYPE P_INT
+INVALIDATION INVAL_ATOMCHANGE|INVAL_BONDCHANGE
+DEPENDS A_FORMAL_CHARGE
+ATTACHMENT P_ENS
+PRECISION 4
+LENGTH 0
+FLAGS TRUSTED|PORTABLE|EXPORT
+REGEXPFLAGS none
+CONSTRAINTS NONE
+TIMEOUT 0
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME negative_charged_atom_count 1
+proc negative_charged_atom_count {ehandle} {
+	filter create negativecharge property A_FORMAL_CHARGE operator < value 0
+	#filter create positivecharge property A_FORMAL_CHARGE operator > value 0
+	ens set $ehandle E_NEGATIVE_CHARGED_ATOM_COUNT [ens atoms $ehandle negativecharge count]
+}

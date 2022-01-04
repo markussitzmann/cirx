@@ -5,7 +5,7 @@ from django.http import  *
 r = HttpRequest()
 u = URLmethod('smiles', request = r)
 
-u.parser('tautomers:guanine')
+u.parse('tautomers:guanine')
 
 #s = ChemicalString(string='tautomers:guanine')
 	

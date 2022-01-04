@@ -1,0 +1,31 @@
+# tkserver Property Definition by Markus Sitzmann 2009
+NAME E_PROTONABLE_GROUP_COUNT
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "2010-05-19"
+PUBKEY 
+DESCRIPTION "Protonable group count"
+OUTMODE P_OUT_YES
+OUTLEVEL 4
+MAGIC -1
+DEFAULT 0
+VALTYPE P_INT
+INVALIDATION INVAL_ATOMCHANGE|INVAL_BONDCHANGE
+DEPENDS B_TITRATION
+ATTACHMENT P_ENS
+PRECISION 4
+LENGTH 0
+FLAGS TRUSTED|PORTABLE|EXPORT
+REGEXPFLAGS none
+CONSTRAINTS NONE
+TIMEOUT 0
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME protonable_group_count 1
+proc protonable_group_count {ehandle} {
+	filter create protonable property G_TITRATION operator eq value protonation
+	ens need $ehandle G_TITRATION
+	set protonableGroups [ens groups $ehandle protonable count]
+	ens set $ehandle E_PROTONABLE_GROUP_COUNT $protonableGroups
+}

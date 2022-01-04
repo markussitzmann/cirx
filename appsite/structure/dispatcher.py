@@ -1,3 +1,9 @@
+import functools
+from typing import List
+
+import logging
+
+from django.conf import settings
 from pycactvs import Ens, Dataset
 
 from django.core.files import File
@@ -5,11 +11,13 @@ from django.core.paginator import Paginator
 from django.http import HttpRequest, QueryDict
 
 from structure.models import ResponseType, NameType, NameCache
-from structure.resolver import ChemicalString
+from structure.resolver import ChemicalString, ChemicalStructure
+
+logger = logging.getLogger('cirx')
 
 
-class URLmethod:
-    def __init__(self, representation, request=None, parameters=None, output_format='plain'):
+class Dispatcher:
+    def __init__(self, representation, request, parameters=None, output_format='plain'):
         response_type = ResponseType.objects.get(url=representation)
         self.type = response_type
         self.base_content_type = response_type.base_mime_type
@@ -57,7 +65,7 @@ class URLmethod:
                     response = response + "%s\n" % (item,)
             return response
 
-    def parser(self, string):
+    def parse(self, string):
         parser_method = getattr(self, self.method, self.parameters)
         parser_response = parser_method(string)
         content_type = self.content_type
@@ -472,8 +480,26 @@ class URLmethod:
             self.response_list = all_interpretation_response_list
         return representation_list
 
+    @staticmethod
+    def _create_dataset(string: str, resolver_list: List[str], simple: bool) -> Dataset:
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        structure_lists: List[List[ChemicalStructure]] = [
+            interpretation.structures for interpretation in ([interpretations[0]] if simple else interpretations)
+        ]
+        ens_list: List[Ens] = [
+            structure.ens for structure_list in structure_lists for structure in structure_list
+        ]
+        dataset: Dataset = Dataset(ens_list)
+        return dataset
+
+    @staticmethod
+    def _create_dataset_page(dataset: Dataset, rows: int, columns: int, page: int) -> Dataset:
+        page_size: int = rows * columns
+        paginator: Paginator = Paginator(dataset.ens(), page_size)
+        return Dataset(paginator.page(page).object_list)
+
+
     def prop(self, string):
-        # cactvs = self.cactvs
         propname = self.parameters
         base_content_type = self.base_content_type
         parameters = self.url_parameters.copy()
@@ -490,23 +516,23 @@ class URLmethod:
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
         full_ensemble_list = []
-        representation_list = []
+        response_list = []
         for interpretation in interpretations:
             for structure in interpretation.structures:
                 full_ensemble_list.append(structure.ens)
                 if self.output_format == 'xml':
-                    if hasattr(structure, 'ens'):
+                    if 'ens' in structure:
                         ens = structure.ens
                     else:
                         ens = Ens(structure.object.minimol)
                     # dataset is used to have the same object as below for the plain text output
                     dataset = Dataset([ens, ])
                     if base_content_type == 'text':
-                        response_list = dataset.get(propname, parameters=parameters, new=True)
+                        response_list = dataset.get(propname, parameters=parameters)
                     elif base_content_type == 'image':
                         response_list = dataset.get_image(parameters=parameters).hash_list
                     response_list = self._unique(response_list)
-                    representation = {
+                    response = {
                         'base_mime_type': self.base_content_type,
                         'id': interpretation.id,
                         'string': string,
@@ -514,7 +540,7 @@ class URLmethod:
                         'response': response_list,
                         'index': index,
                     }
-                    representation_list.append(representation)
+                    self.response_list.append(response)
                     index += 1
                 else:
                     pass
@@ -528,7 +554,7 @@ class URLmethod:
             else:
                 ens_list = full_ensemble_list
             if columns and rows and page:
-                user_page_num = int(page)
+                #user_page_num = int(page)
                 user_columns, columns = int(columns), int(columns)
                 user_rows = int(rows)
                 dataset_size = len(ens_list)
@@ -562,10 +588,9 @@ class URLmethod:
             else:
                 pass
             self.response_list = response_list
-            representation_list = response_list
         else:
             pass
-        return representation_list
+        return self.response_list
 
     def cas(self, string):
         url_parameters = self.url_parameters.copy()
@@ -619,7 +644,8 @@ class URLmethod:
                     }
                     representation_list.append(representation)
                     index += 1
-        # end of interpretation loop
+                else:
+                    pass
         if self.output_format == 'plain':
             if structure_index:
                 i = int(structure_index)
@@ -652,13 +678,6 @@ class URLmethod:
         self.prop(string)
         return self
 
-    def twirl(self, string):
-        url_parameters = self.url_parameters.copy()
-        url_parameters.__setitem__('get3d', 1)
-        self.url_parameters = url_parameters
-        self.prop(string)
-        return self
-
     @staticmethod
     def _unique(input_list):
         # creates a unique list without changing the order of the remaining list elements
@@ -676,6 +695,8 @@ class Resolver(object):
         self.request = request
 
     def resolve(self, identifier, representation):
-        url_method = URLmethod(representation, self.request)
-        url_method.parser(identifier)
+        url_method = Dispatcher(representation, self.request)
+        url_method.parse(identifier)
         return url_method.response_list
+
+

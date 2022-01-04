@@ -1,14 +1,10 @@
 import logging
 
-from django.test import TestCase, SimpleTestCase, Client, RequestFactory
+from django.test import TestCase, Client, RequestFactory
 from parameterized import parameterized
-
 from pycactvs import Ens
 
-from custom.cactvs import CactvsHash, CactvsMinimol
-from dispatcher import URLmethod
-from structure.models import Structure2, InChI
-from structure.resolver import ChemicalStructure
+from dispatcher import Dispatcher
 
 logger = logging.getLogger('cirx')
 
@@ -38,10 +34,9 @@ class DispatcherTests(TestCase):
         if operator_parameter:
             string = "%s:%s" % (operator_parameter, string)
 
-        url_method = URLmethod(request=request, representation=representation)
-        logger.info("u > %s " % (url_method, ))
+        dispatcher = Dispatcher(request=request, representation=representation)
 
-        resolved_string, representation, response, content_type = url_method.parser(string)
+        resolved_string, representation, response, content_type = dispatcher.parse(string)
         logger.info("r > %s : %s : %s : %s" % (resolved_string, representation, response, content_type))
 
         self.assertEqual(response, expected[0])

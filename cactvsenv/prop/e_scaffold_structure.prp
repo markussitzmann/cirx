@@ -1,0 +1,53 @@
+# tkserver Property Definition by Wolf Ihlenfeldt 08/13/2003 14:26 cclinuxsvr02
+NAME E_SCAFFOLD_STRUCTURE
+AUTHOR "Wolf-D. Ihlenfeldt"
+EMAIL wdi@xemistry.com
+VERSION 1.0
+DATE "2003-08-13 14:25:35"
+DESCRIPTION "Scaffold structure"
+OUTMODE P_OUT_YES
+OUTLEVEL 4
+MENUNAME "Scaffold Structure"
+VALTYPE P_STRUCTURE
+INVALIDATION INVAL_NEVER
+ATTACHMENT P_ENS
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME CSgetE_SCAFFOLD_STRUCTURE 1
+proc CSgetE_SCAFFOLD_STRUCTURE {eh} {
+	set mode [prop getparam E_SCAFFOLD_STRUCTURE mode]
+	if {[ens rings $eh {} count]==0} {
+		set ehscaf [ens create]
+	} else {
+		set ehscaf [ens dup $eh {} 0 {} 1]
+		ens uncharge $ehscaf
+		eval atom delete $ehscaf [ens atoms $ehscaf asidechain]
+		ens purge $ehscaf stereochemistry
+		ens need $ehscaf B_FLAGS recalc
+		if {$mode=="archetype"} {
+			foreach b [ens bonds $ehscaf multibond] {
+				if {[catch {bond create $ehscaf $b 1}]} {
+					error "cannot set order of bond [bond atoms $ehscaf $b] to 1"
+				}
+			}
+			foreach a [ens atoms $ehscaf heteroatom] {
+				if {[catch {atom change $ehscaf $a C}]} {
+					error "valence violation on change of atom $a"
+				}
+			}
+		}
+		ens hadd $ehscaf
+	}
+	ens set $eh E_SCAFFOLD_STRUCTURE $ehscaf
+	ens delete $ehscaf
+}
+MFUNCNAME NULL
+LOGMODE DONTCARE
+COMMENT "mode 'instance' will generate graph with elements and bond order, mode 'archetype' pure C graph"
+PARAMETERS "mode instance"
+DEFAULTPARAMS "mode instance"
+NAMESPACE .xemistry.com
+LITERATURE "Bemis, Murcko; J. Med. Chem. 1996, 39, 2887-2893"

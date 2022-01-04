@@ -1,0 +1,89 @@
+# tkserver Property Definition by Markus Sitzmann 2010
+NAME E_RESOLVER_TAUTOMERS
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "2007-02-28 15:20:31"
+DESCRIPTION "tautomers"
+OUTMODE P_OUT_YES
+OUTLEVEL 4
+MENUNAME "Tautomers"
+VALTYPE P_DATASET
+INVALIDATION INVAL_ATOMCHANGE|INVAL_BONDCHANGE|INVAL_MERGE|INVAL_ATOM|INVAL_BOND|INVAL_RING
+DEPENDS "A_TYPE A_ELEMENT B_TYPE B_ORDER"
+ATTACHMENT P_ENS
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+REGEXPFLAGS none
+CONSTRAINTS NONE
+TIMEOUT 0
+ACCESS PA_NONE
+PARAMETERS maxens 1000 timeout 0 setcount 0 usekekuleset 0 addh 0 preservecoordinates 0 maxtransforms 500
+DEFAULTPARAMS maxens 1000 timeout 0 setcount 0 usekekuleset 0 addh 0 preservecoordinates 0 maxtransforms 500
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME get_tautomers 1
+
+proc get_tautomers {ehandle} {
+	if {[prop getparam E_RESOLVER_TAUTOMERS addh]} {
+		ens hadd $ehandle
+	}
+	set tlist {}
+		
+	lappend tlist {{[O,S,Se,Te;X1:1]=[C;z{1-2}:2][CX4R{0-2}:3][#1:4]>>[#1:4][O,S,Se,Te;X2:1][#6;z{1-2}:2]=[C,cz{0-1}R{0-1}:3] 1.3 enol/thioenol}}
+	# long-range enol transform
+	lappend tlist {{[O,S,Se,Te;X1:1]=[Cz1H0:2][C:5]=[C:6][CX4z0,NX3:3][#1:4]>>[#1:4][O,S,Se,Te;X2:1][Cz1:2]=[C:5][C:6]=[Cz0,N:3] 1.5 enol}}
+	# simple imine transform
+	lappend tlist {{[#1,a:5][NX2:1]=[Cz1:2][CX4R{0-2}:3][#1:4]>>[#1,a:5][NX3:1]([#1:4])[Cz1,Cz2:2]=[C:3] simple imine}}
+	lappend tlist {{[Cz0R0X3:1]([C:5])=[C:2][Nz0:3][#1:4]>>[#1:4][Cz0R0X4:1]([C:5])[c:2]=[nz0:3] special imine}}
+	# aro heteroatom shift
+	lappend tlist {{[#1:4][N:1][C;e6:2]=[O,NX2:3]>>[NX2,nX2:1]=[C,c;e6:2][O,N:3][#1:4] 1.3 aro heteroatom H shift}}
+	# hetero atom hydrogen exchange
+	lappend tlist {{[N,n,S,s,O,o,Se,Te:1]=[NX2,nX2,C,c,P,p:2][N,n,S,O,Se,Te:3][#1:4]>>[#1:4][N,n,S,O,Se,Te:1][NX2,nX2,C,c,P,p:2]=[N,n,S,s,O,o,Se,Te:3] 1.3 hetero atom hydrogen shift}}
+	# long-range hetero atom hydrogen exchange
+	lappend tlist {{[nX2,NX2,S,O,Se,Te:1]=[C,c,nX2,NX2:6][C,c:5]=[C,c,nX2:2][N,n,S,s,O,o,Se,Te:3][#1:4]>>[#1:4][N,n,S,O,Se,Te:1][C,c,nX2,NX2:6]=[C,c:5][C,c,nX2:2]=[NX2,S,O,Se,Te:3] 1.5 aro heteroatom H shift (1)}}
+	lappend tlist {{[n,s,o:1]=[c,n:6][c:5]=[c,n:2][n,s,o:3][#1:4]>>[#1:4][n,s,o:1][c,n:6]=[c:5][c,n:2]=[n,s,o:3] 1.5 aro heteroatom H shift (2)}}
+	# changed!
+	lappend tlist {{[nX2,NX2,S,O,Se,Te,Cz0X3:1]=[c,C,NX2,nX2:6][C,c:5]=[C,c,NX2,nX2:2][C,c,NX2,nX2:7]=[C,c,NX2,nX2:8][N,n,S,s,O,o,Se,Te:3][#1:4]>>[#1:4][N,n,S,O,Se,Te,Cz0X4:1][C,c,NX2,nX2:6]=[C,c:5][C,c,NX2,nX2:2]=[C,c,NX2,nX2:7][C,c,NX2,nX2:8]=[NX2,S,O,Se,Te:3] 1.7 aro heteroatom H shift}}
+#	lappend tlist {{[nX2,NX2,S,O,Se,Te:1]=[c,C,NX2,nX2:6][C,c:5]=[C,c,NX2,nX2:2][C,c,NX2,nX2:7]=[C,c,NX2,nX2:8][N,n,S,s,O,o,Se,Te:3][#1:4]>>[#1:4][N,n,S,O,Se,Te:1][C,c,NX2,nX2:6]=[C,c:5][C,c,NX2,nX2:2]=[C,c,NX2,nX2:7][C,c,NX2,nX2:8]=[NX2,S,O,Se,Te:3] 1.7 aro heteroatom H shift}}
+	lappend tlist {{[#1:1][n,N,O:2][c,nX2,C:3]=[c,nX2,C:4][c,nX2:5]=[c,nX2:6][c,nX2:7]=[c,nX2:8][c,nX2,C:9]=[n,N,O:10]>>[N,n,O:2]=[C,c,nX2:3][c,nX2:4]=[c,nX2:5][c,nX2:6]=[c,nX2:7][c,nX2:8]=[c,nX2:9][n,O:10][#1:1] 1.9 aro heteroatom H shift}}
+	lappend tlist {{[#1:1][n,N,O:2][c,nX2,C:3]=[c,nX2,C:4][c,nX2:5]=[c,C,nX2:6][c,C,nX2:7]=[c,C,nX2:8][c,nX2,C:9]=[c,C,nX2:10][c,C,nX2:11]=[nX2,NX2,O:12]>>[NX2,nX2,O:2]=[C,c,nX2:3][c,C,nX2:4]=[c,C,nX2:5][c,C,nX2:6]=[c,C,nX2:7][c,C,nX2:8]=[c,C,nX2:9][c,C,nX2:10]=[c,C,nX2:11][nX2,O:12][#1:1] 1.11 aro heteroatom H shift}}
+	
+	# keten/inol exchange
+	lappend tlist {{[O,S,Se,Te;X1:1]=[C:2]=[C:3][#1:4]>>[#1:4][O,S,Se,Te;X2:1][C:2]#[C:3] keten-inol exchange}}
+	# nitro/aci with ionic nitro group
+	lappend tlist {{[#1:1][C:2][N+:3]([O-:5])=[O:4]>>[C:2]=[N+:3]([O-:5])[O:4][#1:1] nitro/aci ionic} 1 bidirectional {checkcharges setname}}
+	# nitro/aci with pentavalent nitro group
+	lappend tlist {{[#1:1][C:2][N:3](=[O:5])=[O:4]>>[C:2]=[N:3](=[O:5])[O:4][#1:1] nitro/aci pentavalent}}
+	# nitroso/oxim
+	lappend tlist {{[#1:1][O:2][Nz1:3]=[C:4]>>[O:2]=[Nz1:3][C:4][#1:1] nitroso/oxim}}
+	# nitroso/oxim through aro ring to phenol
+	lappend tlist {{[#1:1][O:2][N:3]=[C:4][C:5]=[C:6][C:7]=[O:8]>>[O:2]=[N:3][c:4]=[c:5][c:6]=[c:7][O:8][#1:1] nitroso/oxim via phenol}}
+	# cyanuric acid and various other special cases
+	lappend tlist {{[#1:1][O:2][C:3]#[N:4]>>[O:2]=[C:3]=[N:4][#1:1] cynanuric acid}}
+	lappend tlist {{[#1:1][O,N:2][C:3]=[S,Se,Te:4]=[O:5]>>[O,N:2]=[C:3][S,Se,Te:4][O:5][#1:1] formamidinesulfonic acid}}
+	lappend tlist {{[#1:1][C0:2]#[N0:3]>>[C-:2]#[N+:3][#1:1] isocyanide} 1 bidirectional {checkcharges checkaro setname}}
+	lappend tlist {{[#1:1][O:2][P:3]>>[O:2]=[P:3][#1:1] phosphonic acid}}
+	lappend tlist {{[#1:1][O,S,N:2][c,C;z2;r5:3]=[C,c;r5:4][c,C;r5:5]>>[O,S,N:2]=[Cz2r5:3][C&r5R{0-2}:4]([#1:1])[C,c;r5:5] furanones}}
+
+
+	# to trace the applied transforms: add 'setname' flag
+	set trafoflags {preservecharges checkaro setname} 
+	if {[prop getparam E_RESOLVER_TAUTOMERS preservecoordinates]} {
+		lappend trafoflags preservecoordinates
+	}
+	if {[prop getparam E_RESOLVER_TAUTOMERS usekekuleset]} {
+		set kset [ens get $ehandle E_KEKULESET]
+		if {[catch {dataset transform $kset $tlist bidirectional multistep all $trafoflags none {} [prop getparam E_RESOLVER_TAUTOMERS maxens] [prop getparam E_RESOLVER_TAUTOMERS timeout] [prop getparam E_RESOLVER_TAUTOMERS maxtransforms]} tautomers]} {
+			error "transform failure: $tautomers"
+		}
+	} else {
+		if {[catch {ens transform $ehandle $tlist bidirectional multistep all $trafoflags none {} [prop getparam E_RESOLVER_TAUTOMERS maxens] [prop getparam E_RESOLVER_TAUTOMERS timeout] [prop getparam E_RESOLVER_TAUTOMERS maxtransforms]} tautomers]} {
+			error "transform failure: $tautomers"
+		}
+	}
+ 	if {[prop getparam E_RESOLVER_TAUTOMERS setcount]} {
+		ens set $ehandle E_TAUTOMER_COUNT [expr [llength $tautomers] + 1]
+	}
+	set tautomers [concat [ens dup $ehandle] $tautomers]
+	ens set $ehandle E_RESOLVER_TAUTOMERS $tautomers
+}

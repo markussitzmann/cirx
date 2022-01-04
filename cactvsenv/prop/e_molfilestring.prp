@@ -1,0 +1,46 @@
+# tkserver Property Definition by Markus Sitzmann 2010
+NAME E_MOLFILESTRING
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "Oct 30 11:23:49 2010"
+PUBKEY 
+DESCRIPTION "Molfile String"
+OUTMODE P_OUT_YES
+KEYTYPE P_INT
+OUTLEVEL 4
+KEY UDEFPROP
+MAGIC ???
+DEFAULT ???
+VALTYPE P_STRING
+INVALIDATION
+DEPENDS
+ATTACHMENT P_ENS
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+PORT 16520
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+PARAMETERS "format sdf get3d 0 force2d 1"
+DEFAULTPARAMS "format sdf get3d 0 force2d 1"
+FUNCNAME "get_molfilestring" 1
+
+proc get_molfilestring {ehandle} {
+	set format [prop getparam E_MOLFILESTRING format]
+	if {[prop getparam E_MOLFILESTRING get3d]} {
+		prop setparam E_MOLFILESTRING force2d 0
+	}
+	if {![prop getparam E_MOLFILESTRING force2d]} { 
+		catch {ens need $ehandle A_XYZ}
+		if {![catch {molfile string $ehandle writeflags write3d format $format} molfilestring]} {
+			ens set $ehandle E_MOLFILESTRING $molfilestring
+		} else {
+			ens need $ehandle A_XY
+			ens set $ehandle E_MOLFILESTRING [molfile string $ehandle writeflags write2d format $format]
+		}
+	} else {
+		ens need $ehandle A_XY
+		ens set $ehandle E_MOLFILESTRING [molfile string $ehandle writeflags write2d format $format]
+	}
+}

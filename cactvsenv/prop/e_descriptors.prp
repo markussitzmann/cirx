@@ -1,0 +1,880 @@
+# tkcactvs Property Definition by Wolf-D. Ihlenfeldt 07/05/2008 23:41 blackbox
+NAME E_DESCRIPTORS
+AUTHOR "Wolf-D. Ihlenfeldt"
+EMAIL wdi@xemistry.com
+VERSION 1.0
+DATE "2008-07-05 23:41:23"
+DESCRIPTION "MOLD2 descriptor collection"
+OUTMODE P_OUT_YES
+OUTLEVEL 4
+MENUNAME Descriptors
+VALTYPE P_FLOATVEC
+INVALIDATION INVAL_ATOMCHANGE|INVAL_BONDCHANGE|INVAL_MERGE
+ATTACHMENT P_ENS
+SUBFIELDS "D001:float D002:float D003:float D004:float D005:float D006:float D007:float D008:float D009:float D010:float D011:float D012:float D013:float D014:float D015:float D016:float D017:float D018:float D019:float D020:float D021:float D022:float D023:float D024:float D025:float D026:float D027:float D028:float D029:float D030:float D031:float D032:float D033:float D034:float D035:float D036:float D037:float D038:float D039:float D040:float D041:float D042:float D043:float D044:float D045:float D046:float D047:float D048:float D049:float D050:float D051:float D052:float D053:float D054:float D055:float D056:float D057:float D058:float D059:float D060:float D061:float D062:float D063:float D064:float D065:float D066:float D067:float D068:float D069:float D070:float D071:float D072:float D073:float D074:float D075:float D076:float D077:float D078:float D079:float D080:float D081:float D082:float D083:float D084:float D085:float D086:float D087:float D088:float D089:float D090:float D091:float D092:float D093:float D094:float D095:float D096:float D097:float D098:float D099:float D100:float D101:float D102:float D103:float D104:float D105:float D106:float D107:float D108:float D109:float D110:float D111:float D112:float D113:float D114:float D115:float D116:float D117:float D118:float D119:float D120:float D121:float D122:float D123:float D124:float D125:float D126:float D127:float D128:float D129:float D130:float D131:float D132:float D133:float D134:float D135:float D136:float D137:float D138:float D139:float D140:float D141:float D142:float D143:float D144:float D145:float D146:float D147:float D148:float D149:float D150:float D151:float D152:float D153:float D154:float D155:float D156:float D157:float D158:float D159:float D160:float D161:float D162:float D163:float D164:float D165:float D166:float D167:float D168:float D169:float D170:float D171:float D172:float D173:float D174:float D175:float D176:float D177:float D178:float D179:float D180:float D181:float D182:float D183:float D184:float D185:float D186:float D187:float D188:float D189:float D190:float D191:float D192:float D193:float D194:float D195:float D196:float D197:float D198:float D199:float D200:float D201:float D202:float D203:float D204:float D205:float D206:float D207:float D208:float D209:float D210:float D211:float D212:float D213:float D214:float D215:float D216:float D217:float D218:float D219:float D220:float D221:float D222:float D223:float D224:float D225:float D226:float D227:float D228:float D229:float D230:float D231:float D232:float D233:float D234:float D235:float D236:float D237:float D238:float D239:float D240:float D241:float D242:float D243:float D244:float D245:float D246:float D247:float D248:float D249:float D250:float D251:float D252:float D253:float D254:float D255:float D256:float D257:float D258:float D259:float D260:float D261:float D262:float D263:float D264:float D265:float D266:float D267:float D268:float D269:float D270:float D271:float D272:float D273:float D274:float D275:float D276:float D277:float D278:float D279:float D280:float D281:float D282:float D283:float D284:float D285:float D286:float D287:float D288:float D289:float D290:float D291:float D292:float D293:float D294:float D295:float D296:float D297:float D298:float D299:float D300:float D301:float D302:float D303:float D304:float D305:float D306:float D307:float D308:float D309:float D310:float D311:float D312:float D313:float D314:float D315:float D316:float D317:float D318:float D319:float D320:float D321:float D322:float D323:float D324:float D325:float D326:float D327:float D328:float D329:float D330:float D331:float D332:float D333:float D334:float D335:float D336:float D337:float D338:float D339:float D340:float D341:float D342:float D343:float D344:float D345:float D346:float D347:float D348:float D349:float D350:float D351:float D352:float D353:float D354:float D355:float D356:float D357:float D358:float D359:float D360:float D361:float D362:float D363:float D364:float D365:float D366:float D367:float D368:float D369:float D370:float D371:float D372:float D373:float D374:float D375:float D376:float D377:float D378:float D379:float D380:float D381:float D382:float D383:float D384:float D385:float D386:float D387:float D388:float D389:float D390:float D391:float D392:float D393:float D394:float D395:float D396:float D397:float D398:float D399:float D400:float D401:float D402:float D403:float D404:float D405:float D406:float D407:float D408:float D409:float D410:float D411:float D412:float D413:float D414:float D415:float D416:float D417:float D418:float D419:float D420:float D421:float D422:float D423:float D424:float D425:float D426:float D427:float D428:float D429:float D430:float D431:float D432:float D433:float D434:float D435:float D436:float D437:float D438:float D439:float D440:float D441:float D442:float D443:float D444:float D445:float D446:float D447:float D448:float D449:float D450:float D451:float D452:float D453:float D454:float D455:float D456:float D457:float D458:float D459:float D460:float D461:float D462:float D463:float D464:float D465:float D466:float D467:float D468:float D469:float D470:float D471:float D472:float D473:float D474:float D475:float D476:float D477:float D478:float D479:float D480:float D481:float D482:float D483:float D484:float D485:float D486:float D487:float D488:float D489:float D490:float D491:float D492:float D493:float D494:float D495:float D496:float D497:float D498:float D499:float D500:float D501:float D502:float D503:float D504:float D505:float D506:float D507:float D508:float D509:float D510:float D511:float D512:float D513:float D514:float D515:float D516:float D517:float D518:float D519:float D520:float D521:float D522:float D523:float D524:float D525:float D526:float D527:float D528:float D529:float D530:float D531:float D532:float D533:float D534:float D535:float D536:float D537:float D538:float D539:float D540:float D541:float D542:float D543:float D544:float D545:float D546:float D547:float D548:float D549:float D550:float D551:float D552:float D553:float D554:float D555:float D556:float D557:float D558:float D559:float D560:float D561:float D562:float D563:float D564:float D565:float D566:float D567:float D568:float D569:float D570:float D571:float D572:float D573:float D574:float D575:float D576:float D577:float D578:float D579:float D580:float D581:float D582:float D583:float D584:float D585:float D586:float D587:float D588:float D589:float D590:float D591:float D592:float D593:float D594:float D595:float D596:float D597:float D598:float D599:float D600:float D601:float D602:float D603:float D604:float D605:float D606:float D607:float D608:float D609:float D610:float D611:float D612:float D613:float D614:float D615:float D616:float D617:float D618:float D619:float D620:float D621:float D622:float D623:float D624:float D625:float D626:float D627:float D628:float D629:float D630:float D631:float D632:float D633:float D634:float D635:float D636:float D637:float D638:float D639:float D640:float D641:float D642:float D643:float D644:float D645:float D646:float D647:float D648:float D649:float D650:float D651:float D652:float D653:float D654:float D655:float D656:float D657:float D658:float D659:float D660:float D661:float D662:float D663:float D664:float D665:float D666:float D667:float D668:float D669:float D670:float D671:float D672:float D673:float D674:float D675:float D676:float D677:float D678:float D679:float D680:float D681:float D682:float D683:float D684:float D685:float D686:float D687:float D688:float D689:float D690:float D691:float D692:float D693:float D694:float D695:float D696:float D697:float D698:float D699:float D700:float D701:float D702:float D703:float D704:float D705:float D706:float D707:float D708:float D709:float D710:float D711:float D712:float D713:float D714:float D715:float D716:float D717:float D718:float D719:float D720:float D721:float D722:float D723:float D724:float D725:float D726:float D727:float D728:float D729:float D730:float D731:float D732:float D733:float D734:float D735:float D736:float D737:float D738:float D739:float D740:float D741:float D742:float D743:float D744:float D745:float D746:float D747:float D748:float D749:float D750:float D751:float D752:float D753:float D754:float D755:float D756:float D757:float D758:float D759:float D760:float D761:float D762:float D763:float D764:float D765:float D766:float D767:float D768:float D769:float D770:float D771:float D772:float D773:float D774:float D775:float D776:float D777:float"
+# D001 #6-membered all carbon aro rings
+# D002 #3-membered rings
+# D003 #4-membered rings
+# D004 #5-membered rings
+# D005 #6-membered rings
+# D006 #7-membered rings
+# D007 #8-membered rings
+# D008 #9-membered rings
+# D009 #10-membered rings
+# D010 #11-membered rings
+# D011 #12-membered rings
+# D012 #multiple bonds
+# D013 #rings
+# D014 #rotatable bonds
+# D015 rotatable bond fraction
+# D016 #double bonds
+# D017 #aro bonds
+# D018 Sum of VB bond orders without H bonds
+# ------ 
+# D019 #H
+# D020 #He
+# D021 #Li
+# D022 #Be
+# D023 #B
+# D024 #C
+# D025 #N
+# D026 #O
+# D027 #F
+# D028 #Ne
+# D029 #Na
+# D030 #Mg
+# D031 #Al
+# D032 #Si
+# D033 #P
+# D034 #S
+# D035 #Cl
+# D036 #Ar
+# D037 #K
+# D038 #Ca
+# D039 #Sc
+# D040 #Ti
+# D041 #V
+# D042 #Cr
+# D043 #Mn
+# D044 #Fe
+# D045 #Co
+# D046 #Ni
+# D047 #Cu
+# D048 #Zn
+# D049 #Ga
+# D050 #Ge
+# D051 #As
+# D052 #Se
+# D053 #Br
+# D054 #Kr
+# D055 #Rb
+# D056 #Sr
+# D057 #Y
+# D058 #Zr
+# D059 #Nb
+# D060 #Mo
+# D061 #Tc
+# D062 #Ru
+# D063 #Rh
+# D064 #Pd
+# D065 #Ag
+# D066 #Cd
+# D067 #In
+# D068 #Sn
+# D069 #Sb
+# D070 #Te
+# D071 #I
+# D072 #Xe
+# D073 #Cs
+# D074 #Ba
+# D075 #La
+# D076 #Ce
+# D077 #Pr
+# D078 #Nd
+# D079 #Pm
+# D080 #Sm
+# D081 #Eu
+# D082 #Gd
+# D083 #Tb
+# D084 #Dy
+# D085 #Ho
+# D086 #Er
+# D087 #Tm
+# D088 #Yb
+# D089 #Lu
+# D090 #Hf
+# D091 #Ta
+# D092 #W
+# D093 #Re
+# D094 #Os
+# D095 #Ir
+# D096 #Pt
+# D097 #Au
+# D098 #Hg
+# D090 #Tl
+# D100 #Pb
+# D101 #Bi
+# D102 #Po
+# D103 #At
+# D104 #Rn
+# D105 #Fr
+# D106 #Ra
+# D107 #Ac
+# D108 #Th
+# D109 #Pa
+# D110 #U
+# D111 #Np
+# D112 #Pu
+# D113 #Am
+# D114 #Cm
+# D115 #Bk
+# D116 #Cf
+# D117 #Es
+# D118 #Fm
+# D119 #Md
+# D120 #No
+# D121 #Lr
+# ------ 
+# D122 MW
+# D123 avg. atomic weight
+# ------ 
+# D124 #atoms
+# D125 #non-h atoms
+# D126 #bonds
+# D127 #non-h bonds
+# D128 #rings
+# D129 #triple bonds
+# D130 #halogen atoms
+# D131 molecular size index
+# D132 atomic composition index
+# D133 mean value of atomic composition index
+# D134 branch index
+# D135 molecular structure connectivity index
+# ------ 
+# D136 Narumi topo index
+# D137 Harmonic topo index
+# D138 Geometric topo index
+# D139 topo distance count order-3
+# D140 log of vertex distance path count
+# D141 avg of vertex distance path count
+# D142 Balaban type mean squre vertex distance index
+# ------ 
+# D143 sum of atomic vdw carbon scale
+# D144 mean of atomic vdw carbon scale
+# D145 sum of atomic EN Pauling scale on carbon
+# D146 mean of atomic EN Pauling scale on carbon
+# D147 sum of atomic EN Sanderson scale on carbon
+# D148 mean of atomic EN Sanderson scale on carbon
+# D149 sum of atomic EN Allred-Rochow scale on carbon
+# D150 mean of atomic EN Allred-Rochow scale on carbon
+# ------ 
+# D151 sum of atomic polarizability scaled on c/sp3
+# D152 mean of atomic polarizability scaled on c/sp3
+# ------ 
+# D153 Zagreb order-1 index
+# D154 Zagreb order-1 index with valuie of valence vertex degrees
+# D155 Zagreb order-2 index
+# D156 Vertex degree topo index
+# ------ 
+# D157 second Zagreb order-2 ondex with value of valence vertex degrees
+# ------ 
+# D158 valence electrons of principal quantum index
+# ------ 
+# D159 Schultz-type molecular topo index
+# ------ 
+# D160 Schultz-type molecular topo index of valence degrees
+# ------ 
+# D161 molecular topo distance index (Gutman)
+# ------ 
+# D162 molecular topo distance index (Gutman) of valence degrees
+# ------ 
+# D163 molecular size and branching index
+# ------ 
+# D164 index of terminal vertex matrix
+# ------ 
+# D165 Wiener index
+# ------ 
+# D166 average path length in Wiener index
+# ------ 
+# D167 reciprocal index of Wiener distance matrix
+# ------ 
+# D168 Harary index
+# ------ 
+# D169 index of Laplacian matrix
+# D170 first non-zero eigenvalue of Laplacian matrix
+# ------ 
+# D171 Wiener path index
+# ------ 
+# D172 reciprocal Wieder path index
+# ------ 
+# D173 Mohar order-2 index
+# ------ 
+# D174 maximum path index
+# D175 Wiener type maximum path index
+# D176 reciprocal Wiener type maximum path index
+# ------ 
+# D177 minimum-path / maximum-path index
+# ------ 
+# D178 all-path Wiener - sum of edges in the shortest paths between all pairs of non-h atoms
+# ------ 
+# D179 heteroatoms and bonds weighted distance matrix
+# ------ 
+# D180 mass weighted distance matrix
+# ------ 
+# D181 index of VdW weighted distance matrix
+# ------ 
+# D182 distance matrix of EN weighted with Pauling scale
+# D183 distance matrix of EN weighted with Sanderson scale
+# D184 distance matrix of EN weighted with Allred-Rochow scale
+# ------ 
+# D185 polarizabilty weighted distance matrix
+# ------ 
+# D186 average vertex distance connecitivy index
+# ------ 
+# D187 Balaban heteroatoms bonds weighted index
+# D188 Balaban mass weighted index
+# D189 Balaban vdW weighted index
+# D190 Balaban EN weighted with Pauling scale
+# D191 Balaban EN weighted with Sanderson scale
+# D192 Balaban EN weighted with Allred-Rochow scale
+# D193 Balaban polarizability weighted index
+# ------ 
+# D194 maximum valence vertex electrotopological negative variation
+# D195 maximum valence vertex electrotopological positive variation
+# D196 sum of absolute electrotopological negative variation
+# D197 electrotopological index
+# D198 sum electrotopological index
+# D199 mean electrotopological index
+# ------ 
+# D200 vertex connectivity order-0 index
+# D201 vertex connectivity order-1 index
+# D202 vertex connectivity order-2 index
+# D203 vertex connectivity order-3 index
+# D204 vertex connectivity order-4 index
+# D205 vertex connectivity order-5 index
+# D206 avg vertex connectivity order-0 index
+# D207 avg vertex connectivity order-1 index
+# D208 avg vertex connectivity order-2 index
+# D209 avg vertex connectivity order-3 index
+# D210 avg vertex connectivity order-4 index
+# D211 avg vertex connectivity order-5 index
+# D212 valence vertex connectivity order-0 index
+# D213 valence vertex connectivity order-1 index
+# D214 valence vertex connectivity order-2 index
+# D215 valence vertex connectivity order-3 index
+# D216 valence vertex connectivity order-4 index
+# D217 valence vertex connectivity order-5 index
+# D218 avg alence vertex connectivity order-0 index
+# D219 avg alence vertex connectivity order-1 index
+# D220 avg alence vertex connectivity order-2 index
+# D221 avg alence vertex connectivity order-3 index
+# D222 avg alence vertex connectivity order-4 index
+# D223 avg alence vertex connectivity order-5 index
+# D224 principal quantum vertex connectivity order-0 index
+# D225 principal quantum vertex connectivity order-1 index
+# D226 principal quantum vertex connectivity order-2 index
+# D227 principal quantum vertex connectivity order-3 index
+# D228 principal quantum vertex connectivity order-4 index
+# D229 principal quantum vertex connectivity order-5 index
+# D230 aromaticity valence vertex connectivity order-1 index
+# ------ 
+# D231 sum of valence vertex connectivity order-1 index
+# ------ 
+# D232 reciprocal distance order-1 sum product index
+# D233 squared reciprocal distance order-1 sum product index
+# ------ 
+# D234 Kier atom 0-order path information index
+# ------ 
+# D235 Kier 1-path index
+# D236 Kier 2-path index
+# D237 Kier 3-path index
+# D238 molecular flexibility index
+# ------ 
+# D239 atom's connectivity index in longest path
+# D240 sum of the longest path of the atom
+# D241 avg longest path of the molecule
+# D242 avg of deviation of the average of the longest path
+# D243 avg of deviation of distance degree
+# D244 shortest path in molecule
+# D245 shortest path of centralization index
+# D246 maximum value of variation
+# ------ 
+# D247 EXP2 of path-distance/walk/distance over all atoms
+# D248 EXP3 of path-distance/walk/distance over all atoms
+# D249 EXP4 of path-distance/walk/distance over all atoms
+# D250 EXP5 of path-distance/walk/distance over all atoms
+# ------ 
+# D251 Petitjean index
+# ------ 
+# D252 structure centric index
+# D253 structure looping centric group index
+# ------ 
+# D254 radial centrix index
+# ------ 
+# D255 vertex distance count equality index
+# D256 vertex distance count magnitude index
+# D257 total vertex distance count equality index
+# D258 total vertex distance count magnitude index
+# ------ 
+# D259 mean of distance degree equality index
+# D260 mean of distance degree magnitude index
+# ------ 
+# D261 information of vertex degree magnitude index
+# D262 information of bonds index
+# ------ 
+# D263 vertex distance path count index
+# D264 complexity of vertex distance path count index
+# D265 vertex distance information index
+# D266 relative of vertex distance information index
+# D267 mean of vertex distance information index
+# D268 extended of vertex distance information index
+# ------ 
+# D269 information content order-0 index
+# D270 total information content order-0 index
+# D271 structural information content order-0 index
+# D272 complementary information content order-0 index
+# D273 bond information content order-0 index
+# D274 information content order-1 index
+# D275 total information content order-1 index
+# D276 structural information content order-1 index
+# D277 complementary information content order-1 index
+# D278 bond information content order-1 index
+# D279 information content order-2 index
+# D280 total information content order-2 index
+# D281 structural information content order-2 index
+# D282 complementary information content order-2 index
+# D283 bond information content order-2 index
+# D284 information content order-3 index
+# D285 total information content order-3 index
+# D286 structural information content order-3 index
+# D287 complementary information content order-3 index
+# D288 bond information content order-3 index
+# D289 information content order-4 index
+# D290 total information content order-4 index
+# D291 structural information content order-4 index
+# D292 complementary information content order-4 index
+# D293 bond information content order-4 index
+# D294 information content order-5 index
+# D295 total information content order-5 index
+# D296 structural information content order-5 index
+# D297 complementary information content order-5 index
+# D298 bond information content order-5 index
+# ------ 
+# D299 maximum eigenvalue
+# ------ 
+# D300 spanning tree with log value
+# ------ 
+# D301 maximum eigenvalue weighted by heteroatoms and multiple bonds matrix
+# D302 maximum eigenvalue weighted by mass distance matrix
+# D303 maximum eigenvalue weighted by vdW distance matrix
+# D304 maximum eigenvalue weighted by polarizability matrix
+# D305 maximum eigenvalue weighted by EN Pauling scale matrix
+# D306 maximum eigenvalue weighted by EN Sanderson scale matrix
+# D307 maximum eigenvalue weighted by EN Alfred-Rochow scale matrix
+# D308 sum eigenvalue weighted by heteroatoms and multiple bonds matrix
+# D309 sum eigenvalue weighted by mass distance matrixranch index
+# D310 sum eigenvalue weighted by vdW distance matrix
+# D311 sum eigenvalue weighted by polarizability matrix
+# D312 sum eigenvalue weighted by EN Pauling scale matrix index
+# D313 sum eigenvalue weighted by EN Sanderson scale matrix index
+# D314 sum eigenvalue weighted by EN Alfred-Rochow scale matrix
+# D315 sum absolute eigenvalue weighted by heteroatoms and multiple bonds matrix
+# D316 sum absolute eigenvalue weighted by mass distance matrixranch index
+# D317 sum absolute eigenvalue weighted by vdW distance matrix
+# D318 sum absolute eigenvalue weighted by polarizability matrix
+# D319 sum absolute eigenvalue weighted by EN Pauling scale matrix index
+# D320 sum absolute eigenvalue weighted by EN Sanderson scale matrix index
+# D321 sum absolute eigenvalue weighted by EN Alfred-Rochow scale matrix
+# ------ 
+# D322 distance+detour path with ring index of order 3
+# D323 distance+detour path with ring index of order 4
+# D324 distance+detour path with ring index of order 5
+# D325 distance+detour path with ring index of order 6
+# D326 distance+detour path with ring index of order 7
+# D327 distance+detour path with ring index of order 8
+# D328 distance+detour path with ring index of order 9
+# D329 distance+detour path with ring index of order 10
+# D330 distance+detour path with ring index of order 11
+# D331 distance+detour path with ring index of order 12
+# ------ 
+# D332 distance+detour path on ring index of order 3 (circuits)
+# D333 distance+detour path on ring index of order 4 (circuits)
+# D334 distance+detour path on ring index of order 5 (circuits)
+# D335 distance+detour path on ring index of order 6 (circuits)
+# D336 distance+detour path on ring index of order 7 (circuits)
+# D337 distance+detour path on ring index of order 8 (circuits)
+# D338 distance+detour path on ring index of order 9 (circuits)
+# D339 distance+detour path on ring index of order 10 (circuits)
+# D340 distance+detour path on ring index of order 11 (circuits)
+# D341 distance+detour path on ring index of order 12 (circuits)
+# ------ 
+# D342 molecular topological path index of oder 02
+# D343 molecular topological path index of oder 03
+# D344 molecular topological path index of oder 04
+# D345 molecular topological path index of oder 05
+# D346 molecular topological path index of oder 06
+# D347 molecular topological path index of oder 07
+# D348 molecular topological path index of oder 08
+# D349 molecular topological path index of oder 09
+# D350 molecular topological path index of oder 10
+# ------ 
+# D351 molecular topological multiple path index of oder 03
+# D352 molecular topological multiple path index of oder 04
+# D353 molecular topological multiple path index of oder 05
+# D354 molecular topological multiple path index of oder 06
+# D355 molecular topological multiple path index of oder 07
+# D356 molecular topological multiple path index of oder 08
+# D357 molecular topological multiple path index of oder 09
+# D358 molecular topological multiple path index of oder 10
+# D359 molecular topoloigcal all path index
+# D360 conventional bond index
+# D361 ratio of conventional bonds with total path counts
+# D362 ratio of difference of conventional bonds and total path counts
+# D363 Randic index
+# D364 Balaban all-path index
+# ------ 
+# D365 Balaban sort-path index
+# ------ 
+# D366 sum of topological distance between the vertices N and N
+# D367 sum of topological distance between the vertices N and P
+# D368 sum of topological distance between the vertices N and O
+# D369 sum of topological distance between the vertices N and S
+# D370 sum of topological distance between the vertices N and F
+# D371 sum of topological distance between the vertices N and Cl
+# D372 sum of topological distance between the vertices N and Br
+# D373 sum of topological distance between the vertices N and I
+# D374 sum of topological distance between the vertices O and O
+# D375 sum of topological distance between the vertices O and S
+# D376 sum of topological distance between the vertices O and P
+# D377 sum of topological distance between the vertices O and F
+# D378 sum of topological distance between the vertices O and Cl
+# D379 sum of topological distance between the vertices O and Br
+# D380 sum of topological distance between the vertices O and I
+# D381 sum of topological distance between the vertices S and S
+# D382 sum of topological distance between the vertices S and P
+# D383 sum of topological distance between the vertices S and F
+# D384 sum of topological distance between the vertices S and Cl
+# D385 sum of topological distance between the vertices S and Br
+# D386 sum of topological distance between the vertices S and I
+# D387 sum of topological distance between the vertices P and P
+# D388 sum of topological distance between the vertices P and F
+# D389 sum of topological distance between the vertices P and Cl
+# D390 sum of topological distance between the vertices P and Br
+# D391 sum of topological distance between the vertices P and I
+# D392 sum of topological distance between the vertices F and F
+# D393 sum of topological distance between the vertices F and Cl
+# D394 sum of topological distance between the vertices F and Br
+# D395 sum of topological distance between the vertices F and I
+# D396 sum of topological distance between the vertices Cl and Cl
+# D397 sum of topological distance between the vertices Cl and Br
+# D398 sum of topological distance between the vertices Cl and I
+# D399 sum of topological distance between the vertices Br and Br
+# D400 sum of topological distance between the vertices Br and I
+# D401 sum of topological distance between the vertices I and I
+# ------ 
+# D402 walk count order-01
+# D403 walk count order-02
+# D404 walk count order-03
+# D405 walk count order-04
+# D406 walk count order-05
+# D407 walk count order-06
+# D408 walk count max-10steps
+# ------ 
+# D409 walk-returning count order-1
+# D410 walk-returning count order-2
+# D411 walk-returning count order-3
+# D412 walk-returning count order-4
+# D413 walk-returning count order-5
+# D414 walk-returning count order-6
+# ------ 
+# D415 topological structure autocorrelation length-1 weighted by atomic mass
+# D416 topological structure autocorrelation length-2 weighted by atomic mass
+# D417 topological structure autocorrelation length-3 weighted by atomic mass
+# D418 topological structure autocorrelation length-4 weighted by atomic mass
+# D419 topological structure autocorrelation length-5 weighted by atomic mass
+# D420 topological structure autocorrelation length-6 weighted by atomic mass
+# D421 topological structure autocorrelation length-7 weighted by atomic mass
+# D422 topological structure autocorrelation length-8 weighted by atomic mass
+# D423 topological structure autocorrelation length-1 weighted by vdW volumes
+# D424 topological structure autocorrelation length-2 weighted by vdW volumes
+# D425 topological structure autocorrelation length-3 weighted by vdW volumes
+# D426 topological structure autocorrelation length-4 weighted by vdW volumes
+# D427 topological structure autocorrelation length-5 weighted by vdW volumes
+# D428 topological structure autocorrelation length-6 weighted by vdW volumes
+# D429 topological structure autocorrelation length-7 weighted by vdW volumes
+# D430 topological structure autocorrelation length-8 weighted by vdW volumes
+# D431 topological structure autocorrelation length-1 weighted by Sanderson EN
+# D432 topological structure autocorrelation length-2 weighted by Sanderson EN
+# D433 topological structure autocorrelation length-3 weighted by Sanderson EN
+# D434 topological structure autocorrelation length-4 weighted by Sanderson EN
+# D435 topological structure autocorrelation length-5 weighted by Sanderson EN
+# D436 topological structure autocorrelation length-6 weighted by Sanderson EN
+# D437 topological structure autocorrelation length-7 weighted by Sanderson EN
+# D438 topological structure autocorrelation length-8 weighted by Sanderson EN
+# D439 topological structure autocorrelation length-1 weighted by atomic polarizabilities
+# D440 topological structure autocorrelation length-2 weighted by atomic polarizabilities
+# D441 topological structure autocorrelation length-3 weighted by atomic polarizabilities
+# D442 topological structure autocorrelation length-4 weighted by atomic polarizabilities
+# D443 topological structure autocorrelation length-5 weighted by atomic polarizabilities
+# D444 topological structure autocorrelation length-6 weighted by atomic polarizabilities
+# D445 topological structure autocorrelation length-7 weighted by atomic polarizabilities
+# D446 topological structure autocorrelation length-8 weighted by atomic polarizabilities
+# ------ 
+# D447 Geary topological structure autocorr length-1 weighted by atomic masses
+# D448 Geary topological structure autocorr length-2 weighted by atomic masses
+# D449 Geary topological structure autocorr length-3 weighted by atomic masses
+# D450 Geary topological structure autocorr length-4 weighted by atomic masses
+# D451 Geary topological structure autocorr length-5 weighted by atomic masses
+# D452 Geary topological structure autocorr length-6 weighted by atomic masses
+# D453 Geary topological structure autocorr length-7 weighted by atomic masses
+# D454 Geary topological structure autocorr length-8 weighted by atomic masses
+# D455 Geary topological structure autocorr length-1 weighted by vdW volumes
+# D456 Geary topological structure autocorr length-2 weighted by vdW volumes
+# D457 Geary topological structure autocorr length-3 weighted by vdW volumes
+# D458 Geary topological structure autocorr length-4 weighted by vdW volumes
+# D459 Geary topological structure autocorr length-5 weighted by vdW volumes
+# D460 Geary topological structure autocorr length-6 weighted by vdW volumes
+# D461 Geary topological structure autocorr length-7 weighted by vdW volumes
+# D462 Geary topological structure autocorr length-8 weighted by vdW volumes
+# D463 Geary topological structure autocorr length-1 weighted by atomic Sanderson EN
+# D464 Geary topological structure autocorr length-2 weighted by atomic Sanderson EN
+# D465 Geary topological structure autocorr length-3 weighted by atomic Sanderson EN
+# D466 Geary topological structure autocorr length-4 weighted by atomic Sanderson EN
+# D467 Geary topological structure autocorr length-5 weighted by atomic Sanderson EN
+# D468 Geary topological structure autocorr length-6 weighted by atomic Sanderson EN
+# D469 Geary topological structure autocorr length-7 weighted by atomic Sanderson EN
+# D470 Geary topological structure autocorr length-8 weighted by atomic Sanderson EN
+# D471 Geary topological structure autocorr length-1 weighted by atomic polarizabilities
+# D472 Geary topological structure autocorr length-2 weighted by atomic polarizabilities
+# D473 Geary topological structure autocorr length-3 weighted by atomic polarizabilities
+# D474 Geary topological structure autocorr length-4 weighted by atomic polarizabilities
+# D475 Geary topological structure autocorr length-5 weighted by atomic polarizabilities
+# D476 Geary topological structure autocorr length-6 weighted by atomic polarizabilities
+# D477 Geary topological structure autocorr length-7 weighted by atomic polarizabilities
+# D478 Geary topological structure autocorr length-8 weighted by atomic polarizabilities
+# ------ 
+# D479 Moran topological structure autocorr length-1 weighted by atomic mass
+# D480 Moran topological structure autocorr length-2 weighted by atomic mass
+# D481 Moran topological structure autocorr length-3 weighted by atomic mass
+# D482 Moran topological structure autocorr length-4 weighted by atomic mass
+# D483 Moran topological structure autocorr length-5 weighted by atomic mass
+# D484 Moran topological structure autocorr length-6 weighted by atomic mass
+# D485 Moran topological structure autocorr length-7 weighted by atomic mass
+# D486 Moran topological structure autocorr length-8 weighted by atomic mass
+# D487 Moran topological structure autocorr length-1 weighted by vdW volumes
+# D488 Moran topological structure autocorr length-2 weighted by vdW volumes
+# D489 Moran topological structure autocorr length-3 weighted by vdW volumes
+# D490 Moran topological structure autocorr length-4 weighted by vdW volumes
+# D491 Moran topological structure autocorr length-5 weighted by vdW volumes
+# D492 Moran topological structure autocorr length-6 weighted by vdW volumes
+# D493 Moran topological structure autocorr length-7 weighted by vdW volumes
+# D494 Moran topological structure autocorr length-8 weighted by vdW volumes
+# D495 Moran topological structure autocorr length-1 weighted by Sanderson EN
+# D496 Moran topological structure autocorr length-2 weighted by Sanderson EN
+# D497 Moran topological structure autocorr length-3 weighted by Sanderson EN
+# D498 Moran topological structure autocorr length-4 weighted by Sanderson EN
+# D499 Moran topological structure autocorr length-5 weighted by Sanderson EN
+# D500 Moran topological structure autocorr length-6 weighted by Sanderson EN
+# D501 Moran topological structure autocorr length-7 weighted by Sanderson EN
+# D502 Moran topological structure autocorr length-8 weighted by Sanderson EN
+# D503 Moran topological structure autocorr length-1 weighted by atomic polarizability
+# D504 Moran topological structure autocorr length-2 weighted by atomic polarizability
+# D505 Moran topological structure autocorr length-3 weighted by atomic polarizability
+# D506 Moran topological structure autocorr length-4 weighted by atomic polarizability
+# D507 Moran topological structure autocorr length-5 weighted by atomic polarizability
+# D508 Moran topological structure autocorr length-6 weighted by atomic polarizability
+# D509 Moran topological structure autocorr length-7 weighted by atomic polarizability
+# D510 Moran topological structure autocorr length-8 weighted by atomic polarizability
+# ------ 
+# D511 molecular topological order-1 charge index
+# D512 molecular topological order-2 charge index
+# D513 molecular topological order-3 charge index
+# D514 molecular topological order-4 charge index
+# D515 molecular topological order-5 charge index
+# D516 molecular topological order-6 charge index
+# D517 molecular topological order-7 charge index
+# D518 molecular topological order-8 charge index
+# D519 molecular topological order-9 charge index
+# D520 molecular topological order-10 charge index
+# D521 mean molecular topological order-1 charge index
+# D522 mean molecular topological order-2 charge index
+# D523 mean molecular topological order-3 charge index
+# D524 mean molecular topological order-4 charge index
+# D525 mean molecular topological order-5 charge index
+# D526 mean molecular topological order-6 charge index
+# D527 mean molecular topological order-7 charge index
+# D528 mean molecular topological order-8 charge index
+# D529 mean molecular topological order-9 charge index
+# D530 mean molecular topological order-10 charge index
+# D531 sum of molecular topological mean charge index
+# ------ 
+# D532 lowest eigenvalue from Burdex matrix weighted by masses order-1
+# D533 lowest eigenvalue from Burdex matrix weighted by masses order-2
+# D534 lowest eigenvalue from Burdex matrix weighted by masses order-3
+# D535 lowest eigenvalue from Burdex matrix weighted by masses order-4
+# D536 lowest eigenvalue from Burdex matrix weighted by masses order-5
+# D537 lowest eigenvalue from Burdex matrix weighted by masses order-6
+# D538 lowest eigenvalue from Burdex matrix weighted by masses order-7
+# D539 lowest eigenvalue from Burdex matrix weighted by masses order-8
+# D540 lowest eigenvalue from Burdex matrix weighted by vdW order-1
+# D541 lowest eigenvalue from Burdex matrix weighted by vdW order-2
+# D542 lowest eigenvalue from Burdex matrix weighted by vdW order-3
+# D543 lowest eigenvalue from Burdex matrix weighted by vdW order-4
+# D544 lowest eigenvalue from Burdex matrix weighted by vdW order-5
+# D545 lowest eigenvalue from Burdex matrix weighted by vdW order-6
+# D546 lowest eigenvalue from Burdex matrix weighted by vdW order-7
+# D547 lowest eigenvalue from Burdex matrix weighted by vdW order-8
+# D548 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-1
+# D549 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-2
+# D550 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-3
+# D551 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-4
+# D552 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-5
+# D553 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-6
+# D554 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-7
+# D555 lowest eigenvalue from Burdex matrix weighted by Sanderson EN order-8
+# ------ 
+# D556 lowest eigenvalue from Burdex matrix weighted by polarizability order-1
+# D557 lowest eigenvalue from Burdex matrix weighted by polarizability order-2
+# D558 lowest eigenvalue from Burdex matrix weighted by polarizability order-3
+# D559 lowest eigenvalue from Burdex matrix weighted by polarizability order-4
+# D550 lowest eigenvalue from Burdex matrix weighted by polarizability order-5
+# D561 lowest eigenvalue from Burdex matrix weighted by polarizability order-6
+# D562 lowest eigenvalue from Burdex matrix weighted by polarizability order-7
+# D563 lowest eigenvalue from Burdex matrix weighted by polarizability order-8
+# ------ 
+# D564 highes eigenvalue from Burdex matrix weighted by masses order-1
+# D565 highes eigenvalue from Burdex matrix weighted by masses order-2
+# D566 highes eigenvalue from Burdex matrix weighted by masses order-3
+# D567 highes eigenvalue from Burdex matrix weighted by masses order-4
+# D568 highes eigenvalue from Burdex matrix weighted by masses order-5
+# D569 highes eigenvalue from Burdex matrix weighted by masses order-6
+# D570 highes eigenvalue from Burdex matrix weighted by masses order-7
+# D571 highes eigenvalue from Burdex matrix weighted by masses order-8
+# D572 highest eigenvalue from Burdex matrix weighted by vdW order-1
+# D573 highest eigenvalue from Burdex matrix weighted by vdW order-2
+# D574 highest eigenvalue from Burdex matrix weighted by vdW order-3
+# D575 highest eigenvalue from Burdex matrix weighted by vdW order-4
+# D576 highest eigenvalue from Burdex matrix weighted by vdW order-5
+# D577 highest eigenvalue from Burdex matrix weighted by vdW order-6
+# D578 highest eigenvalue from Burdex matrix weighted by vdW order-7
+# D579 highest eigenvalue from Burdex matrix weighted by vdW order-8
+# D580 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-1
+# D581 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-2
+# D582 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-3
+# D583 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-4
+# D584 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-5
+# D585 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-6
+# D586 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-7
+# D587 highest eigenvalue from Burdex matrix weighted by Sanderson EN order-8
+# ------ 
+# D588 highest eigenvalue from Burdex matrix weighted by polarizability order-1
+# D589 highest eigenvalue from Burdex matrix weighted by polarizability order-2
+# D590 highest eigenvalue from Burdex matrix weighted by polarizability order-3
+# D591 highest eigenvalue from Burdex matrix weighted by polarizability order-4
+# D592 highest eigenvalue from Burdex matrix weighted by polarizability order-5
+# D593 highest eigenvalue from Burdex matrix weighted by polarizability order-6
+# D594 highest eigenvalue from Burdex matrix weighted by polarizability order-7
+# D595 highest eigenvalue from Burdex matrix weighted by polarizability order-8
+# ------ 
+# D596 number of primary Csp3
+# D597 number of secondary Csp3
+# D598 number of tertiary Csp3
+# D599 number of quarternary Csp3
+# D600 number of ring secondary Csp3
+# D601 number of ring tertiary Csp3
+# D602 number of ring quarternary Csp3
+# D603 number of unsubstituted aromatic Csp2
+# D604 number of substituted arimatic Csp2
+# D605 number or primary Csp2
+# D606 number or secondary Csp2
+# D607 number or tertiary Csp2
+# D608 number of allene groups
+# D609 number of terminal Csp
+# D610 number of non-terminal Csp
+# ------ 
+# D611 number of aliphatic cyanate groups
+# D612 number of aromatic cyanate groups
+# D613 number of aliphatic isocyanate groups
+# D614 number of aromatic isocyanate groups
+# D615 number of aliphatic thiocyanate groups
+# D616 number of aromatic thiocyanate groups
+# D617 number of aliphatic isothiocyanate groups
+# D618 number of aromatic isothiocyanate groups
+# D619 number of aliphatic carboxylic acid groups
+# D620 number of aromatic carboxylic acid groups
+# D621 number of aliphatic ester groups
+# D622 number of aromatic ester groups
+# D623 number of aliphatic primary amines
+# D624 number of aromatic primary amines
+# D625 number of aliphatic secondary amines
+# D626 number of aromatic secondary amines
+# D627 number of aliphatic tertiary amines
+# D628 number of aromatic tertiary amines
+# D629 number of aliphatic carbamates
+# D630 number of aromatic carbamates
+# D631 number of aliphatic acyl halogenide groups
+# D632 number of aromatic acyl halogenide groups
+# D633 number of aliphatic thioacid groups
+# D634 number of aromatic thioacid groups
+# D635 number of aliphatic dithioacids
+# D636 number of aromatic dithioacids
+# D637 number of aliphatic thioesters
+# D638 number of aromatic thioesters
+# D639 number of aliphatic dithioesters
+# D640 number of aromatic dithioesters
+# D641 number of aliphatic aldehydes
+# D642 number of aromatic aldehydes
+# D643 number of aliphatic ketones
+# D644 number of aromatic ketones
+# D645 number of aliphatic urea derivatives
+# D646 number of aromatic urea derivatives
+# D647 number of aliphatic primary amines
+# D648 number of aromatic primary amines
+# D649 number of aliphatic secondary amines
+# D650 number of aliphatic secondary amines
+# D651 number of aliphatic tertiary amines
+# D652 number of aliphatic tertiary amines
+# D653 number of aliphatic N-hydrazines
+# D654 number of aromatic N-hydrazines
+# D655 number of aliphatic N-azo groups
+# D656 number of aromatic N-azo groups
+# D657 number of aliphatic nitriles
+# D658 number of aromatic nitriles
+# D659 number of aliphatic imines
+# D660 number of aromatic imines
+# D661 number of aliphatic ammonium groups
+# D662 number of aromatic ammonium groups
+# D663 number of aliphatic hydroxylamines
+# D664 number of aromatic hydroxylamines
+# D665 number of aliphatic oximes
+# D666 number of aromatic oximes
+# D667 number of aliphatic n-nitroso groups
+# D668 number of aromatic n-nitroso groups
+# D669 number of aliphatic nitroso groups
+# D670 number of aromatic nitroso groups
+# D671 number of aliphatic nitro groups
+# D672 number of aromatic nitro groups
+# D673 number of imide groups
+# D674 number of hydroxyl groups (all kinds)
+# D675 number of phenol groups
+# D676 number of aliphatic primary alcohols
+# D677 number of aliphatic secondary alcohols
+# D678 number of aliphatic tertiary alcohols
+# D679 number of aliphatic ether groups
+# D680 number of aromatic ether groups
+# D681 number of aliphatic hypohalogenides
+# D682 number of arimatic hypohalogenides
+# D683 number of water molecules
+# D684 number of sulfoxides
+# D685 number of sulfones
+# D686 number of sulfates
+# D687 number of thiols
+# D688 number of thioketones
+# D689 number of "solfures"
+# D690 number of "disolfures"
+# D691 number of sulfonic acids
+# D692 number of sulfonamides
+# D693 number of phosphites
+# D694 number of phosphates
+# D695 number of phosphothionates
+# D696 number of phosphodithionates
+# D697 number of phosphothioates
+# D698 number of CH2X groups
+# D699 number of CR2HX groups
+# D700 number of CR3X groups
+# D701 number of R=CHX groups
+# D702 number of R=CRX groups
+# D703 number of R#CX groups
+# D704 number of CHRX2 groups
+# D705 number of CR2X2 groups
+# D706 number of R=CX2 groups
+# D707 number of RCX3 groups
+# D708 number of number of X-C groups on aromatic ring
+# D709 number of number of X-C groups on ring
+# D710 number of number of X-C= groups on ring
+# D711 number of X-C on conjugated C
+# D712 number of donor atoms of H bonds with N and O
+# D713 number of acceptor atoms for H bondfs (N O F)
+# D714 number of CH3R and CH4 groups
+# D715 number of CH2R2 groups
+# D716 number of CHR3 groups
+# D717 number of CR4 groups
+# D718 number of CH3X groups
+# D719 number of CH2RX groups
+# D720 number of CH2X2 groups
+# D721 number of CHR2X groups
+# D722 number of CHRX2 groups
+# D723 number of CHX3 groups
+# D724 number of CR3X groups
+# D725 number of CR2X2 groups
+# D726 number of CRX3 groups
+# D727 number of CX4 groups
+# D728 number of =CH2 groups
+# D729 number of =CHR groups
+# D730 number of =CR2 groups
+# D731 number of =CHX groups
+# D732 number of =CRX groups
+# D733 number of =CX2 groups
+# D734 number of #CH groups
+# D735 number of #CR or R=C=R groups
+# D736 number of #CX groups
+# D737 number of R~CH~R groups
+# D738 number of R~CR~R groups
+# D739 number of R~CH~R groups
+# D730 number of Al-CH=X groups
+# D741 number of Ar-CH=X groups
+# D742 number of Al-C(=X)-Al groups
+# D743 number of Ar-C(=X)-R groups
+# D744 number of R-C(=X)-X / R-C#X groups
+# D745 number of X-C(=X)-X groups
+# D746 number of H attached to C0(sp3) no X attached to next C
+# D747 number of H attached to hetero atom
+# D748 number of H attached to C0(sp3) with 1X attached to next C
+# D749 number of H attached to C0(sp3) with 2X attached to next C
+# D750 number of H attached to C0(sp3) with 3X attached to next C
+# D741 number of H attached to C0(sp3) with 4X attached to next C
+# D752 number of alcohol groups
+# D753 number of phenol or enol or carboxyl OH
+# D754 number of O= groups
+# D755 number of Al-O-Al groups
+# D756 number of Al-O-R or Ar-O-Ar pr R-O-C=X groups
+# D757 number of Al-NH2 groups
+# D758 number of Al2-NH groups
+# D759 number of Al3-N groups
+# D750 number of Ar-NH2 or X-NH2 groups
+# D761 number of Ar-NH-Al groups
+# D762 number of Ar-NAl2 groups
+# D763 number of RCO-N< or >N-X=X groups
+# D764 number of Ar2NH pr Ar3N or Ar2N-Al groups
+# D765 number of R#N or R=N- groups
+# D766 number of Ar-NO2 or RO-NO2 groups
+# D767 number of Al-NO2 groups
+# D768 number of Ar-N=X or X-N=X groups
+# D769 number of R-SH groups
+# D770 number of R2S or RSSR groups
+# D771 number of R=S groups
+# D772 number of R-SO-R groups
+# D773 number of R-SO2-R groups
+# ------------------
+# D774 insaturation index weighted by conventional bonds order
+# D775 hydrophilic factor index
+# D776 aromatic bonds ratio
+# D777 molecular regression coefficients surface logP index
+# ------ 
+LENGTH 0
+PRECISION 6
+DEFAULT "777:-1"
+FLAGS TRUSTED|PORTABLE|EXPORT
+REGEXPFLAGS none
+CONSTRAINTS NONE
+TIMEOUT 0
+ACCESS PA_NONE
+FUNCTYPE PF_DYNC
+FUNCNAME CSgetE_DESCRIPTORS
+MFUNCNAME NULL
+LOGMODE DONTCARE
+LITERATURE "J. Chem. Inf. Model., 2008, 48 (7), pp 1337-1344"
+COMMENT "These are the original MOLD2 descriptors"
+NAMESPACE .xemistry.com
+OBJECT mod_e_descriptors
+SOURCE mod_e_descriptors.c

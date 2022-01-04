@@ -7,7 +7,7 @@ from typing import List
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import NotSupportedError
-from pycactvs import Ens
+from pycactvs import Ens, Dataset
 
 from custom.cactvs import CactvsHash
 from structure.cas.number import String as CasNumber
@@ -87,24 +87,24 @@ class ChemicalStructure:
     """Container class to keep a CACTVS ensemble and a Structure model object of the
        of the same chemical structure together"""
 
-    def __init__(self, resolved=None, ens=None):
+    def __init__(self, resolved: Structure2 = None, ens: Ens = None):
         self.resolved = resolved
         self.ens = ens
-        #self.cactvs = cactvs
         self.metadata = {}
-        # if not self.cactvs:
-        #     self.cactvs = settings.CACTVS
         if resolved and not ens:
             ens = resolved.minimol.ens()
+            #logger.info("CS 1 ---> %s", ens)
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.ens = ens
             self.hashisy = hashisy
         elif ens and not resolved:
+            #logger.info("CS 2 ---> %s", ens)
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.hashisy = hashisy
             try:
                 self.resolved = Structure2.objects.get(hashisy=CactvsHash(hashisy))
             except Exception as e:
+                #self.resolved = None
                 self.resolved = Structure2(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
         elif ens and resolved:
             h1 = resolved.hashisy.int()
@@ -162,16 +162,8 @@ class ChemicalString:
             return "<< %s (number of structures: %s) >>" % (self.type, self.structures)
 
     def __init__(self, string, operator=None, resolver_list=None, operator_list=None, debug=False):
-        # self.cactvs = settings.CACTVS.client_is_up(return_instance=True)
-        # if not cactvs:
-        #	self.cactvs = Cactvs()
-        # else:
-        #	self.cactvs = cactvs
         self.string = string.strip()
         self.interpretations = []
-
-        # debug=True
-
         if resolver_list:
             pass
         else:
@@ -240,8 +232,8 @@ class ChemicalString:
                             interpretation = operator_method(interpretation)
                         self.interpretations.append(interpretation)
                         i += 1
-                    else:
-                        del interpretation
+                    # else:
+                    #     del interpretation
                 except Exception as e:
                     logger.error(e)
                     pass
@@ -255,8 +247,8 @@ class ChemicalString:
                         interpretation = operator_method(interpretation)
                     self.interpretations.append(interpretation)
                     i += 1
-                else:
-                    del interpretation
+                # else:
+                #     del interpretation
         return
 
     def _resolver_hashisy(self, interpretation_object):
@@ -823,7 +815,6 @@ class ChemicalString:
             string = string.replace("\\n", '\n')
             # TODO: hadd is missing
             #ens = Ens(string, mode='hadd')
-            logger.info(string)
             ens = Ens(string)
         except Exception as e:
             logger.error(e)
@@ -862,30 +853,35 @@ class ChemicalString:
         return True
 
     def _operator_tautomers(self, interpretation):
-        enslist = []
-        dataset_list = []
+        ens_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
-        dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+            ens_list.append(structure.ens)
+        dataset = Dataset(ens_list)
+        # TODO: This is fishy - found during refactoring:
+        metadata = structure.metadata
+
         structures = []
         description_list = []
         index = 1
-        for dataset, metadata in dataset_list:
-            tautomers = dataset.get_tautomers()
-            t_count = 1
-            for ens in tautomers.get_enslist():
-                structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
+
+        t_count = 1
+        for ens in dataset.ens():
+            tautomers = ens.get("E_RESOLVER_TAUTOMERS")
+            for tautomer in tautomers.ens():
+                structure = ChemicalStructure(ens=tautomer)
                 description_string = 'tautomer %s' % t_count
                 structure.metadata = {
                     'description': description_string,
-                    'query_type': metadata['query_type'],
+                    'query_type': metadata['query_type']
+                        if 'query_type' in metadata else None,
                     'query_search_string': metadata['query_search_string']
+                        if 'query_search_string' in metadata else None
                 }
                 structures.append(structure)
                 index += 1
                 t_count += 1
-        interpretation._reference_dataset = dataset_list
+
+        interpretation._reference_dataset = dataset
         interpretation.tautomers = tautomers
         interpretation.description_list = description_list
         interpretation.structures = structures

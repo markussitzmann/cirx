@@ -1,0 +1,27 @@
+# tkserver Property Definition by Markus Sitzmann 2010
+NAME E_PACKSTRING
+AUTHOR "Markus Sitzmann"
+EMAIL sitzmann@helix.nih.gov
+VERSION 1.0
+DATE "Oct 30 11:23:49 2010"
+PUBKEY 
+DESCRIPTION "Pack String"
+OUTMODE P_OUT_YES
+KEYTYPE P_INT
+OUTLEVEL 4
+KEY UDEFPROP
+VALTYPE P_STRING
+INVALIDATION
+DEPENDS
+ATTACHMENT P_ENS
+PRECISION 4
+FLAGS TRUSTED|PORTABLE|EXPORT
+TIMEOUT 0
+PORT 16520
+ACCESS PA_NONE
+FUNCTYPE PF_TCLSCRIPT
+FUNCNAME get_packstring 1
+
+proc get_packstring {ehandle} {
+	ens set $ehandle E_PACKSTRING [ens pack $ehandle]
+}
