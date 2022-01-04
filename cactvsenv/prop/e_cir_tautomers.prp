@@ -1,5 +1,5 @@
 # tkserver Property Definition by Markus Sitzmann 2010
-NAME D_RESOLVER_TAUTOMERS
+NAME E_CIR_TAUTOMERS
 AUTHOR "Markus Sitzmann"
 EMAIL sitzmann@helix.nih.gov
 VERSION 1.0
@@ -11,7 +11,7 @@ MENUNAME "Tautomers"
 VALTYPE P_DATASET
 INVALIDATION INVAL_ATOMCHANGE|INVAL_BONDCHANGE|INVAL_MERGE|INVAL_ATOM|INVAL_BOND|INVAL_RING
 DEPENDS "A_TYPE A_ELEMENT B_TYPE B_ORDER"
-ATTACHMENT P_DATASET
+ATTACHMENT P_ENS
 PRECISION 4
 FLAGS TRUSTED|PORTABLE|EXPORT
 REGEXPFLAGS none
@@ -23,9 +23,12 @@ DEFAULTPARAMS maxens 1000 timeout 0 setcount 0 usekekuleset 0 addh 0 preservecoo
 FUNCTYPE PF_TCLSCRIPT
 FUNCNAME get_tautomers 1
 
-proc get_tautomers {dhandle} {
-	prop set D_RESOLVER_TAUTOMERS parameters [prop get E_RESOLVER_TAUTOMERS parameters]
-	set dataset [dataset create [dataset unique [join [dataset get $dhandle E_RESOLVER_TAUTOMERS]] E_HASHISY]]
-	#puts "$dhandle $dataset_tautomers [dataset ens $dataset_tautomers]"
-	dataset set $dhandle D_RESOLVER_TAUTOMERS $dataset
+proc get_tautomers {ehandle} {
+    puts "1"
+	prop set E_RESOLVER_TAUTOMERS parameters [prop get E_CIR_TAUTOMERS parameters]
+	puts "2"
+	set dataset [dataset create [dataset unique [join [ens get $ehandle E_RESOLVER_TAUTOMERS]] E_HASHISY]]
+	puts "3"
+	ens set $ehandle E_CIR_TAUTOMERS $dataset
+	puts "4"
 }

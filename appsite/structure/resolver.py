@@ -872,10 +872,8 @@ class ChemicalString:
                 description_string = 'tautomer %s' % t_count
                 structure.metadata = {
                     'description': description_string,
-                    'query_type': metadata['query_type']
-                        if 'query_type' in metadata else None,
-                    'query_search_string': metadata['query_search_string']
-                        if 'query_search_string' in metadata else None
+                    'query_type': metadata['query_type'] if 'query_type' in metadata else None,
+                    'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
                 }
                 structures.append(structure)
                 index += 1

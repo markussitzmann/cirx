@@ -24,6 +24,9 @@ FUNCTYPE PF_TCLSCRIPT
 FUNCNAME get_tautomers 1
 
 proc get_tautomers {ehandle} {
+
+    puts "IN  >>> D: [dataset list] E: [ens list]"
+
 	if {[prop getparam E_RESOLVER_TAUTOMERS addh]} {
 		ens hadd $ehandle
 	}
@@ -84,6 +87,6 @@ proc get_tautomers {ehandle} {
  	if {[prop getparam E_RESOLVER_TAUTOMERS setcount]} {
 		ens set $ehandle E_TAUTOMER_COUNT [expr [llength $tautomers] + 1]
 	}
-	set tautomers [concat [ens dup $ehandle] $tautomers]
-	ens set $ehandle E_RESOLVER_TAUTOMERS $tautomers
+	set tautomer_dataset [dataset create $tautomers]
+	ens set $ehandle E_RESOLVER_TAUTOMERS $tautomer_dataset
 }

@@ -7,7 +7,7 @@ from django.conf import settings
 from pycactvs import Ens, Dataset
 
 from django.core.files import File
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpRequest, QueryDict
 
 from structure.models import ResponseType, NameType, NameCache
@@ -494,9 +494,12 @@ class Dispatcher:
 
     @staticmethod
     def _create_dataset_page(dataset: Dataset, rows: int, columns: int, page: int) -> Dataset:
-        page_size: int = rows * columns
-        paginator: Paginator = Paginator(dataset.ens(), page_size)
-        return Dataset(paginator.page(page).object_list)
+        try:
+            page_size: int = rows * columns
+            paginator: Paginator = Paginator(dataset.ens(), page_size)
+            return Dataset(paginator.page(page).object_list)
+        except (EmptyPage, ZeroDivisionError):
+            return Dataset()
 
 
     def prop(self, string):
