@@ -35,27 +35,30 @@ class DispatcherComponentTests(TestCase):
 
 
     @parameterized.expand([
-        ["tautomers:warfarin", RESOLVER_LIST, (8, True)],
-        ["tautomers:tylenol", RESOLVER_LIST, (9, True)],
+        ["tautomers:warfarin", RESOLVER_LIST, (9, True)],
+        ["tautomers:tylenol", RESOLVER_LIST, (10, True)],
         ["CCO", RESOLVER_LIST, (1, True)],
         ["CCN", RESOLVER_LIST, (1, True)],
         ["CCS", RESOLVER_LIST, (1, True)],
         ["CCOCC", RESOLVER_LIST, (1, True)],
         ["CCNCC", RESOLVER_LIST, (1, True)],
-        ["tautomers:guanine", RESOLVER_LIST, (25, True)],
+        ["tautomers:guanine", RESOLVER_LIST, (26, True)],
     ])
     def test_dispatcher(self, string, resolver_list, expectations):
         logger.info("------------- Test Dispatcher (%s) -------------" % string)
         expected_dataset_count, expected_status = expectations
 
         dataset: Dataset = Dispatcher._create_dataset(string=string, resolver_list=resolver_list, simple=True)
+        for e in dataset.ens():
+            logger.info("%s %s" % (e.get('E_SMILES'), e.get('E_FICUS_ID')))
+
 
         self.assertEqual(dataset.count(), expected_dataset_count)
         self.assertTrue(expected_status)
 
     @parameterized.expand([
         ["tautomers:guanine", RESOLVER_LIST, (2, 3, 2), (6, True)],
-        ["tautomers:guanine", RESOLVER_LIST, (2, 3, 5), (1, True)],
+        ["tautomers:guanine", RESOLVER_LIST, (2, 3, 5), (2, True)],
         ["tautomers:guanine", RESOLVER_LIST, (2, 3, 20), (0, True)],
         ["tautomers:guanine", RESOLVER_LIST, (2, 0, 20), (0, True)],
         ["tautomers:guanine", RESOLVER_LIST, (0, 3, 20), (0, True)],

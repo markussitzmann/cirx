@@ -853,37 +853,85 @@ class ChemicalString:
         return True
 
     def _operator_tautomers(self, interpretation):
-        ens_list = []
-        for structure in interpretation.structures:
-            ens_list.append(structure.ens)
-        dataset = Dataset(ens_list)
-        # TODO: This is fishy - found during refactoring:
-        metadata = structure.metadata
+        # ens_list = []
+        # for structure in interpretation.structures:
+        #     ens_list.append(structure.ens)
+        # dataset = Dataset(ens_list)
+        # # TODO: This is fishy - found during refactoring:
+        # metadata = structure.metadata
 
         structures = []
         description_list = []
         index = 1
+        dataset: Dataset = Dataset()
 
-        t_count = 1
-        for ens in dataset.ens():
-            tautomers = ens.get("E_RESOLVER_TAUTOMERS")
+        for interpretation_structure in interpretation.structures:
+            interpretation_structure_ens = interpretation_structure.ens
+            metadata = interpretation_structure.metadata.copy()
+
+            description_string = metadata['description'] + " tautomer 1" \
+                if 'description' in metadata else "tautomer 1"
+            interpretation_structure.metadata.update({'description': description_string})
+            structures.append(interpretation_structure)
+            description_list.append(description_string)
+            dataset.add(interpretation_structure_ens)
+
+            t_count = 1
+            tautomers = interpretation_structure_ens.get("E_RESOLVER_TAUTOMERS")
             for tautomer in tautomers.ens():
+                t_count += 1
                 structure = ChemicalStructure(ens=tautomer)
-                description_string = 'tautomer %s' % t_count
+                tautomer_string = 'tautomer %s' % t_count
+                description_string = metadata['description'] + " " + tautomer_string \
+                    if 'description' in metadata else tautomer_string
                 structure.metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'] if 'query_type' in metadata else None,
                     'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
                 }
                 structures.append(structure)
+                description_list.append(description_string)
+                dataset.add(tautomer)
                 index += 1
-                t_count += 1
 
         interpretation._reference_dataset = dataset
         interpretation.tautomers = tautomers
         interpretation.description_list = description_list
         interpretation.structures = structures
         return interpretation
+
+    # def _operator_tautomers(self, interpretation):
+    #     ens_list = []
+    #     for structure in interpretation.structures:
+    #         ens_list.append(structure.ens)
+    #     dataset = Dataset(ens_list)
+    #     # TODO: This is fishy - found during refactoring:
+    #     metadata = structure.metadata
+    #
+    #     structures = []
+    #     description_list = []
+    #     index = 1
+    #
+    #     t_count = 1
+    #     for ens in dataset.ens():
+    #         tautomers = ens.get("E_RESOLVER_TAUTOMERS")
+    #         for tautomer in tautomers.ens():
+    #             structure = ChemicalStructure(ens=tautomer)
+    #             description_string = 'tautomer %s' % t_count
+    #             structure.metadata = {
+    #                 'description': description_string,
+    #                 'query_type': metadata['query_type'] if 'query_type' in metadata else None,
+    #                 'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
+    #             }
+    #             structures.append(structure)
+    #             index += 1
+    #             t_count += 1
+    #
+    #     interpretation._reference_dataset = dataset
+    #     interpretation.tautomers = tautomers
+    #     interpretation.description_list = description_list
+    #     interpretation.structures = structures
+    #     return interpretation
 
     def _operator_remove_hydrogens(self, interpretation):
         enslist = []
