@@ -26,7 +26,7 @@ class StructureTests(TestCase):
 
     def test_minimol(self):
         ens1 = Ens("CCO")
-        minimol = CactvsMinimol(ens1).minimol()
+        minimol = CactvsMinimol(ens1).minimol
         ens2 = Ens(minimol)
         self.assertEqual(CactvsHash(ens1), CactvsHash(ens2))
         self.assertEqual(CactvsMinimol(ens1), CactvsMinimol(ens2))

@@ -2,6 +2,8 @@ import datetime
 import os
 import time
 
+import xml.dom.minidom
+
 from django.conf import settings
 from django.http import *
 from django.shortcuts import render
@@ -98,7 +100,8 @@ def resolve_to_response(request, string, representation, operator_parameter=None
             'string': resolved_string,
             'representation': representation,
             'base_url': settings.STRUCTURE_BASE_URL,
-            'host': host_string})
+            'host': host_string
+        }, content_type="text/xml")
 
 #
 # # print " 1 jeff /www/django/chemical/structure/views.py"

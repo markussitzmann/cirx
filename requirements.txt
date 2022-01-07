@@ -1,7 +1,8 @@
 psycopg2-binary
 requests
-django==4.0rc1
+django=>4.0
 djangorestframework
 django-extensions
-parameterized
+django-htmlmin
+parameterized~=0.8.1
 #django-dbbackup>=3

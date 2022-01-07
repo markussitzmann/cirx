@@ -79,7 +79,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -151,7 +151,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -196,7 +196,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -239,7 +239,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -283,7 +283,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -326,7 +326,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -371,7 +371,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -415,7 +415,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -452,7 +452,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
@@ -481,8 +481,12 @@ class Dispatcher:
         return representation_list
 
     @staticmethod
-    def _create_dataset(string: str, resolver_list: List[str], simple: bool) -> Dataset:
+    def _create_dataset_from_resolver_string(string: str, resolver_list: List[str], simple: bool) -> Dataset:
         interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        return Dispatcher._create_dataset(interpretations, simple)
+
+    @staticmethod
+    def _create_dataset(interpretations: List[ChemicalString.Interpretation], simple: bool) -> Dataset:
         structure_lists: List[List[ChemicalStructure]] = [
             interpretation.structures for interpretation in ([interpretations[0]] if simple else interpretations)
         ]
@@ -524,7 +528,7 @@ class Dispatcher:
             for structure in interpretation.structures:
                 full_ensemble_list.append(structure.ens)
                 if self.output_format == 'xml':
-                    if 'ens' in structure:
+                    if hasattr(structure, 'ens'):
                         ens = structure.ens
                     else:
                         ens = Ens(structure.object.minimol)
@@ -618,7 +622,7 @@ class Dispatcher:
         mode = parameters.get('mode', 'simple')
         if resolver_list:
             resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]

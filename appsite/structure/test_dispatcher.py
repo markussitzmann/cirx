@@ -48,10 +48,14 @@ class DispatcherComponentTests(TestCase):
         logger.info("------------- Test Dispatcher (%s) -------------" % string)
         expected_dataset_count, expected_status = expectations
 
-        dataset: Dataset = Dispatcher._create_dataset(string=string, resolver_list=resolver_list, simple=True)
+        interpretations: List[ChemicalString.Interpretation] = ChemicalString(
+            string=string,
+            resolver_list=resolver_list
+        ).interpretations
+        dataset: Dataset = Dispatcher._create_dataset(interpretations=interpretations, simple=True)
+
         for e in dataset.ens():
             logger.info("%s %s" % (e.get('E_SMILES'), e.get('E_FICUS_ID')))
-
 
         self.assertEqual(dataset.count(), expected_dataset_count)
         self.assertTrue(expected_status)
@@ -67,7 +71,11 @@ class DispatcherComponentTests(TestCase):
         logger.info("------------- Test Dispatcher Page (%s) -------------" % string)
         expected_dataset_count, expected_status = expectations
 
-        dataset: Dataset = Dispatcher._create_dataset(string=string, resolver_list=resolver_list, simple=True)
+        dataset: Dataset = Dispatcher._create_dataset_from_resolver_string(
+            string=string,
+            resolver_list=resolver_list,
+            simple=True
+        )
 
         rows, columns, page = paging
         page_dataset: Dataset = Dispatcher._create_dataset_page(dataset, rows, columns, page)

@@ -17,4 +17,4 @@ c = Cactvs()
 
 
 s = ChemicalString(string="tautomers:guanine", resolver_list=['name'], cactvs = c)
-print s.interpretations
+print s._interpretations

@@ -53,7 +53,7 @@ class Structure2(models.Model):
     objects = Structure2Manager()
 
     def to_ens(self):
-        return self.minimol.ens()
+        return self.minimol.ens
 
     def __str__(self):
         return self.hashisy.padded()

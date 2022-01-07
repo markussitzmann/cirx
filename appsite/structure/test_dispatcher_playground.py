@@ -108,7 +108,7 @@ class DispatcherComponentTests(TestCase):
 
         logger.info("0: ens list: %s", Ens.List())
 
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
 
         logger.info("1: ens list: %s", Ens.List())
 

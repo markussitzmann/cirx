@@ -281,20 +281,20 @@ class UserFileProcessor(CactvsScript):
 				item, 
 				resolver_list=UserFileProcessor.resolver_list
 			)
-			success = len(chemical_string.interpretations)
+			success = len(chemical_string._interpretations)
 			if not success:
 				chemical_string = ChemicalString(
 					item, 
 					resolver_list=['name_pattern',]
 				)
-				success = len(chemical_string.interpretations)
+				success = len(chemical_string._interpretations)
 				if not success:
 					failed_attempts += 1
 			if item_count > 3 and float(failed_attempts) / float(item_count) >= 0.3:
 				self.from_resolver = False
 				break
 			retrieved_cid_list = []
-			for interpretation in chemical_string.interpretations:
+			for interpretation in chemical_string._interpretations:
 				for structure in interpretation.structures:
 					ncicadd_cid = structure.object.compound.id
 					if ncicadd_cid in retrieved_cid_list:

@@ -17,15 +17,17 @@ class CactvsMinimol:
         else:
             raise ValueError('CACTVS ensemble can not be created from source')
 
+    @property
     def ens(self) -> Ens:
         return Ens(self._minimol)
 
+    @property
     def minimol(self) -> bytes:
         return self._minimol
 
     def __eq__(self, other):
         if isinstance(other, CactvsMinimol):
-            return CactvsHash(Ens(self.minimol())).int() == CactvsHash(Ens(other.minimol())).int()
+            return CactvsHash(Ens(self._minimol)).int() == CactvsHash(Ens(other._minimol)).int()
         return False
 
 

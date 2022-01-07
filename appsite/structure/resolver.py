@@ -92,13 +92,11 @@ class ChemicalStructure:
         self.ens = ens
         self.metadata = {}
         if resolved and not ens:
-            ens = resolved.minimol.ens()
-            #logger.info("CS 1 ---> %s", ens)
+            ens = resolved.minimol.ens
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.ens = ens
             self.hashisy = hashisy
         elif ens and not resolved:
-            #logger.info("CS 2 ---> %s", ens)
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.hashisy = hashisy
             try:
@@ -163,7 +161,7 @@ class ChemicalString:
 
     def __init__(self, string, operator=None, resolver_list=None, operator_list=None, debug=False):
         self.string = string.strip()
-        self.interpretations = []
+        self._interpretations = []
         if resolver_list:
             pass
         else:
@@ -230,9 +228,9 @@ class ChemicalString:
                         if self.operator:
                             operator_method = getattr(self, '_operator_' + self.operator)
                             interpretation = operator_method(interpretation)
-                        self.interpretations.append(interpretation)
+                        self._interpretations.append(interpretation)
                         i += 1
-                    # else:
+                    #else:
                     #     del interpretation
                 except Exception as e:
                     logger.error(e)
@@ -245,11 +243,15 @@ class ChemicalString:
                     if self.operator:
                         operator_method = getattr(self, '_operator_' + self.operator)
                         interpretation = operator_method(interpretation)
-                    self.interpretations.append(interpretation)
+                    self._interpretations.append(interpretation)
                     i += 1
-                # else:
-                #     del interpretation
+                #else:
+                #    del interpretation
         return
+
+    @property
+    def interpretations(self) -> List[Interpretation]:
+        return self._interpretations
 
     def _resolver_hashisy(self, interpretation_object):
         pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
@@ -1181,5 +1183,5 @@ class ChemicalString:
 
     def __len__(self):
         l = []
-        [l.extend(s.structures) for s in self.interpretations]
+        [l.extend(s.structures) for s in self._interpretations]
         return len(l)

@@ -41,7 +41,7 @@ class CactvsMinimolField(BinaryField):
 
     def get_db_prep_value(self, value, connection, prepared=False):
         if value is not None:
-            return value.minimol()
+            return value.minimol
         return value
 
     def get_prep_value(self, value):
@@ -64,6 +64,6 @@ class CactvsMinimolField(BinaryField):
 
     def value_to_string(self, obj):
         value = self.value_from_object(obj)
-        return b64encode(value.minimol()).decode('ascii')
+        return b64encode(value.minimol).decode('ascii')
 
 

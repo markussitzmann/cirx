@@ -17,6 +17,7 @@ import structure.views
 from . import views
 
 urlpatterns = [
+    re_path('^structure/(?P<string>.+)/(?P<representation>.+)/(?P<format>xml)', views.identifier),
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)$', views.identifier),
     re_path('^structure/(?P<string>.+)$', views.structure),
     re_path('^structure$', views.structure),
