@@ -304,8 +304,8 @@ class UserFileProcessor(CactvsScript):
 					minimol = structure.object.minimol
 					structure_data_list.append(minimol)
 					metadata = "resolved as %s matching \"%s\"" % (
-						structure.metadata['query_search_string'],
-						structure.metadata['description']
+						structure._metadata['query_search_string'],
+						structure._metadata['description']
 					)
 					structure_data_list.append(base64.b64encode(metadata.encode('utf-8')))
 				# this break is because we care only for the first interpretation

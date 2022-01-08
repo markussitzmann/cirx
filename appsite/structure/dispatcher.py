@@ -1,5 +1,5 @@
 import functools
-from typing import List
+from typing import List, Dict
 
 import logging
 
@@ -22,11 +22,13 @@ class Dispatcher:
         self.type = response_type
         self.base_content_type = response_type.base_mime_type
         self.method = response_type.method
-        self.url_parameters = request.GET.copy()
+        self.url_parameters: HttpRequest.GET = request.GET.copy()
         self.representation = representation
         self.content_type = None
         self.output_format = output_format
         self.response_list = []
+        #self.simple_mode: bool = self._use_simple_mode()
+
         if not parameters:
             self.parameters = response_type.parameter
         else:
@@ -505,53 +507,82 @@ class Dispatcher:
         except (EmptyPage, ZeroDivisionError):
             return Dataset()
 
+    @staticmethod
+    def _use_simple_mode(output_format: str, simple_mode: bool) -> bool:
+        if output_format == 'xml' and not simple_mode:
+            return False
+        return True
+
+    def xprop(self, string: str) -> List:
+        url_params = self.url_parameters.copy()
+        if 'resolver' in url_params:
+            resolver_list = url_params.get('resolver').split(',')
+        else:
+            resolver_list = settings.AVAILABLE_RESOLVERS
+        simple: bool = self._use_simple_mode(
+            output_format=self.output_format,
+            simple_mode=('mode' in url_params and url_params == 'simple')
+        )
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        if simple:
+            dataset: Dataset = self._create_dataset(interpretations, True)
+            if 'rows' in url_params and 'columns' in url_params and 'page' in url_params:
+                rows, columns, page = url_params['rows'], min(url_params['columns'], 25), url_params['page']
+                dataset = self._create_dataset_page(dataset, int(rows), int(columns), int(page))
+            if self.base_content_type == 'text':
+                self.content_type = "text/plain"
+                self.response_list = self._unique(dataset.get(self.parameters))
+        else:
+            pass
+
+        return self.response_list
 
     def prop(self, string):
         propname = self.parameters
         base_content_type = self.base_content_type
         parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
+        resolver_list = parameters.get('resolver', settings.AVAILABLE_RESOLVERS)
         structure_index = parameters.get('structure_index', None)
         mode = parameters.get('mode', 'simple')
         page = parameters.get('page', None)
         columns = parameters.get('columns', None)
         rows = parameters.get('rows', None)
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
+        #if resolver_list:
+        #    resolver_list = resolver_list.split(',')
         interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
         index = 1
         if not self.output_format == 'xml' and mode == 'simple':
             interpretations = [interpretations[0], ]
         full_ensemble_list = []
-        response_list = []
+        response_collector_list = []
         for interpretation in interpretations:
+            structure: ChemicalStructure
             for structure in interpretation.structures:
                 full_ensemble_list.append(structure.ens)
                 if self.output_format == 'xml':
-                    if hasattr(structure, 'ens'):
-                        ens = structure.ens
-                    else:
-                        ens = Ens(structure.object.minimol)
+                    # if hasattr(structure, 'ens'):
+                    #     ens = structure._ens
+                    # else:
+                    #     ens = Ens(structure._resolved.minimol)
                     # dataset is used to have the same object as below for the plain text output
-                    dataset = Dataset([ens, ])
+                    dataset = Dataset([structure.ens, ])
                     if base_content_type == 'text':
-                        response_list = dataset.get(propname, parameters=parameters)
+                        response_collector_list = dataset.get(propname, parameters=parameters)
                     elif base_content_type == 'image':
-                        response_list = dataset.get_image(parameters=parameters).hash_list
-                    response_list = self._unique(response_list)
+                        response_collector_list = dataset.get_image(parameters=parameters).hash_list
+                    response_collector_list = self._unique(response_collector_list)
                     response = {
                         'base_mime_type': self.base_content_type,
                         'id': interpretation.id,
                         'string': string,
                         'structure': structure,
-                        'response': response_list,
+                        'response': response_collector_list,
                         'index': index,
                     }
                     self.response_list.append(response)
                     index += 1
                 else:
                     pass
-        # end of interpretation loop
         if self.output_format == 'plain':
             if structure_index:
                 i = int(structure_index)
@@ -580,8 +611,8 @@ class Dispatcher:
             dataset = Dataset(ens_list)
             if base_content_type == 'text':
                 self.content_type = "text/plain"
-                response_list = dataset.get(propname)
-                response_list = self._unique(response_list)
+                response_collector_list = dataset.get(propname)
+                response_collector_list = self._unique(response_collector_list)
             elif base_content_type == 'image':
                 # unique for structures that come from different resolvers:
                 # dataset.unique()
@@ -590,11 +621,11 @@ class Dispatcher:
                 image_file = File(f)
                 image_file.url = image.file
                 image_file.image = f.read()
-                response_list = image_file.image
+                response_collector_list = image_file.image
                 self.content_type = "image/gif"
             else:
                 pass
-            self.response_list = response_list
+            self.response_list = response_collector_list
         else:
             pass
         return self.response_list

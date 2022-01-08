@@ -2,7 +2,7 @@ import re
 import urllib
 
 import logging
-from typing import List
+from typing import List, Dict
 
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
@@ -10,7 +10,7 @@ from django.db import NotSupportedError
 from pycactvs import Ens, Dataset
 
 from custom.cactvs import CactvsHash
-from structure.cas.number import String as CasNumber
+from structure.cas.number import String as CASNumber
 from structure.inchi.identifier import InChIString, InChIKey, InChIError
 from structure.minimol import Minimol
 from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
@@ -88,27 +88,38 @@ class ChemicalStructure:
        of the same chemical structure together"""
 
     def __init__(self, resolved: Structure2 = None, ens: Ens = None):
-        self.resolved = resolved
-        self.ens = ens
-        self.metadata = {}
+        self._resolved = resolved
+        self._ens = ens
+        self._metadata = {}
         if resolved and not ens:
             ens = resolved.minimol.ens
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
-            self.ens = ens
+            self._ens = ens
             self.hashisy = hashisy
         elif ens and not resolved:
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.hashisy = hashisy
             try:
-                self.resolved = Structure2.objects.get(hashisy=CactvsHash(hashisy))
+                self._resolved = Structure2.objects.get(hashisy=CactvsHash(hashisy))
             except Exception as e:
                 #self.resolved = None
-                self.resolved = Structure2(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
+                self._resolved = Structure2(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
         elif ens and resolved:
             h1 = resolved.hashisy.int()
             h2 = Identifier(hashcode=ens.get('E_HASHISY')).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')
+
+    @property
+    def ens(self) -> Ens:
+        if self._ens:
+            return self._ens
+        else:
+            return Ens(self._resolved.minimol)
+
+    @property
+    def metadata(self) -> dict:
+        return self._metadata
 
 
 class ChemicalStructureError(Exception):
@@ -121,30 +132,6 @@ class ChemicalStructureError(Exception):
 
 
 class ChemicalString:
-    # available_resolver_list = [
-    #     'smiles',
-    #     'stdinchikey',
-    #     'stdinchi',
-    #     'ncicadd_identifier',
-    #     'hashisy',
-    #     'chemspider_id',
-    #     'chemnavigator_sid',
-    #     'pubchem_sid',
-    #     'emolecules_vid',
-    #     'ncicadd_rid',
-    #     'ncicadd_cid',
-    #     'ncicadd_sid',
-    #     'cas_number',
-    #     'nsc_number',
-    #     'zinc_code',
-    #     'opsin',
-    #     'chemspider_name',
-    #     'name_pattern',
-    #     'name',
-    #     'SDFile',
-    #     'minimol',
-    #     'packstring',
-    # ]
 
     class Interpretation:
 
@@ -165,28 +152,7 @@ class ChemicalString:
         if resolver_list:
             pass
         else:
-            resolver_list = [
-                #'smiles',
-                'stdinchikey',
-                'stdinchi',
-                'ncicadd_identifier',
-                'hashisy',
-                # 'chemspider_id',
-                #'chemnavigator_sid',
-                #'pubchem_sid',
-                #'emolecules_vid',
-                #'ncicadd_rid',
-                #'ncicadd_cid',
-                #'ncicadd_sid',
-                #'cas_number',
-                #'nsc_number',
-                #'zinc_code',
-                #'opsin',
-                'name',
-                #'SDFile',
-                #'minimol',
-                #'packstring',
-            ]
+            resolver_list = settings.AVAILABLE_RESOLVERS
 
         if operator_list:
             pass
@@ -260,7 +226,7 @@ class ChemicalString:
         hashcode_int = int(match.group('hashcode'), 16)
         chemical_structure = ChemicalStructure(resolved=Structure2.objects.get(hashisy=hashcode_int))
         if chemical_structure:
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'hashisy',
                 'query_search_string': 'Cactvs HASHISY hashcode',
                 'query_object': hashcode,
@@ -276,7 +242,7 @@ class ChemicalString:
         record = Record.objects.get(id=record_id.rid)
         chemical_structure = ChemicalStructure(resolved=record.get_structure())
         if chemical_structure:
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'ncicadd_rid',
                 'query_search_string': 'NCI/CADD Record ID',
                 'query_object': record_id,
@@ -294,7 +260,7 @@ class ChemicalString:
         structure = compound.get_structure()
         chemical_structure = ChemicalStructure(resolved=structure)
         if chemical_structure:
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'ncicadd_cid',
                 'query_search_string': 'NCI/CADD Compound ID',
                 'query_object': compound_id,
@@ -314,7 +280,7 @@ class ChemicalString:
             structure = Structure2.objects.get(id=structure_id)
             chemical_structure = ChemicalStructure(resolved=structure)
             if chemical_structure:
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'ncicadd_sid',
                     'query_search_string': 'NCI/CADD Structure ID',
                     'query_object': structure.id,
@@ -331,7 +297,7 @@ class ChemicalString:
         chemical_structure = ChemicalStructure(resolved=structure)
         if chemical_structure:
             identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'ncicadd_identifier',
                 'query_search_string': identifier_search_type_string,
                 'query_object': identifier,
@@ -362,7 +328,7 @@ class ChemicalString:
             for structure in structures:
                 # ens = Ens(self.cactvs, structure.object.minimol)
                 chemical_structure = ChemicalStructure(resolved=structure)
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'stdinchikey',
                     'query_search_string': 'Standard InChIKey',
                     'query_object': identifier,
@@ -379,7 +345,7 @@ class ChemicalString:
         identifier = InChI(string=self.string)
         if identifier and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'stdinchi',
                 'query_search_string': 'Standard InChI',
                 'query_object': identifier,
@@ -400,7 +366,7 @@ class ChemicalString:
             structure = record.get_structure()
             chemical_structure = ChemicalStructure(resolved=structure)
             if chemical_structure:
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'chemnavigator_sid',
                     'query_search_string': 'ChemNavigator SID',
                     'query_object': self.string,
@@ -422,7 +388,7 @@ class ChemicalString:
             structure = record.get_structure()
             chemical_structure = ChemicalStructure(resolved=structure)
             if chemical_structure:
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'pubchem_sid',
                     'query_search_string': 'PubChem SID',
                     'query_object': self.string,
@@ -443,7 +409,7 @@ class ChemicalString:
             structure = record.get_structure()
             chemical_structure = ChemicalStructure(resolved=structure)
             if chemical_structure:
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'emolecules_vid',
                     'query_search_string': 'eMolecules VID',
                     'query_object': self.string,
@@ -595,7 +561,7 @@ class ChemicalString:
             if record:
                 structure = record.get_structure()
                 chemical_structure = ChemicalStructure(resolved=structure)
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'nsc_number',
                     'query_search_string': 'NSC number',
                     'query_object': pattern,
@@ -615,7 +581,7 @@ class ChemicalString:
             if name:
                 structure_object = name.get_structure()
                 chemical_structure = ChemicalStructure(resolved=structure_object)
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'zinc_code',
                     'query_search_string': 'ZINC code',
                     'query_object': name,
@@ -627,12 +593,12 @@ class ChemicalString:
         return False
 
     def _resolver_cas_number(self, interpretation_object):
-        #cas_number = cas.number.String(string=self.string)
+        cas_number = CASNumber(string=self.string)
         name = Name.objects.get(name=self.string)
         if name:
             structure = name.get_structure()
             chemical_structure = ChemicalStructure(resolved=structure)
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'cas_number',
                 'query_search_string': 'CAS Registry Number',
                 'query_object': name,
@@ -708,7 +674,7 @@ class ChemicalString:
             match = pattern.search(self.string)
             if match:
                 return False
-            cas_number = CasNumber(string=self.string)
+            cas_number = CASNumber(string=self.string)
             return False
         except:
             pass
@@ -716,7 +682,7 @@ class ChemicalString:
         if name:
             structure = name.get_structure()
             chemical_structure = ChemicalStructure(resolved=structure)
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'name_by_cir',
                 'query_search_string': 'chemical name (CIR)',
                 'query_object': name,
@@ -738,7 +704,7 @@ class ChemicalString:
             for structure_name in structure_names:
                 structure = structure_name['structure']
                 chemical_structure = ChemicalStructure(resolved=structure)
-                chemical_structure.metadata = {
+                chemical_structure._metadata = {
                     'query_type': 'name_pattern',
                     'query_search_string': 'chemical name pattern',
                     'query_object': self.string,
@@ -753,7 +719,7 @@ class ChemicalString:
         smiles_string = SMILES(string=self.string, strict_testing=True)
         if smiles_string and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'smiles',
                 'query_search_string': 'SMILES string',
                 'query_object': smiles_string,
@@ -767,7 +733,7 @@ class ChemicalString:
         minimol = Minimol(string=self.string)
         if minimol and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'minimol',
                 'query_search_string': 'Cactvs minimol',
                 'query_object': minimol,
@@ -781,7 +747,7 @@ class ChemicalString:
         pack_string = PackString(string=self.string)
         if pack_string and self._structure_representation_resolver(interpretation_object):
             chemical_structure = interpretation_object.structures[0]
-            chemical_structure.metadata = {
+            chemical_structure._metadata = {
                 'query_type': 'packstring',
                 'query_search_string': 'Cactvs pack string',
                 'query_object': pack_string,
@@ -828,7 +794,7 @@ class ChemicalString:
             interpretation_object.type = 'structure'
             interpretation_object.type_string = 'chemical structure string'
             interpretation_object.query_object = ens
-            interpretation_object.ens = ens
+            interpretation_object._ens = ens
             try:
                 hashcode = Identifier(hashcode=ens.get('E_HASHISY'))
                 try:
@@ -886,7 +852,7 @@ class ChemicalString:
                 tautomer_string = 'tautomer %s' % t_count
                 description_string = metadata['description'] + " " + tautomer_string \
                     if 'description' in metadata else tautomer_string
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'] if 'query_type' in metadata else None,
                     'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
@@ -939,9 +905,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -951,7 +917,7 @@ class ChemicalString:
             for ens in no_hydrogens.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'no hydrogens %s' % count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']
@@ -969,9 +935,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -981,7 +947,7 @@ class ChemicalString:
             for ens in hydrogens.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'hydrogens %s' % count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']
@@ -999,9 +965,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -1011,7 +977,7 @@ class ChemicalString:
             for ens in no_stereo.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'no_stereo %s' % count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']
@@ -1029,9 +995,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -1041,7 +1007,7 @@ class ChemicalString:
             for ens in ficts.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'ficts %s' % count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']
@@ -1065,9 +1031,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -1077,7 +1043,7 @@ class ChemicalString:
             for ens in ficus.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'ficus %s' % count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']
@@ -1095,9 +1061,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -1107,7 +1073,7 @@ class ChemicalString:
             for ens in uuuuu.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'uuuuu %s' % count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']
@@ -1125,9 +1091,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -1137,7 +1103,7 @@ class ChemicalString:
             for ens in stereoisomers.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'stereoisomer %s' % count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']
@@ -1155,9 +1121,9 @@ class ChemicalString:
         enslist = []
         dataset_list = []
         for structure in interpretation.structures:
-            enslist.append(structure.ens)
+            enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure.metadata))
+        dataset_list.append((dataset, structure._metadata))
         structures = []
         description_list = []
         index = 1
@@ -1167,7 +1133,7 @@ class ChemicalString:
             for ens in scaffolds.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
                 description_string = 'scaffold %s' % t_count
-                structure.metadata = {
+                structure._metadata = {
                     'description': description_string,
                     'query_type': metadata['query_type'],
                     'query_search_string': metadata['query_search_string']

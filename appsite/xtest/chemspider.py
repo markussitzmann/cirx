@@ -16,4 +16,4 @@ from chemical.structure.resolver import *
 print 'hallo'
 s = ChemicalString(string='ADVPTQAUNPRNPO', resolver_list=['chemspider_stdinchikey'])
 
-print s._interpretations[0].structures[0].ens['smiles']
+print s._interpretations[0].structures[0]._ens['smiles']

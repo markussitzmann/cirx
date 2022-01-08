@@ -77,7 +77,7 @@ class DispatcherComponentTests(TestCase):
             logger.info(">>> %s", chemical_structure)
 
         logger.info("ens list: %s", Ens.List())
-        logger.info("dataset ens list: %s %s", tautomers, tautomers.ens())
+        logger.info("dataset ens list: %s %s", tautomers, tautomers._ens())
         logger.info("ens list: %s", Ens.List())
 
     @skip
@@ -119,7 +119,7 @@ class DispatcherComponentTests(TestCase):
         #logger.info("2: ens list: %s", Ens.List())
 
         ens_list: List[Ens] = [
-           structure.ens for structure_list in structure_lists for structure in structure_list
+           structure._ens for structure_list in structure_lists for structure in structure_list
         ]
 
         #logger.info("3 : ens list: %s", Ens.List())

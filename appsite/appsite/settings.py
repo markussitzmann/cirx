@@ -24,7 +24,7 @@ propertypath = list(CACTVS_SETTINGS['propertypath'])
 propertypath.append('/home/app/cactvsenv/prop')
 
 CACTVS_SETTINGS['python_object_autodelete'] = True
-#CACTVS_SETTINGS['lookup_hosts'] = []
+CACTVS_SETTINGS['lookup_hosts'] = []
 CACTVS_SETTINGS['propertypath'] = tuple(propertypath)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -184,6 +184,33 @@ LOGGING = {
         },
     },
 }
+
+# CIR Settings
+
+AVAILABLE_RESOLVERS = [
+    'smiles',
+    'stdinchikey',
+    'stdinchi',
+    'ncicadd_identifier',
+    'hashisy',
+    #'chemspider_id',
+    #'chemnavigator_sid',
+    #'pubchem_sid',
+    #'emolecules_vid',
+    #'ncicadd_rid',
+    'ncicadd_cid',
+    'ncicadd_sid',
+    'cas_number',
+    'nsc_number',
+    'zinc_code',
+    #'opsin',
+    #'chemspider_name',
+    #'name_pattern',
+    'name',
+    #'SDFile',
+    'minimol',
+    'packstring',
+]
 
 ### THE WE HAVE TO GET RID OF THIS SECTION
 

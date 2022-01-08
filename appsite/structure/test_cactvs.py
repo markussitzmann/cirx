@@ -48,7 +48,7 @@ class CactvsTests(SimpleTestCase):
         tautomers = e.get("E_RESOLVER_TAUTOMERS")
 
 
-        logger.info("Python tautomers: %s %s | %s" % (tautomers, tautomers.ens(), Dataset.List()))
+        logger.info("Python tautomers: %s %s | %s" % (tautomers, tautomers._ens(), Dataset.List()))
 
         # for structure in tautomers:
         #     logger.info(">>> %s", structure.get("E_SMILES"))
