@@ -146,7 +146,15 @@ class ChemicalString:
         def __repr__(self):
             return "<< %s (number of structures: %s) >>" % (self.type, self.structures)
 
-    def __init__(self, string, operator=None, resolver_list=None, operator_list=None, debug=False):
+    def __init__(
+            self,
+            string,
+            operator=None,
+            resolver_list=None,
+            operator_list=None,
+            simple: bool = False,
+            debug: bool = False
+    ):
         self.string = string.strip()
         self._interpretations = []
         if resolver_list:
@@ -196,8 +204,6 @@ class ChemicalString:
                             interpretation = operator_method(interpretation)
                         self._interpretations.append(interpretation)
                         i += 1
-                    #else:
-                    #     del interpretation
                 except Exception as e:
                     logger.error(e)
                     pass
@@ -211,8 +217,8 @@ class ChemicalString:
                         interpretation = operator_method(interpretation)
                     self._interpretations.append(interpretation)
                     i += 1
-                #else:
-                #    del interpretation
+            if simple and len(self._interpretations):
+                break
         return
 
     @property

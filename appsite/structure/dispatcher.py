@@ -513,8 +513,44 @@ class Dispatcher:
             return False
         return True
 
-    def xprop(self, string: str) -> List:
+    def prop(self, string: str) -> List:
         url_params = self.url_parameters.copy()
+        prop = self.parameters
+        if 'resolver' in url_params:
+            resolver_list = url_params.get('resolver').split(',')
+        else:
+            resolver_list = settings.AVAILABLE_RESOLVERS
+        simple: bool = self._use_simple_mode(
+            output_format=self.output_format,
+            simple_mode=('mode' in url_params and url_params == 'simple')
+        )
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list, simple=simple).interpretations
+        index: int = 1
+        for interpretation in interpretations:
+            structure: ChemicalStructure
+            for structure in interpretation.structures:
+                prop_val = structure.ens.get(prop, parameters=url_params)
+                if simple:
+                    structure_response = prop_val
+                else:
+                    structure_response = {
+                        'base_mime_type': self.base_content_type,
+                        'id': interpretation.id,
+                        'string': string,
+                        'structure': structure,
+                        'response': [prop_val, ],
+                        'index': index,
+                    }
+                self.response_list.append(structure_response)
+                index += 1
+        if simple:
+            return self._unique(self.response_list)
+        else:
+            return self.response_list
+
+    def xxprop(self, string: str) -> List:
+        url_params = self.url_parameters.copy()
+        prop = self.parameters
         if 'resolver' in url_params:
             resolver_list = url_params.get('resolver').split(',')
         else:
@@ -531,13 +567,27 @@ class Dispatcher:
                 dataset = self._create_dataset_page(dataset, int(rows), int(columns), int(page))
             if self.base_content_type == 'text':
                 self.content_type = "text/plain"
-                self.response_list = self._unique(dataset.get(self.parameters))
+                self.response_list = self._unique(dataset.get(prop))
         else:
-            pass
-
+            index: int = 1
+            for interpretation in interpretations:
+                structure: ChemicalStructure
+                for structure in interpretation.structures:
+                    prop_val = structure.ens.get(prop, parameters=url_params)
+                    #response = self._unique(prop_val)
+                    structure_response = {
+                        'base_mime_type': self.base_content_type,
+                        'id': interpretation.id,
+                        'string': string,
+                        'structure': structure,
+                        'response': [prop_val, ],
+                        'index': index,
+                    }
+                    self.response_list.append(structure_response)
+                    index += 1
         return self.response_list
 
-    def prop(self, string):
+    def xprop(self, string):
         propname = self.parameters
         base_content_type = self.base_content_type
         parameters = self.url_parameters.copy()
