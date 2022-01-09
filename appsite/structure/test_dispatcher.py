@@ -11,7 +11,7 @@ from dispatcher import Dispatcher
 from django.conf import settings
 
 from structure.models import Structure2
-from resolver import ChemicalString, ChemicalStructure
+from structure.resolver import ChemicalString, ChemicalStructure
 
 logger = logging.getLogger('cirx')
 
@@ -33,7 +33,6 @@ class DispatcherComponentTests(TestCase):
         logger.info("ens list >>> %s : %s" % (len(Ens.List()), Ens.List()))
         logger.info("dataset list 2 >>> %s", Dataset.List())
 
-
     @parameterized.expand([
         ["tautomers:warfarin", RESOLVER_LIST, (9, True)],
         ["tautomers:tylenol", RESOLVER_LIST, (10, True)],
@@ -44,6 +43,7 @@ class DispatcherComponentTests(TestCase):
         ["CCNCC", RESOLVER_LIST, (1, True)],
         ["tautomers:guanine", RESOLVER_LIST, (26, True)],
     ])
+    @skip
     def test_dispatcher(self, string, resolver_list, expectations):
         logger.info("------------- Test Dispatcher (%s) -------------" % string)
         expected_dataset_count, expected_status = expectations
@@ -67,6 +67,7 @@ class DispatcherComponentTests(TestCase):
         ["tautomers:guanine", RESOLVER_LIST, (2, 0, 20), (0, True)],
         ["tautomers:guanine", RESOLVER_LIST, (0, 3, 20), (0, True)],
     ])
+    @skip
     def test_dispatcher_page(self, string, resolver_list, paging, expectations):
         logger.info("------------- Test Dispatcher Page (%s) -------------" % string)
         expected_dataset_count, expected_status = expectations
@@ -81,4 +82,28 @@ class DispatcherComponentTests(TestCase):
         page_dataset: Dataset = Dispatcher._create_dataset_page(dataset, rows, columns, page)
 
         self.assertEqual(page_dataset.count(), expected_dataset_count)
+        self.assertTrue(expected_status)
+
+    @parameterized.expand([
+        ["tautomers:warfarin", RESOLVER_LIST, (9, True)],
+        ["tautomers:tylenol", RESOLVER_LIST, (10, True)],
+        ["CCO", RESOLVER_LIST, (1, True)],
+        ["CCN", RESOLVER_LIST, (1, True)],
+        ["CCS", RESOLVER_LIST, (1, True)],
+        ["CCOCC", RESOLVER_LIST, (1, True)],
+        ["CCNCC", RESOLVER_LIST, (1, True)],
+        ["tautomers:guanine", RESOLVER_LIST, (26, True)],
+    ])
+    def test_dispatcher_molfile_request(self, string, resolver_list, expectations):
+        logger.info("------------- Test Dispatcher Molfile (%s) -------------" % string)
+        expected_dataset_count, expected_status = expectations
+
+        request = self.factory.request()
+        dispatcher: Dispatcher = Dispatcher("file", request)
+
+        dispatcher.molfilestring(string)
+
+        logger.info(">>> %s" % dispatcher.response_list)
+
+        #self.assertEqual(dataset.count(), expected_dataset_count)
         self.assertTrue(expected_status)

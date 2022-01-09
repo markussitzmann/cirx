@@ -28,7 +28,7 @@
 | 28 |           NULL | hashisy                   | prop                 | E_HASHISY                    | text           |
 | 29 |           NULL | gif                       | prop                 | structure_image                | image          |
 | 30 |           NULL | iupac_name                | iupac_name           | NULL                           | text           |
-| 31 |           NULL | file                      | prop                 | E_MOLFILESTRING                  | text           |
+| 31 |           NULL | file                      | molfilestring        | NULL                  | text           |
 | 32 |           NULL | twirl                     | twirl                | E_MOLFILESTRING                  | text           |
 | 33 |           NULL | urls                      | urls                 | NULL                           | text           |
 | 34 |           NULL | 3d                        | twirl                | E_MOLFILESTRING                  | text           |
