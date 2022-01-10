@@ -59,7 +59,7 @@ def resolve_to_response(request, string, representation, operator_parameter=None
         string = "%s:%s" % (operator_parameter, string)
 
     url_method = Dispatcher(representation=representation, request=request, output_format=format)
-    resolved_string, representation, response, mime_type = url_method.parse(string)
+    resolved_string, representation, response, content_type = url_method.parse(string)
     if request.is_secure():
         host_string = 'https://' + request.get_host()
     else:
@@ -76,9 +76,9 @@ def resolve_to_response(request, string, representation, operator_parameter=None
         if parameters.has_key('div_id') or parameters.has_key('dom_id'):
             if parameters.has_key('div_id') and not parameters.has_key('dom_id'):
                 parameters['dom_id'] = parameters['div_id']
-            mime_type = 'text/javascript'
+            content_type = 'text/javascript'
         else:
-            mime_type = 'text/html'
+            content_type = 'text/html'
         return render(
             request, '3d.template', {
                 'library': representation,
@@ -88,12 +88,12 @@ def resolve_to_response(request, string, representation, operator_parameter=None
                 'url_parameter_string': url_parameter_string,
                 'base_url': settings.STRUCTURE_BASE_URL,
                 'host': host_string
-            }, content_type=mime_type)
+            }, content_type=content_type)
 
     if format == 'plain':
         if not url_method.__repr__():
             raise Http404
-        return HttpResponse(url_method.__repr__())
+        return HttpResponse(url_method.__repr__(), content_type=content_type)
     elif format == 'xml':
         return render(request, 'structure.xml', {
             'response': response,

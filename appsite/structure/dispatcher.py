@@ -528,15 +528,18 @@ class Dispatcher:
 
     def molfilestring(self, string: str) -> List:
         url_params = self.url_parameters.copy()
+        url_param_dict = url_params.dict()
         interpretations: List[ChemicalString.Interpretation]
         simple: bool
         interpretations, simple = self._interpretations(string)
         if not simple:
             raise NotImplemented
         dataset: Dataset = self._create_dataset(interpretations, simple)
-        molfile: str = Molfile.String(dataset, **url_params).decode(encoding='utf-8')
-        self.response_list = [molfile, ]
-        return molfile
+        molfile: bytes = Molfile.String(dataset, url_param_dict)
+        molfile_string: str = molfile.decode(encoding='utf-8')
+        self.response_list = [molfile_string, ]
+        self.content_type = "text/plain"
+        return molfile_string
 
     def prop(self, string: str) -> List:
         url_params = self.url_parameters.copy()

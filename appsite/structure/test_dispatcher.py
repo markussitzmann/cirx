@@ -85,14 +85,14 @@ class DispatcherComponentTests(TestCase):
         self.assertTrue(expected_status)
 
     @parameterized.expand([
-        ["tautomers:warfarin", RESOLVER_LIST, (9, True)],
-        ["tautomers:tylenol", RESOLVER_LIST, (10, True)],
+        #["tautomers:warfarin", RESOLVER_LIST, (9, True)],
+        #["tautomers:tylenol", RESOLVER_LIST, (10, True)],
         ["CCO", RESOLVER_LIST, (1, True)],
-        ["CCN", RESOLVER_LIST, (1, True)],
-        ["CCS", RESOLVER_LIST, (1, True)],
-        ["CCOCC", RESOLVER_LIST, (1, True)],
-        ["CCNCC", RESOLVER_LIST, (1, True)],
-        ["tautomers:guanine", RESOLVER_LIST, (26, True)],
+        #["CCN", RESOLVER_LIST, (1, True)],
+        #["CCS", RESOLVER_LIST, (1, True)],
+        #["CCOCC", RESOLVER_LIST, (1, True)],
+        #["CCNCC", RESOLVER_LIST, (1, True)],
+        #["tautomers:guanine", RESOLVER_LIST, (26, True)],
     ])
     def test_dispatcher_molfile_request(self, string, resolver_list, expectations):
         logger.info("------------- Test Dispatcher Molfile (%s) -------------" % string)
