@@ -1,4 +1,5 @@
 import datetime
+import io
 import os
 import time
 
@@ -14,7 +15,7 @@ from structure.models import *
 
 
 def identifier(request, string, representation, operator=None, format='plain'):
-    return resolve_to_response(request, string, representation, operator_parameter=None, format=format)
+    return resolve_to_response(request, string, representation, operator_parameter=None, output_format=format)
 
 
 def structure(request, string=None):
@@ -51,15 +52,15 @@ def structure(request, string=None):
     })
 
 
-def resolve_to_response(request, string, representation, operator_parameter=None, format='plain'):
+def resolve_to_response(request, string, representation, operator_parameter=None, output_format='plain'):
     parameters = request.GET.copy()
     if 'operator' in parameters:
         operator_parameter = parameters['operator']
     if operator_parameter:
         string = "%s:%s" % (operator_parameter, string)
 
-    url_method = Dispatcher(representation=representation, request=request, output_format=format)
-    resolved_string, representation, response, content_type = url_method.parse(string)
+    dispatcher: Dispatcher = Dispatcher(representation=representation, request=request, output_format=output_format)
+    resolved_string, representation, response, content_type = dispatcher.parse(string)
     if request.is_secure():
         host_string = 'https://' + request.get_host()
     else:
@@ -83,18 +84,24 @@ def resolve_to_response(request, string, representation, operator_parameter=None
             request, '3d.template', {
                 'library': representation,
                 'string': string,
-                'response': url_method.response_list,
+                'response': dispatcher.response_list,
                 'parameters': parameters,
                 'url_parameter_string': url_parameter_string,
                 'base_url': settings.STRUCTURE_BASE_URL,
                 'host': host_string
             }, content_type=content_type)
 
-    if format == 'plain':
-        if not url_method.__repr__():
+    if output_format == 'plain':
+        if not response:
             raise Http404
-        return HttpResponse(url_method.__repr__(), content_type=content_type)
-    elif format == 'xml':
+        #return HttpResponse(url_method.__repr__(), content_type=content_type)
+        try:
+            http_response = HttpResponse(content_type=content_type)
+            http_response.write(io.BytesIO(response).getvalue())
+        except Exception:
+            http_response = HttpResponse(response, content_type=content_type)
+        return http_response
+    elif output_format == 'xml':
         return render(request, 'structure.xml', {
             'response': response,
             'string': resolved_string,

@@ -1,4 +1,6 @@
 import functools
+import io
+from distutils.util import strtobool
 from typing import List, Dict, Tuple
 
 import logging
@@ -526,20 +528,33 @@ class Dispatcher:
         interpretations = ChemicalString(string=string, resolver_list=resolver_list, simple=simple).interpretations
         return interpretations, simple
 
-    def molfilestring(self, string: str) -> List:
+    def molfilestring(self, string: str):
         url_params = self.url_parameters.copy()
         url_param_dict = url_params.dict()
+        if 'get3d' in url_param_dict:
+            writeflags = url_param_dict.get('writeflags', [])
+            if 'write3d' not in writeflags and strtobool(url_param_dict['get3d']):
+                writeflags.append('write3d')
+                url_param_dict['writeflags'] = writeflags
+            del url_param_dict['get3d']
         interpretations: List[ChemicalString.Interpretation]
         simple: bool
         interpretations, simple = self._interpretations(string)
         if not simple:
             raise NotImplemented
         dataset: Dataset = self._create_dataset(interpretations, simple)
-        molfile: bytes = Molfile.String(dataset, url_param_dict)
-        molfile_string: str = molfile.decode(encoding='utf-8')
-        self.response_list = [molfile_string, ]
-        self.content_type = "text/plain"
-        return molfile_string
+        molfile_string_response: bytes = Molfile.String(dataset, url_param_dict)
+        response = None
+        # TODO: this is too trusty and needs improvements
+        try:
+            response = molfile_string_response.decode(encoding='utf-8')
+            self.content_type = "text/plain"
+        except UnicodeDecodeError:
+            response = io.BytesIO(molfile_string_response).getvalue()
+            self.content_type = "application/octet-stream"
+        finally:
+            self.response_list = [response, ]
+        return response
 
     def prop(self, string: str) -> List:
         url_params = self.url_parameters.copy()
