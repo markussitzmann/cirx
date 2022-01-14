@@ -49,12 +49,14 @@ INSTALLED_APPS = [
     'simple.apps.SimpleConfig',
     'database.apps.DatabaseConfig',
     'structure.apps.StructureConfig',
+    'machine.apps.MachineConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -184,6 +186,14 @@ LOGGING = {
         },
     },
 }
+
+# Celery
+
+CELERY_BROKER_URL = 'amqp://' + os.environ['RABBITMQ_DEFAULT_USER'] + ':' + os.environ['RABBITMQ_DEFAULT_PASS'] + '@cirx-rabbitmq'
+CELERY_RESULT_BACKEND = 'django-db'
+
+#CELERY_ACCEPT_CONTENT = ['json']
+#CELERY_TASK_SERIALIZER = 'json'
 
 # CIR Settings
 

@@ -23,6 +23,8 @@ services:
       - POSTGRES_PORT
       - POSTGRES_PASSWORD
       - VIRTUAL_HOST=${APP_VIRTUAL_HOSTNAME}
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
       - LETSENCRYPT_HOST
       - LETSENCRYPT_EMAIL
       - LETSENCRYPT_TEST
@@ -31,21 +33,39 @@ services:
     entrypoint: [ "/home/app/docker-entrypoint.sh" ]
     command: [ "/home/nginx/run.sh" ]
 
-
   cirx-postgres:
     image: postgres:latest
     container_name: ${APP_NAME}-postgres
     volumes:
       - postgres_db_volume:/var/lib/postgresql
+    ports:
+      - "5432:5432"
     networks:
       - app_network
     environment:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
 
+  cirx-rabbitmq:
+    image: rabbitmq:3.8-management
+    container_name: ${APP_NAME}-rabbitmq
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - rabbitmq_volume:/var/lib/rabbitmq/
+      - rabbitmq_volume:/var/log/rabbitmq
+    networks:
+      - app_network
+    environment:
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+
 volumes:
   postgres_db_volume:
     name: ${APP_NAME}-postgres-db-volume
+  rabbitmq_volume:
+    name: ${APP_NAME}-rabbitmq_volume
 
 networks:
   app_network:

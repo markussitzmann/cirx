@@ -1,8 +1,12 @@
+backports.zoneinfo
 psycopg2-binary
 requests
 django>=4.0
 djangorestframework
 django-extensions
 django-htmlmin
+django-celery-results
+celery[librabbitmq]
 parameterized~=0.8.1
 #django-dbbackup>=3
+
