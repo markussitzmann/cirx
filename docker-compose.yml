@@ -60,6 +60,42 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER
       - RABBITMQ_DEFAULT_PASS
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 15s
+      retries: 10
+
+  cirx-worker:
+    image: ${APP_NAME}:${APP_VERSION}
+    container_name: ${APP_NAME}-python
+    volumes:
+      - ${APP_HOME}:/home/app
+      - ${APP_HOME}/nginx:/home/nginx
+      #    ports:
+      #      - "8000:8000"
+    networks:
+      - app_network
+    environment:
+      - APP_NAME
+      - APP_VERSION
+      - APP_UID
+      - APP_GID
+      - APP_VIRTUAL_HOSTNAME
+      - POSTGRES_USER
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - VIRTUAL_HOST=${APP_VIRTUAL_HOSTNAME}
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+      - PYTHONSTARTUP=/home/app/cactvsenv/__init__.py
+    entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
+    working_dir: "/home/app"
+    command: python
+    restart: on-failure
+    depends_on:
+      - cirx-rabbitmq
 
 volumes:
   postgres_db_volume:

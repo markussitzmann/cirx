@@ -1,4 +1,11 @@
+from pycactvs import Ens
+
 from celery import shared_task
+
+
+@shared_task
+def ficus(structure):
+    return Ens(structure).get('E_FICUS_ID')
 
 
 @shared_task

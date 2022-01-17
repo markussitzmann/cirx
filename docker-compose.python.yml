@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+
+  cirx-python:
+    image: ${APP_NAME}:${APP_VERSION}
+    container_name: ${APP_NAME}-python
+    volumes:
+      - ${APP_HOME}:/home/app
+      - ${APP_HOME}/nginx:/home/nginx
+#    ports:
+#      - "8000:8000"
+    networks:
+      - app_network
+    environment:
+      - APP_NAME
+      - APP_VERSION
+      - APP_UID
+      - APP_GID
+      - APP_VIRTUAL_HOSTNAME
+      - POSTGRES_USER
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_PASSWORD
+      - VIRTUAL_HOST=${APP_VIRTUAL_HOSTNAME}
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+      #- LETSENCRYPT_HOST
+      #- LETSENCRYPT_EMAIL
+      #- LETSENCRYPT_TEST
+      - PYTHONSTARTUP=/home/app/cactvsenv/__init__.py
+    #depends_on:
+    #  - cirx-postgres
+    entrypoint: [ "/home/app/docker-entrypoint.dev.sh" ]
+    working_dir: "/home/app"
+    command: python
+
+networks:
+  app_network:
+    external:
+      name: ${APP_NAME}-backend
+
+
