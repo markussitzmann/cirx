@@ -40,6 +40,14 @@
     }
   },
   {
+    "model": "structure.structure2",
+    "pk": 6,
+    "fields": {
+      "hashisy": "7EADF90967D28C06",
+      "minimol": "EhhYdR6hfAMVmfwDDisbG3WOJkL3gkhRVQqYVxtQ/3SOQAIqaggrCJQNcwIEBgshNcwIBBwRGfkNWJ4RgH4R+ZQHCEUi5swBEBkAqRFhfAAT9icDFwwLEf58BwhZaAloAX0ABxEAAA=="
+    }
+  },
+  {
     "model": "structure.inchi",
     "pk": "355d05f1-acdf-520f-9bc0-bfbdea4a302c",
     "fields": {
@@ -88,6 +96,23 @@
       "safe_options": null,
       "added": "2021-12-10T23:04:05.632Z",
       "modified": "2021-12-10T23:04:05.632Z"
+    }
+  },
+  {
+    "model": "structure.inchi",
+    "pk": "d710429f-4a77-58ec-bd79-f515134adb77",
+    "fields": {
+      "version": 1,
+      "version_string": "",
+      "block1": "RYYVLZVUVIJVGH",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+      "string": "InChI=1S/C8H10N4O2/c1-10-4-9-6-5(10)7(13)12(3)8(14)11(6)2/h4H,1-3H3",
+      "is_standard": true,
+      "safe_options": null,
+      "added": "2022-01-18T15:07:40.093Z",
+      "modified": "2022-01-18T15:07:40.093Z"
     }
   },
   {
@@ -165,6 +190,14 @@
     }
   },
   {
+    "model": "structure.structureinchis",
+    "pk": 6,
+    "fields": {
+      "structure": 6,
+      "inchi": "d710429f-4a77-58ec-bd79-f515134adb77"
+    }
+  },
+  {
     "model": "structure.name",
     "pk": 1,
     "fields": {
@@ -197,6 +230,13 @@
     "pk": 5,
     "fields": {
       "name": "tylenol"
+    }
+  },
+  {
+    "model": "structure.name",
+    "pk": 6,
+    "fields": {
+      "name": "caffeine"
     }
   },
   {
@@ -241,6 +281,15 @@
     "fields": {
       "name": 5,
       "structure": 5,
+      "name_type": 7
+    }
+  },
+  {
+    "model": "structure.structurename",
+    "pk": 6,
+    "fields": {
+      "name": 6,
+      "structure": 6,
       "name_type": 7
     }
   },
@@ -574,8 +623,8 @@
     "fields": {
       "parent_type": null,
       "url": "sdf",
-      "method": "molfilestring",
-      "parameter": null,
+      "method": "prop",
+      "parameter": "E_MOLFILESTRING",
       "base_mime_type": "text"
     }
   },
@@ -585,8 +634,8 @@
     "fields": {
       "parent_type": null,
       "url": "molfile",
-      "method": "molfilestring",
-      "parameter": null,
+      "method": "prop",
+      "parameter": "E_MOLFILESTRING",
       "base_mime_type": "text"
     }
   },
@@ -641,7 +690,7 @@
       "parent_type": null,
       "url": "twirl",
       "method": "twirl",
-      "parameter": "molfilestring",
+      "parameter": "E_MOLFILESTRING",
       "base_mime_type": "text"
     }
   },
@@ -663,7 +712,7 @@
       "parent_type": null,
       "url": "3d",
       "method": "twirl",
-      "parameter": "molfilestring",
+      "parameter": "E_MOLFILESTRING",
       "base_mime_type": "text"
     }
   },

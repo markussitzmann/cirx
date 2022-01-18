@@ -23,7 +23,7 @@ def _loader():
     init_response_type_data()
     init_name_type_data()
 
-    names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol']
+    names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']
     name_type_obj = NameType.objects.get(id=7)
 
     for name in names:
