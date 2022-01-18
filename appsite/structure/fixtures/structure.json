@@ -574,8 +574,8 @@
     "fields": {
       "parent_type": null,
       "url": "sdf",
-      "method": "prop",
-      "parameter": "molfilestring",
+      "method": "molfilestring",
+      "parameter": null,
       "base_mime_type": "text"
     }
   },
@@ -585,8 +585,8 @@
     "fields": {
       "parent_type": null,
       "url": "molfile",
-      "method": "prop",
-      "parameter": "molfilestring",
+      "method": "molfilestring",
+      "parameter": null,
       "base_mime_type": "text"
     }
   },
@@ -629,8 +629,8 @@
     "fields": {
       "parent_type": null,
       "url": "file",
-      "method": "prop",
-      "parameter": "molfilestring",
+      "method": "molfilestring",
+      "parameter": null,
       "base_mime_type": "text"
     }
   },

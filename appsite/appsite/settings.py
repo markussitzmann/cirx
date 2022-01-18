@@ -148,6 +148,22 @@ STATIC_ROOT = os.path.join("/home/app", "static/")
 MEDIA_ROOT = os.path.join("/home/app", "media/")
 MEDIA_URL = "/media/"
 
+### CORS
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ['*']
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+#CSRF_TRUSTED_ORIGINS = (
+#    'http://localhost:8000'
+#)
+#CORS_ORIGIN_ALLOW_ALL = True
+#sCORS_ALLOW_CREDENTIALS = False
+
+### LOGGING
 
 LOGGING = {
     'version': 1,
