@@ -46,8 +46,11 @@ ALLOWED_HOSTS = os.environ['APP_VIRTUAL_HOSTNAME'].split(",")
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
+    'rest_framework_json_api',
     'simple.apps.SimpleConfig',
     'database.apps.DatabaseConfig',
+    'resolver.apps.ResolverConfig',
     'structure.apps.StructureConfig',
     'django.contrib.admin',
     'django.contrib.auth',

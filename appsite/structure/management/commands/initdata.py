@@ -4,7 +4,8 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from structure.models import Structure2, Name, NameType, StructureName, ResponseType, InChI, StructureInChIs
+from structure.models import Structure2, Name, NameType, StructureName, ResponseType, StructureInChIs
+from resolver.models import InChI
 
 from pycactvs import Ens
 

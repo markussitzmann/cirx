@@ -5,8 +5,9 @@ from django.test import TestCase, SimpleTestCase
 from pycactvs import Ens
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from structure.models import Structure2, InChI
-from resolver import ChemicalStructure
+from structure.models import Structure2
+from resolver.models import InChI
+from .resolver import ChemicalStructure
 
 logger = logging.getLogger('cirx')
 
@@ -68,12 +69,17 @@ class StructureTests(TestCase):
         ens = Ens("CCO")
         inchi_key = ens.get("E_INCHIKEY")
         inchi_string = ens.get("E_INCHI")
-        inchi_string_obj = InChI.create(key=inchi_key, string=inchi_string)
-        logger.info("x>>> %s | %s" % (inchi_string_obj, inchi_string_obj))
-        logger.info("k>>> %s" % (inchi_string_obj.__dict__,))
-        z = InChI.create(**inchi_string_obj.__dict__.pop('_state'))
+        inchi = InChI.create(key=inchi_key, string=inchi_string)
+        #logger.info("x>>> %s | %s" % (inchi_string_obj, inchi_string_obj))
+        #logger.info("k>>> %s" % (inchi_string_obj.__dict__,))
+        #z = InChI.create(**inchi_string_obj.__dict__.pop('_state'))
 
-        logger.info("z>>> %s" % (z,))
+        inchi.save()
+        #inchi2 = InCh
+
+        logger.info("1>>> %s %s" % (inchi, inchi.id))
+        #logger.info("2>>> %s %s" % (inchi2, inchi2.id))
+
 
 
     def test_inchi_model2(self):

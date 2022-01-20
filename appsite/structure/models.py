@@ -42,7 +42,7 @@ class Structure2(models.Model):
         related_name="structure_set"
     )
     inchis = models.ManyToManyField(
-        'InChI',
+        'resolver.InChI',
         through='StructureInChIs',
         related_name="structures"
     )
@@ -176,94 +176,94 @@ class StructureStandardInChI(models.Model):
         #db_table = u'`chemical_inchi`.`structure_standard_inchi`'
 
 
+# class InChIManager(models.Manager):
+#
+#     def get_or_create_from_ens(self, ens: Ens):
+#         inchikey = ens.get('E_STDINCHIKEY')
+#         inchi = ens.get('E_STDINCHI')
+#         i = InChI.create(key=inchikey, string=inchi)
+#         d = model_to_dict(i)
+#         return self.get_or_create(id=i.id, **d)
 
-class InChIManager(models.Manager):
 
-    def get_or_create_from_ens(self, ens: Ens):
-        inchikey = ens.get('E_STDINCHIKEY')
-        inchi = ens.get('E_STDINCHI')
-        i = InChI.create(key=inchikey, string=inchi)
-        d = model_to_dict(i)
-        return self.get_or_create(id=i.id, **d)
-
-
-class InChI(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
-    version = models.IntegerField(default=1)
-    version_string = models.CharField(max_length=64)
-    block1 = models.CharField(max_length=14)
-    block2 = models.CharField(max_length=10)
-    block3 = models.CharField(max_length=1)
-    key = models.CharField(max_length=27, blank=True, null=True)
-    string = models.CharField(max_length=32768, blank=True, null=True)
-    is_standard = models.BooleanField(default=False)
-    safe_options = models.CharField(max_length=2, default=None, null=True)
-    added = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    objects = InChIManager()
-
-    indexes = Index(
-        fields=['version', 'block1', 'block2', 'block3'],
-        name='inchi_index'
-    )
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['version', 'block1', 'block2', 'block3'],
-                name='unique_inchi_constraint'
-            ),
-        ]
-        verbose_name = "InChI"
-        db_table = 'cir_inchi'
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        if 'url_prefix' in kwargs:
-            inchiargs = kwargs.pop('url_prefix')
-            inchi = cls(*args, inchiargs)
-        else:
-            inchi = cls(*args, **kwargs)
-        k = None
-        s = None
-        if 'key' in kwargs and kwargs['key']:
-            k = InChIKey(kwargs['key'])
-
-        if 'string' in kwargs and kwargs['string']:
-            s = InChIString(kwargs['string'])
-            e = Ens(kwargs['string'])
-            if s.element['is_standard']:
-                _k = InChIKey(e.get('E_STDINCHIKEY'))
-            else:
-                _k = InChIKey(e.get('E_INCHIKEY'))
-            if k:
-                if not k.element['well_formatted'] == _k.element['well_formatted']:
-                    raise FieldError("InChI key does not represent InChI string")
-            else:
-                k = _k
-
-        inchi.key = k.element['well_formatted_no_prefix']
-        inchi.version = k.element['version']
-        inchi.is_standard = k.element['is_standard']
-        inchi.block1 = k.element['block1']
-        inchi.block2 = k.element['block2']
-        inchi.block3 = k.element['block3']
-        if s:
-            inchi.string = s.element['well_formatted']
-        inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            inchi.key,
-            str(kwargs.get('safe_options', None)),
-        ]))
-        return inchi
-
-    def __str__(self):
-        return self.key
+# class InChI(models.Model):
+#     id = models.UUIDField(primary_key=True, editable=False)
+#     version = models.IntegerField(default=1)
+#     version_string = models.CharField(max_length=64)
+#     block1 = models.CharField(max_length=14)
+#     block2 = models.CharField(max_length=10)
+#     block3 = models.CharField(max_length=1)
+#     key = models.CharField(max_length=27, blank=True, null=True)
+#     string = models.CharField(max_length=32768, blank=True, null=True)
+#     is_standard = models.BooleanField(default=False)
+#     safe_options = models.CharField(max_length=2, default=None, null=True)
+#     entrypoints = models.ManyToManyField('EntryPoint', related_name='inchis')
+#     added = models.DateTimeField(auto_now_add=True)
+#     modified = models.DateTimeField(auto_now=True)
+#
+#     objects = InChIManager()
+#
+#     indexes = Index(
+#         fields=['version', 'block1', 'block2', 'block3'],
+#         name='inchi_index'
+#     )
+#
+#     class Meta:
+#         constraints = [
+#             UniqueConstraint(
+#                 fields=['version', 'block1', 'block2', 'block3'],
+#                 name='unique_inchi_constraint'
+#             ),
+#         ]
+#         verbose_name = "InChI"
+#         db_table = 'cir_inchi'
+#
+#     @classmethod
+#     def create(cls, *args, **kwargs):
+#         if 'url_prefix' in kwargs:
+#             inchiargs = kwargs.pop('url_prefix')
+#             inchi = cls(*args, inchiargs)
+#         else:
+#             inchi = cls(*args, **kwargs)
+#         k = None
+#         s = None
+#         if 'key' in kwargs and kwargs['key']:
+#             k = InChIKey(kwargs['key'])
+#
+#         if 'string' in kwargs and kwargs['string']:
+#             s = InChIString(kwargs['string'])
+#             e = Ens(kwargs['string'])
+#             if s.element['is_standard']:
+#                 _k = InChIKey(e.get('E_STDINCHIKEY'))
+#             else:
+#                 _k = InChIKey(e.get('E_INCHIKEY'))
+#             if k:
+#                 if not k.element['well_formatted'] == _k.element['well_formatted']:
+#                     raise FieldError("InChI key does not represent InChI string")
+#             else:
+#                 k = _k
+#
+#         inchi.key = k.element['well_formatted_no_prefix']
+#         inchi.version = k.element['version']
+#         inchi.is_standard = k.element['is_standard']
+#         inchi.block1 = k.element['block1']
+#         inchi.block2 = k.element['block2']
+#         inchi.block3 = k.element['block3']
+#         if s:
+#             inchi.string = s.element['well_formatted']
+#         inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+#             inchi.key,
+#             str(kwargs.get('safe_options', None)),
+#         ]))
+#         return inchi
+#
+#     def __str__(self):
+#         return self.key
 
 
 class StructureInChIs(models.Model):
     structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
-    inchi = models.ForeignKey('InChI', on_delete=models.CASCADE)
+    inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'cir_structure_inchis'

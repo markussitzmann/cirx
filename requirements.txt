@@ -3,6 +3,10 @@ requests
 django>=4.0
 djangorestframework
 django-extensions
+djangorestframework-jsonapi
+djangorestframework-jsonapi[django-filter]
+djangorestframework-jsonapi[django-polymorphic]
+django-multiselectfield
 django-htmlmin
 parameterized~=0.8.1
 #django-dbbackup>=3
