@@ -19,14 +19,13 @@ from structure.inchi.identifier import InChIKey, InChIString
 class InChIManager(models.Manager):
 
     def get_or_create_from_ens(self, ens: Ens):
+        # TODO: improve
         inchikey = ens.get('E_STDINCHIKEY')
         inchi = ens.get('E_STDINCHI')
         i = InChI.create(key=inchikey, string=inchi)
         d = model_to_dict(i)
-        try:
-            o = self.get_or_create(id=i.id, **d)
-        except Exception as e:
-            print(e)
+        d.pop('entrypoints', [])
+        o = self.get_or_create(id=i.id, **d)
         return o
 
 
@@ -41,7 +40,7 @@ class InChI(models.Model):
     string = models.CharField(max_length=32768, blank=True, null=True)
     is_standard = models.BooleanField(default=False)
     safe_options = models.CharField(max_length=2, default=None, null=True)
-    entrypoints = models.ManyToManyField('EntryPoint', related_name='inchis')
+    entrypoints = models.ManyToManyField('EntryPoint', related_name='inchis', blank=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -201,6 +200,8 @@ class Organization(models.Model):
 
     class Meta:
         unique_together = ('parent', 'name')
+        db_table = 'cir_organization'
+
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -239,6 +240,7 @@ class Publisher(models.Model):
 
     class Meta:
         unique_together = ('organization', 'parent', 'name', 'href', 'orcid')
+        db_table = 'cir_publisher'
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -278,6 +280,7 @@ class EntryPoint(models.Model):
 
     class Meta:
         unique_together = ('parent', 'publisher', 'href')
+        db_table = 'cir_entrypoint'
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -318,6 +321,7 @@ class EndPoint(models.Model):
 
     class Meta:
         unique_together = ('entrypoint', 'uri')
+        db_table = 'cir_endpoint'
 
     def full_path_uri(self):
         if self.entrypoint:
@@ -347,6 +351,9 @@ class MediaType(models.Model):
 
     class JSONAPIMeta:
         resource_name = 'mediatypes'
+
+    class Meta:
+        db_table = 'cir_media_type'
 
     @classmethod
     def create(cls, *args, **kwargs):

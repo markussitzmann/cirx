@@ -10,6 +10,11 @@ if [ -z $(docker network ls --filter name=^${APP_NAME}-backend$ --format="{{ .Na
      docker network create cirx-backend ;
 fi
 
+./build
+./django-init
+./django-manage-py initdata
+
+
 echo "done"
 
 
