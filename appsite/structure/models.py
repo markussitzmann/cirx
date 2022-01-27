@@ -1,28 +1,12 @@
-import uuid
-
-from django.core.exceptions import FieldError
-from django.db.models import UniqueConstraint, Index
-from django.forms import model_to_dict
-from pycactvs import Ens
-
-from django.db import models
-
 import json
 
+from django.db import models
+from django.db.models import UniqueConstraint, Index
+from pycactvs import Ens
+
 from custom.cactvs import CactvsHash, CactvsMinimol
-from database.models import Database, Release, DatabaseDataCache
-
-from structure.inchi.identifier import InChIKey, InChIString
-
-#from structure.inchi import identifier as inchi
-#from structure.ncicadd import identifier as ncicadd
-
 from custom.fields import CactvsHashField, CactvsMinimolField
-
-
-# from django.utils import simplejson
-# import json
-
+from database.models import Database, Release, DatabaseDataCache
 
 # import djangosphinx
 
