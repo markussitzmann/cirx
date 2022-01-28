@@ -4,8 +4,8 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from structure.models import Structure2, Name, NameType, StructureName, ResponseType, StructureInChIs
-from resolver.models import InChI
+from structure.models import Structure2, Name, NameType, StructureNames, ResponseType, StructureInChIs
+from resolver.models import InChI, Organization
 
 from pycactvs import Ens
 
@@ -23,6 +23,7 @@ class Command(BaseCommand):
 def _loader():
     init_response_type_data()
     init_name_type_data()
+    #init_organization_data()
 
     names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']
     name_type_obj = NameType.objects.get(id=7)
@@ -35,7 +36,7 @@ def _loader():
         structure_obj, structure_created = Structure2.objects.get_or_create_from_ens(ens)
         logger.info("Structure: %s %s" % (structure_obj, structure_created))
 
-        structure_name_obj, name_created = StructureName.objects.get_or_create(
+        structure_name_obj, name_created = StructureNames.objects.get_or_create(
             name=name_obj,
             structure=structure_obj,
             name_type=name_type_obj
@@ -99,3 +100,23 @@ def init_name_type_data():
 
     for name_type in name_types:
         NameType.objects.get_or_create(string=name_type)
+
+
+def init_organization_data():
+
+    nih = Organization.objects.create_organization(
+        name="National Institutes of Health",
+        abbreviation="NIH",
+        category="government",
+        href="https://www.nih.gov"
+    )
+
+    nci = Organization.objects.create_organization(
+        parent=nih,
+        name="National Cancer Institute",
+        abbreviation="NCI",
+        category="government",
+        href="https://www.cancer.gov"
+    )
+    Organization.objects.get_or_create(nci)
+

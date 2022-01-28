@@ -1,11 +1,14 @@
 psycopg2-binary
 requests
 django>=4.0
-djangorestframework
 django-extensions
-djangorestframework-jsonapi
+djangorestframework
+django-filter
+django-crispy-forms
+djangorestframework-jsonapi>=5.0.0
 djangorestframework-jsonapi[django-filter]
 djangorestframework-jsonapi[django-polymorphic]
+djangorestframework-jsonapi[openapi]
 django-multiselectfield
 django-htmlmin
 parameterized~=0.8.1

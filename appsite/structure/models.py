@@ -8,7 +8,6 @@ from custom.cactvs import CactvsHash, CactvsMinimol
 from custom.fields import CactvsHashField, CactvsMinimolField
 from database.models import Database, Release, DatabaseDataCache
 
-# import djangosphinx
 
 class Structure2Manager(models.Manager):
 
@@ -19,12 +18,12 @@ class Structure2Manager(models.Manager):
 class Structure2(models.Model):
     hashisy = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
-    names = models.ManyToManyField('Name', through='StructureName', related_name="structure")
-    standard_inchis = models.ManyToManyField(
-        'StandardInChI',
-        through='StructureStandardInChI',
-        related_name="structure_set"
-    )
+    names = models.ManyToManyField('Name', through='StructureNames', related_name="structure")
+    # standard_inchis = models.ManyToManyField(
+    #     'StandardInChI',
+    #     through='StructureStandardInChI',
+    #     related_name="structure_set"
+    # )
     inchis = models.ManyToManyField(
         'resolver.InChI',
         through='StructureInChIs',
@@ -41,6 +40,56 @@ class Structure2(models.Model):
 
     def __str__(self):
         return self.hashisy.padded()
+
+
+class StructureInChIs(models.Model):
+    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
+    inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'cir_structure_inchis'
+
+
+class Name(models.Model):
+    name = models.TextField(max_length=1500, unique=True)
+
+    class Meta:
+        db_table = 'cir_structure_name'
+
+    def get_structure(self):
+        return self.structure.get()
+
+    def __str__(self):
+        return "Name='%s'" % (self.name, )
+
+    def __repr__(self):
+        return self.name
+
+
+class NameType(models.Model):
+    string = models.TextField(max_length=45, unique=True)
+
+    class Meta:
+        db_table = 'cir_name_type'
+
+
+class StructureNames(models.Model):
+    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure2, on_delete=models.CASCADE)
+    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
+        ]
+        db_table = 'cir_structure_names'
+
+
+class Formula(models.Model):
+    formula = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'cir_structure_formula'
 
 
 
@@ -92,72 +141,63 @@ class Structure2(models.Model):
 #         return 'NCICADD:SID=%s' % self.id
 
 
-class StructureImage(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    hashisy = models.IntegerField(unique=True)
-    small = models.TextField(max_length=65535)
-    medium = models.TextField(max_length=65535)
-    large = models.TextField(max_length=65535)
-
-    class Meta:
-        db_table = 'cir_structure_image'
-        #db_table = u'`chemical_structure_image`'
-
-
-class Formula(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    formula = models.CharField(max_length=50)
-
-    class Meta:
-        db_table = 'cir_structure_formula'
-        #db_table = u'`chemical_formula`.`formula`'
+# class StructureImage(models.Model):
+#     #id = models.IntegerField(primary_key=True)
+#     hashisy = models.IntegerField(unique=True)
+#     small = models.TextField(max_length=65535)
+#     medium = models.TextField(max_length=65535)
+#     large = models.TextField(max_length=65535)
+#
+#     class Meta:
+#         db_table = 'cir_structure_image'
+#         #db_table = u'`chemical_structure_image`'
 
 
-class StandardInChI(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    version = models.IntegerField(db_column='version_id')
-    key_layer1 = models.CharField(max_length=14, db_column='key_layer1')
-    key_layer2 = models.CharField(max_length=10, db_column='key_layer2')
-    key_layer3 = models.CharField(max_length=1, db_column='key_layer3')
-    string = models.CharField(max_length=1500)
+# class StandardInChI(models.Model):
+#     #id = models.IntegerField(primary_key=True)
+#     version = models.IntegerField(db_column='version_id')
+#     key_layer1 = models.CharField(max_length=14, db_column='key_layer1')
+#     key_layer2 = models.CharField(max_length=10, db_column='key_layer2')
+#     key_layer3 = models.CharField(max_length=1, db_column='key_layer3')
+#     string = models.CharField(max_length=1500)
+#
+#     indexes = Index(
+#         fields=['version', 'key_layer1', 'key_layer2', 'key_layer3', 'string'],
+#         name='index_standard_inchi'
+#     )
+#
+#     # objects = models.Manager()
+#     # inchi_set = StandardInChIStructureManager()
+#
+#     class Meta:
+#         constraints = [
+#             UniqueConstraint(
+#                 fields=['version', 'key_layer1', 'key_layer2', 'key_layer3'],
+#                 name='unique_standard_inchi_key'
+#             ),
+#         ]
+#         db_table = 'cir_structure_standard_inchi'
+#
+#         #db_table = u'`chemical_inchi`.`standard_inchi`'
+#
+#     def get_structure(self):
+#         # .all()[0] is dirty but there are some issues (there are stdinchis
+#         # with more than one of our unique structures
+#         return self.structurestandardinchi_set.all()[0].structure
+#
+#     # def get_structures(self, query):
+#     #     # cleaner method
+#     #     t = StandardInChI.objects.filter(**i.query())
+#     #     return t
 
-    indexes = Index(
-        fields=['version', 'key_layer1', 'key_layer2', 'key_layer3', 'string'],
-        name='index_standard_inchi'
-    )
 
-    # objects = models.Manager()
-    # inchi_set = StandardInChIStructureManager()
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['version', 'key_layer1', 'key_layer2', 'key_layer3'],
-                name='unique_standard_inchi_key'
-            ),
-        ]
-        db_table = 'cir_structure_standard_inchi'
-
-        #db_table = u'`chemical_inchi`.`standard_inchi`'
-
-    def get_structure(self):
-        # .all()[0] is dirty but there are some issues (there are stdinchis
-        # with more than one of our unique structures
-        return self.structurestandardinchi_set.all()[0].structure
-
-    # def get_structures(self, query):
-    #     # cleaner method
-    #     t = StandardInChI.objects.filter(**i.query())
-    #     return t
-
-
-class StructureStandardInChI(models.Model):
-    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
-    standard_inchi = models.ForeignKey('StandardInChI', db_column='standard_inchi_id', on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'cir_structure_standard_inchis'
-        #db_table = u'`chemical_inchi`.`structure_standard_inchi`'
+# class StructureStandardInChI(models.Model):
+#     structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
+#     standard_inchi = models.ForeignKey('StandardInChI', db_column='standard_inchi_id', on_delete=models.CASCADE)
+#
+#     class Meta:
+#         db_table = 'cir_structure_standard_inchis'
+#         #db_table = u'`chemical_inchi`.`structure_standard_inchi`'
 
 
 # class InChIManager(models.Manager):
@@ -245,31 +285,7 @@ class StructureStandardInChI(models.Model):
 #         return self.key
 
 
-class StructureInChIs(models.Model):
-    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
-    inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
 
-    class Meta:
-        db_table = 'cir_structure_inchis'
-
-
-class Name(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    name = models.TextField(max_length=1500, unique=True)
-    #classification_list = None
-
-    class Meta:
-        db_table = 'cir_structure_name'
-        #db_table = u'`chemical_name`.`name`'
-
-    def get_structure(self):
-        return self.structure.get()
-
-    def __str__(self):
-        return "Name='%s'" % (self.name, )
-
-    def __repr__(self):
-        return self.name
 
 
 # class Name_Fulltext(models.Model):
@@ -290,18 +306,7 @@ class Name(models.Model):
 #         db_table = u'`chemical_name`.`name`'
 
 
-class StructureName(models.Model):
-    name = models.ForeignKey('Name', on_delete=models.CASCADE)
-    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
-    name_type = models.ForeignKey('NameType', on_delete=models.CASCADE)
 
-    class Meta:
-        constraints = [
-            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
-        ]
-        #unique_together = (('name', 'structure', 'name_type'),)
-        db_table = 'cir_structure_names'
-        #db_table = u'`chemical_name`.`structure_names`'
 
 
 # class StructureNameTypes(models.Model):
@@ -311,16 +316,6 @@ class StructureName(models.Model):
 #     class Meta:
 #         db_table = 'cir_structure_name_types'
 #         #db_table = u'`chemical_name`.`structure_name_classification`'
-
-
-class NameType(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    string = models.TextField(max_length=45, unique=True)
-
-    class Meta:
-        db_table = 'cir_name_type'
-        #db_table = u'`chemical_name`.`name_classification`'
-
 
 
 

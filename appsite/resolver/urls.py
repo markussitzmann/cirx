@@ -17,7 +17,7 @@ router.register('mediatypes', views.MediaTypeViewSet)
 
 urlpatterns = [
 
-    re_path(r'^', include(router.urls)),
+    re_path(r'', include(router.urls)),
 
     path('_self',
         view=views.EntryPointViewSet.as_view({'get': 'get_self_entrypoint'}),

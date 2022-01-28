@@ -10,11 +10,12 @@ from pycactvs import Ens
 from structure.inchi.identifier import InChIKey, InChIString
 from resolver import defaults
 
+
 class InChIManager(models.Manager):
 
     def create_inchi(self, *args, **kwargs) -> 'InChI':
         if 'string' not in kwargs and 'key' not in kwargs:
-            raise ValueError
+            raise AttributeError("either 'string' or 'key' is required")
         inchi = InChI.create(*args, **kwargs)
         return inchi
 
@@ -109,6 +110,21 @@ class InChI(models.Model):
         return self.key
 
 
+class OrganizationManager(models.Manager):
+
+    def create_organization(self, *args, **kwargs) -> 'Organization':
+        if 'name' not in kwargs or 'abbreviation' not in kwargs:
+            raise AttributeError("'name' and 'abbreviation' are required")
+        organization = Organization.create(*args, **kwargs)
+        return organization
+
+    def get_or_create_organization(self, *args, **kwargs) -> 'Organization':
+        if 'name' not in kwargs or 'abbreviation' not in kwargs:
+            raise AttributeError("'name' and 'abbreviation' are required")
+        organization = Organization.create(*args, **kwargs)
+        return self.get_or_create(organization)
+
+
 class Organization(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
@@ -132,6 +148,8 @@ class Organization(models.Model):
     href = models.URLField(max_length=4096, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+
+    objects = OrganizationManager()
 
     indexes = Index(
         fields=['name', 'abbreviation'],
@@ -159,6 +177,15 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class PublisherManager(models.Manager):
+
+    def create_publisher(self, *args, **kwargs) -> 'Publisher':
+        if 'name' not in kwargs:
+            raise AttributeError("'name' is required")
+        publisher = Publisher.create(*args, **kwargs)
+        return publisher
 
 
 class Publisher(models.Model):
@@ -216,6 +243,15 @@ class Publisher(models.Model):
         return "%s[%s]" % (self.name, self.category)
 
 
+class EntryPointManager(models.Manager):
+
+    def create_entrypoint(self, *args, **kwargs) -> 'EntryPoint':
+        if 'href' not in kwargs:
+            raise AttributeError("'href' is required")
+        entrypoint = EntryPoint.create(*args, **kwargs)
+        return entrypoint
+
+
 class EntryPoint(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='children', null=True)
@@ -264,16 +300,39 @@ class EntryPoint(models.Model):
         return "%s [%s]" % (self.publisher, self.href)
 
 
+class EndPointManager(models.Manager):
+
+    def create_endpoint(self, *args, **kwargs) -> 'EndPoint':
+        if 'uri' not in kwargs:
+            raise AttributeError("'uri' is required")
+        endpoint = EndPoint.create(*args, **kwargs)
+        return endpoint
+
+
 class EndPoint(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     entrypoint = models.ForeignKey('EntryPoint', related_name='endpoints', on_delete=models.SET_NULL, null=True)
     uri = models.CharField(max_length=32768)
-    accept_header_media_types = models.ManyToManyField('MediaType', related_name='accepting_endpoints')
-    content_media_types = models.ManyToManyField('MediaType', related_name='delivering_endpoints')
-    request_schema_endpoint = models.ForeignKey('EndPoint', related_name='schema_requesting_endpoints',
-                                                on_delete=models.SET_NULL, null=True)
-    response_schema_endpoint = models.ForeignKey('EndPoint', related_name='schema_responding_endpoints',
-                                                 on_delete=models.SET_NULL, null=True)
+    accept_header_media_types = models.ManyToManyField(
+        'MediaType',
+        related_name='accepting_endpoints'
+    )
+    content_media_types = models.ManyToManyField(
+        'MediaType',
+        related_name='delivering_endpoints'
+    )
+    request_schema_endpoint = models.ForeignKey(
+        'EndPoint',
+        related_name='schema_requesting_endpoints',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    response_schema_endpoint = models.ForeignKey(
+        'EndPoint',
+        related_name='schema_responding_endpoints',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     category = models.CharField(max_length=16, choices=(
         ('schema', 'Schema'),
         ('uritemplate', 'URI Template (RFC6570)'),
@@ -313,6 +372,15 @@ class EndPoint(models.Model):
 
     def __str__(self):
         return "%s[%s]" % (self.entrypoint, self.uri)
+
+
+class MediaTypeManager(models.Manager):
+
+    def create_mediatype(self, *args, **kwargs) -> 'MediaType':
+        if 'name' not in kwargs:
+            raise AttributeError("'name' is required")
+        mediatype = MediaType.create(*args, **kwargs)
+        return mediatype
 
 
 class MediaType(models.Model):

@@ -8,8 +8,9 @@ from rest_framework import permissions, routers, generics
 from rest_framework.decorators import action
 from rest_framework_json_api.views import RelationshipView, ModelViewSet
 
-from .models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
-from .serializers import (
+
+from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
+from resolver.serializers import (
     InchiSerializer,
     OrganizationSerializer,
     PublisherSerializer,
@@ -27,10 +28,11 @@ class ResolverApiView(routers.APIRootView):
         return "API Root Resource"
 
     def get_view_description(self, html=False):
-        if os.environ['INCHI_RESOLVER_TITLE'] == '':
-            title = 'InChI Resolver'
-        else:
-            title = os.environ.get('INCHI_RESOLVER_TITLE', 'InChI Resolver')
+        #if os.environ['INCHI_RESOLVER_TITLE'] == '':
+        #    title = 'InChI Resolver'
+        #else:
+        #    title = os.environ.get('INCHI_RESOLVER_TITLE', 'InChI Resolver')
+        title = "CIRX API"
         text = "API Root resource of the " + title.strip('"') + \
                ". It lists the top-level resources generally available at this and any InChI Resolver instance."
         if html:
