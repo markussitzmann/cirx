@@ -8,16 +8,32 @@ from multiselectfield import MultiSelectField
 from pycactvs import Ens
 
 from structure.inchi.identifier import InChIKey, InChIString
-from resolver import defaults
+from resolver.defaults import http_verbs
 
 
 class InChIManager(models.Manager):
+
+    def create(self, *args, **kwargs):
+        inchi = InChIString(*args, **kwargs)
+        return super(InChIManager, self).create(**inchi.model_dict)
+
+
+    def get_or_create(self, *args, **kwargs):
+        inchi = InChIString(*args, **kwargs)
+        return super(InChIManager, self).get_or_create(**inchi.model_dict)
+
 
     def create_inchi(self, *args, **kwargs) -> 'InChI':
         if 'string' not in kwargs and 'key' not in kwargs:
             raise AttributeError("either 'string' or 'key' is required")
         inchi = InChI.create(*args, **kwargs)
         return inchi
+
+
+    #def get_or_create(self, *args, **kwargs):
+    #    super(s)
+
+
 
     def get_or_create_from_ens(self, ens: Ens) -> 'InChI':
         # TODO: improve
@@ -33,13 +49,20 @@ class InChIManager(models.Manager):
 
 
 class InChI(models.Model):
+
+    # def calculate_uuid(self):
+    #     return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+    #         self.key,
+    #         str(self.safe_options)
+    #     ]))
+
     id = models.UUIDField(primary_key=True, editable=False)
     version = models.IntegerField(default=1)
-    version_string = models.CharField(max_length=64)
+    version_string = models.CharField(max_length=64, blank=True, null=True)
     block1 = models.CharField(max_length=14)
     block2 = models.CharField(max_length=10)
     block3 = models.CharField(max_length=1)
-    key = models.CharField(max_length=27, blank=True, null=True)
+    key = models.CharField(max_length=27)
     string = models.CharField(max_length=32768, blank=True, null=True)
     is_standard = models.BooleanField(default=False)
     safe_options = models.CharField(max_length=2, default=None, null=True)
@@ -67,43 +90,48 @@ class InChI(models.Model):
         verbose_name = "InChI"
         db_table = 'cir_inchi'
 
+    # @classmethod
+    # def create(cls, *args, **kwargs):
+    #     if 'url_prefix' in kwargs:
+    #         inchiargs = kwargs.pop('url_prefix')
+    #         inchi = cls(*args, inchiargs)
+    #     else:
+    #         inchi = cls(*args, **kwargs)
+    #     k = None
+    #     s = None
+    #     if 'key' in kwargs and kwargs['key']:
+    #         k = InChIKey(kwargs['key'])
+    #
+    #     if 'string' in kwargs and kwargs['string']:
+    #         s = InChIString(kwargs['string'])
+    #         e = Ens(kwargs['string'])
+    #         if s.element['is_standard']:
+    #             _k = InChIKey(e.get('E_STDINCHIKEY'))
+    #         else:
+    #             _k = InChIKey(e.get('E_INCHIKEY'))
+    #         if k:
+    #             if not k.element['well_formatted'] == _k.element['well_formatted']:
+    #                 raise FieldError("InChI key does not represent InChI string")
+    #         else:
+    #             k = _k
+    #
+    #     inchi.key = k.element['well_formatted_no_prefix']
+    #     inchi.version = k.element['version']
+    #     inchi.is_standard = k.element['is_standard']
+    #     inchi.block1 = k.element['block1']
+    #     inchi.block2 = k.element['block2']
+    #     inchi.block3 = k.element['block3']
+    #     if s:
+    #         inchi.string = s.element['well_formatted']
+    #     inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+    #         inchi.key,
+    #         str(kwargs.get('safe_options', None)),
+    #     ]))
+    #     return inchi
+
     @classmethod
     def create(cls, *args, **kwargs):
-        if 'url_prefix' in kwargs:
-            inchiargs = kwargs.pop('url_prefix')
-            inchi = cls(*args, inchiargs)
-        else:
-            inchi = cls(*args, **kwargs)
-        k = None
-        s = None
-        if 'key' in kwargs and kwargs['key']:
-            k = InChIKey(kwargs['key'])
-
-        if 'string' in kwargs and kwargs['string']:
-            s = InChIString(kwargs['string'])
-            e = Ens(kwargs['string'])
-            if s.element['is_standard']:
-                _k = InChIKey(e.get('E_STDINCHIKEY'))
-            else:
-                _k = InChIKey(e.get('E_INCHIKEY'))
-            if k:
-                if not k.element['well_formatted'] == _k.element['well_formatted']:
-                    raise FieldError("InChI key does not represent InChI string")
-            else:
-                k = _k
-
-        inchi.key = k.element['well_formatted_no_prefix']
-        inchi.version = k.element['version']
-        inchi.is_standard = k.element['is_standard']
-        inchi.block1 = k.element['block1']
-        inchi.block2 = k.element['block2']
-        inchi.block3 = k.element['block3']
-        if s:
-            inchi.string = s.element['well_formatted']
-        inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            inchi.key,
-            str(kwargs.get('safe_options', None)),
-        ]))
+        inchi = cls(*args, **kwargs)
         return inchi
 
     def __str__(self):
@@ -338,7 +366,7 @@ class EndPoint(models.Model):
         ('uritemplate', 'URI Template (RFC6570)'),
         ('documentation', 'Documentation (HTML, PDF)'),
     ), default='uritemplate')
-    request_methods = MultiSelectField(choices=defaults.http_verbs, default=['GET'])
+    request_methods = MultiSelectField(choices=http_verbs, default=['GET'])
     description = models.TextField(max_length=32768, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

@@ -5,7 +5,7 @@ from django.test import TestCase, SimpleTestCase
 from pycactvs import Ens
 
 from custom.cactvs import CactvsHash
-from resolver import ChemicalStructure
+from external_resolver import ChemicalStructure
 
 logger = logging.getLogger('cirx')
 
