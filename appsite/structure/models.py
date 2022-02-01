@@ -19,11 +19,6 @@ class Structure2(models.Model):
     hashisy = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
     names = models.ManyToManyField('Name', through='StructureNames', related_name="structure")
-    # standard_inchis = models.ManyToManyField(
-    #     'StandardInChI',
-    #     through='StructureStandardInChI',
-    #     related_name="structure_set"
-    # )
     inchis = models.ManyToManyField(
         'resolver.InChI',
         through='StructureInChIs',
@@ -35,11 +30,12 @@ class Structure2(models.Model):
 
     objects = Structure2Manager()
 
-    def to_ens(self):
+    @property
+    def ens(self):
         return self.minimol.ens
 
     def __str__(self):
-        return self.hashisy.padded()
+        return "[%s] %s" % (self.hashisy.padded(), self.ens.get("E_SMILES"))
 
 
 class StructureInChIs(models.Model):

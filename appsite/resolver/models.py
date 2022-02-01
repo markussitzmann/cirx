@@ -68,21 +68,6 @@ class InChI(models.Model):
         return self.key
 
 
-# class OrganizationManager(models.Manager):
-#
-#     def create_organization(self, *args, **kwargs) -> 'Organization':
-#         if 'name' not in kwargs or 'abbreviation' not in kwargs:
-#             raise AttributeError("'name' and 'abbreviation' are required")
-#         organization = Organization.create(*args, **kwargs)
-#         return organization
-#
-#     def get_or_create_organization(self, *args, **kwargs) -> 'Organization':
-#         if 'name' not in kwargs or 'abbreviation' not in kwargs:
-#             raise AttributeError("'name' and 'abbreviation' are required")
-#         organization = Organization.create(*args, **kwargs)
-#         return self.get_or_create(organization)
-
-
 class Organization(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
@@ -107,8 +92,6 @@ class Organization(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-    # objects = OrganizationManager()
-
     indexes = Index(
         fields=['name', 'abbreviation'],
         name='organization_index'
@@ -130,26 +113,15 @@ class Organization(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         organization = cls(*args, **kwargs)
-        #organization.id = uuid.uuid5(uuid.NAMESPACE_URL, kwargs.get('name'))
         return organization
 
     def __str__(self):
         return self.name
 
 
-# class PublisherManager(models.Manager):
-#
-#     def create_publisher(self, *args, **kwargs) -> 'Publisher':
-#         if 'name' not in kwargs:
-#             raise AttributeError("'name' is required")
-#         publisher = Publisher.create(*args, **kwargs)
-#         return publisher
-
-
 class Publisher(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, null=True)
-    #organization = models.ForeignKey('Organization', related_name='publishers', on_delete=models.SET_NULL, null=True)
     organizations = models.ManyToManyField('Organization', related_name='publishers', blank=True)
     category = models.CharField(max_length=16, choices=(
         ('entity', 'Entity'),
@@ -189,26 +161,10 @@ class Publisher(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         publisher = cls(*args, **kwargs)
-        # publisher.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-        #     str(kwargs.get('organization', None)),
-        #     str(kwargs.get('parent', None)),
-        #     str(kwargs.get('href', None)),
-        #     str(kwargs.get('orcid', None)),
-        #     kwargs.get('name')
-        # ]))
         return publisher
 
     def __str__(self):
         return "%s[%s]" % (self.name, self.category)
-
-
-# class EntryPointManager(models.Manager):
-#
-#     def create_entrypoint(self, *args, **kwargs) -> 'EntryPoint':
-#         if 'href' not in kwargs:
-#             raise AttributeError("'href' is required")
-#         entrypoint = EntryPoint.create(*args, **kwargs)
-#         return entrypoint
 
 
 class EntryPoint(models.Model):
@@ -248,24 +204,10 @@ class EntryPoint(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         entrypoint = cls(*args, **kwargs)
-        # entrypoint.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-        #     str(kwargs.get('parent', None)),
-        #     str(kwargs.get('publisher')),
-        #     kwargs.get('href'),
-        # ]))
         return entrypoint
 
     def __str__(self):
         return "%s [%s]" % (self.publisher, self.href)
-
-
-# class EndPointManager(models.Manager):
-#
-#     def create_endpoint(self, *args, **kwargs) -> 'EndPoint':
-#         if 'uri' not in kwargs:
-#             raise AttributeError("'uri' is required")
-#         endpoint = EndPoint.create(*args, **kwargs)
-#         return endpoint
 
 
 class EndPoint(models.Model):
@@ -323,23 +265,10 @@ class EndPoint(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         endpoint = cls(*args, **kwargs)
-        # endpoint.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-        #     str(kwargs.get('entrypoint')),
-        #     kwargs.get('uri'),
-        # ]))
         return endpoint
 
     def __str__(self):
         return "%s[%s]" % (self.entrypoint, self.uri)
-
-
-# class MediaTypeManager(models.Manager):
-#
-#     def create_mediatype(self, *args, **kwargs) -> 'MediaType':
-#         if 'name' not in kwargs:
-#             raise AttributeError("'name' is required")
-#         mediatype = MediaType.create(*args, **kwargs)
-#         return mediatype
 
 
 class MediaType(models.Model):
@@ -358,9 +287,6 @@ class MediaType(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         mediatype = cls(*args, **kwargs)
-        # mediatype.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-        #     str(kwargs.get('name'))
-        # ]))
         return mediatype
 
     def __str__(self):
