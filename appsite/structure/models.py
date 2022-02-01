@@ -6,7 +6,7 @@ from pycactvs import Ens
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from custom.fields import CactvsHashField, CactvsMinimolField
-from database.models import Database, Release, DatabaseDataCache
+from database.models import Database, Release
 
 
 class Structure2Manager(models.Manager):
@@ -27,6 +27,8 @@ class Structure2(models.Model):
 
     class Meta:
         db_table = 'cir_structure_2'
+        verbose_name = "Structure"
+        verbose_name_plural = "Structures"
 
     objects = Structure2Manager()
 
@@ -86,6 +88,25 @@ class Formula(models.Model):
 
     class Meta:
         db_table = 'cir_structure_formula'
+
+
+class ResponseType(models.Model):
+    parent_type = models.ForeignKey('ResponseType', null=True, blank=True, on_delete=models.CASCADE)
+    url = models.CharField(max_length=128)
+    method = models.CharField(max_length=255, null=True, blank=True)
+    parameter = models.CharField(max_length=1024, null=True, blank=True)
+    base_mime_type = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name = "Response Type"
+        verbose_name_plural = "Response Types"
+        db_table = 'cir_response_type'
+
+    def child_types(self):
+        return ResponseType.objects.get(parent_type=self.pk)
+
+    def __str__(self):
+        return self.url + ":" + self.method
 
 
 
@@ -509,23 +530,7 @@ class AccessHostOrganization(models.Model):
         #db_table = u'chemical_structure_access_host_organization'
 
 
-class ResponseType(models.Model):
-    #id = models.AutoField(primary_key=True)
-    parent_type = models.ForeignKey('ResponseType', null=True, blank=True, on_delete=models.CASCADE)
-    url = models.CharField(max_length=128)
-    method = models.CharField(max_length=255, null=True, blank=True)
-    parameter = models.CharField(max_length=1024, null=True, blank=True)
-    base_mime_type = models.CharField(max_length=255)
 
-    class Meta:
-        db_table = 'cir_response_type'
-        #db_table = u'chemical_structure_response_type'
-
-    def child_types(self):
-        return ResponseType.objects.get(parent_type=self.pk)
-
-    def __str__(self):
-        return self.url + ":" + self.method
 
 
 class Response(models.Model):
@@ -622,63 +627,63 @@ class UsageSeconds(models.Model):
 
 ############
 
-class NameCache:
-
-    def __init__(self, structure):
-        self.attributes = {'structure': structure, 'structure_names': (self.get_structure_names())[0],
-                           'name_set': (self.get_structure_names())[1],
-                           'classified_name_sets': (self.get_structure_names())[2],
-                           'classified_name_object_sets': (self.get_structure_names())[3]}
-
-    def get_structure_names(self):
-        try:
-            return self.attributes['names']
-        except:
-            structure_names = StructureName.objects.select_related('name').filter(structure=self['structure'])
-            names = []
-            name_set = set()
-            classified_name_sets = {}
-            classified_name_object_sets = {}
-            for n in structure_names:
-                name_dict = {'name_object': n.name}
-                name_dict['name_string'] = name_dict['name_object'].name
-                name_dict['structure_name_object'] = n
-                name_dict['classifications'] = n.classification.all().values()
-                names.append(name_dict)
-                name = name_dict['name_string']
-                name_set.add(name)
-                name_object = name_dict['name_object']
-                for classification in name_dict['classifications']:
-                    class_name = classification['id']
-                    try:
-                        classified_name_sets[class_name].add(name)
-                        classified_name_object_sets[class_name].add(name_object)
-                    except:
-                        classified_name_sets[class_name] = {name}
-                        classified_name_object_sets[class_name] = {name_object}
-            return [names, name_set, classified_name_sets, classified_name_object_sets]
-
-    def get_display_list(self, query_string=None):
-        name_set_1 = set()
-        name_set_2 = set()
-        if query_string and query_string in self.attributes['name_set']:
-            name_set_1 = {query_string}
-        name_sets = self.attributes['classified_name_sets']
-        try:
-            name_set_1.update(list(name_sets[1]))
-        except:
-            pass
-        for key_length in [(2, 5), (3, 1), (4, 1), (5, 1), (6, 3), (7, 8)]:
-            key = key_length[0]
-            length = key_length[1]
-            try:
-                name_set_2.update(list(name_sets[key])[0:length])
-            except:
-                pass
-        add_list = list(name_set_2)
-        add_list.sort()
-        return_list = list(name_set_1) + add_list
-        return return_list
-
-    def __getitem__(self, key):
-        return self.attributes[key]
+# class NameCache:
+#
+#     def __init__(self, structure):
+#         self.attributes = {'structure': structure, 'structure_names': (self.get_structure_names())[0],
+#                            'name_set': (self.get_structure_names())[1],
+#                            'classified_name_sets': (self.get_structure_names())[2],
+#                            'classified_name_object_sets': (self.get_structure_names())[3]}
+#
+#     def get_structure_names(self):
+#         try:
+#             return self.attributes['names']
+#         except:
+#             structure_names = StructureName.objects.select_related('name').filter(structure=self['structure'])
+#             names = []
+#             name_set = set()
+#             classified_name_sets = {}
+#             classified_name_object_sets = {}
+#             for n in structure_names:
+#                 name_dict = {'name_object': n.name}
+#                 name_dict['name_string'] = name_dict['name_object'].name
+#                 name_dict['structure_name_object'] = n
+#                 name_dict['classifications'] = n.classification.all().values()
+#                 names.append(name_dict)
+#                 name = name_dict['name_string']
+#                 name_set.add(name)
+#                 name_object = name_dict['name_object']
+#                 for classification in name_dict['classifications']:
+#                     class_name = classification['id']
+#                     try:
+#                         classified_name_sets[class_name].add(name)
+#                         classified_name_object_sets[class_name].add(name_object)
+#                     except:
+#                         classified_name_sets[class_name] = {name}
+#                         classified_name_object_sets[class_name] = {name_object}
+#             return [names, name_set, classified_name_sets, classified_name_object_sets]
+#
+#     def get_display_list(self, query_string=None):
+#         name_set_1 = set()
+#         name_set_2 = set()
+#         if query_string and query_string in self.attributes['name_set']:
+#             name_set_1 = {query_string}
+#         name_sets = self.attributes['classified_name_sets']
+#         try:
+#             name_set_1.update(list(name_sets[1]))
+#         except:
+#             pass
+#         for key_length in [(2, 5), (3, 1), (4, 1), (5, 1), (6, 3), (7, 8)]:
+#             key = key_length[0]
+#             length = key_length[1]
+#             try:
+#                 name_set_2.update(list(name_sets[key])[0:length])
+#             except:
+#                 pass
+#         add_list = list(name_set_2)
+#         add_list.sort()
+#         return_list = list(name_set_1) + add_list
+#         return return_list
+#
+#     def __getitem__(self, key):
+#         return self.attributes[key]

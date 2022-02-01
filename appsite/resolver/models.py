@@ -57,6 +57,7 @@ class InChI(models.Model):
             ),
         ]
         verbose_name = "InChI"
+        verbose_name_plural = "InChIs"
         db_table = 'cir_inchi'
 
     @classmethod
@@ -164,7 +165,7 @@ class Publisher(models.Model):
         return publisher
 
     def __str__(self):
-        return "%s[%s]" % (self.name, self.category)
+        return "%s [%s]" % (self.name, self.category)
 
 
 class EntryPoint(models.Model):

@@ -4,6 +4,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
+from database.models import DatabaseContext
 from structure.models import Structure2, Name, NameType, StructureNames, ResponseType, StructureInChIs
 from resolver.models import InChI, Organization, Publisher
 
@@ -23,6 +24,7 @@ class Command(BaseCommand):
 def _loader():
     init_response_type_data()
     init_name_type_data()
+    init_database_context_type_data()
     init_organization_and_publisher_data()
 
     names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']
@@ -76,7 +78,6 @@ def init_response_type_data():
             else:
                 parent_type = None
             response_type = ResponseType(
-                id=id,
                 parent_type=parent_type,
                 url=url,
                 method=method,
@@ -85,6 +86,20 @@ def init_response_type_data():
             )
             response_type.save()
             response_type_dict[id] = response_type
+
+
+def init_database_context_type_data():
+    with open('./structure/management/raw-data/context-type.txt') as f:
+        lines = f.readlines()
+        for line in lines:
+            splitted = [e.strip() for e in line.split('|')]
+            cleaned = [None if e == 'NULL' else e for e in splitted][1:-1]
+            id, record_string, database_string = cleaned
+            context_type = DatabaseContext(
+                record_string=record_string,
+                database_string=database_string
+            )
+            context_type.save()
 
 
 def init_name_type_data():

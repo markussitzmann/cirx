@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'database.apps.DatabaseConfig',
     'structure.apps.StructureConfig',
     'resolver.apps.ResolverConfig',
+    'etl.apps.ETLConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
