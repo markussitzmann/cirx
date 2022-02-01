@@ -24,7 +24,7 @@ class ResolverModelTests(TestCase):
 
     @parameterized.expand([
         ['LFQSCWFLJHTTHZ-UHFFFAOYSA-N', 'InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3', (1, True)],
-        [None, 'InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3', (1, True)],
+        #[None, 'InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3', (1, True)],
         #['BSYNRYMUTXBXSQ-UHFFFAOYSA-N', (2, False)],
     ])
     def test_inchi(self, key, string, expectations):
@@ -39,8 +39,20 @@ class ResolverModelTests(TestCase):
         logger.info("S >>> %s" % inchistring.element)
         logger.info("S >>> %s" % inchistring.model_dict)
 
+        inchi_1 = InChI.objects.get_or_create(string)
+        inchi_2 = InChI.objects.get_or_create(string=string, key=InChIKey(key))
+        inchi_3 = InChI.objects.get_or_create(key=InChIKey(key))
 
-        inchi = InChI.objects.get_or_create(string=string)
+
+        logger.info("IS >>>> %s : %s", inchi_1, inchi_2, inchi_3)
+
+
+
+
+
+        requested = InChI.objects.filter(block1="LFQSCWFLJHTTHZ").all()
+        logger.info("R >>>> %s", requested)
+
 
         # inchi2, created = InChI.objects.get_or_create(key=key)
         # logger.info("2 >>> %s %s" % (inchi2.id, created))

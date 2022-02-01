@@ -1,60 +1,29 @@
 import uuid
 
-from django.core.exceptions import FieldError
-from django.db import models
+from django.db import models, IntegrityError
 from django.db.models import Index, UniqueConstraint
-from django.forms import model_to_dict
 from multiselectfield import MultiSelectField
-from pycactvs import Ens
 
-from structure.inchi.identifier import InChIKey, InChIString
 from resolver.defaults import http_verbs
+from structure.inchi.identifier import InChIString
 
 
 class InChIManager(models.Manager):
 
-    def create(self, *args, **kwargs):
-        inchi = InChIString(*args, **kwargs)
+    def create(self, string=None, *args, **kwargs):
+        if not string and 'string' not in kwargs:
+            raise IntegrityError('InChI string required for creation of InChI instance')
+        inchi = InChIString(string, *args, **kwargs)
         return super(InChIManager, self).create(**inchi.model_dict)
 
-
-    def get_or_create(self, *args, **kwargs):
-        inchi = InChIString(*args, **kwargs)
+    def get_or_create(self, string=None, *args, **kwargs):
+        if not string and 'string' not in kwargs:
+            raise IntegrityError('InChI string required for creation of InChI instance')
+        inchi = InChIString(string, *args, **kwargs)
         return super(InChIManager, self).get_or_create(**inchi.model_dict)
 
 
-    def create_inchi(self, *args, **kwargs) -> 'InChI':
-        if 'string' not in kwargs and 'key' not in kwargs:
-            raise AttributeError("either 'string' or 'key' is required")
-        inchi = InChI.create(*args, **kwargs)
-        return inchi
-
-
-    #def get_or_create(self, *args, **kwargs):
-    #    super(s)
-
-
-
-    def get_or_create_from_ens(self, ens: Ens) -> 'InChI':
-        # TODO: improve
-        try:
-            inchikey = ens.get('E_STDINCHIKEY')
-            inchi = ens.get('E_STDINCHI')
-            i = InChI.create(key=inchikey, string=inchi)
-            d = model_to_dict(i)
-            d.pop('entrypoints', [])
-            return self.get_or_create(id=i.id, **d)
-        except Exception as e:
-            raise ValueError(e)
-
-
 class InChI(models.Model):
-
-    # def calculate_uuid(self):
-    #     return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-    #         self.key,
-    #         str(self.safe_options)
-    #     ]))
 
     id = models.UUIDField(primary_key=True, editable=False)
     version = models.IntegerField(default=1)
@@ -90,45 +59,6 @@ class InChI(models.Model):
         verbose_name = "InChI"
         db_table = 'cir_inchi'
 
-    # @classmethod
-    # def create(cls, *args, **kwargs):
-    #     if 'url_prefix' in kwargs:
-    #         inchiargs = kwargs.pop('url_prefix')
-    #         inchi = cls(*args, inchiargs)
-    #     else:
-    #         inchi = cls(*args, **kwargs)
-    #     k = None
-    #     s = None
-    #     if 'key' in kwargs and kwargs['key']:
-    #         k = InChIKey(kwargs['key'])
-    #
-    #     if 'string' in kwargs and kwargs['string']:
-    #         s = InChIString(kwargs['string'])
-    #         e = Ens(kwargs['string'])
-    #         if s.element['is_standard']:
-    #             _k = InChIKey(e.get('E_STDINCHIKEY'))
-    #         else:
-    #             _k = InChIKey(e.get('E_INCHIKEY'))
-    #         if k:
-    #             if not k.element['well_formatted'] == _k.element['well_formatted']:
-    #                 raise FieldError("InChI key does not represent InChI string")
-    #         else:
-    #             k = _k
-    #
-    #     inchi.key = k.element['well_formatted_no_prefix']
-    #     inchi.version = k.element['version']
-    #     inchi.is_standard = k.element['is_standard']
-    #     inchi.block1 = k.element['block1']
-    #     inchi.block2 = k.element['block2']
-    #     inchi.block3 = k.element['block3']
-    #     if s:
-    #         inchi.string = s.element['well_formatted']
-    #     inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-    #         inchi.key,
-    #         str(kwargs.get('safe_options', None)),
-    #     ]))
-    #     return inchi
-
     @classmethod
     def create(cls, *args, **kwargs):
         inchi = cls(*args, **kwargs)
@@ -138,23 +68,23 @@ class InChI(models.Model):
         return self.key
 
 
-class OrganizationManager(models.Manager):
-
-    def create_organization(self, *args, **kwargs) -> 'Organization':
-        if 'name' not in kwargs or 'abbreviation' not in kwargs:
-            raise AttributeError("'name' and 'abbreviation' are required")
-        organization = Organization.create(*args, **kwargs)
-        return organization
-
-    def get_or_create_organization(self, *args, **kwargs) -> 'Organization':
-        if 'name' not in kwargs or 'abbreviation' not in kwargs:
-            raise AttributeError("'name' and 'abbreviation' are required")
-        organization = Organization.create(*args, **kwargs)
-        return self.get_or_create(organization)
+# class OrganizationManager(models.Manager):
+#
+#     def create_organization(self, *args, **kwargs) -> 'Organization':
+#         if 'name' not in kwargs or 'abbreviation' not in kwargs:
+#             raise AttributeError("'name' and 'abbreviation' are required")
+#         organization = Organization.create(*args, **kwargs)
+#         return organization
+#
+#     def get_or_create_organization(self, *args, **kwargs) -> 'Organization':
+#         if 'name' not in kwargs or 'abbreviation' not in kwargs:
+#             raise AttributeError("'name' and 'abbreviation' are required")
+#         organization = Organization.create(*args, **kwargs)
+#         return self.get_or_create(organization)
 
 
 class Organization(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=32768)
     abbreviation = models.CharField(max_length=32, blank=True, null=True)
@@ -177,7 +107,7 @@ class Organization(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-    objects = OrganizationManager()
+    # objects = OrganizationManager()
 
     indexes = Index(
         fields=['name', 'abbreviation'],
@@ -200,26 +130,27 @@ class Organization(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         organization = cls(*args, **kwargs)
-        organization.id = uuid.uuid5(uuid.NAMESPACE_URL, kwargs.get('name'))
+        #organization.id = uuid.uuid5(uuid.NAMESPACE_URL, kwargs.get('name'))
         return organization
 
     def __str__(self):
         return self.name
 
 
-class PublisherManager(models.Manager):
-
-    def create_publisher(self, *args, **kwargs) -> 'Publisher':
-        if 'name' not in kwargs:
-            raise AttributeError("'name' is required")
-        publisher = Publisher.create(*args, **kwargs)
-        return publisher
+# class PublisherManager(models.Manager):
+#
+#     def create_publisher(self, *args, **kwargs) -> 'Publisher':
+#         if 'name' not in kwargs:
+#             raise AttributeError("'name' is required")
+#         publisher = Publisher.create(*args, **kwargs)
+#         return publisher
 
 
 class Publisher(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, null=True)
-    organization = models.ForeignKey('Organization', related_name='publishers', on_delete=models.SET_NULL, null=True)
+    #organization = models.ForeignKey('Organization', related_name='publishers', on_delete=models.SET_NULL, null=True)
+    organizations = models.ManyToManyField('Organization', related_name='publishers', blank=True)
     category = models.CharField(max_length=16, choices=(
         ('entity', 'Entity'),
         ('service', 'Service'),
@@ -249,7 +180,7 @@ class Publisher(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['organization', 'parent', 'name', 'href', 'orcid'],
+                fields=['parent', 'name', 'href', 'orcid'],
                 name='unique_publisher_constraint'
             ),
         ]
@@ -258,30 +189,30 @@ class Publisher(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         publisher = cls(*args, **kwargs)
-        publisher.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            str(kwargs.get('organization', None)),
-            str(kwargs.get('parent', None)),
-            str(kwargs.get('href', None)),
-            str(kwargs.get('orcid', None)),
-            kwargs.get('name')
-        ]))
+        # publisher.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+        #     str(kwargs.get('organization', None)),
+        #     str(kwargs.get('parent', None)),
+        #     str(kwargs.get('href', None)),
+        #     str(kwargs.get('orcid', None)),
+        #     kwargs.get('name')
+        # ]))
         return publisher
 
     def __str__(self):
         return "%s[%s]" % (self.name, self.category)
 
 
-class EntryPointManager(models.Manager):
-
-    def create_entrypoint(self, *args, **kwargs) -> 'EntryPoint':
-        if 'href' not in kwargs:
-            raise AttributeError("'href' is required")
-        entrypoint = EntryPoint.create(*args, **kwargs)
-        return entrypoint
+# class EntryPointManager(models.Manager):
+#
+#     def create_entrypoint(self, *args, **kwargs) -> 'EntryPoint':
+#         if 'href' not in kwargs:
+#             raise AttributeError("'href' is required")
+#         entrypoint = EntryPoint.create(*args, **kwargs)
+#         return entrypoint
 
 
 class EntryPoint(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='children', null=True)
     category = models.CharField(max_length=16, choices=(
         ('self', 'Self'),
@@ -317,28 +248,28 @@ class EntryPoint(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         entrypoint = cls(*args, **kwargs)
-        entrypoint.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            str(kwargs.get('parent', None)),
-            str(kwargs.get('publisher')),
-            kwargs.get('href'),
-        ]))
+        # entrypoint.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+        #     str(kwargs.get('parent', None)),
+        #     str(kwargs.get('publisher')),
+        #     kwargs.get('href'),
+        # ]))
         return entrypoint
 
     def __str__(self):
         return "%s [%s]" % (self.publisher, self.href)
 
 
-class EndPointManager(models.Manager):
-
-    def create_endpoint(self, *args, **kwargs) -> 'EndPoint':
-        if 'uri' not in kwargs:
-            raise AttributeError("'uri' is required")
-        endpoint = EndPoint.create(*args, **kwargs)
-        return endpoint
+# class EndPointManager(models.Manager):
+#
+#     def create_endpoint(self, *args, **kwargs) -> 'EndPoint':
+#         if 'uri' not in kwargs:
+#             raise AttributeError("'uri' is required")
+#         endpoint = EndPoint.create(*args, **kwargs)
+#         return endpoint
 
 
 class EndPoint(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     entrypoint = models.ForeignKey('EntryPoint', related_name='endpoints', on_delete=models.SET_NULL, null=True)
     uri = models.CharField(max_length=32768)
     accept_header_media_types = models.ManyToManyField(
@@ -392,27 +323,27 @@ class EndPoint(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         endpoint = cls(*args, **kwargs)
-        endpoint.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            str(kwargs.get('entrypoint')),
-            kwargs.get('uri'),
-        ]))
+        # endpoint.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+        #     str(kwargs.get('entrypoint')),
+        #     kwargs.get('uri'),
+        # ]))
         return endpoint
 
     def __str__(self):
         return "%s[%s]" % (self.entrypoint, self.uri)
 
 
-class MediaTypeManager(models.Manager):
-
-    def create_mediatype(self, *args, **kwargs) -> 'MediaType':
-        if 'name' not in kwargs:
-            raise AttributeError("'name' is required")
-        mediatype = MediaType.create(*args, **kwargs)
-        return mediatype
+# class MediaTypeManager(models.Manager):
+#
+#     def create_mediatype(self, *args, **kwargs) -> 'MediaType':
+#         if 'name' not in kwargs:
+#             raise AttributeError("'name' is required")
+#         mediatype = MediaType.create(*args, **kwargs)
+#         return mediatype
 
 
 class MediaType(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=1024, blank=False, null=False, unique=True)
     description = models.TextField(max_length=32768, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
@@ -427,9 +358,9 @@ class MediaType(models.Model):
     @classmethod
     def create(cls, *args, **kwargs):
         mediatype = cls(*args, **kwargs)
-        mediatype.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            str(kwargs.get('name'))
-        ]))
+        # mediatype.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+        #     str(kwargs.get('name'))
+        # ]))
         return mediatype
 
     def __str__(self):

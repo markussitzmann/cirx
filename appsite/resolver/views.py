@@ -195,9 +195,9 @@ class PublisherViewSet(ResourceModelViewSet):
         'children__address': ('icontains', 'iexact', 'contains', 'exact', 'in'),
         'children__href': ('icontains', 'iexact', 'contains', 'exact', 'in'),
         'children__orcid': ('icontains', 'iexact', 'contains', 'exact', 'in'),
-        'organization__name': ('icontains', 'iexact', 'contains', 'exact', 'in'),
-        'organization__abbreviation': ('icontains', 'iexact', 'contains', 'exact', 'in'),
-        'organization__category': ('icontains', 'iexact', 'contains', 'exact', 'in'),
+        'organizations__name': ('icontains', 'iexact', 'contains', 'exact', 'in'),
+        'organizations__abbreviation': ('icontains', 'iexact', 'contains', 'exact', 'in'),
+        'organizations__category': ('icontains', 'iexact', 'contains', 'exact', 'in'),
     }
     search_fields = ('name', 'category', 'email', 'address', 'href', 'orcid')
 

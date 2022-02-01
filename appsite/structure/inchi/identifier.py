@@ -174,7 +174,6 @@ class InChIString:
         return self.element['well_formatted']
 
 
-
 class InChIError(Exception):
     def __init__(self, value):
         self.value = value

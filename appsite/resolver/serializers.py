@@ -156,8 +156,8 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
         self_link_view_name='publisher-relationships',
     )
 
-    organization = relations.ResourceRelatedField(
-        queryset=Organization.objects, many=False, read_only=False, required=False, default=None,
+    organizations = relations.ResourceRelatedField(
+        queryset=Organization.objects, many=True, read_only=False, required=False, default=None,
         related_link_view_name='publisher-related',
         related_link_url_kwarg='pk',
         self_link_view_name='publisher-relationships',
@@ -178,7 +178,7 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     included_serializers = {
-        'organization': 'resolver.serializers.OrganizationSerializer',
+        'organizations': 'resolver.serializers.OrganizationSerializer',
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
         'parent': 'resolver.serializers.PublisherSerializer',
         'children': 'resolver.serializers.PublisherSerializer',
@@ -186,7 +186,7 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Publisher
-        fields = ('url', 'parent', 'children', 'organization', 'entrypoints', 'name', 'category', 'email',
+        fields = ('url', 'parent', 'children', 'organizations', 'entrypoints', 'name', 'category', 'email',
                   'address', 'href', 'orcid', 'added', 'modified')
         read_only_fields = ('added', 'modified')
         meta_fields = ('added', 'modified')
@@ -194,6 +194,7 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data: Dict):
         children = validated_data.pop('children', None)
         entrypoints = validated_data.pop('entrypoints', None)
+        organizations = validated_data.pop('organizations', None)
 
         self.is_valid(raise_exception=True)
 
@@ -209,14 +210,17 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
                 publisher.children.add(*children, bulk=True)
             if entrypoints:
                 publisher.entrypoints.add(*entrypoints, bulk=True)
+            if organizations:
+                publisher.organizations.add(*organizations, bulk=True)
         return publisher
 
     def update(self, instance: Publisher, validated_data: Dict):
-        if 'organization' in validated_data or 'parent' in validated_data or 'name' in validated_data:
-            raise IntegrityError("fields 'organization', 'parent', and 'name' are immutable for the publishers resource")
+        if 'parent' in validated_data or 'name' in validated_data:
+            raise IntegrityError("fields 'parent', and 'name' are immutable for the publishers resource")
 
         children = validated_data.pop('children', None)
         entrypoints = validated_data.pop('entrypoints', None)
+        organizations = validated_data.pop('organizations', None)
 
         instance.category = validated_data.get('category', instance.category)
         instance.name = validated_data.get('name', instance.name)
@@ -235,6 +239,10 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
             instance.entrypoints.bulk_update(entrypoints, bulk=True, clear=True)
         else:
             instance.entrypoints.clear(bulk=True)
+        if organizations:
+            instance.organizations.bulk_update(organizations, bulk=True, clear=True)
+        else:
+            instance.organizations.clear(bulk=True)
 
         return instance
 
