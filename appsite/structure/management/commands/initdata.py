@@ -4,7 +4,8 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from structure.models import Structure2, Name, NameType, StructureName, ResponseType, InChI, StructureInChIs
+from structure.models import Structure2, Name, NameType, StructureNames, ResponseType, StructureInChIs
+from resolver.models import InChI, Organization, Publisher
 
 from pycactvs import Ens
 
@@ -22,6 +23,7 @@ class Command(BaseCommand):
 def _loader():
     init_response_type_data()
     init_name_type_data()
+    init_organization_and_publisher_data()
 
     names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']
     name_type_obj = NameType.objects.get(id=7)
@@ -34,13 +36,13 @@ def _loader():
         structure_obj, structure_created = Structure2.objects.get_or_create_from_ens(ens)
         logger.info("Structure: %s %s" % (structure_obj, structure_created))
 
-        structure_name_obj, name_created = StructureName.objects.get_or_create(
+        structure_name_obj, name_created = StructureNames.objects.get_or_create(
             name=name_obj,
             structure=structure_obj,
             name_type=name_type_obj
         )
 
-        inchi_obj, inchi_created = InChI.objects.get_or_create_from_ens(ens)
+        inchi_obj, inchi_created = InChI.objects.get_or_create(ens.get('E_STDINCHI'))
         logger.info("InChI: %s %s" % (inchi_obj, inchi_created))
 
         structure_inchi_obj, structure_inchi_created = StructureInChIs.objects.get_or_create(
@@ -98,3 +100,78 @@ def init_name_type_data():
 
     for name_type in name_types:
         NameType.objects.get_or_create(string=name_type)
+
+
+def init_organization_and_publisher_data():
+
+    nih, created = Organization.objects.get_or_create(
+        name="U.S. National Institutes of Health",
+        abbreviation="NIH",
+        category="government",
+        href="https://www.nih.gov"
+    )
+
+    nci, created = Organization.objects.get_or_create(
+        parent=nih,
+        name="U.S. National Cancer Institute",
+        abbreviation="NCI",
+        category="government",
+        href="https://www.cancer.gov"
+    )
+
+    nlm, created = Organization.objects.get_or_create(
+        parent=nih,
+        name="U.S. National Library of Medicine",
+        abbreviation="NLM",
+        category="government",
+        href="https://www.nlm.nih.gov"
+    )
+
+    ncbi, created = Organization.objects.get_or_create(
+        parent=nih,
+        name="U.S. National Center for Biotechnology Information",
+        abbreviation="NCBI",
+        category="government",
+        href="https://www.ncbi.nlm.nih.gov"
+    )
+
+    fiz, created = Organization.objects.get_or_create(
+        name="FIZ Karlsruhe – Leibniz-Institut für Informationsinfrastruktur",
+        abbreviation="FIZ Karlsruhe",
+        category="public",
+        href="https://www.fiz-karlsruhe.de"
+    )
+
+    sito, created = Organization.objects.get_or_create(
+        name="Markus Sitzmann Cheminformatics & IT Consulting",
+        abbreviation="SCIC",
+        category="other",
+        href=""
+    )
+
+    ncicadd, created = Publisher.objects.get_or_create(
+        name="NCI Computer-Aided Drug Design (CADD) Group",
+        category="group",
+        href="https://cactus.nci.nih.gov",
+        address="Frederick, MD 21702-1201, USA",
+    )
+    ncicadd.organizations.add(nci, nih)
+
+    mn1, created = Publisher.objects.get_or_create(
+        parent=ncicadd,
+        name="Marc Nicklaus",
+        category="person",
+        email="mn1ahelix@gmail.com",
+        address="Frederick, MD 21702-1201, USA",
+        href="https://ccr.cancer.gov/staff-directory/marc-c-nicklaus",
+        orcid="https://orcid.org/0000-0002-4775-7030"
+    )
+    mn1.organizations.add(nci, nih)
+
+    sitp, created = Publisher.objects.get_or_create(
+        name="Markus Sitzmann",
+        category="person",
+        email="markus.sitzmann@gmail.com",
+        orcid="https://orcid.org/0000-0001-5346-1298"
+    )
+    sitp.organizations.add(sito, fiz)

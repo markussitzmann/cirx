@@ -1,30 +1,13 @@
-import uuid
-
-from django.core.exceptions import FieldError
-from django.db.models import UniqueConstraint, Index
-from django.forms import model_to_dict
-from pycactvs import Ens
-
-from django.db import models
-
 import json
 
+from django.db import models
+from django.db.models import UniqueConstraint, Index
+from pycactvs import Ens
+
 from custom.cactvs import CactvsHash, CactvsMinimol
+from custom.fields import CactvsHashField, CactvsMinimolField
 from database.models import Database, Release, DatabaseDataCache
 
-from structure.inchi.identifier import InChIKey, InChIString
-
-#from structure.inchi import identifier as inchi
-#from structure.ncicadd import identifier as ncicadd
-
-from custom.fields import CactvsHashField, CactvsMinimolField
-
-
-# from django.utils import simplejson
-# import json
-
-
-# import djangosphinx
 
 class Structure2Manager(models.Manager):
 
@@ -35,14 +18,9 @@ class Structure2Manager(models.Manager):
 class Structure2(models.Model):
     hashisy = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
-    names = models.ManyToManyField('Name', through='StructureName', related_name="structure")
-    standard_inchis = models.ManyToManyField(
-        'StandardInChI',
-        through='StructureStandardInChI',
-        related_name="structure_set"
-    )
+    names = models.ManyToManyField('Name', through='StructureNames', related_name="structure")
     inchis = models.ManyToManyField(
-        'InChI',
+        'resolver.InChI',
         through='StructureInChIs',
         related_name="structures"
     )
@@ -52,11 +30,62 @@ class Structure2(models.Model):
 
     objects = Structure2Manager()
 
-    def to_ens(self):
+    @property
+    def ens(self):
         return self.minimol.ens
 
     def __str__(self):
-        return self.hashisy.padded()
+        return "[%s] %s" % (self.hashisy.padded(), self.ens.get("E_SMILES"))
+
+
+class StructureInChIs(models.Model):
+    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
+    inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'cir_structure_inchis'
+
+
+class Name(models.Model):
+    name = models.TextField(max_length=1500, unique=True)
+
+    class Meta:
+        db_table = 'cir_structure_name'
+
+    def get_structure(self):
+        return self.structure.get()
+
+    def __str__(self):
+        return "Name='%s'" % (self.name, )
+
+    def __repr__(self):
+        return self.name
+
+
+class NameType(models.Model):
+    string = models.TextField(max_length=45, unique=True)
+
+    class Meta:
+        db_table = 'cir_name_type'
+
+
+class StructureNames(models.Model):
+    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure2, on_delete=models.CASCADE)
+    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
+        ]
+        db_table = 'cir_structure_names'
+
+
+class Formula(models.Model):
+    formula = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'cir_structure_formula'
 
 
 
@@ -108,184 +137,151 @@ class Structure2(models.Model):
 #         return 'NCICADD:SID=%s' % self.id
 
 
-class StructureImage(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    hashisy = models.IntegerField(unique=True)
-    small = models.TextField(max_length=65535)
-    medium = models.TextField(max_length=65535)
-    large = models.TextField(max_length=65535)
-
-    class Meta:
-        db_table = 'cir_structure_image'
-        #db_table = u'`chemical_structure_image`'
-
-
-class Formula(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    formula = models.CharField(max_length=50)
-
-    class Meta:
-        db_table = 'cir_structure_formula'
-        #db_table = u'`chemical_formula`.`formula`'
+# class StructureImage(models.Model):
+#     #id = models.IntegerField(primary_key=True)
+#     hashisy = models.IntegerField(unique=True)
+#     small = models.TextField(max_length=65535)
+#     medium = models.TextField(max_length=65535)
+#     large = models.TextField(max_length=65535)
+#
+#     class Meta:
+#         db_table = 'cir_structure_image'
+#         #db_table = u'`chemical_structure_image`'
 
 
-class StandardInChI(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    version = models.IntegerField(db_column='version_id')
-    key_layer1 = models.CharField(max_length=14, db_column='key_layer1')
-    key_layer2 = models.CharField(max_length=10, db_column='key_layer2')
-    key_layer3 = models.CharField(max_length=1, db_column='key_layer3')
-    string = models.CharField(max_length=1500)
-
-    indexes = Index(
-        fields=['version', 'key_layer1', 'key_layer2', 'key_layer3', 'string'],
-        name='index_standard_inchi'
-    )
-
-    # objects = models.Manager()
-    # inchi_set = StandardInChIStructureManager()
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['version', 'key_layer1', 'key_layer2', 'key_layer3'],
-                name='unique_standard_inchi_key'
-            ),
-        ]
-        db_table = 'cir_structure_standard_inchi'
-
-        #db_table = u'`chemical_inchi`.`standard_inchi`'
-
-    def get_structure(self):
-        # .all()[0] is dirty but there are some issues (there are stdinchis
-        # with more than one of our unique structures
-        return self.structurestandardinchi_set.all()[0].structure
-
-    # def get_structures(self, query):
-    #     # cleaner method
-    #     t = StandardInChI.objects.filter(**i.query())
-    #     return t
-
-
-class StructureStandardInChI(models.Model):
-    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
-    standard_inchi = models.ForeignKey('StandardInChI', db_column='standard_inchi_id', on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'cir_structure_standard_inchis'
-        #db_table = u'`chemical_inchi`.`structure_standard_inchi`'
+# class StandardInChI(models.Model):
+#     #id = models.IntegerField(primary_key=True)
+#     version = models.IntegerField(db_column='version_id')
+#     key_layer1 = models.CharField(max_length=14, db_column='key_layer1')
+#     key_layer2 = models.CharField(max_length=10, db_column='key_layer2')
+#     key_layer3 = models.CharField(max_length=1, db_column='key_layer3')
+#     string = models.CharField(max_length=1500)
+#
+#     indexes = Index(
+#         fields=['version', 'key_layer1', 'key_layer2', 'key_layer3', 'string'],
+#         name='index_standard_inchi'
+#     )
+#
+#     # objects = models.Manager()
+#     # inchi_set = StandardInChIStructureManager()
+#
+#     class Meta:
+#         constraints = [
+#             UniqueConstraint(
+#                 fields=['version', 'key_layer1', 'key_layer2', 'key_layer3'],
+#                 name='unique_standard_inchi_key'
+#             ),
+#         ]
+#         db_table = 'cir_structure_standard_inchi'
+#
+#         #db_table = u'`chemical_inchi`.`standard_inchi`'
+#
+#     def get_structure(self):
+#         # .all()[0] is dirty but there are some issues (there are stdinchis
+#         # with more than one of our unique structures
+#         return self.structurestandardinchi_set.all()[0].structure
+#
+#     # def get_structures(self, query):
+#     #     # cleaner method
+#     #     t = StandardInChI.objects.filter(**i.query())
+#     #     return t
 
 
-
-class InChIManager(models.Manager):
-
-    def get_or_create_from_ens(self, ens: Ens):
-        inchikey = ens.get('E_STDINCHIKEY')
-        inchi = ens.get('E_STDINCHI')
-        i = InChI.create(key=inchikey, string=inchi)
-        d = model_to_dict(i)
-        return self.get_or_create(id=i.id, **d)
+# class StructureStandardInChI(models.Model):
+#     structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
+#     standard_inchi = models.ForeignKey('StandardInChI', db_column='standard_inchi_id', on_delete=models.CASCADE)
+#
+#     class Meta:
+#         db_table = 'cir_structure_standard_inchis'
+#         #db_table = u'`chemical_inchi`.`structure_standard_inchi`'
 
 
-class InChI(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
-    version = models.IntegerField(default=1)
-    version_string = models.CharField(max_length=64)
-    block1 = models.CharField(max_length=14)
-    block2 = models.CharField(max_length=10)
-    block3 = models.CharField(max_length=1)
-    key = models.CharField(max_length=27, blank=True, null=True)
-    string = models.CharField(max_length=32768, blank=True, null=True)
-    is_standard = models.BooleanField(default=False)
-    safe_options = models.CharField(max_length=2, default=None, null=True)
-    added = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    objects = InChIManager()
-
-    indexes = Index(
-        fields=['version', 'block1', 'block2', 'block3'],
-        name='inchi_index'
-    )
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['version', 'block1', 'block2', 'block3'],
-                name='unique_inchi_constraint'
-            ),
-        ]
-        verbose_name = "InChI"
-        db_table = 'cir_inchi'
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        if 'url_prefix' in kwargs:
-            inchiargs = kwargs.pop('url_prefix')
-            inchi = cls(*args, inchiargs)
-        else:
-            inchi = cls(*args, **kwargs)
-        k = None
-        s = None
-        if 'key' in kwargs and kwargs['key']:
-            k = InChIKey(kwargs['key'])
-
-        if 'string' in kwargs and kwargs['string']:
-            s = InChIString(kwargs['string'])
-            e = Ens(kwargs['string'])
-            if s.element['is_standard']:
-                _k = InChIKey(e.get('E_STDINCHIKEY'))
-            else:
-                _k = InChIKey(e.get('E_INCHIKEY'))
-            if k:
-                if not k.element['well_formatted'] == _k.element['well_formatted']:
-                    raise FieldError("InChI key does not represent InChI string")
-            else:
-                k = _k
-
-        inchi.key = k.element['well_formatted_no_prefix']
-        inchi.version = k.element['version']
-        inchi.is_standard = k.element['is_standard']
-        inchi.block1 = k.element['block1']
-        inchi.block2 = k.element['block2']
-        inchi.block3 = k.element['block3']
-        if s:
-            inchi.string = s.element['well_formatted']
-        inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            inchi.key,
-            str(kwargs.get('safe_options', None)),
-        ]))
-        return inchi
-
-    def __str__(self):
-        return self.key
+# class InChIManager(models.Manager):
+#
+#     def get_or_create_from_ens(self, ens: Ens):
+#         inchikey = ens.get('E_STDINCHIKEY')
+#         inchi = ens.get('E_STDINCHI')
+#         i = InChI.create(key=inchikey, string=inchi)
+#         d = model_to_dict(i)
+#         return self.get_or_create(id=i.id, **d)
 
 
-class StructureInChIs(models.Model):
-    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
-    inchi = models.ForeignKey('InChI', on_delete=models.CASCADE)
+# class InChI(models.Model):
+#     id = models.UUIDField(primary_key=True, editable=False)
+#     version = models.IntegerField(default=1)
+#     version_string = models.CharField(max_length=64)
+#     block1 = models.CharField(max_length=14)
+#     block2 = models.CharField(max_length=10)
+#     block3 = models.CharField(max_length=1)
+#     key = models.CharField(max_length=27, blank=True, null=True)
+#     string = models.CharField(max_length=32768, blank=True, null=True)
+#     is_standard = models.BooleanField(default=False)
+#     safe_options = models.CharField(max_length=2, default=None, null=True)
+#     entrypoints = models.ManyToManyField('EntryPoint', related_name='inchis')
+#     added = models.DateTimeField(auto_now_add=True)
+#     modified = models.DateTimeField(auto_now=True)
+#
+#     objects = InChIManager()
+#
+#     indexes = Index(
+#         fields=['version', 'block1', 'block2', 'block3'],
+#         name='inchi_index'
+#     )
+#
+#     class Meta:
+#         constraints = [
+#             UniqueConstraint(
+#                 fields=['version', 'block1', 'block2', 'block3'],
+#                 name='unique_inchi_constraint'
+#             ),
+#         ]
+#         verbose_name = "InChI"
+#         db_table = 'cir_inchi'
+#
+#     @classmethod
+#     def create(cls, *args, **kwargs):
+#         if 'url_prefix' in kwargs:
+#             inchiargs = kwargs.pop('url_prefix')
+#             inchi = cls(*args, inchiargs)
+#         else:
+#             inchi = cls(*args, **kwargs)
+#         k = None
+#         s = None
+#         if 'key' in kwargs and kwargs['key']:
+#             k = InChIKey(kwargs['key'])
+#
+#         if 'string' in kwargs and kwargs['string']:
+#             s = InChIString(kwargs['string'])
+#             e = Ens(kwargs['string'])
+#             if s.element['is_standard']:
+#                 _k = InChIKey(e.get('E_STDINCHIKEY'))
+#             else:
+#                 _k = InChIKey(e.get('E_INCHIKEY'))
+#             if k:
+#                 if not k.element['well_formatted'] == _k.element['well_formatted']:
+#                     raise FieldError("InChI key does not represent InChI string")
+#             else:
+#                 k = _k
+#
+#         inchi.key = k.element['well_formatted_no_prefix']
+#         inchi.version = k.element['version']
+#         inchi.is_standard = k.element['is_standard']
+#         inchi.block1 = k.element['block1']
+#         inchi.block2 = k.element['block2']
+#         inchi.block3 = k.element['block3']
+#         if s:
+#             inchi.string = s.element['well_formatted']
+#         inchi.id = uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+#             inchi.key,
+#             str(kwargs.get('safe_options', None)),
+#         ]))
+#         return inchi
+#
+#     def __str__(self):
+#         return self.key
 
-    class Meta:
-        db_table = 'cir_structure_inchis'
 
 
-class Name(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    name = models.TextField(max_length=1500, unique=True)
-    #classification_list = None
-
-    class Meta:
-        db_table = 'cir_structure_name'
-        #db_table = u'`chemical_name`.`name`'
-
-    def get_structure(self):
-        return self.structure.get()
-
-    def __str__(self):
-        return "Name='%s'" % (self.name, )
-
-    def __repr__(self):
-        return self.name
 
 
 # class Name_Fulltext(models.Model):
@@ -306,18 +302,7 @@ class Name(models.Model):
 #         db_table = u'`chemical_name`.`name`'
 
 
-class StructureName(models.Model):
-    name = models.ForeignKey('Name', on_delete=models.CASCADE)
-    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
-    name_type = models.ForeignKey('NameType', on_delete=models.CASCADE)
 
-    class Meta:
-        constraints = [
-            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
-        ]
-        #unique_together = (('name', 'structure', 'name_type'),)
-        db_table = 'cir_structure_names'
-        #db_table = u'`chemical_name`.`structure_names`'
 
 
 # class StructureNameTypes(models.Model):
@@ -327,16 +312,6 @@ class StructureName(models.Model):
 #     class Meta:
 #         db_table = 'cir_structure_name_types'
 #         #db_table = u'`chemical_name`.`structure_name_classification`'
-
-
-class NameType(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    string = models.TextField(max_length=45, unique=True)
-
-    class Meta:
-        db_table = 'cir_name_type'
-        #db_table = u'`chemical_name`.`name_classification`'
-
 
 
 

@@ -49,12 +49,18 @@ INSTALLED_APPS = [
     'simple.apps.SimpleConfig',
     'database.apps.DatabaseConfig',
     'structure.apps.StructureConfig',
+    'resolver.apps.ResolverConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+#    'rest_framework_json_api',
+    'django_filters',
+    'crispy_forms',
+    'multiselectfield',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +80,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             'templates',
-            'structure/templates'
+            'structure/templates',
+            'resolver/templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -150,11 +157,45 @@ MEDIA_URL = "/media/"
 
 ### CORS
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ['*']
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_HEADERS = ['*']
+#
+# CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOW_ALL_ORIGINS = True
+#### JSON API
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10,
+    'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework_json_api.pagination.JsonApiPageNumberPagination',
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework_json_api.renderers.JSONRenderer',
+        'resolver.renderers.ResolverAPIRenderer',
+    ),
+    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_json_api.filters.QueryParameterValidationFilter',
+        'rest_framework_json_api.filters.OrderingFilter',
+        'rest_framework_json_api.django_filters.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ),
+    'SEARCH_PARAM': 'filter[search]',
+    'TEST_REQUEST_RENDERER_CLASSES': (
+        'rest_framework_json_api.renderers.JSONRenderer',
+    ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'vnd.api+json',
+}
+
+JSON_API_FORMAT_FIELD_NAMES = 'camelize'
+
+#APPEND_SLASH = False
 
 
 #CSRF_TRUSTED_ORIGINS = (
@@ -228,8 +269,13 @@ AVAILABLE_RESOLVERS = [
     'packstring',
 ]
 
+
+
+
+
+
 ### THE WE HAVE TO GET RID OF THIS SECTION
 
-BASE_URL =  \
-    '/chemical'
-STRUCTURE_BASE_URL=BASE_URL + '/structure'
+#BASE_URL =  \
+#    '/chemical'
+#STRUCTURE_BASE_URL=BASE_URL + '/structure'
