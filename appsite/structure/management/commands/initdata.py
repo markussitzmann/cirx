@@ -24,7 +24,7 @@ class Command(BaseCommand):
 def _loader():
     init_response_type_data()
     init_name_type_data()
-    init_database_context_type_data()
+    #init_database_context_type_data()
     init_organization_and_publisher_data()
 
     names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']

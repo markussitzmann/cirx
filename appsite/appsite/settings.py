@@ -245,7 +245,7 @@ LOGGING = {
 
 # CIR Settings
 
-AVAILABLE_RESOLVERS = [
+CIR_AVAILABLE_RESOLVERS = [
     'smiles',
     'stdinchikey',
     'stdinchi',
@@ -270,9 +270,7 @@ AVAILABLE_RESOLVERS = [
     'packstring',
 ]
 
-
-
-
+CIR_FILESTORE_ROOT = os.path.join("/home/app", "filestore")
 
 
 ### THE WE HAVE TO GET RID OF THIS SECTION

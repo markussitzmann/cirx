@@ -19,6 +19,20 @@ class DatabaseContext(models.Model):
         return self.database_string
 
 
+class ContextTag(models.Model):
+    tag = models.CharField(max_length=128, blank=False, null=False, unique=True)
+    description = models.TextField(max_length=1500, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Context Teg"
+        verbose_name_plural = "Context Tags"
+        db_table = 'cir_database_context_tag'
+
+    def __str__(self):
+        return self.tag
+
+
+
 class URL(models.Model):
     #id = models.AutoField(primary_key=True)
     string = models.URLField()

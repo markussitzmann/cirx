@@ -161,7 +161,7 @@ class ChemicalString:
         if resolver_list:
             pass
         else:
-            resolver_list = settings.AVAILABLE_RESOLVERS
+            resolver_list = settings.CIR_AVAILABLE_RESOLVERS
 
         if operator_list:
             pass
