@@ -12,21 +12,34 @@ fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
 
 
 class FileCollection(models.Model):
-    file_location_pattern_string = models.CharField(
-        max_length=2048, blank=True, null=True
-    )
     release = models.ForeignKey(
         Release,
-        related_name='collection',
+        related_name='collections',
         blank=True,
         null=True,
         on_delete=models.CASCADE
     )
+    file_location_pattern_string = models.CharField(
+        max_length=2048, blank=True, null=True
+    )
+    description = models.TextField(max_length=768, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
     class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['release', 'file_location_pattern_string'],
+                name='unique_file_collection_constraint'
+            ),
+        ]
         db_table = 'cir_structure_file_collection'
+
+    def __str__(self):
+        if self.release:
+            return "File Collection for %s" % self.release.release_name
+        else:
+            return "File Collection - no linked release (%s)" % self.id
 
 
 class StructureFile(models.Model):

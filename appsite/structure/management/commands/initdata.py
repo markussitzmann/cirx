@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from database.models import ContextTag, Database, Release
+from etl.models import FileCollection
 from structure.models import Structure2, Name, NameType, StructureNames, ResponseType, StructureInChIs
 from resolver.models import InChI, Organization, Publisher
 
@@ -321,6 +322,12 @@ def init_release():
     chembl_db.description = "ChEMBL database"
     chembl_db.save()
 
+    chembl_collection, created = FileCollection.objects.get_or_create(
+        release=chembl_db,
+        file_location_pattern_string="chembl/29/chembl_29.sdf"
+    )
+    chembl_collection.save()
+
     nci_db, created = Release.objects.get_or_create(
         database=Database.objects.get(name="NCI Database"),
         publisher=Publisher.objects.get(name="PubChem"),
@@ -347,6 +354,10 @@ def init_release():
     open_nci_db.description = "NCI database"
     open_nci_db.save()
 
+    open_nci_db_collection, created = FileCollection.objects.get_or_create(
+        release=open_nci_db,
+        file_location_pattern_string="nci/NCI_DTP.sdf"
+    )
+    open_nci_db_collection.save()
 
-def init_etl():
-    pass
+
