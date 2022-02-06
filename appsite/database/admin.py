@@ -3,13 +3,20 @@ from django.contrib import admin
 from database.models import ContextTag, Database, Release, URIPattern
 
 
+class ReleaseInline(admin.StackedInline):
+    model = Release
+    extra = 0
+
+
 @admin.register(Database)
 class DatabaseAdmin(admin.ModelAdmin):
-    pass
+    inlines = [
+        ReleaseInline
+    ]
 
 
 @admin.register(Release)
-class DatabaseAdmin(admin.ModelAdmin):
+class ReleaseAdmin(admin.ModelAdmin):
     pass
 
 

@@ -15,3 +15,26 @@
 | 15 | compounds in SAR/QSAR/physicochemical property database | SAR/QSAR/physicochemical databases         |
 | 16 | compounds claimed/mentioned in patents                  | Compounds claimed/mentioned in patents     |
 | 17 | compounds in specific journals                          | Compounds in specific journals             |
+
+[
+("other",),
+("screening",),
+("building blocks",),
+("toxicology",),
+("environmental",),
+("patent",),
+("journal",),
+("literature",),
+("natural product",),
+("imaging",),
+("contrast agent",),
+("meta",),
+("vendor",),
+("drug",),
+("SAR",),
+("QSAR",),
+("physicochemical property",),
+("ligand",),
+("small molecule",),
+("crystal-structure",),
+]

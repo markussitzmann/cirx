@@ -153,7 +153,7 @@ class Publisher(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['parent', 'name', 'href', 'orcid'],
+                fields=['parent', 'name', 'category', 'href', 'orcid'],
                 name='unique_publisher_constraint'
             ),
         ]
@@ -165,7 +165,7 @@ class Publisher(models.Model):
         return publisher
 
     def __str__(self):
-        return "%s [%s]" % (self.name, self.category)
+        return "%s" % self.name
 
 
 class EntryPoint(models.Model):

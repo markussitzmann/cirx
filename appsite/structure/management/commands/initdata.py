@@ -1,10 +1,11 @@
+import datetime
 import logging
 import os
 
 from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from database.models import DatabaseContext
+from database.models import ContextTag, Database, Release
 from structure.models import Structure2, Name, NameType, StructureNames, ResponseType, StructureInChIs
 from resolver.models import InChI, Organization, Publisher
 
@@ -24,8 +25,10 @@ class Command(BaseCommand):
 def _loader():
     init_response_type_data()
     init_name_type_data()
-    #init_database_context_type_data()
+    init_database_context_type_data()
     init_organization_and_publisher_data()
+    init_database()
+    init_release()
 
     names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']
     name_type_obj = NameType.objects.get(id=7)
@@ -53,18 +56,6 @@ def _loader():
         )
 
 
-
-        # inchikey = ens.get('E_STDINCHIKEY')
-        # inchi = ens.get('E_STDINCHI')
-        #
-        # logger.info("1 >>> %s | %s" % (inchikey, inchi))
-        #
-        # io = InChI.objects.get_or_create(key=inchikey)
-        # logger.info("2 >>> %s | %s" % (io, io))
-
-        #io.save()
-
-
 def init_response_type_data():
     with open('./structure/management/raw-data/response-type.txt') as f:
         lines = f.readlines()
@@ -89,17 +80,34 @@ def init_response_type_data():
 
 
 def init_database_context_type_data():
-    with open('./structure/management/raw-data/context-type.txt') as f:
-        lines = f.readlines()
-        for line in lines:
-            splitted = [e.strip() for e in line.split('|')]
-            cleaned = [None if e == 'NULL' else e for e in splitted][1:-1]
-            id, record_string, database_string = cleaned
-            context_type = DatabaseContext(
-                record_string=record_string,
-                database_string=database_string
-            )
-            context_type.save()
+    context_data = [
+        ("other", None),
+        ("screening", None),
+        ("building blocks", None),
+        ("toxicology", None),
+        ("environmental", None),
+        ("patent", None),
+        ("journal", None),
+        ("literature", None),
+        ("natural product", None),
+        ("imaging", None),
+        ("contrast agent", None),
+        ("meta", None),
+        ("vendor", None),
+        ("drug", None),
+        ("SAR", None),
+        ("QSAR", None),
+        ("physicochemical property", None),
+        ("ligand", None),
+        ("small molecule", None),
+        ("crystal-structure", None),
+    ]
+
+    for data in context_data:
+        tag, description = data
+        context_tag, created = ContextTag.objects.get_or_create(tag=tag)
+        context_tag.description = description
+        context_tag.save()
 
 
 def init_name_type_data():
@@ -121,72 +129,224 @@ def init_organization_and_publisher_data():
 
     nih, created = Organization.objects.get_or_create(
         name="U.S. National Institutes of Health",
-        abbreviation="NIH",
-        category="government",
-        href="https://www.nih.gov"
+
     )
+    nih.abbreviation = "NIH",
+    nih.category = "government",
+    nih.href = "https://www.nih.gov"
+    nih.save()
 
     nci, created = Organization.objects.get_or_create(
         parent=nih,
         name="U.S. National Cancer Institute",
-        abbreviation="NCI",
-        category="government",
-        href="https://www.cancer.gov"
+
     )
+    nci.abbreviation = "NCI",
+    nci.category = "government",
+    nci.href = "https://www.cancer.gov"
+    nci.save()
 
     nlm, created = Organization.objects.get_or_create(
         parent=nih,
         name="U.S. National Library of Medicine",
-        abbreviation="NLM",
-        category="government",
-        href="https://www.nlm.nih.gov"
     )
+    nlm.abbreviation = "NLM",
+    nlm.category = "government",
+    nlm.href = "https://www.nlm.nih.gov"
+    nlm.save()
 
     ncbi, created = Organization.objects.get_or_create(
-        parent=nih,
+        parent=nlm,
         name="U.S. National Center for Biotechnology Information",
-        abbreviation="NCBI",
-        category="government",
-        href="https://www.ncbi.nlm.nih.gov"
     )
+    ncbi.abbreviation = "NCBI",
+    ncbi.category = "government",
+    ncbi.href = "https://www.ncbi.nlm.nih.gov"
+    ncbi.save()
 
     fiz, created = Organization.objects.get_or_create(
         name="FIZ Karlsruhe – Leibniz-Institut für Informationsinfrastruktur",
-        abbreviation="FIZ Karlsruhe",
-        category="public",
-        href="https://www.fiz-karlsruhe.de"
     )
+    fiz.abbreviation = "FIZ Karlsruhe",
+    fiz.category = "public",
+    fiz.href = "https://www.fiz-karlsruhe.de"
+    fiz.save()
+
+    embl, created = Organization.objects.get_or_create(
+        name="European Molecular Biology Laboratory",
+    )
+    embl.abbreviation = "EMBL"
+    embl.category = "public"
+    embl.href = "https://www.embl.org/"
+    embl.save()
+
+    ebi, created = Organization.objects.get_or_create(
+        parent=embl,
+        name="EMBL's European Bioinformatics Institute",
+    )
+    ebi.abbreviation = "EMBL-EBI"
+    ebi.category = "public"
+    ebi.href = "https://www.ebi.ac.uk/"
+    ebi.save()
 
     sito, created = Organization.objects.get_or_create(
         name="Markus Sitzmann Cheminformatics & IT Consulting",
-        abbreviation="SCIC",
-        category="other",
-        href=""
     )
+    sito.abbreviation = "SCIC"
+    sito.category = "other"
+    sito.href = ""
+    sito.save()
 
     ncicadd, created = Publisher.objects.get_or_create(
         name="NCI Computer-Aided Drug Design (CADD) Group",
-        category="group",
+        category = "group",
         href="https://cactus.nci.nih.gov",
-        address="Frederick, MD 21702-1201, USA",
     )
+    ncicadd.address = "Frederick, MD 21702-1201, USA"
     ncicadd.organizations.add(nci, nih)
+    ncicadd.save()
 
     mn1, created = Publisher.objects.get_or_create(
         parent=ncicadd,
         name="Marc Nicklaus",
         category="person",
-        email="mn1ahelix@gmail.com",
-        address="Frederick, MD 21702-1201, USA",
         href="https://ccr.cancer.gov/staff-directory/marc-c-nicklaus",
         orcid="https://orcid.org/0000-0002-4775-7030"
     )
+    mn1.email = "mn1ahelix@gmail.com"
+    mn1.address = "Frederick, MD 21702-1201, USA"
     mn1.organizations.add(nci, nih)
+    mn1.save()
 
     sitp, created = Publisher.objects.get_or_create(
         name="Markus Sitzmann",
         category="person",
-        email="markus.sitzmann@gmail.com",
         orcid="https://orcid.org/0000-0001-5346-1298"
     )
+    sitp.email = "markus.sitzmann@gmail.com"
     sitp.organizations.add(sito, fiz)
+    sitp.save()
+
+    pubchem_division, created = Publisher.objects.get_or_create(
+        name="PubChem",
+        category="division",
+        href="https://pubchemdocs.ncbi.nlm.nih.gov/contact",
+    )
+    pubchem_division.address = "8600 Rockville Pike; Bethesda, MD  20894; USA"
+    pubchem_division.email = "pubchem-help@ncbi.nlm.nih.gov"
+    pubchem_division.organizations.add(ncbi, nlm)
+    pubchem_division.save()
+
+    chembl_team, created = Publisher.objects.get_or_create(
+        name="ChEMBL Team",
+        category="group",
+        href="https://chembl.gitbook.io/chembl-interface-documentation/about",
+    )
+    chembl_team.organizations.add(embl, ebi)
+    chembl_team.save()
+
+    nci_dtp, created = Publisher.objects.get_or_create(
+        name="DTP/NCI",
+        category="division",
+        href="https://dtp.cancer.gov/"
+    )
+    nci_dtp.organizations.add(nih, nci)
+    nci_dtp.save()
+
+
+def init_database():
+    pubchem, created = Database.objects.get_or_create(
+        name="PubChem",
+        publisher=Publisher.objects.get(name="PubChem"),
+    )
+    pubchem.href = "https://pubchem.ncbi.nlm.nih.gov/"
+    pubchem.description = "PubChem is an open chemistry database at the National Institutes of Health (NIH)"
+    pubchem.context_tags.add(ContextTag.objects.get(tag="meta"))
+    pubchem.save()
+
+    chembl, created = Database.objects.get_or_create(
+        name="ChEMBL",
+        publisher=Publisher.objects.get(name="ChEMBL Team"),
+    )
+    chembl.href = "https://www.ebi.ac.uk/chembl/"
+    chembl.description = "ChEMBL is a manually curated database of bioactive molecules with drug-like properties"
+    chembl.context_tags.add(ContextTag.objects.get(tag="drug"))
+    chembl.save()
+
+    ncidb, created = Database.objects.get_or_create(
+        name="NCI Database",
+        publisher=Publisher.objects.get(name="DTP/NCI"),
+    )
+    ncidb.href = "https://dtp.cancer.gov/"
+    ncidb.description = "NCI database"
+    ncidb.context_tags.add(ContextTag.objects.get(tag="screening"))
+    ncidb.save()
+
+
+def init_release():
+    pubchem_compound, created = Release.objects.get_or_create(
+        database=Database.objects.get(name="PubChem"),
+        publisher=Publisher.objects.get(name="PubChem"),
+        name="PubChem Compound",
+        version=None,
+        downloaded=datetime.datetime(2022, 2, 1),
+    )
+    pubchem_compound.classification = 'public'
+    pubchem_compound.status = 'active'
+    pubchem_compound.description = "PubChem Compound database"
+    pubchem_compound.save()
+
+    pubchem_substance, created = Release.objects.get_or_create(
+        database=Database.objects.get(name="PubChem"),
+        publisher=Publisher.objects.get(name="PubChem"),
+        name="PubChem Substance",
+        version=None,
+        released=None,
+        downloaded=datetime.datetime(2022, 2, 1),
+    )
+    pubchem_substance.classification = 'public'
+    pubchem_substance.status = 'active'
+    pubchem_substance.description = "PubChem Substance database"
+    pubchem_substance.save()
+
+    chembl_db, created = Release.objects.get_or_create(
+        database=Database.objects.get(name="ChEMBL"),
+        publisher=Publisher.objects.get(name="ChEMBL Team"),
+        version=29,
+        released=None,
+        downloaded=datetime.datetime(2022, 2, 1),
+    )
+    chembl_db.classification = 'public'
+    chembl_db.status = 'active'
+    chembl_db.description = "ChEMBL database"
+    chembl_db.save()
+
+    nci_db, created = Release.objects.get_or_create(
+        database=Database.objects.get(name="NCI Database"),
+        publisher=Publisher.objects.get(name="PubChem"),
+        version=None,
+        released=None,
+        downloaded=datetime.datetime(2022, 2, 1),
+    )
+    nci_db.description = 'NCI Database downloaded from PubChem'
+    nci_db.classification = 'public'
+    nci_db.status = 'active'
+    nci_db.description = "NCI database"
+    nci_db.save()
+
+    open_nci_db, created = Release.objects.get_or_create(
+        database=Database.objects.get(name="NCI Database"),
+        publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
+        version=None,
+        released=None,
+        downloaded=datetime.datetime(2022, 2, 1),
+    )
+    open_nci_db.name = "Open NCI Database"
+    open_nci_db.classification = 'public'
+    open_nci_db.status = 'active'
+    open_nci_db.description = "NCI database"
+    open_nci_db.save()
+
+
+def init_etl():
+    pass

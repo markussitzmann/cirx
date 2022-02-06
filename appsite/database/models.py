@@ -17,7 +17,7 @@ class ContextTag(models.Model):
         db_table = 'cir_database_context_tag'
 
     def __str__(self):
-        return self.tag
+        return "%s" % self.tag
 
 
 class URIPattern(models.Model):
@@ -28,6 +28,7 @@ class URIPattern(models.Model):
         ('uritemplate', 'URI Template (RFC6570)'),
         ('documentation', 'Documentation (HTML, PDF)'),
     ), default='uritemplate')
+    name = models.CharField(max_length=768, null=False, blank=False)
     description = models.TextField(max_length=32768, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -64,13 +65,14 @@ class Database(models.Model):
         db_table = 'cir_database'
 
     def __str__(self):
-        return self.name
+        return "%s" % self.name
 
 
 class Release(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     database = models.ForeignKey(Database, blank=False, null=False, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, blank=False, null=False, on_delete=models.CASCADE)
+    name = models.CharField(max_length=768, null=False, blank=False)
     description = models.TextField(max_length=2048, blank=True, null=True)
     href = models.URLField(max_length=4096, null=True, blank=True)
     record_uri_pattern = models.ManyToManyField(URIPattern)
@@ -88,6 +90,7 @@ class Release(models.Model):
     status = models.CharField(max_length=32, blank=True, choices=(('active', 'Show'), ('inactive', 'Hide')))
     version = models.CharField(max_length=255, null=True, blank=True)
     released = models.DateField(null=True, blank=True, verbose_name="Date Released")
+    downloaded = models.DateField(null=True, blank=True, verbose_name="Date Downloaded")
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -95,27 +98,35 @@ class Release(models.Model):
         ordering = ['-added']
         constraints = [
             UniqueConstraint(
-                fields=['database', 'publisher', 'version', 'released'],
+                fields=['database', 'publisher', 'name', 'version', 'downloaded', 'released'],
                 name='unique_database_release_constraint'
             ),
         ]
         db_table = 'cir_database_release'
 
-    def version_name(self):
-        date_string = "%s/%s" % (self.released.strftime('%m'), self.released.strftime('%Y'))
+    @property
+    def version_string(self):
         if self.version:
-            return "%s (%s)" % (self.version, date_string)
-        else:
+            return self.version
+        if self.released:
+            date_string = "(%s/%s)" % (self.released.strftime('%m'), self.released.strftime('%Y'))
             return date_string
+        else:
+            return None
 
-    def database_name(self):
-        string = "%s (%s)" % (self.database.name, self.publisher.name)
-        return string
+    @property
+    def release_name(self):
+        if self.name:
+            return self.name
+        else:
+            if self.version_string:
+                string = "%s %s" % (self.database.name, self.version_string)
+            else:
+                string = "%s (%s)" % (self.database.name, self.publisher)
+            return string
 
     def __str__(self):
-        version_name = self.version_name()
-        string = "%s %s" % (self.database_name(), version_name)
-        return string
+        return "%s" % self.release_name
 
 
 
