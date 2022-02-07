@@ -1,7 +1,7 @@
 import functools
 import io
 from distutils.util import strtobool
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 import logging
 
@@ -485,19 +485,23 @@ class Dispatcher:
         return representation_list
 
     @staticmethod
-    def _create_dataset_from_resolver_string(string: str, resolver_list: List[str], simple: bool) -> Dataset:
+    def _create_dataset_from_resolver_string(string: str, resolver_list: List[str], simple: bool, index: int = -1) -> Dataset:
         interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
-        return Dispatcher._create_dataset(interpretations, simple)
+        return Dispatcher._create_dataset(interpretations, simple, index)
 
     @staticmethod
-    def _create_dataset(interpretations: List[ChemicalString.Interpretation], simple: bool) -> Dataset:
+    def _create_dataset(interpretations: List[ChemicalString.Interpretation], simple: bool, structure_index: int = -1) -> Dataset:
         structure_lists: List[List[ChemicalStructure]] = [
             interpretation.structures for interpretation in ([interpretations[0]] if simple else interpretations)
         ]
         ens_list: List[Ens] = [
             structure.ens for structure_list in structure_lists for structure in structure_list
         ]
-        dataset: Dataset = Dataset(ens_list)
+        dataset: Dataset
+        if structure_index > 0:
+            dataset = Dataset(ens_list[structure_index])
+        else:
+            dataset = Dataset(ens_list)
         return dataset
 
     @staticmethod
@@ -515,7 +519,22 @@ class Dispatcher:
             return False
         return True
 
-    def _interpretations(self, string: str) -> Tuple[List[ChemicalString.Interpretation], bool]:
+    @staticmethod
+    def _prepare_params(query_dict: QueryDict) -> Tuple[Dict, int]:
+        url_param_dict = query_dict.copy().dict()
+        structure_index: int = -1
+        if 'structure_index' in url_param_dict:
+            structure_index = int(url_param_dict.get('structure_index', -1))
+            del url_param_dict['structure_index']
+        if 'get3d' in url_param_dict:
+            writeflags = url_param_dict.get('writeflags', [])
+            if 'write3d' not in writeflags and strtobool(url_param_dict['get3d']):
+                writeflags.append('write3d')
+                url_param_dict['writeflags'] = writeflags
+            del url_param_dict['get3d']
+        return url_param_dict, structure_index
+
+    def _interpretations(self, string: str, structure_index: int = -1) -> Tuple[List[ChemicalString.Interpretation], bool]:
         url_params = self.url_parameters.copy()
         if 'resolver' in url_params:
             resolver_list = url_params.get('resolver').split(',')
@@ -526,24 +545,19 @@ class Dispatcher:
             simple_mode=('mode' in url_params and url_params == 'simple')
         )
         interpretations = ChemicalString(string=string, resolver_list=resolver_list, simple=simple).interpretations
+        if structure_index > 0:
+            interpretations = [interpretations[structure_index], ]
         return interpretations, simple
 
-    def molfilestring(self, string: str):
-        url_params = self.url_parameters.copy()
-        url_param_dict = url_params.dict()
-        if 'get3d' in url_param_dict:
-            writeflags = url_param_dict.get('writeflags', [])
-            if 'write3d' not in writeflags and strtobool(url_param_dict['get3d']):
-                writeflags.append('write3d')
-                url_param_dict['writeflags'] = writeflags
-            del url_param_dict['get3d']
+    def molfilestring(self, string: str) -> Any:
+        url_params, structure_index = self._prepare_params(self.url_parameters.copy())
         interpretations: List[ChemicalString.Interpretation]
         simple: bool
         interpretations, simple = self._interpretations(string)
         if not simple:
             raise NotImplemented
-        dataset: Dataset = self._create_dataset(interpretations, simple)
-        molfile_string_response: bytes = Molfile.String(dataset, url_param_dict)
+        dataset: Dataset = self._create_dataset(interpretations, simple=simple, structure_index=structure_index)
+        molfile_string_response: bytes = Molfile.String(dataset, url_params)
         response = None
         # TODO: this is too trusty and needs improvements
         try:
@@ -557,12 +571,12 @@ class Dispatcher:
         return response
 
     def prop(self, string: str) -> List:
-        url_params = self.url_parameters.copy()
+        url_params, structure_index = self._prepare_params(self.url_parameters.copy())
         prop = self.parameters
         index: int = 1
         interpretations: List[ChemicalString.Interpretation]
         simple: bool
-        interpretations, simple = self._interpretations(string)
+        interpretations, simple = self._interpretations(string, structure_index=structure_index)
         for interpretation in interpretations:
             structure: ChemicalStructure
             for structure in interpretation.structures:
