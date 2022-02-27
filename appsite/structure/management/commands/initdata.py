@@ -297,6 +297,13 @@ def init_release():
     pubchem_compound.description = "PubChem Compound database"
     pubchem_compound.save()
 
+    pubchem_compound_collection, created = FileCollection.objects.get_or_create(
+        release=pubchem_compound,
+        file_location_pattern_string="pubchem/compound/Compound_*.sdf"
+    )
+    pubchem_compound_collection.save()
+
+
     pubchem_substance, created = Release.objects.get_or_create(
         database=Database.objects.get(name="PubChem"),
         publisher=Publisher.objects.get(name="PubChem"),
@@ -309,6 +316,13 @@ def init_release():
     pubchem_substance.status = 'active'
     pubchem_substance.description = "PubChem Substance database"
     pubchem_substance.save()
+
+    pubchem_substance_collection, created = FileCollection.objects.get_or_create(
+        release=pubchem_compound,
+        file_location_pattern_string="pubchem/substance/Substance_*.sdf"
+    )
+    pubchem_substance_collection.save()
+
 
     chembl_db, created = Release.objects.get_or_create(
         database=Database.objects.get(name="ChEMBL"),
