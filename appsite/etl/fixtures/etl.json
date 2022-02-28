@@ -1,0 +1,45 @@
+[
+  {
+    "model": "etl.filecollection",
+    "pk": 1,
+    "fields": {
+      "release": null,
+      "file_location_pattern_string": "chembl/29/chembl_29.sdf",
+      "description": null,
+      "added": "2022-02-27T15:50:54.436Z",
+      "modified": "2022-02-27T15:50:54.438Z"
+    }
+  },
+  {
+    "model": "etl.filecollection",
+    "pk": 2,
+    "fields": {
+      "release": null,
+      "file_location_pattern_string": "nci/NCI_DTP.sdf",
+      "description": null,
+      "added": "2022-02-27T15:50:54.452Z",
+      "modified": "2022-02-27T15:50:54.453Z"
+    }
+  },
+  {
+    "model": "etl.filecollection",
+    "pk": 3,
+    "fields": {
+      "release": null,
+      "file_location_pattern_string": "pubchem/compound/Compound_*.sdf",
+      "description": null,
+      "added": "2022-02-27T15:50:54.452Z",
+      "modified": "2022-02-27T15:50:54.453Z"
+    }
+    },{
+    "model": "etl.filecollection",
+    "pk": 4,
+    "fields": {
+      "release": null,
+      "file_location_pattern_string": "pubchem/substance/Substance_*.sdf",
+      "description": null,
+      "added": "2022-02-27T15:50:54.452Z",
+      "modified": "2022-02-27T15:50:54.453Z"
+    }
+  }
+]

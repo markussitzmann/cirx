@@ -51,8 +51,10 @@ class StructureFile(models.Model):
         on_delete=models.CASCADE
     )
     name = models.FileField(max_length=1024, upload_to="manual/", storage=fs)
+    count = models.IntegerField(null=True, blank=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    processed = models.DateTimeField(auto_now=False, blank=True, null=True)
 
     class Meta:
         constraints = [
@@ -63,8 +65,8 @@ class StructureFile(models.Model):
         ]
         db_table = 'cir_structure_file'
 
-
-
+    def __str__(self):
+        return "%s (%s)" % (self.name, self.count)
 
 
 
