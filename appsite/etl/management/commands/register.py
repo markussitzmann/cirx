@@ -21,9 +21,10 @@ def _register():
     file_collections = FileCollection.objects.all()
     for file_collection in file_collections:
         processor = FileRegistry(file_collection)
-        file_list = processor.register()
+        file_list = processor.register_files()
         for file in file_list:
             logger.info("found file : %s" % file)
+            processor.register_file_records(file, 10000)
 
 
 
