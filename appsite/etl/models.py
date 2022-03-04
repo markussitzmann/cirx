@@ -50,7 +50,7 @@ class StructureFile(models.Model):
         blank=True,
         on_delete=models.CASCADE
     )
-    name = models.FileField(max_length=1024, upload_to="manual/", storage=fs)
+    file = models.FileField(max_length=1024, upload_to="manual/", storage=fs)
     count = models.IntegerField(null=True, blank=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -59,14 +59,24 @@ class StructureFile(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['collection', 'name'],
+                fields=['collection', 'file'],
                 name='unique_structure_file_constraint'
             ),
         ]
         db_table = 'cir_structure_file'
 
     def __str__(self):
-        return "%s (%s)" % (self.name, self.count)
+        return "%s (%s)" % (self.file, self.count)
 
+
+class StructureFileFields(models.Model):
+    name = models.CharField(max_length=768, null=False, blank=False, unique=True)
+    structure_files = models.ManyToManyField(StructureFile, related_name="fields")
+
+    class Meta:
+        db_table = 'cir_structure_file_field'
+
+    def __str__(self):
+        return "%s" % self.name
 
 

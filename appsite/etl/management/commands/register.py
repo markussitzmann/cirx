@@ -24,7 +24,7 @@ def _register():
         file_list = processor.register_files()
         for file in file_list:
             logger.info("found file : %s" % file)
-            processor.register_file_records(file, 10000)
+            processor.register_file_records(file)
 
 
 
