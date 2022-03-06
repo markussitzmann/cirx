@@ -24,7 +24,6 @@ class InChIManager(models.Manager):
 
 
 class InChI(models.Model):
-
     id = models.UUIDField(primary_key=True, editable=False)
     version = models.IntegerField(default=1)
     version_string = models.CharField(max_length=64, blank=True, null=True)

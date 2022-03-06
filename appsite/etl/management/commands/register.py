@@ -1,7 +1,7 @@
 
 import logging
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from etl.models import FileCollection
 from etl.registration import FileRegistry
@@ -18,7 +18,8 @@ class Command(BaseCommand):
 
 
 def _register():
-    file_collections = FileCollection.objects.all()
+    #file_collections = FileCollection.objects.all()
+    file_collections = FileCollection.objects.filter(id=4)
     for file_collection in file_collections:
         processor = FileRegistry(file_collection)
         file_list = processor.register_files()

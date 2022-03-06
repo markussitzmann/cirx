@@ -80,3 +80,21 @@ class StructureFileFields(models.Model):
         return "%s" % self.name
 
 
+class StructureFileRecord(models.Model):
+    structure_file = models.ForeignKey(StructureFile, blank=False, null=False, on_delete=models.CASCADE)
+    record = models.IntegerField(null=False, blank=False)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    processed = models.DateTimeField(auto_now=False, blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['structure_file', 'record'],
+                name='unique_structure_file__record_constraint'
+            ),
+        ]
+        db_table = 'cir_structure_file_record'
+
+    def __str__(self):
+        return "%s (%s)" % (self.structure_file, self.record)
