@@ -75,9 +75,10 @@ class FileRegistry(object):
                 logger.info(">>> %s", index)
             try:
                 ens = molfile.read()
+                hashisy = CactvsHash(ens)
                 structure = Structure2(
-                    hashisy=CactvsHash(ens),
-                    minimol=CactvsMinimol(ens)
+                     hashisy=hashisy,
+                     minimol=CactvsMinimol(ens)
                 )
                 structures.append(structure)
             except Exception as e:
@@ -85,6 +86,7 @@ class FileRegistry(object):
                 break
             record = StructureFileRecord(
                 structure_file=structure_file,
+                hashisy=hashisy,
                 record=index
             )
             records.append(record)

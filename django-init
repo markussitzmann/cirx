@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-./django-manage-py makemigrations &&\
+./django-manage-py makemigrations structure resolver database etl &&\
 ./django-manage-py migrate &&\
 ./django-manage-py collectstatic --noinput &&\
 ./django-manage-py createsuperuser --noinput
