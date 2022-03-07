@@ -83,8 +83,8 @@ class StructureFileFields(models.Model):
 
 class StructureFileRecord(models.Model):
     structure_file = models.ForeignKey(StructureFile, blank=False, null=False, on_delete=models.CASCADE)
-    hashisy = CactvsHashField(blank=True, null=True)
-    #raw_structure = models.ForeignKey(Structure2, from_field='hashisy', to_field='hashisy', blank=True, null=True, on_delete=models.CASCADE)
+    #hashisy = CactvsHashField(blank=True, null=True)
+    structure = models.ForeignKey(Structure2, blank=True, null=True, on_delete=models.CASCADE)
     record = models.IntegerField(null=False, blank=False)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

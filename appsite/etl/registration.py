@@ -84,11 +84,10 @@ class FileRegistry(object):
             except Exception as e:
                 logger.error("error while registering file record '%s': %s" % (fname, e))
                 break
-            record = StructureFileRecord(
-                structure_file=structure_file,
-                hashisy=hashisy,
-                record=index
-            )
+            record = {
+                'hashisy': hashisy,
+                'index': index,
+            }
             records.append(record)
             molfile_fields = [str(f) for f in molfile.fields]
             fields.update(molfile_fields)
@@ -99,8 +98,18 @@ class FileRegistry(object):
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
-                StructureFileRecord.objects.bulk_create(records, batch_size=1000)
                 Structure2.objects.bulk_create(structures, batch_size=1000, ignore_conflicts=True)
+                hashisy_list = [record['hashisy'] for record in records]
+                structures = Structure2.objects.in_bulk(hashisy_list, field_name='hashisy')
+                record_objects = list()
+                for record in records:
+                    structure = structures[record['hashisy']]
+                    record_objects.append(StructureFileRecord(
+                        structure_file=structure_file,
+                        structure=structure,
+                        record=record['index']
+                    ))
+                StructureFileRecord.objects.bulk_create(record_objects, batch_size=1000)
                 logger.error("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.info("registering file field '%s'" % (field,))
@@ -109,6 +118,9 @@ class FileRegistry(object):
                     sff.save()
         except DatabaseError:
             logger.error("file record registration failed for '%s'" % (fname,))
+        except Exception as e:
+            logger.error("file record registration failed for '%s': %s" % (fname,e))
+
         logger.info("data registration data finished for file '%s'" % (fname, ))
 
 
