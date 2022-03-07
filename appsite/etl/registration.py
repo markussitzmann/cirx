@@ -99,17 +99,20 @@ class FileRegistry(object):
         try:
             with transaction.atomic():
                 Structure2.objects.bulk_create(structures, batch_size=1000, ignore_conflicts=True)
-                hashisy_list = [record['hashisy'] for record in records]
-                structures = Structure2.objects.in_bulk(hashisy_list, field_name='hashisy')
-                record_objects = list()
-                for record in records:
-                    structure = structures[record['hashisy']]
-                    record_objects.append(StructureFileRecord(
-                        structure_file=structure_file,
-                        structure=structure,
-                        record=record['index']
-                    ))
-                StructureFileRecord.objects.bulk_create(record_objects, batch_size=1000)
+                page_size = 1000
+                records = [records[i:i + page_size] for i in range(0, len(records), page_size)]
+                for page in records:
+                    hashisy_list = [record['hashisy'] for record in page]
+                    structures = Structure2.objects.in_bulk(hashisy_list, field_name='hashisy')
+                    record_objects = list()
+                    for record in page:
+                        structure = structures[record['hashisy']]
+                        record_objects.append(StructureFileRecord(
+                            structure_file=structure_file,
+                            structure=structure,
+                            record=record['index']
+                        ))
+                    StructureFileRecord.objects.bulk_create(record_objects, batch_size=1000)
                 logger.error("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.info("registering file field '%s'" % (field,))

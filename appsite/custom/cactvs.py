@@ -86,5 +86,5 @@ class CactvsHash:
         return False
 
     def __hash__(self):
-        return self.int()
+        return self._integer
 
