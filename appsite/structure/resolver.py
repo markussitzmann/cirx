@@ -29,7 +29,8 @@ logger = logging.getLogger('cirx')
 #import smiles
 
 from database.models import Database
-from structure.models import Structure2, Record, Compound, StandardInChI, Name, StructureName, InChI
+from structure.models import Structure2, Record, Compound, Name, StructureNames
+from resolver.models import InChI
 
 
 # from sets import Set
@@ -61,7 +62,7 @@ class ChemicalName:
                 mode=sphinxapi.SPH_MATCH_EXTENDED).select_related()
             self.metadata = self.query_set._sphinx
             self.names = self.query_set[0:100]
-            structure_name_objects = StructureName.objects.filter(name__in=self.names)
+            structure_name_objects = StructureNames.objects.filter(name__in=self.names)
             structure_names = {}
             structure_rank = 1
             for structure_name in structure_name_objects:
@@ -160,7 +161,7 @@ class ChemicalString:
         if resolver_list:
             pass
         else:
-            resolver_list = settings.AVAILABLE_RESOLVERS
+            resolver_list = settings.CIR_AVAILABLE_RESOLVERS
 
         if operator_list:
             pass

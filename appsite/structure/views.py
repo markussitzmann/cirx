@@ -94,12 +94,15 @@ def resolve_to_response(request, string, representation, operator_parameter=None
     if output_format == 'plain':
         if not response:
             raise Http404
-        #return HttpResponse(url_method.__repr__(), content_type=content_type)
         try:
             http_response = HttpResponse(content_type=content_type)
             http_response.write(io.BytesIO(response).getvalue())
         except Exception:
             http_response = HttpResponse(response, content_type=content_type)
+        http_response["Access-Control-Allow-Origin"] = "*"
+        http_response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        http_response["Access-Control-Max-Age"] = "1000"
+        http_response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
         return http_response
     elif output_format == 'xml':
         return render(request, 'structure.xml', {

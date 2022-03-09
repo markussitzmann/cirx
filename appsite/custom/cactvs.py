@@ -85,3 +85,6 @@ class CactvsHash:
             return self.int() == other.int()
         return False
 
+    def __hash__(self):
+        return self._integer
+

@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'simple.apps.SimpleConfig',
     'database.apps.DatabaseConfig',
     'structure.apps.StructureConfig',
+    'resolver.apps.ResolverConfig',
+    'etl.apps.ETLConfig',
     'machine.apps.MachineConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,6 +59,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
+    'rest_framework',
+#    'rest_framework_json_api',
+    'django_filters',
+    'crispy_forms',
+    'multiselectfield',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +83,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             'templates',
-            'structure/templates'
+            'structure/templates',
+            'resolver/templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -150,6 +158,56 @@ STATIC_ROOT = os.path.join("/home/app", "static/")
 MEDIA_ROOT = os.path.join("/home/app", "media/")
 MEDIA_URL = "/media/"
 
+### CORS
+
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_HEADERS = ['*']
+#
+# CORS_ALLOW_ALL_ORIGINS = True
+
+#### JSON API
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10,
+    'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework_json_api.pagination.JsonApiPageNumberPagination',
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework_json_api.renderers.JSONRenderer',
+        'resolver.renderers.ResolverAPIRenderer',
+    ),
+    'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_json_api.filters.QueryParameterValidationFilter',
+        'rest_framework_json_api.filters.OrderingFilter',
+        'rest_framework_json_api.django_filters.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ),
+    'SEARCH_PARAM': 'filter[search]',
+    'TEST_REQUEST_RENDERER_CLASSES': (
+        'rest_framework_json_api.renderers.JSONRenderer',
+    ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'vnd.api+json',
+}
+
+JSON_API_FORMAT_FIELD_NAMES = 'camelize'
+
+#APPEND_SLASH = False
+
+
+#CSRF_TRUSTED_ORIGINS = (
+#    'http://localhost:8000'
+#)
+#CORS_ORIGIN_ALLOW_ALL = True
+#sCORS_ALLOW_CREDENTIALS = False
+
+### LOGGING
 
 LOGGING = {
     'version': 1,
@@ -167,6 +225,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         },
         'file': {
             'class': 'logging.FileHandler',
@@ -187,17 +246,9 @@ LOGGING = {
     },
 }
 
-# Celery
-
-CELERY_BROKER_URL = 'amqp://' + os.environ['RABBITMQ_DEFAULT_USER'] + ':' + os.environ['RABBITMQ_DEFAULT_PASS'] + '@cirx-rabbitmq'
-CELERY_RESULT_BACKEND = 'django-db'
-
-#CELERY_ACCEPT_CONTENT = ['json']
-#CELERY_TASK_SERIALIZER = 'json'
-
 # CIR Settings
 
-AVAILABLE_RESOLVERS = [
+CIR_AVAILABLE_RESOLVERS = [
     'smiles',
     'stdinchikey',
     'stdinchi',
@@ -222,8 +273,11 @@ AVAILABLE_RESOLVERS = [
     'packstring',
 ]
 
+CIR_FILESTORE_ROOT = os.path.join("/home/app", "filestore")
+
+
 ### THE WE HAVE TO GET RID OF THIS SECTION
 
-BASE_URL =  \
-    '/chemical'
-STRUCTURE_BASE_URL=BASE_URL + '/structure'
+#BASE_URL =  \
+#    '/chemical'
+#STRUCTURE_BASE_URL=BASE_URL + '/structure'

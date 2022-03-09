@@ -5,6 +5,7 @@ tmp/*
 .idea/
 /static
 /media
+/filestore
 /logging
 .env
 #settings.py*

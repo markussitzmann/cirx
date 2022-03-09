@@ -2,8 +2,15 @@ backports.zoneinfo
 psycopg2-binary
 requests
 django>=4.0
-djangorestframework
 django-extensions
+djangorestframework
+django-filter
+django-crispy-forms
+djangorestframework-jsonapi>=5.0.0
+djangorestframework-jsonapi[django-filter]
+djangorestframework-jsonapi[django-polymorphic]
+djangorestframework-jsonapi[openapi]
+django-multiselectfield
 django-htmlmin
 django-celery-results
 celery[librabbitmq]

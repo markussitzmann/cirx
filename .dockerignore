@@ -1,0 +1,7 @@
+tmp/*
+.project/*
+.idea/
+/static
+/media
+/filestore
+/logging

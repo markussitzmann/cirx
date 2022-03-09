@@ -12,7 +12,7 @@ from django.core.files import File
 from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpRequest, QueryDict
 
-from structure.models import ResponseType, NameType, NameCache
+from structure.models import ResponseType, NameType
 from structure.resolver import ChemicalString, ChemicalStructure
 
 logger = logging.getLogger('cirx')
@@ -539,7 +539,7 @@ class Dispatcher:
         if 'resolver' in url_params:
             resolver_list = url_params.get('resolver').split(',')
         else:
-            resolver_list = settings.AVAILABLE_RESOLVERS
+            resolver_list = settings.CIR_AVAILABLE_RESOLVERS
         simple: bool = self._use_simple_mode(
             output_format=self.output_format,
             simple_mode=('mode' in url_params and url_params == 'simple')

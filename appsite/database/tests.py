@@ -13,3 +13,7 @@ class DatabaseTests(TestCase):
         database = Database(name="test")
         logger.info("database %s", database)
         self.assertTrue(True)
+
+    def test_get_all_databases(self):
+        databases = Database.objects.all()
+        logger.info("database %s", databases)
