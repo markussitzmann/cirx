@@ -70,7 +70,7 @@ class StructureFile(models.Model):
         return "%s (%s)" % (self.file, self.count)
 
 
-class StructureFileFields(models.Model):
+class StructureFileField(models.Model):
     name = models.CharField(max_length=768, null=False, blank=False, unique=True)
     structure_files = models.ManyToManyField(StructureFile, related_name="fields")
 

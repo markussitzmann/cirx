@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import transaction, DatabaseError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from etl.models import FileCollection, StructureFile, StructureFileFields, StructureFileRecord
+from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
 
 from pycactvs import Molfile
 
@@ -116,7 +116,7 @@ class FileRegistry(object):
                 logger.error("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.info("registering file field '%s'" % (field,))
-                    sff, created = StructureFileFields.objects.get_or_create(name=field)
+                    sff, created = StructureFileField.objects.get_or_create(name=field)
                     sff.structure_files.add(structure_file)
                     sff.save()
         except DatabaseError:
