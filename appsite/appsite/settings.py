@@ -246,6 +246,15 @@ LOGGING = {
     },
 }
 
+# CELERY SETTINGS
+
+CELERY_BROKER_URL = 'amqp://' + os.environ['RABBITMQ_DEFAULT_USER'] + ':' + os.environ['RABBITMQ_DEFAULT_PASS'] + '@cirx-rabbitmq'
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+CELERY_RESULT_BACKEND = 'django-db'
+
 # CIR Settings
 
 CIR_AVAILABLE_RESOLVERS = [
