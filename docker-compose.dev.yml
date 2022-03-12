@@ -48,6 +48,11 @@ services:
     environment:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready", "-U $POSTGRES_USER" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
 
   cirx-rabbitmq:
     image: rabbitmq:3.8-management
@@ -64,22 +69,21 @@ services:
       - RABBITMQ_DEFAULT_USER
       - RABBITMQ_DEFAULT_PASS
     healthcheck:
-      test: [ "CMD", "nc", "-z", "cirx-rabbitmq", "15672" ]
+      test: rabbitmq-diagnostics -q ping
       interval: 5s
       timeout: 15s
       retries: 1
 
-  cirx-worker:
+  cirx-worker1:
     image: ${APP_NAME}:${APP_VERSION}
-    container_name: ${APP_NAME}-worker
-    volumes:
+    container_name: ${APP_NAME}-worker1
+    volumes: &worker_volumes
       - ${APP_HOME}:/home/app
-      - ${APP_HOME}/nginx:/home/nginx
-      #    ports:
-      #      - "8000:8000"
+      - ${APP_HOME}/logging:/logging
+      - ${APP_HOME}/pids:/pids
     networks:
       - app_network
-    environment:
+    environment: &worker_env
       - APP_NAME
       - APP_VERSION
       - APP_UID
@@ -92,10 +96,23 @@ services:
       - VIRTUAL_HOST=${APP_VIRTUAL_HOSTNAME}
       - RABBITMQ_DEFAULT_USER
       - RABBITMQ_DEFAULT_PASS
-      #- PYTHONSTARTUP=/home/app/cactvsenv/__init__.py
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
-    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info']
+    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log", "--pidfile=/pids/cirx-worker1.pid"]
+    #restart: on-failure
+    depends_on:
+      - cirx-rabbitmq
+
+  cirx-worker2:
+    image: ${APP_NAME}:${APP_VERSION}
+    container_name: ${APP_NAME}-worker2
+    volumes: *worker_volumes
+    networks:
+      - app_network
+    environment: *worker_env
+    entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
+    working_dir: "/home/app/appsite"
+    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker2.log", "--pidfile=/pids/cirx-worker2.pid"]
     #restart: on-failure
     depends_on:
       - cirx-rabbitmq

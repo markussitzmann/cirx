@@ -11,6 +11,7 @@ fi
 
 mkdir -p /home/app/backup
 mkdir -p /home/app/logging
+mkdir -p /home/app/pids
 
 chown -R app.app /home/app
 

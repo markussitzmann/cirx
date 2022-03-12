@@ -12,6 +12,7 @@ fi
 mkdir -p /home/app/backup
 mkdir -p /home/app/logging
 
+
 chown -R app.app /home/app
 
 #exec "$@"
