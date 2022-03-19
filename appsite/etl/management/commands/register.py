@@ -1,9 +1,11 @@
 
 import logging
+from typing import List
 
 from django.core.management.base import BaseCommand
 
-from etl.models import FileCollection
+from etl.tasks import *
+from etl.models import FileCollection, StructureFile
 from etl.registration import FileRegistry
 
 logger = logging.getLogger('cirx')
@@ -17,18 +19,32 @@ class Command(BaseCommand):
         _register()
 
 
+# def _register():
+#     #file_collections = FileCollection.objects.all()
+#     file_collections = FileCollection.objects.filter(id=4)
+#     for file_collection in file_collections:
+#         processor = FileRegistry(file_collection)
+#         file_list: List[StructureFile] = processor.register_files()
+#         file: StructureFile
+#         for file in file_list:
+#             logger.info("found file : %s" % file)
+#             processor.register_file_records(file)
+
+
 def _register():
-    #file_collections = FileCollection.objects.all()
-    file_collections = FileCollection.objects.filter(id=4)
+    file_collections = FileCollection.objects.all()
+    #file_collections = FileCollection.objects.filter(id=4)
     for file_collection in file_collections:
         processor = FileRegistry(file_collection)
-        file_list = processor.register_files()
+        file_list: List[StructureFile] = processor.register_files()
         for file in file_list:
-            logger.info("found file : %s" % file)
-            processor.register_file_records(file)
+            logger.info("file %s" % file)
+            count_and_save_file.delay(file.id)
 
-
-
+        # file: StructureFile
+        # for file in file_list:
+        #     logger.info("found file : %s" % file)
+        #     processor.register_file_records(file)
 
 
 

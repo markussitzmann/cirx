@@ -4,7 +4,15 @@ from pycactvs import Ens
 
 from celery import shared_task
 
+from etl.registration import FileRegistry
+
 logger = logging.getLogger('cirx')
+
+
+@shared_task
+def count_and_save_file(file_id):
+    FileRegistry.count_and_save_file(file_id)
+
 
 # file_collections = FileCollection.objects.all()
 #     file_collections = FileCollection.objects.filter(id=4)

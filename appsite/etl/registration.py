@@ -1,10 +1,11 @@
 import glob
 import logging
 import os
+from collections import namedtuple
 from typing import List, Tuple, Dict
 
 from django.conf import settings
-from django.db import transaction, DatabaseError
+from django.db import transaction, DatabaseError, IntegrityError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
@@ -14,6 +15,7 @@ from pycactvs import Molfile
 from structure.models import Structure2
 
 logger = logging.getLogger('cirx')
+Status = namedtuple('Status', 'file created')
 
 
 class FileRegistry(object):
@@ -40,24 +42,39 @@ class FileRegistry(object):
         #         return structure_file
         #     return None
         self._file_list = \
-            [structure_file['file'] for fname in self._file_name_list if (structure_file := self.register_file(fname))['created']]
+            [status.file for fname in self._file_name_list if (status := self.register_file(fname)).created]
+        #   [structure_file['file'] for fname in self._file_name_list if (structure_file := self.register_file(fname))['created']]
         return self._file_list
 
-    def register_file(self, fname) -> Dict:
+    def register_file(self, fname) -> Status:
         structure_file, created = StructureFile.objects.get_or_create(
             collection=self.file_collection,
             file=fname
         )
         if created:
-            logger.info("counting file %s", fname)
-            molfile_handle = Molfile.Open(fname)
-            structure_file.count = molfile_handle.count()
-            structure_file.save()
-            logger.info("registered file '%s' with %s records" % (fname, structure_file.count))
-            return {'file': structure_file, 'created': True}
+            return Status(file=structure_file, created=True)
         logger.info("file '%s' had already been registered previously (%s records)" % (fname, structure_file.count))
-        return {'file': structure_file, 'created': False}
+        return Status(file=structure_file, created=False)
 
+    @staticmethod
+    def count_and_save_file(structure_file_id: int):
+        structure_file = StructureFile.objects.get(id=structure_file_id)
+        logger.info("structure file %s", structure_file)
+        successful = True
+        if structure_file:
+            fname = structure_file.file.name
+            logger.info("counting file '%s'", fname)
+            molfile_handle = Molfile.Open(fname)
+            try:
+                with transaction.atomic():
+                    structure_file.count = molfile_handle.count()
+                    structure_file.save()
+            except (IntegrityError, DatabaseError) as e:
+                logging.error("counting failed: %s", e)
+                successful = False
+        return successful
+
+    @staticmethod
     def register_file_records(self, structure_file: StructureFile, max_records=None):
         index: int = 1
         fname: str = structure_file.file.name
