@@ -60,7 +60,6 @@ class FileRegistry(object):
     def count_and_save_file(structure_file_id: int):
         structure_file = StructureFile.objects.get(id=structure_file_id)
         logger.info("structure file %s", structure_file)
-        successful = True
         if structure_file:
             fname = structure_file.file.name
             logger.info("counting file '%s'", fname)
@@ -70,12 +69,16 @@ class FileRegistry(object):
                     structure_file.count = molfile_handle.count()
                     structure_file.save()
             except (IntegrityError, DatabaseError) as e:
-                logging.error("counting failed: %s", e)
-                successful = False
-        return successful
+                logging.error("counting of %s failed: %s" % (fname, e))
+                raise Exception("counting of %s failed", fname)
+        logger.info("structure file has been counted successfully: %s", structure_file)
+        return structure_file_id
 
     @staticmethod
-    def register_file_records(self, structure_file: StructureFile, max_records=None):
+    def register_file_records(structure_file_id: int, max_records=None):
+        logger.info("accepted task for registering file with id: %s", structure_file_id)
+        structure_file = StructureFile.objects.get(id=structure_file_id)
+        logger.info("registering file records for file %s (file id %s)", (structure_file.file.name, structure_file_id))
         index: int = 1
         fname: str = structure_file.file.name
         molfile: Molfile = Molfile.Open(fname)
@@ -139,8 +142,9 @@ class FileRegistry(object):
         except DatabaseError:
             logger.error("file record registration failed for '%s'" % (fname,))
         except Exception as e:
-            logger.error("file record registration failed for '%s': %s" % (fname,e))
+            logger.error("file record registration failed for '%s': %s" % (fname, e))
 
         logger.info("data registration data finished for file '%s'" % (fname, ))
+        return structure_file_id
 
 

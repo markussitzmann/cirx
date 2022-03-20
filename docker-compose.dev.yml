@@ -103,19 +103,19 @@ services:
     depends_on:
       - cirx-rabbitmq
 
-  cirx-worker2:
-    image: ${APP_NAME}:${APP_VERSION}
-    container_name: ${APP_NAME}-worker2
-    volumes: *worker_volumes
-    networks:
-      - app_network
-    environment: *worker_env
-    entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
-    working_dir: "/home/app/appsite"
-    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker2.log", "--pidfile=/pids/cirx-worker2.pid"]
-    #restart: on-failure
-    depends_on:
-      - cirx-rabbitmq
+#  cirx-worker2:
+#    image: ${APP_NAME}:${APP_VERSION}
+#    container_name: ${APP_NAME}-worker2
+#    volumes: *worker_volumes
+#    networks:
+#      - app_network
+#    environment: *worker_env
+#    entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
+#    working_dir: "/home/app/appsite"
+#    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker2.log", "--pidfile=/pids/cirx-worker2.pid"]
+#    #restart: on-failure
+#    depends_on:
+#      - cirx-rabbitmq
 
 volumes:
   postgres_db_volume:

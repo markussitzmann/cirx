@@ -39,7 +39,8 @@ def _register():
         file_list: List[StructureFile] = processor.register_files()
         for file in file_list:
             logger.info("file %s" % file)
-            count_and_save_file.delay(file.id)
+            chain = (count_and_save_file.s(file.id) | register_file_records.s())
+            chain.delay()
 
         # file: StructureFile
         # for file in file_list:

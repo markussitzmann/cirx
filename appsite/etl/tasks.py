@@ -11,7 +11,12 @@ logger = logging.getLogger('cirx')
 
 @shared_task
 def count_and_save_file(file_id):
-    FileRegistry.count_and_save_file(file_id)
+    return FileRegistry.count_and_save_file(file_id)
+
+
+@shared_task
+def register_file_records(file_id):
+    return FileRegistry.register_file_records(file_id)
 
 
 # file_collections = FileCollection.objects.all()
