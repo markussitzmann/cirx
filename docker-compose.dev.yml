@@ -74,6 +74,19 @@ services:
       timeout: 15s
       retries: 1
 
+  cirx-cache:
+    image: redis:6.2-bullseye
+    container_name: ${APP_NAME}-cache
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning #--requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - cache_volume:/data
+    networks:
+      - app_network
+
+
   cirx-worker1:
     image: ${APP_NAME}:${APP_VERSION}
     container_name: ${APP_NAME}-worker1
@@ -122,6 +135,8 @@ volumes:
     name: ${APP_NAME}-postgres-db-volume
   rabbitmq_volume:
     name: ${APP_NAME}-rabbitmq_volume
+  cache_volume:
+    driver: local
 
 networks:
   app_network:

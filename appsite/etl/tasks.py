@@ -1,10 +1,9 @@
 import logging
 
-from pycactvs import Ens
-
 from celery import shared_task
 
 from etl.registration import FileRegistry
+from etl.sandbox import count_box, chunk_box
 
 logger = logging.getLogger('cirx')
 
@@ -17,6 +16,16 @@ def count_and_save_file(file_id):
 @shared_task
 def register_file_records(file_id):
     return FileRegistry.register_file_records(file_id)
+
+
+@shared_task
+def count_box_task(fid):
+    return count_box(fid)
+
+
+@shared_task
+def chunk_box_task(fid, count, chunk_number, chunk_size):
+    return chunk_box(fid, count, chunk_number, chunk_size)
 
 
 # file_collections = FileCollection.objects.all()

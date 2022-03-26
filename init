@@ -13,6 +13,7 @@ fi
 ./build
 ./django-init
 ./django-manage-py initdata
+#./django-manage-py loaddata structure
 
 
 echo "done"

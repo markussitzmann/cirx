@@ -115,6 +115,13 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://cirx-cache:6379',
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -253,7 +260,9 @@ CELERY_BROKER_URL = 'amqp://' + os.environ['RABBITMQ_DEFAULT_USER'] + ':' + os.e
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
-CELERY_RESULT_BACKEND = 'django-db'
+#CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'default'
+CELERY_RESULT_BACKEND = 'django-cache'
 CELERY_TIMEZONE = "Europe/Berlin"
 
 

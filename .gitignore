@@ -7,6 +7,7 @@ tmp/*
 /media
 /filestore
 /logging
+/pids
 .env
 #settings.py*
 

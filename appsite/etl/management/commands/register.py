@@ -32,20 +32,22 @@ class Command(BaseCommand):
 
 
 def _register():
-    file_collections = FileCollection.objects.all()
-    #file_collections = FileCollection.objects.filter(id=4)
+    #file_collections = FileCollection.objects.all()
+    file_collections = FileCollection.objects.filter(id=4)
     for file_collection in file_collections:
         processor = FileRegistry(file_collection)
         file_list: List[StructureFile] = processor.register_files()
+        #for file in file_list:
+        #    logger.info("file %s" % file)
+        #    chain = (count_and_save_file.s(file.id) | register_file_records.s())
+        #    chain.delay()
+
         for file in file_list:
             logger.info("file %s" % file)
-            chain = (count_and_save_file.s(file.id) | register_file_records.s())
-            chain.delay()
+            FileRegistry.count_and_save_file(file.id)
+            for chunk in range(0, 30):
+                FileRegistry.register_file_records(file.id, chunk, 10000)
 
-        # file: StructureFile
-        # for file in file_list:
-        #     logger.info("found file : %s" % file)
-        #     processor.register_file_records(file)
 
 
 

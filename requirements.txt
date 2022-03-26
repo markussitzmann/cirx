@@ -15,5 +15,7 @@ django-htmlmin
 django-celery-results
 celery[librabbitmq]
 parameterized~=0.8.1
+redis
+hiredis
 #django-dbbackup>=3
 
