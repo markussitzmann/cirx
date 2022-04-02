@@ -3,19 +3,31 @@ import logging
 from celery import shared_task
 
 from etl.registration import FileRegistry
-from etl.sandbox import count_box, chunk_box
+from etl.sandbox import count_box, chunk_box, chunk_creator
 
 logger = logging.getLogger('cirx')
 
 
+def register_file_records(structure_file_id: int):
+    task_list = \
+        (count_and_save_file_task.s(structure_file_id) |
+         register_file_record_chunk_mapper.s(register_file_record_chunk_task.s()))
+    return task_list.delay()
+
+
 @shared_task
-def count_and_save_file(file_id):
+def count_and_save_file_task(file_id: int):
     return FileRegistry.count_and_save_file(file_id)
 
 
 @shared_task
-def register_file_records(file_id):
-    return FileRegistry.register_file_records(file_id)
+def register_file_record_chunk_mapper(file_id: int, callback):
+    return FileRegistry.register_file_record_chunk_mapper(file_id, callback)
+
+
+@shared_task
+def register_file_record_chunk_task(file_id: int, chunk_number: int, chunk_size: int):
+    return FileRegistry.register_file_record_chunk(file_id, chunk_number, chunk_size)
 
 
 @shared_task
@@ -24,9 +36,13 @@ def count_box_task(fid):
 
 
 @shared_task
+def chunk_creator_task(count_result, callback):
+    return chunk_creator(count_result, callback)
+
+
+@shared_task
 def chunk_box_task(fid, count, chunk_number, chunk_size):
     return chunk_box(fid, count, chunk_number, chunk_size)
-
 
 # file_collections = FileCollection.objects.all()
 #     file_collections = FileCollection.objects.filter(id=4)

@@ -4,6 +4,7 @@ import os
 from collections import namedtuple
 from typing import List, Tuple, Dict
 
+from celery import subtask, group
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
 
@@ -19,6 +20,8 @@ Status = namedtuple('Status', 'file created')
 
 
 class FileRegistry(object):
+
+    CHUNK_SIZE = 10000
 
     def __init__(self, file_collection: FileCollection):
         self.file_collection = file_collection
@@ -44,7 +47,7 @@ class FileRegistry(object):
         return Status(file=structure_file, created=False)
 
     @staticmethod
-    def count_and_save_file(structure_file_id: int):
+    def count_and_save_file(structure_file_id: int) -> int:
         structure_file = StructureFile.objects.get(id=structure_file_id)
         logger.info("structure file %s", structure_file)
         if structure_file:
@@ -62,9 +65,23 @@ class FileRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def register_file_records(structure_file_id: int, chunk_number, chunk_size, max_records=None):
+    def register_file_record_chunk_mapper(structure_file_id: int, callback):
+        try:
+            structure_file = StructureFile.objects.get(id=structure_file_id)
+            count = structure_file.count
+        except Exception as e:
+            logger.error("structure file and count not available")
+            raise Exception(e)
+        chunk_size = FileRegistry.CHUNK_SIZE
+        chunk_number = int(count / chunk_size) + 1
+        chunks = range(0, chunk_number)
+        callback = subtask(callback)
+        return group(callback.clone([structure_file_id, count, chunk, chunk_size]) for chunk in chunks)()
+
+    @staticmethod
+    def register_file_record_chunk(structure_file_id: int, chunk_number, chunk_size, max_records=None):
         logger.info("accepted task for registering file with id: %s", structure_file_id)
-        structure_file = StructureFile.objects.get(id=structure_file_id)
+        structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
         count: int
         if not structure_file.count:
@@ -136,11 +153,12 @@ class FileRegistry(object):
                     sff, created = StructureFileField.objects.get_or_create(name=field)
                     sff.structure_files.add(structure_file)
                     sff.save()
-        except DatabaseError:
+        except DatabaseError as e:
             logger.error("file record registration failed for '%s'" % (fname,))
+            raise(DatabaseError(e))
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
-
+            raise Exception(e)
         logger.info("data registration data finished for file '%s'" % (fname, ))
         return structure_file_id
 

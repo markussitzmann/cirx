@@ -43,10 +43,11 @@ def _register():
         #    chain.delay()
 
         for file in file_list:
-            logger.info("file %s" % file)
-            FileRegistry.count_and_save_file(file.id)
-            for chunk in range(0, 30):
-                FileRegistry.register_file_records(file.id, chunk, 10000)
+            register_file_records(file.id)
+            #logger.info("file %s" % file)
+            #FileRegistry.count_and_save_file(file.id)
+            #for chunk in range(0, 30):
+            #    FileRegistry.register_file_records(file.id, chunk, 10000)
 
 
 
