@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 from collections import namedtuple
-from typing import List, Tuple, Dict
+from typing import List
 
 from celery import subtask, group
 from django.conf import settings
@@ -76,11 +76,11 @@ class FileRegistry(object):
         chunk_number = int(count / chunk_size) + 1
         chunks = range(0, chunk_number)
         callback = subtask(callback)
-        return group(callback.clone([structure_file_id, count, chunk, chunk_size]) for chunk in chunks)()
+        return group(callback.clone([structure_file_id, chunk, chunk_size]) for chunk in chunks)()
 
     @staticmethod
     def register_file_record_chunk(structure_file_id: int, chunk_number, chunk_size, max_records=None):
-        logger.info("accepted task for registering file with id: %s", structure_file_id)
+        logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
         count: int
@@ -90,7 +90,6 @@ class FileRegistry(object):
             count = structure_file.count
         file_records = range(1, count+1)
         chunk_records = [file_records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)][chunk_number]
-
         record: int = chunk_records[0]
         last_record: int = chunk_records[-1]
 
@@ -129,6 +128,9 @@ class FileRegistry(object):
                 break
             record += 1
         molfile.close()
+
+        structures = sorted(structures, key=lambda s: s.hashisy.int())
+
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
@@ -147,7 +149,7 @@ class FileRegistry(object):
                         record=record_data['index']
                     ))
                 StructureFileRecord.objects.bulk_create(record_objects, batch_size=1000)
-                logger.error("registering file fields for '%s'" % (fname,))
+                logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.info("registering file field '%s'" % (field,))
                     sff, created = StructureFileField.objects.get_or_create(name=field)

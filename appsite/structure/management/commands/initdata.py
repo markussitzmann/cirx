@@ -30,7 +30,10 @@ def _loader():
     init_organization_and_publisher_data()
     init_database()
     init_release()
+    #init_structures()
 
+
+def init_structures():
     names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']
     name_type_obj = NameType.objects.get(id=7)
 

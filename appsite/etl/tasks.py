@@ -22,6 +22,7 @@ def count_and_save_file_task(file_id: int):
 
 @shared_task
 def register_file_record_chunk_mapper(file_id: int, callback):
+    logger.info("args %s %s" % (file_id, callback))
     return FileRegistry.register_file_record_chunk_mapper(file_id, callback)
 
 
