@@ -123,6 +123,9 @@ def init_name_type_data():
         'PUBCHEM_IUPAC_SYSTEMATIC_NAME',
         'PUBCHEM_GENERIC_REGISTRY_NAME',
         'PUBCHEM_SUBSTANCE_SYNONYM',
+        'NSC_NUMBER',
+        'PUBCHEM_SID',
+        'PUBCHEM_CID',
     ]
 
     for name_type in name_types:
@@ -373,7 +376,7 @@ def init_release():
 
     open_nci_db_collection, created = FileCollection.objects.get_or_create(
         release=open_nci_db,
-        file_location_pattern_string="nci/NCI_DTP.sdf"
+        file_location_pattern_string="nci/NCI_DTP.mini.sdf"
     )
     open_nci_db_collection.save()
 
