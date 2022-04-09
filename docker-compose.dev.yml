@@ -54,25 +54,25 @@ services:
 #      timeout: 5s
 #      retries: 5
 
-  cirx-rabbitmq:
-    image: rabbitmq:3.8-management
-    container_name: ${APP_NAME}-rabbitmq
-    ports:
-      - "5673:5672"
-      - "15673:15672"
-    volumes:
-      - rabbitmq_volume:/var/lib/rabbitmq/
-      - rabbitmq_volume:/var/log/rabbitmq
-    networks:
-      - app_network
-    environment:
-      - RABBITMQ_DEFAULT_USER
-      - RABBITMQ_DEFAULT_PASS
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 5s
-      timeout: 15s
-      retries: 1
+#  cirx-rabbitmq:
+#    image: rabbitmq:3.8-management
+#    container_name: ${APP_NAME}-rabbitmq
+#    ports:
+#      - "5673:5672"
+#      - "15673:15672"
+#    volumes:
+#      - rabbitmq_volume:/var/lib/rabbitmq/
+#      - rabbitmq_volume:/var/log/rabbitmq
+#    networks:
+#      - app_network
+#    environment:
+#      - RABBITMQ_DEFAULT_USER
+#      - RABBITMQ_DEFAULT_PASS
+#    healthcheck:
+#      test: rabbitmq-diagnostics -q ping
+#      interval: 5s
+#      timeout: 15s
+#      retries: 1
 
   cirx-cache:
     image: redis:6.2-bullseye
@@ -86,6 +86,21 @@ services:
     networks:
       - app_network
 
+  cirx-flower:
+    image: mher/flower
+    container_name: ${APP_NAME}-flower
+    environment:
+      - CELERY_BROKER_URL=redis://cirx-cache
+      - CELERY_RESULT_BACKEND=redis://cirx-cache
+      - FLOWER_PORT=8888
+    #command: [ 'celery', 'flower', '--broker=redis://cirx-cache:6379', '--port=8888' ]
+    ports:
+      - 8888:8888
+    depends_on:
+      - cirx-cache
+      - cirx-worker1
+    networks:
+      - app_network
 
   cirx-worker1:
     image: ${APP_NAME}:${APP_VERSION}
@@ -111,10 +126,13 @@ services:
       - RABBITMQ_DEFAULT_PASS
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
-    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log", "--pidfile=/pids/cirx-worker1.pid"]
+#    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log", "--pidfile=/pids/cirx-worker1.pid"]
+    command: [ 'celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log"]
+
     #restart: on-failure
     depends_on:
-      - cirx-rabbitmq
+#      - cirx-rabbitmq
+      - cirx-cache
 
 #  cirx-worker2:
 #    image: ${APP_NAME}:${APP_VERSION}
