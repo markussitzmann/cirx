@@ -18,7 +18,11 @@ class Structure2Manager(models.Manager):
 class Structure2(models.Model):
     hashisy = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
-    names = models.ManyToManyField('Name', through='StructureNames', related_name="structure")
+    names = models.ManyToManyField(
+        'Name',
+        through='StructureNames',
+        related_name="structure"
+    )
     inchis = models.ManyToManyField(
         'resolver.InChI',
         through='StructureInChIs',
@@ -38,6 +42,50 @@ class Structure2(models.Model):
 
     def __str__(self):
         return "[%s] %s" % (self.hashisy.padded(), self.ens.get("E_SMILES"))
+
+
+class Record(models.Model):
+    version = models.IntegerField(db_column="version")
+    release = models.ForeignKey(Release, on_delete=models.CASCADE)
+    database = models.ForeignKey(Database, on_delete=models.RESTRICT)
+    ficts_compound = models.IntegerField(db_column='ficts_compound_id')
+    ficus_compound = models.IntegerField(db_column='ficus_compound_id')
+    uuuuu_compound = models.IntegerField(db_column='uuuuu_compound_id')
+    names = models.ManyToManyField(
+        'Name',
+        through='StructureNames',
+        related_name="structure"
+    )
+    database_record_external_identifier = models.CharField(max_length=100)
+    release_record_external_identifier = models.CharField(max_length=100)
+
+
+    class Meta:
+        db_table = 'cir_record'
+        #db_table = u'`chemical`.`record_lookup`'
+
+#    def get_structure(self):
+#        a = self.compound_associations.get(type=1)
+#        return a.compound.structure
+
+    def __str__(self):
+        return "NCICADD:RID=%s" % self.id
+
+
+class Compound(models.Model):
+    structure = models.OneToOneField('Structure2', related_name="compound", on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'cir_compound'
+
+    def __str__(self):
+        return "NCICADD:CID=%s" % self.id
+
+    def __repr__(self):
+        return "NCICADD:CID=%s" % self.id
+
+    def get_structure(self):
+        return self.structure
 
 
 class StructureInChIs(models.Model):
@@ -65,7 +113,9 @@ class Name(models.Model):
 
 
 class NameType(models.Model):
-    string = models.TextField(max_length=45, unique=True)
+    string = models.CharField(max_length=64, unique=True)
+    public_string = models.TextField(max_length=46)
+    description = models.TextField(max_length=768)
 
     class Meta:
         db_table = 'cir_name_type'
@@ -83,11 +133,23 @@ class StructureNames(models.Model):
         db_table = 'cir_structure_names'
 
 
-class Formula(models.Model):
-    formula = models.CharField(max_length=50)
+class StructureFormula(models.Model):
+    formula = models.CharField(max_length=50, unique=True)
 
     class Meta:
         db_table = 'cir_structure_formula'
+
+
+class RecordNames(models.Model):
+    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    record = models.ForeignKey(Record, on_delete=models.CASCADE)
+    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['name', 'record', 'name_type'], name='unique_record_names'),
+        ]
+        db_table = 'cir_record_names'
 
 
 class ResponseType(models.Model):
@@ -337,121 +399,121 @@ class ResponseType(models.Model):
 
 
 
-class Record(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    #cocoa_id = models.IntegerField(db_column="cocoa_structure_id")
-    release = models.ForeignKey(Release, on_delete=models.CASCADE)
-    database = models.ForeignKey(Database, on_delete=models.CASCADE)
-    ficts_compound = models.IntegerField(db_column='ficts_compound_id')
-    ficus_compound = models.IntegerField(db_column='ficus_compound_id')
-    uuuuu_compound = models.IntegerField(db_column='uuuuu_compound_id')
-    database_record_external_identifier = models.CharField(max_length=100)
-    release_record_external_identifier = models.CharField(max_length=100)
-    revision = models.IntegerField(db_column="revision_id")
-
-    class Meta:
-        db_table = 'cir_record_lookup'
-        #db_table = u'`chemical`.`record_lookup`'
-
-    def get_structure(self):
-        a = self.compound_associations.get(type=1)
-        return a.compound.structure
-
-    def __str__(self):
-        return "NCICADD:RID=%s" % self.id
-
-
-class Compound(models.Model):
-    #id = models.IntegerField(primary_key=True)
-    structure = models.OneToOneField('Structure2', related_name="compound", on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'cir_compound'
-        #db_table = u'`chemical`.`compound`'
-
-    def __str__(self):
-        return "NCICADD:CID=%s" % self.id
-
-    def __repr__(self):
-        return "NCICADD:CID=%s" % self.id
-
-    def get_structure(self):
-        return self.structure
-
-    def retrieve_distinct_record_set(self):
-        record_set = set()
-        record_list = Record.objects.filter(compound_associations__compound__id=self.id)
-        record_set.update(record_list)
-        return record_set
-
-    def record_relevance(self, record):
-        relevance = 1
-        if record['ficts_compound'] == self.id:
-            relevance += 10000
-        if record['ficus_compound'] == self.id:
-            relevance += 1000
-        if record['uuuuu_compound'] == self.id:
-            relevance += 100
-        relevance += int(record['release']['date_released'].strftime('%Y'))
-        relevance = -1 * relevance
-        return relevance
-
-    def get_records(self, group_key=None, database=None, release=None, context=None, max_records=10000, public=True):
-        record_set = set()
-        for identifier in ['ficts', 'ficus', ' uuuuu']:
-            filter_string = '%s_compound = %s' % (identifier, self.id)
-            if release:
-                filter_string += ', release = %s' % (release.id,)
-            if database:
-                filter_string += ', database = %s' % (database.id,)
-            if context:
-                filter_string += ', database__context__id = %s' % (context.id,)
-            query_string = "Record.objects.select_related().filter(%s)[0:%s]" % (filter_string, max_records)
-            record_list = eval(query_string)
-            record_set.update(record_list)
-
-        # build the matchlist
-        matchlist = {'content': {}, 'metadata': {}}
-        matchlist['metadata']['size'] = 0
-        matchlist['metadata']['database_set'] = []
-
-        cached_databases = DatabaseDataCache()
-
-        for recordObject in record_set:
-            if public and recordObject.release.classification == "internal":
-                continue
-            if recordObject.release.status == "inactive":
-                continue
-            matchlist['metadata']['size'] += 1
-            matchlist['metadata']['database_set'].append(recordObject.database)
-            record = {'object': recordObject, 'key': recordObject.__str__(),
-                      'release': cached_databases['releases'][recordObject.release.id],
-                      'database': cached_databases['databases'][recordObject.database.id],
-                      'ficts_compound': recordObject.ficts_compound, 'ficus_compound': recordObject.ficus_compound,
-                      'uuuuu_compound': recordObject.uuuuu_compound,
-                      'ficts_compound_key': "NCICADD:CID=%s" % recordObject.ficts_compound,
-                      'ficus_compound_key': "NCICADD:CID=%s" % recordObject.ficus_compound,
-                      'uuuuu_compound_key': "NCICADD:CID=%s" % recordObject.uuuuu_compound,
-                      'release_record_external_identifier': recordObject.release_record_external_identifier,
-                      'database_record_external_identifier': recordObject.database_record_external_identifier}
-            record['relevance'] = self.record_relevance(record)
-            if group_key:
-                try:
-                    cmd = 'matchlist["content"][recordObject.%s].append(record)' % (group_key,)
-                    exec(cmd)
-                except:
-                    cmd = 'matchlist["content"][recordObject.%s] = [record,]' % (group_key,)
-                    exec(cmd)
-            else:
-                try:
-                    matchlist["content"]["records"].append(record)
-                except:
-                    matchlist["content"]["records"] = [record, ]
-
-        database_set = set(matchlist['metadata']['database_set'])
-        matchlist['metadata']['database_set'] = database_set
-        matchlist['metadata']['database_count'] = len(database_set)
-        return matchlist
+# class Record(models.Model):
+#     #id = models.IntegerField(primary_key=True)
+#     #cocoa_id = models.IntegerField(db_column="cocoa_structure_id")
+#     release = models.ForeignKey(Release, on_delete=models.CASCADE)
+#     database = models.ForeignKey(Database, on_delete=models.CASCADE)
+#     ficts_compound = models.IntegerField(db_column='ficts_compound_id')
+#     ficus_compound = models.IntegerField(db_column='ficus_compound_id')
+#     uuuuu_compound = models.IntegerField(db_column='uuuuu_compound_id')
+#     database_record_external_identifier = models.CharField(max_length=100)
+#     release_record_external_identifier = models.CharField(max_length=100)
+#     revision = models.IntegerField(db_column="revision_id")
+#
+#     class Meta:
+#         db_table = 'cir_record_lookup'
+#         #db_table = u'`chemical`.`record_lookup`'
+#
+#     def get_structure(self):
+#         a = self.compound_associations.get(type=1)
+#         return a.compound.structure
+#
+#     def __str__(self):
+#         return "NCICADD:RID=%s" % self.id
+#
+#
+# class Compound(models.Model):
+#     #id = models.IntegerField(primary_key=True)
+#     structure = models.OneToOneField('Structure2', related_name="compound", on_delete=models.CASCADE)
+#
+#     class Meta:
+#         db_table = 'cir_compound'
+#         #db_table = u'`chemical`.`compound`'
+#
+#     def __str__(self):
+#         return "NCICADD:CID=%s" % self.id
+#
+#     def __repr__(self):
+#         return "NCICADD:CID=%s" % self.id
+#
+#     def get_structure(self):
+#         return self.structure
+#
+#     def retrieve_distinct_record_set(self):
+#         record_set = set()
+#         record_list = Record.objects.filter(compound_associations__compound__id=self.id)
+#         record_set.update(record_list)
+#         return record_set
+#
+#     def record_relevance(self, record):
+#         relevance = 1
+#         if record['ficts_compound'] == self.id:
+#             relevance += 10000
+#         if record['ficus_compound'] == self.id:
+#             relevance += 1000
+#         if record['uuuuu_compound'] == self.id:
+#             relevance += 100
+#         relevance += int(record['release']['date_released'].strftime('%Y'))
+#         relevance = -1 * relevance
+#         return relevance
+#
+#     def get_records(self, group_key=None, database=None, release=None, context=None, max_records=10000, public=True):
+#         record_set = set()
+#         for identifier in ['ficts', 'ficus', ' uuuuu']:
+#             filter_string = '%s_compound = %s' % (identifier, self.id)
+#             if release:
+#                 filter_string += ', release = %s' % (release.id,)
+#             if database:
+#                 filter_string += ', database = %s' % (database.id,)
+#             if context:
+#                 filter_string += ', database__context__id = %s' % (context.id,)
+#             query_string = "Record.objects.select_related().filter(%s)[0:%s]" % (filter_string, max_records)
+#             record_list = eval(query_string)
+#             record_set.update(record_list)
+#
+#         # build the matchlist
+#         matchlist = {'content': {}, 'metadata': {}}
+#         matchlist['metadata']['size'] = 0
+#         matchlist['metadata']['database_set'] = []
+#
+#         cached_databases = DatabaseDataCache()
+#
+#         for recordObject in record_set:
+#             if public and recordObject.release.classification == "internal":
+#                 continue
+#             if recordObject.release.status == "inactive":
+#                 continue
+#             matchlist['metadata']['size'] += 1
+#             matchlist['metadata']['database_set'].append(recordObject.database)
+#             record = {'object': recordObject, 'key': recordObject.__str__(),
+#                       'release': cached_databases['releases'][recordObject.release.id],
+#                       'database': cached_databases['databases'][recordObject.database.id],
+#                       'ficts_compound': recordObject.ficts_compound, 'ficus_compound': recordObject.ficus_compound,
+#                       'uuuuu_compound': recordObject.uuuuu_compound,
+#                       'ficts_compound_key': "NCICADD:CID=%s" % recordObject.ficts_compound,
+#                       'ficus_compound_key': "NCICADD:CID=%s" % recordObject.ficus_compound,
+#                       'uuuuu_compound_key': "NCICADD:CID=%s" % recordObject.uuuuu_compound,
+#                       'release_record_external_identifier': recordObject.release_record_external_identifier,
+#                       'database_record_external_identifier': recordObject.database_record_external_identifier}
+#             record['relevance'] = self.record_relevance(record)
+#             if group_key:
+#                 try:
+#                     cmd = 'matchlist["content"][recordObject.%s].append(record)' % (group_key,)
+#                     exec(cmd)
+#                 except:
+#                     cmd = 'matchlist["content"][recordObject.%s] = [record,]' % (group_key,)
+#                     exec(cmd)
+#             else:
+#                 try:
+#                     matchlist["content"]["records"].append(record)
+#                 except:
+#                     matchlist["content"]["records"] = [record, ]
+#
+#         database_set = set(matchlist['metadata']['database_set'])
+#         matchlist['metadata']['database_set'] = database_set
+#         matchlist['metadata']['database_count'] = len(database_set)
+#         return matchlist
 
 
 class AssociationType(models.Model):
