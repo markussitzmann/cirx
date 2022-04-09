@@ -37,14 +37,22 @@ def _register():
         logger.info("deleting %s", f)
         f.delete()
 
-    file_collections = FileCollection.objects.all()
-    #file_collections = FileCollection.objects.filter(id=4)
+    #file_collections = FileCollection.objects.all()
+    file_collections = FileCollection.objects.filter(id=4)
+
+    tasks = []
     for file_collection in file_collections:
         processor = FileRegistry(file_collection)
         file_list: List[StructureFile] = processor.register_files()
 
         for file in file_list:
-            register_file_records(file.id)
+            task = register_file_records(file.id)
+            tasks.append(task)
+
+    for task in tasks:
+        for k, v in task.collect(intermediate=False):
+            logger.info("%s : %s" % (k.successful(), v))
+
 
 
 
