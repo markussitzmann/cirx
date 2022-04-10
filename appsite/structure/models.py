@@ -21,7 +21,7 @@ class Structure2(models.Model):
     names = models.ManyToManyField(
         'Name',
         through='StructureNames',
-        related_name="structure"
+        related_name="structures"
     )
     inchis = models.ManyToManyField(
         'resolver.InChI',
@@ -45,35 +45,51 @@ class Structure2(models.Model):
 
 
 class Record(models.Model):
-    version = models.IntegerField(db_column="version")
-    release = models.ForeignKey(Release, on_delete=models.CASCADE)
-    database = models.ForeignKey(Database, on_delete=models.RESTRICT)
-    ficts_compound = models.IntegerField(db_column='ficts_compound_id')
-    ficus_compound = models.IntegerField(db_column='ficus_compound_id')
-    uuuuu_compound = models.IntegerField(db_column='uuuuu_compound_id')
-    names = models.ManyToManyField(
-        'Name',
-        through='StructureNames',
-        related_name="structure"
+    regid = models.ForeignKey('Name', on_delete=models.PROTECT)
+    version = models.IntegerField(default=1, blank=False, null=False)
+    release = models.ForeignKey(Release, blank=False, null=False, on_delete=models.CASCADE)
+    database = models.ForeignKey(Database, blank=False, null=False, on_delete=models.RESTRICT)
+    ficts_compound = models.ForeignKey(
+        'Compound', blank=False, null=False, related_name="ficts_records", on_delete=models.PROTECT)
+    ficus_compound = models.ForeignKey(
+        'Compound', blank=False, null=False, related_name="ficus_records", on_delete=models.PROTECT)
+    uuuuu_compound = models.ForeignKey(
+        'Compound', blank=False, null=False, related_name="uuuuu_records", on_delete=models.PROTECT)
+    structure_file_record = models.ForeignKey(
+        'etl.StructureFileRecord',
+        blank=False,
+        null=False,
+        related_name="records",
+        on_delete=models.PROTECT
     )
-    database_record_external_identifier = models.CharField(max_length=100)
-    release_record_external_identifier = models.CharField(max_length=100)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
+    indexes = Index(
+        fields=['ficts_compound', 'ficus_compound', 'uuuuu_compound'],
+        name='record_index'
+    )
 
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['regid', 'version', 'release'], name='unique_record'),
+        ]
         db_table = 'cir_record'
-        #db_table = u'`chemical`.`record_lookup`'
-
-#    def get_structure(self):
-#        a = self.compound_associations.get(type=1)
-#        return a.compound.structure
 
     def __str__(self):
         return "NCICADD:RID=%s" % self.id
 
 
 class Compound(models.Model):
-    structure = models.OneToOneField('Structure2', related_name="compound", on_delete=models.CASCADE)
+    structure = models.OneToOneField(
+        'Structure2',
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT
+    )
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
     class Meta:
         db_table = 'cir_compound'
@@ -83,9 +99,6 @@ class Compound(models.Model):
 
     def __repr__(self):
         return "NCICADD:CID=%s" % self.id
-
-    def get_structure(self):
-        return self.structure
 
 
 class StructureInChIs(models.Model):
@@ -113,9 +126,9 @@ class Name(models.Model):
 
 
 class NameType(models.Model):
-    string = models.CharField(max_length=64, unique=True)
-    public_string = models.TextField(max_length=46)
-    description = models.TextField(max_length=768)
+    string = models.CharField(max_length=64, unique=True, blank=False, null=False)
+    public_string = models.TextField(max_length=64, blank=False, null=False)
+    description = models.TextField(max_length=768, blank=True, null=True)
 
     class Meta:
         db_table = 'cir_name_type'

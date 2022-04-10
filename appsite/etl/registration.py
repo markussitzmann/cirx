@@ -6,12 +6,12 @@ from typing import List
 
 from celery import subtask, group
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction, DatabaseError, IntegrityError, connection
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
 
-from pycactvs import Molfile
+from pycactvs import Molfile, Ens
 
 from structure.models import Structure2
 
@@ -22,6 +22,7 @@ Status = namedtuple('Status', 'file created')
 class FileRegistry(object):
 
     CHUNK_SIZE = 10000
+    DATABASE_ROW_BATCH_SIZE = 1000
 
     def __init__(self, file_collection: FileCollection):
         self.file_collection = file_collection
@@ -47,7 +48,7 @@ class FileRegistry(object):
         return Status(file=structure_file, created=False)
 
     @staticmethod
-    def count_and_save_file(structure_file_id: int) -> int:
+    def count_and_save_structure_file(structure_file_id: int) -> int:
         structure_file = StructureFile.objects.get(id=structure_file_id)
         logger.info("structure file %s", structure_file)
         if structure_file:
@@ -65,7 +66,7 @@ class FileRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def register_file_record_chunk_mapper(structure_file_id: int, callback):
+    def register_structure_file_record_chunk_mapper(structure_file_id: int, callback):
         try:
             structure_file = StructureFile.objects.get(id=structure_file_id)
             count = structure_file.count
@@ -79,7 +80,7 @@ class FileRegistry(object):
         return group(callback.clone([structure_file_id, chunk, chunk_size]) for chunk in chunks)()
 
     @staticmethod
-    def register_file_record_chunk(structure_file_id: int, chunk_number, chunk_size, max_records=None):
+    def register_structure_file_record_chunk(structure_file_id: int, chunk_number: int, chunk_size: int, max_records=None) -> int:
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
@@ -104,7 +105,7 @@ class FileRegistry(object):
         records: list = list()
 
         while record <= last_record:
-            if not record % 10000:
+            if not record % FileRegistry.CHUNK_SIZE:
                 logger.info("processed record %s of %s", record, fname)
             try:
                 ens = molfile.read()
@@ -134,10 +135,7 @@ class FileRegistry(object):
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
-                Structure2.objects.bulk_create(structures, batch_size=1000, ignore_conflicts=True)
-                #page_size = 1000
-                #records = [records[i:i + page_size] for i in range(0, len(records), page_size)]
-                #for page in records:
+                Structure2.objects.bulk_create(structures, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True)
                 hashisy_list = [record['hashisy'] for record in records]
                 structures = Structure2.objects.in_bulk(hashisy_list, field_name='hashisy')
                 record_objects = list()
@@ -146,9 +144,9 @@ class FileRegistry(object):
                     record_objects.append(StructureFileRecord(
                         structure_file=structure_file,
                         structure=structure,
-                        record=record_data['index']
+                        number=record_data['index']
                     ))
-                StructureFileRecord.objects.bulk_create(record_objects, batch_size=1000)
+                StructureFileRecord.objects.bulk_create(record_objects, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE)
                 logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.info("registering file field '%s'" % (field,))
@@ -164,4 +162,30 @@ class FileRegistry(object):
         logger.info("data registration data finished for file '%s'" % (fname, ))
         return structure_file_id
 
+    @staticmethod
+    def normalize_structure_file_record(record_ids: range):
+        structure_file_records = StructureFileRecord.objects.select_related('structure').in_bulk(list(record_ids), field_name='id')
+        for rid, record in structure_file_records.items():
+            #structure_file_record = StructureFileRecord.objects.get(id=rid)
+            structure: Structure2 = record.structure.ens
 
+            hashisy = structure.get('E_HASHISY')
+
+            identifiers = [
+                ('E_FICTS_ID', 'E_FICTS_STRUCTURE'),
+                ('E_FICUS_ID', 'E_FICUS_STRUCTURE'),
+                ('E_UUUUU_ID', 'E_UUUUU_STRUCTURE')
+            ]
+            for identifier, parent in identifiers:
+                identifier_value = structure.get(identifier)
+                identifier_structure = structure.get(parent)
+
+                try:
+                    s = Structure2.objects.get(hashisy=CactvsHash(identifier_structure))
+                    logger.info("%s" % s)
+                except Structure2.DoesNotExist:
+                    logger.info("%s" % "does not exists")
+
+                logger.info("%s %s %s" % (hashisy, identifier_value, identifier_structure))
+
+        print(connection.queries)

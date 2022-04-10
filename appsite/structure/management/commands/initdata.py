@@ -116,20 +116,21 @@ def init_database_context_type_data():
 
 def init_name_type_data():
     name_types = [
-        'PUBCHEM_IUPAC_NAME',
-        'PUBCHEM_IUPAC_OPENEYE_NAME',
-        'PUBCHEM_IUPAC_CAS_NAME',
-        'PUBCHEM_IUPAC_TRADITIONAL_NAME',
-        'PUBCHEM_IUPAC_SYSTEMATIC_NAME',
-        'PUBCHEM_GENERIC_REGISTRY_NAME',
-        'PUBCHEM_SUBSTANCE_SYNONYM',
-        'NSC_NUMBER',
-        'PUBCHEM_SID',
-        'PUBCHEM_CID',
+        ('PUBCHEM_IUPAC_NAME', 'PubChem IUPAC NAME'),
+        ('PUBCHEM_IUPAC_OPENEYE_NAME', 'PubChem IUPAC OPENEYE NAME'),
+        ('PUBCHEM_IUPAC_CAS_NAME', 'PubChem IUPAC CAS NAME'),
+        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', 'PubChem IUPAC TRADITIONAL NAME'),
+        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'PubChem IUPAC SYSTEMATIC NAME'),
+        ('PUBCHEM_GENERIC_REGISTRY_NAME', 'PubChem GENERIC REGISTRY NAME'),
+        ('PUBCHEM_SUBSTANCE_SYNONYM', 'PubChem SUBSTANCE SYNONYM'),
+        ('NSC_NUMBER', 'NSC number'),
+        ('NSC_NUMBER_PREFIXED', 'NSC number prefixed'),
+        ('PUBCHEM_SID', 'PubChem SID'),
+        ('PUBCHEM_CID', 'PubChem CID'),
     ]
 
     for name_type in name_types:
-        NameType.objects.get_or_create(string=name_type)
+        NameType.objects.get_or_create(string=name_type[0], public_string=name_type[1])
 
 
 def init_organization_and_publisher_data():

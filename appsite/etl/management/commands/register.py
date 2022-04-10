@@ -19,18 +19,6 @@ class Command(BaseCommand):
         _register()
 
 
-# def _register():
-#     #file_collections = FileCollection.objects.all()
-#     file_collections = FileCollection.objects.filter(id=4)
-#     for file_collection in file_collections:
-#         processor = FileRegistry(file_collection)
-#         file_list: List[StructureFile] = processor.register_files()
-#         file: StructureFile
-#         for file in file_list:
-#             logger.info("found file : %s" % file)
-#             processor.register_file_records(file)
-
-
 def _register():
 
     for f in StructureFile.objects.all():
