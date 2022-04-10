@@ -17,18 +17,18 @@ def register_file_records(structure_file_id: int):
 
 @shared_task
 def count_and_save_file_task(file_id: int):
-    return FileRegistry.count_and_save_file(file_id)
+    return FileRegistry.count_and_save_structure_file(file_id)
 
 
 @shared_task
 def register_file_record_chunk_mapper(file_id: int, callback):
     logger.info("args %s %s" % (file_id, callback))
-    return FileRegistry.register_file_record_chunk_mapper(file_id, callback)
+    return FileRegistry.register_structure_file_record_chunk_mapper(file_id, callback)
 
 
 @shared_task
 def register_file_record_chunk_task(file_id: int, chunk_number: int, chunk_size: int):
-    return FileRegistry.register_file_record_chunk(file_id, chunk_number, chunk_size)
+    return FileRegistry.register_structure_file_record_chunk(file_id, chunk_number, chunk_size)
 
 
 @shared_task
