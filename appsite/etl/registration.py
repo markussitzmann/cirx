@@ -246,11 +246,12 @@ class FileRegistry(object):
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy')
                 for k, v in structures.items():
                     print(type(k), v, v.id)
-                #print(hash_pairs)
                 for k, v in hash_relationships:
                     for kk, vv in v.items():
-                        print(k, kk, vv)
-                    #print(k, structures[v].id)
+                        print(raw_structures[k])
+                        setattr(raw_structures[k], kk, structures[vv])
+                        print(k, kk, structures[vv].id)
+                Structure.objects.bulk_update(raw_structures.values(), ['ficts_parent', 'ficus_parent', 'uuuuu_parent'])
         except DatabaseError as e:
             logger.error(e)
             raise(DatabaseError(e))
