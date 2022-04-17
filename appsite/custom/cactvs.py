@@ -16,10 +16,13 @@ class CactvsMinimol:
                 raise ValueError('no valid CACTVS ens')
         else:
             raise ValueError('CACTVS ensemble can not be created from source')
+        self._ens = None
 
     @property
     def ens(self) -> Ens:
-        return Ens(self._minimol)
+        if not self._ens:
+            self._ens = Ens(self._minimol)
+        return self._ens
 
     @property
     def minimol(self) -> bytes:
@@ -50,8 +53,8 @@ class CactvsHash:
         elif isinstance(source, Ens):
             try:
                 self._integer: int = int('0x' + source.get('E_HASHISY'), 16)
-            except RuntimeError:
-                raise ValueError('no CACTVS ensemble hash available')
+            except RuntimeError as e:
+                raise ValueError('no CACTVS ensemble hash available', e)
         else:
             try:
                 self._integer: int = int(source, 16)

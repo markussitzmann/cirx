@@ -9,15 +9,21 @@ from custom.fields import CactvsHashField, CactvsMinimolField
 from database.models import Database, Release
 
 
-class Structure2Manager(models.Manager):
+class StructureManager(models.Manager):
 
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
 
-class Structure2(models.Model):
+class Structure(models.Model):
     hashisy = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
+    ficts_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='ficts_children', on_delete=models.PROTECT)
+    ficus_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='ficus_children', on_delete=models.PROTECT)
+    uuuuu_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='uuuuu_children', on_delete=models.PROTECT)
     names = models.ManyToManyField(
         'Name',
         through='StructureNames',
@@ -28,13 +34,28 @@ class Structure2(models.Model):
         through='StructureInChIs',
         related_name="structures"
     )
+    added = models.DateTimeField(auto_now_add=True)
+    blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
+
+    indexes = Index(
+        fields=['ficts_parent', 'ficus_parent', 'uuuuu_parent'],
+        name='structure_index'
+    )
 
     class Meta:
-        db_table = 'cir_structure_2'
+        db_table = 'cir_structure'
         verbose_name = "Structure"
         verbose_name_plural = "Structures"
 
-    objects = Structure2Manager()
+    objects = StructureManager()
+
+    def has_compound(self) -> bool:
+        has_compound = False
+        try:
+            has_compound = (self.compound is not None)
+        except Compound.DoesNotExist:
+            pass
+        return has_compound
 
     @property
     def ens(self):
@@ -49,12 +70,6 @@ class Record(models.Model):
     version = models.IntegerField(default=1, blank=False, null=False)
     release = models.ForeignKey(Release, blank=False, null=False, on_delete=models.CASCADE)
     database = models.ForeignKey(Database, blank=False, null=False, on_delete=models.RESTRICT)
-    ficts_compound = models.ForeignKey(
-        'Compound', blank=False, null=False, related_name="ficts_records", on_delete=models.PROTECT)
-    ficus_compound = models.ForeignKey(
-        'Compound', blank=False, null=False, related_name="ficus_records", on_delete=models.PROTECT)
-    uuuuu_compound = models.ForeignKey(
-        'Compound', blank=False, null=False, related_name="uuuuu_records", on_delete=models.PROTECT)
     structure_file_record = models.ForeignKey(
         'etl.StructureFileRecord',
         blank=False,
@@ -64,11 +79,6 @@ class Record(models.Model):
     )
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-
-    indexes = Index(
-        fields=['ficts_compound', 'ficus_compound', 'uuuuu_compound'],
-        name='record_index'
-    )
 
     class Meta:
         constraints = [
@@ -82,7 +92,7 @@ class Record(models.Model):
 
 class Compound(models.Model):
     structure = models.OneToOneField(
-        'Structure2',
+        'Structure',
         blank=False,
         null=False,
         on_delete=models.PROTECT
@@ -102,7 +112,7 @@ class Compound(models.Model):
 
 
 class StructureInChIs(models.Model):
-    structure = models.ForeignKey('Structure2', on_delete=models.CASCADE)
+    structure = models.ForeignKey('Structure', on_delete=models.CASCADE)
     inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
 
     class Meta:
@@ -136,7 +146,7 @@ class NameType(models.Model):
 
 class StructureNames(models.Model):
     name = models.ForeignKey(Name, on_delete=models.CASCADE)
-    structure = models.ForeignKey(Structure2, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, on_delete=models.CASCADE)
     name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
 
     class Meta:

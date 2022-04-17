@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from custom.cactvs import CactvsHash, CactvsMinimol
 from database.models import ContextTag, Database, Release
 from etl.models import FileCollection
-from structure.models import Structure2, Name, NameType, StructureNames, ResponseType, StructureInChIs
+from structure.models import Structure, Name, NameType, StructureNames, ResponseType, StructureInChIs
 from resolver.models import InChI, Organization, Publisher
 
 from pycactvs import Ens
@@ -42,7 +42,7 @@ def init_structures():
         logger.info("tuples: %s", name)
         name_obj, created = Name.objects.get_or_create(name=name)
 
-        structure_obj, structure_created = Structure2.objects.get_or_create_from_ens(ens)
+        structure_obj, structure_created = Structure.objects.get_or_create_from_ens(ens)
         logger.info("Structure: %s %s" % (structure_obj, structure_created))
 
         structure_name_obj, name_created = StructureNames.objects.get_or_create(

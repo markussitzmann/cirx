@@ -5,7 +5,7 @@ from django.test import TestCase, SimpleTestCase
 from pycactvs import Ens
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from structure.models import Structure2
+from structure.models import Structure
 from resolver.models import InChI
 from .resolver import ChemicalStructure
 
@@ -34,11 +34,11 @@ class StructureTests(TestCase):
 
     def test_structure_db_fetch(self):
         ens = Ens("CCO")
-        structure_obj = Structure2.objects.get_or_create_from_ens(ens)
+        structure_obj = Structure.objects.get_or_create_from_ens(ens)
         structure_obj.save()
 
         hashisy = CactvsHash(ens)
-        structure = Structure2.objects.get(hashisy=hashisy)
+        structure = Structure.objects.get(hashisy=hashisy)
 
         logger.info(">>> %s %s" % (structure, structure.ens().get("E_SMILES")))
         fetched = structure.ens()
