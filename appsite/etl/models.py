@@ -7,7 +7,7 @@ from django.core.files.storage import FileSystemStorage
 
 from database.models import Release
 from custom.fields import CactvsHashField
-from structure.models import Structure2
+from structure.models import Structure
 
 fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
 
@@ -83,7 +83,7 @@ class StructureFileField(models.Model):
 
 class StructureFileRecord(models.Model):
     structure_file = models.ForeignKey(StructureFile, blank=False, null=False, on_delete=models.CASCADE)
-    structure = models.ForeignKey(Structure2, blank=True, null=True, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, blank=True, null=True, on_delete=models.CASCADE)
     number = models.IntegerField(null=False, blank=False)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

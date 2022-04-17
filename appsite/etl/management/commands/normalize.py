@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
 def _normalize():
 
-    FileRegistry.normalize_structure_file_record(range(1, 100))
+    FileRegistry.normalize_structures(range(10, 15))
 
 
     logger.info("ENS LIST %s", Ens.List())

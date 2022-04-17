@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from structure.models import ResponseType, Structure2
+from structure.models import ResponseType, Structure
 
 
-@admin.register(Structure2)
+@admin.register(Structure)
 class StructureAdmin(admin.ModelAdmin):
     pass
 

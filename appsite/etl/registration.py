@@ -6,14 +6,14 @@ from typing import List
 
 from celery import subtask, group
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError, connection
+from django.db import transaction, DatabaseError, IntegrityError, connection, reset_queries
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
 
 from pycactvs import Molfile, Ens
 
-from structure.models import Structure2
+from structure.models import Structure, Compound
 
 logger = logging.getLogger('cirx')
 Status = namedtuple('Status', 'file created')
@@ -23,6 +23,11 @@ class FileRegistry(object):
 
     CHUNK_SIZE = 10000
     DATABASE_ROW_BATCH_SIZE = 1000
+    IDENTIFIERS = [
+        ('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent'),
+        ('E_FICUS_ID', 'E_FICUS_STRUCTURE', 'ficus_parent'),
+        ('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent')
+    ]
 
     def __init__(self, file_collection: FileCollection):
         self.file_collection = file_collection
@@ -110,7 +115,7 @@ class FileRegistry(object):
             try:
                 ens = molfile.read()
                 hashisy = CactvsHash(ens)
-                structure = Structure2(
+                structure = Structure(
                      hashisy=hashisy,
                      minimol=CactvsMinimol(ens)
                 )
@@ -135,9 +140,9 @@ class FileRegistry(object):
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
-                Structure2.objects.bulk_create(structures, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True)
+                Structure.objects.bulk_create(structures, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True)
                 hashisy_list = [record['hashisy'] for record in records]
-                structures = Structure2.objects.in_bulk(hashisy_list, field_name='hashisy')
+                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy')
                 record_objects = list()
                 for record_data in records:
                     structure = structures[record_data['hashisy']]
@@ -164,28 +169,94 @@ class FileRegistry(object):
 
     @staticmethod
     def normalize_structure_file_record(record_ids: range):
-        structure_file_records = StructureFileRecord.objects.select_related('structure').in_bulk(list(record_ids), field_name='id')
+        reset_queries()
+        structure_file_records = StructureFileRecord.objects\
+            .select_related('structure', 'structure__compound').in_bulk(list(record_ids), field_name='id')
+        print(connection.queries)
+
+        ficts_structure_list = []
+        ficts_structure_objects = []
         for rid, record in structure_file_records.items():
             #structure_file_record = StructureFileRecord.objects.get(id=rid)
-            structure: Structure2 = record.structure.ens
+            structure: Structure = record.structure
 
-            hashisy = structure.get('E_HASHISY')
+            #hashisy_list = []
+            structure_ens: Ens = structure.ens
+            #hashisy = structure_ens.get('E_HASHISY')
 
-            identifiers = [
-                ('E_FICTS_ID', 'E_FICTS_STRUCTURE'),
-                ('E_FICUS_ID', 'E_FICUS_STRUCTURE'),
-                ('E_UUUUU_ID', 'E_UUUUU_STRUCTURE')
-            ]
-            for identifier, parent in identifiers:
-                identifier_value = structure.get(identifier)
-                identifier_structure = structure.get(parent)
 
-                try:
-                    s = Structure2.objects.get(hashisy=CactvsHash(identifier_structure))
-                    logger.info("%s" % s)
-                except Structure2.DoesNotExist:
-                    logger.info("%s" % "does not exists")
+            if not structure.has_compound():
+                #ficts = structure_ens.get("E_FICTS_ID")
+                ficts_structure = structure_ens.get("E_FICTS_STRUCTURE")
+                ficts_structure_list.append(CactvsHash(ficts_structure))
+                logger.info(ficts_structure.get('E_FICTS_ID'))
 
-                logger.info("%s %s %s" % (hashisy, identifier_value, identifier_structure))
+        ficts_structure_objects = Structure.objects\
+            .select_related('compound').in_bulk(list(ficts_structure_list), field_name='hashisy')
 
-        print(connection.queries)
+        for k, v in ficts_structure_objects.items():
+            print(k, v, v.has_compound())
+
+
+                #identifiers = FileRegistry.IDENTIFIERS
+
+                #compound = Compound(structure = structure)
+                #for identifier, parent in identifiers:
+                #    parent_hashisy = structure_ens.get(identifier)
+                #    parent_structure = structure_ens.get(parent)
+
+
+                #try:
+                #    s = Structure2.objects.get(hashisy=CactvsHash(parent_structure))
+                #    logger.info("%s" % s)
+                #except Structure2.DoesNotExist:
+                #    logger.info("%s" % "does not exists")
+
+                #logger.info("%s %s %s" % (hashisy, parent_hashisy, parent_structure))
+
+    @staticmethod
+    def normalize_structures(structure_ids: range):
+        raw_structures = Structure.objects.in_bulk(list(structure_ids), field_name='id')
+        structure_objects = []
+        hashisy_list = []
+        hash_relationships = []
+
+        for key, structure in raw_structures.items():
+            for identifier in FileRegistry.IDENTIFIERS:
+                id_prop, structure_prop, attr = identifier
+                relationships = {}
+                #print(structure, structure.ficus_parent)
+                if not getattr(structure, attr):
+                    ens = structure.ens.get(structure_prop)
+                    hashisy = CactvsHash(ens)
+                    structure_object = Structure(
+                        hashisy=hashisy,
+                        minimol=CactvsMinimol(ens)
+                    )
+                    structure_objects.append(structure_object)
+                    hashisy_list.append(hashisy)
+                    print(structure.id, attr, hashisy, ens.get('E_SMILES'))
+                    relationships[attr] = hashisy
+                print(relationships.keys())
+                hash_relationships.append((key, relationships))
+
+        try:
+            with transaction.atomic():
+                Structure.objects.bulk_create(structure_objects, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True)
+                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy')
+                for k, v in structures.items():
+                    print(type(k), v, v.id)
+                #print(hash_pairs)
+                for k, v in hash_relationships:
+                    for kk, vv in v.items():
+                        print(k, kk, vv)
+                    #print(k, structures[v].id)
+        except DatabaseError as e:
+            logger.error(e)
+            raise(DatabaseError(e))
+        except Exception as e:
+            logger.error(e)
+            raise Exception(e)
+
+
+

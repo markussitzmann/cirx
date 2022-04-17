@@ -9,7 +9,7 @@ from pycactvs import Ens, Dataset, cactvs
 from dispatcher import Dispatcher
 from django.conf import settings
 
-from structure.models import Structure2
+from structure.models import Structure
 from resolver import ChemicalString, ChemicalStructure
 
 logger = logging.getLogger('cirx')
@@ -38,7 +38,7 @@ class DispatcherComponentTests(TestCase):
         #logger.info("ens list >>> %s", Ens.List())
 
 
-        for s in Structure2.objects.all():
+        for s in Structure.objects.all():
             logger.info("SSS %s", s)
 
 
