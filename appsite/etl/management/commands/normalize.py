@@ -39,6 +39,9 @@ def _normalize():
 
     logger.info("ENS LIST %s", Ens.List())
 
+    logger.info("ENS LIST %s", Ens.List())
+
+
 
 
 
