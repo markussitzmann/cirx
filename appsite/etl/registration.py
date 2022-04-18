@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 from collections import namedtuple
-from typing import List
+from typing import List, Tuple, Optional
 
 from celery import subtask, group
 from django.conf import settings
@@ -227,7 +227,6 @@ class FileRegistry(object):
         parent_structures = []
         hashisy_list = []
         hash_relationships = []
-        compound_list = []
 
         for structure_id, structure in raw_structures.items():
             for identifier in FileRegistry.IDENTIFIERS:
@@ -237,32 +236,38 @@ class FileRegistry(object):
                 #
                 if True or not getattr(structure, identifier.attr):
                     ens = structure.ens.get(identifier.parent_structure)
-                    hashisy = CactvsHash(ens)
-                    parent_structure = Structure(
+                    hashisy: CactvsHash = CactvsHash(ens)
+                    parent_structure: Structure = Structure(
                         hashisy=hashisy,
                         minimol=CactvsMinimol(ens)
                     )
                     parent_structures.append(parent_structure)
-                    hashisy_list.append(hashisy)
+                    #hashisy_list.append(hashisy)
                     relationships[identifier.attr] = hashisy
                 hash_relationships.append((structure_id, relationships))
-        parent_structure_hash_list = [p.hashisy for p in parent_structures]
+        parent_structure_hash_list = list(set([p.hashisy for p in parent_structures]))
         try:
             with transaction.atomic():
+                # create parent structures in bulk
                 Structure.objects.bulk_create(
                     parent_structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True
                 )
+
+                # fetch hashisy / parent structures in bulk (by that they have an id)
                 parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy')
+
+                # create compounds in bulk
                 Compound.objects.bulk_create(
                     [Compound(structure=parent_structure) for parent_structure in parent_structures.values()],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy')
+
+                #structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy')
                 for structure_id, hash_values in hash_relationships:
                     for attr, parent_hash in hash_values.items():
-                        setattr(raw_structures[structure_id], attr, structures[parent_hash])
+                        setattr(raw_structures[structure_id], attr, parent_structures[parent_hash])
                 Structure.objects.bulk_update(
                     raw_structures.values(),
                     [identifier.attr for identifier in FileRegistry.IDENTIFIERS]
