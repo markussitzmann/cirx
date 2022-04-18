@@ -81,7 +81,7 @@ class CactvsHash:
         return self.padded()
 
     def __repr__(self):
-        return self.int()
+        return str(self.int())
 
     def __eq__(self, other):
         if isinstance(other, CactvsHash):
