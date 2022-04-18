@@ -188,7 +188,7 @@ class FileRegistry(object):
 
         source_structures = Structure.objects.in_bulk(list(structure_ids), field_name='id')
         parent_structure_relationships = []
-        hash_relationships = []
+        source_structure_relationships = []
 
         for structure_id, structure in source_structures.items():
             related_hashes = {}
@@ -197,7 +197,7 @@ class FileRegistry(object):
                 #
                 # !!!!! TODO: remove True
                 #
-                if True or not getattr(structure, identifier.attr):
+                if not getattr(structure, identifier.attr):
                     ens = structure.ens.get(identifier.parent_structure)
                     hashisy: CactvsHash = CactvsHash(ens)
                     related_hashes[identifier.attr] = hashisy
@@ -205,11 +205,11 @@ class FileRegistry(object):
                         hashisy=hashisy,
                         minimol=CactvsMinimol(ens)
                     )
-                    #parent_structure.related_hashes = related_hashes.copy()
                     parent_structure_relationships\
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
                     relationships[identifier.attr] = hashisy
-                hash_relationships.append((structure_id, relationships))
+                source_structure_relationships.append(StructureRelationships(structure, relationships))
+
         parent_structure_hash_list = list(set([p.structure.hashisy for p in parent_structure_relationships]))
         try:
             with transaction.atomic():
@@ -231,14 +231,27 @@ class FileRegistry(object):
                     ignore_conflicts=True
                 )
 
-                # update normalized structure to parent structure relationships in bulk
-                for structure_id, hash_values in hash_relationships:
-                    for attr, parent_hash in hash_values.items():
-                        setattr(source_structures[structure_id], attr, parent_structures[parent_hash])
+                # update normalized structure with parent structure relationships in bulk
+                for relationship in source_structure_relationships:
+                    for attr, parent_hash in relationship.relationships.items():
+                        setattr(source_structures[relationship.structure.id], attr, parent_structures[parent_hash])
+
                 Structure.objects.bulk_update(
                     source_structures.values(),
                     [identifier.attr for identifier in identifiers]
                 )
+
+                ####
+
+                for relationship in parent_structure_relationships:
+                    for attr, parent_hash in relationship.relationships.items():
+                        setattr(parent_structures[relationship.structure.hashisy], attr, parent_structures[parent_hash])
+                Structure.objects.bulk_update(
+                    parent_structures.values(),
+                    [identifier.attr for identifier in identifiers]
+                )
+
+
 
         except DatabaseError as e:
             logger.error(e)
