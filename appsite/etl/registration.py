@@ -139,7 +139,7 @@ class FileRegistry(object):
             record += 1
         molfile.close()
 
-        structures = sorted(structures, key=lambda s: s.hashisy.int)
+        structures = sorted(structures, key=lambda s: s.hashisy.int())
 
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
@@ -216,7 +216,7 @@ class FileRegistry(object):
         try:
             with transaction.atomic():
                 # create parent structures in bulk
-                structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy.int)
+                structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy.int())
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True
@@ -228,7 +228,7 @@ class FileRegistry(object):
                 parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy')
 
                 # create compounds in bulk
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int)
+                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int())
                 Compound.objects.bulk_create(
                     [Compound(structure=parent_structure) for parent_structure in structures],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -240,7 +240,7 @@ class FileRegistry(object):
                     for attr, parent_hash in relationship.relationships.items():
                         setattr(source_structures[relationship.structure.id], attr, parent_structures[parent_hash])
 
-                structures = sorted(source_structures.values(), key=lambda s: s.hashisy.int)
+                structures = sorted(source_structures.values(), key=lambda s: s.hashisy.int())
                 Structure.objects.bulk_update(
                     structures,
                     [identifier.attr for identifier in identifiers]
@@ -252,7 +252,7 @@ class FileRegistry(object):
                     for attr, parent_hash in relationship.relationships.items():
                         setattr(parent_structures[relationship.structure.hashisy], attr, parent_structures[parent_hash])
 
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int)
+                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int())
                 Structure.objects.bulk_update(
                     structures,
                     [identifier.attr for identifier in identifiers]

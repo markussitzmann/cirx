@@ -38,33 +38,31 @@ def checksum(string):
 
 def _normalize():
 
-    query: QuerySet = Structure.objects
+    #query: QuerySet = Structure.objects
 
-    structure = query.get(id=10)
+    #structure = query.get(id=10)
 
-    hashisy: CactvsHash = structure.hashisy
-    ficts_parent: Structure = structure.ficts_parent
-    ficus_parent: Structure = structure.ficus_parent
-    uuuuu_parent: Structure = structure.uuuuu_parent
-
-
+    #hashisy: CactvsHash = structure.hashisy
+    #ficts_parent: Structure = structure.ficts_parent
+    #ficus_parent: Structure = structure.ficus_parent
+    #uuuuu_parent: Structure = structure.uuuuu_parent
 
 
-    logger.info("Q %s %s" % (structure, hashisy))
-    logger.info("P %s %s" % (ficts_parent, ficts_parent.hashisy))
 
-    identifier = uuuuu_parent.hashisy.format_as(IdentifierType.uuuuu)
+
+    #logger.info("Q %s %s" % (structure, hashisy))
+    #logger.info("P %s %s" % (ficts_parent, ficts_parent.hashisy))
+
+    #identifier = uuuuu_parent.hashisy.format_as(IdentifierType.uuuuu)
     #identifier.set_checksum()
 
-    logger.info("C %s" % identifier)
+    #logger.info("C %s" % identifier)
     #logger.info("C %s" % ficts_parent.hashisy.ficts.checksum)
 
 
 
-    #FileRegistry.normalize_structures(range(1, 100))
-
-
-    #logger.info("ENS LIST %s", Ens.List())
+    FileRegistry.normalize_structures(range(1, 100))
+    logger.info("ENS LIST %s", Ens.List())
 
     #logger.info("ENS LIST %s", Ens.List())
 
