@@ -111,6 +111,52 @@ class Compound(models.Model):
         return "NCICADD:CID=%s" % self.id
 
 
+class Record(models.Model):
+    regid = models.ForeignKey('Name', on_delete=models.PROTECT)
+    version = models.IntegerField(default=1, blank=False, null=False)
+    release = models.ForeignKey(Release, blank=False, null=False, on_delete=models.CASCADE)
+    database = models.ForeignKey(Database, blank=False, null=False, on_delete=models.RESTRICT)
+    structure_file_record = models.ForeignKey(
+        'etl.StructureFileRecord',
+        blank=False,
+        null=False,
+        related_name="records",
+        on_delete=models.PROTECT
+    )
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['regid', 'version', 'release'], name='unique_record'),
+        ]
+        db_table = 'cir_record'
+
+    def __str__(self):
+        return "NCICADD:RID=%s" % self.id
+
+
+class Compound(models.Model):
+    structure = models.OneToOneField(
+        'Structure',
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT
+    )
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
+
+    class Meta:
+        db_table = 'cir_compound'
+
+    def __str__(self):
+        return "NCICADD:CID=%s" % self.id
+
+    def __repr__(self):
+        return "NCICADD:CID=%s" % self.id
+
+
 class StructureInChIs(models.Model):
     structure = models.ForeignKey('Structure', on_delete=models.CASCADE)
     inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
