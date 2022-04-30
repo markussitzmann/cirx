@@ -40,8 +40,8 @@ class StructureTests(TestCase):
         hashisy = CactvsHash(ens)
         structure = Structure.objects.get(hashisy=hashisy)
 
-        logger.info(">>> %s %s" % (structure, structure.ens().get("E_SMILES")))
-        fetched = structure.ens()
+        logger.info(">>> %s %s" % (structure, structure.to_ens().get("E_SMILES")))
+        fetched = structure.to_ens()
         self.assertEqual(ens.get('E_HASHISY'), fetched.get('E_HASHISY'))
 
 

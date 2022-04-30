@@ -106,7 +106,7 @@ class ChemicalStructure:
                 #self.resolved = None
                 self._resolved = Structure(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
         elif ens and resolved:
-            h1 = resolved.hashisy.int()
+            h1 = resolved.hashisy.int
             h2 = Identifier(hashcode=ens.get('E_HASHISY')).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')
@@ -853,7 +853,7 @@ class ChemicalString:
 
             t_count = 1
             tautomers = interpretation_structure_ens.get("E_RESOLVER_TAUTOMERS")
-            for tautomer in tautomers.ens():
+            for tautomer in tautomers.to_ens():
                 t_count += 1
                 structure = ChemicalStructure(ens=tautomer)
                 tautomer_string = 'tautomer %s' % t_count

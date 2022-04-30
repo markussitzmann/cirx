@@ -1,7 +1,17 @@
+from enum import Enum
+
 from pycactvs import Ens
 
+from structure.ncicadd.identifier import Identifier
 
-class CactvsMinimol:
+
+class IdentifierType(Enum):
+    FICTS = "FICTS"
+    FICuS = "FICuS"
+    uuuuu = "uuuuu"
+
+
+class CactvsMinimol(object):
 
     def __init__(self, source):
         if isinstance(source, bytes):
@@ -16,13 +26,10 @@ class CactvsMinimol:
                 raise ValueError('no valid CACTVS ens')
         else:
             raise ValueError('CACTVS ensemble can not be created from source')
-        self._ens = None
 
     @property
     def ens(self) -> Ens:
-        if not self._ens:
-            self._ens = Ens(self._minimol)
-        return self._ens
+        return Ens(self._minimol)
 
     @property
     def minimol(self) -> bytes:
@@ -30,14 +37,15 @@ class CactvsMinimol:
 
     def __eq__(self, other):
         if isinstance(other, CactvsMinimol):
-            return CactvsHash(Ens(self._minimol)).int() == CactvsHash(Ens(other._minimol)).int()
+            return CactvsHash(Ens(self._minimol)).int == CactvsHash(Ens(other._minimol)).int
         return False
 
 
-class CactvsHash:
+class CactvsHash(object):
 
     MAXHASH = 2**64 - 1
     MINHASH = 0
+    VERSION_STRING = "01"
 
     SIGNSHIFT = (1 << 63)
 
@@ -64,28 +72,39 @@ class CactvsHash:
         if self._integer > CactvsHash.MAXHASH or self._integer < CactvsHash.MINHASH:
             raise ValueError('init value is outside scope')
 
+    @property
     def unsigned_int(self) -> int:
         return self._integer
 
+    @property
     def signed_int(self) -> int:
         return self._integer - CactvsHash.SIGNSHIFT
 
+    @property
     def int(self) -> int:
-        return self.unsigned_int()
+        return self.unsigned_int
 
+    @property
     def padded(self) -> str:
         i = hex(self._integer)[2:]
         return str(i).zfill(16).upper()
 
+    def format_as(self, identifier_type: IdentifierType) -> Identifier:
+        return Identifier(integer=self.int, identifier_type=identifier_type.value)
+
+
+    #def checksum(self, itype: IdentifierType):
+    #    return ''.join('%02x' % (sum([ord(s) for s in self.padded + "-" + itype.value]) % 256))
+
     def __str__(self):
-        return self.padded()
+        return self.padded
 
     def __repr__(self):
-        return str(self.int())
+        return str(self.int)
 
     def __eq__(self, other):
         if isinstance(other, CactvsHash):
-            return self.int() == other.int()
+            return self.int == other.int
         return False
 
     def __hash__(self):

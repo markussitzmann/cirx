@@ -70,10 +70,10 @@ class Identifier:
     MAGIC_HASHCODE = 'FFFFFFFFFFFFFFFF'
     ZERO_HASHCODE = '0000000000000000'
 
-    def __init__(self, string=None, integer=None, hashcode=None, type=None, version=DEFAULT_VERSION, checksum=None):
-        self._set(string, integer, hashcode, type, version, checksum)
+    def __init__(self, string=None, integer=None, hashcode=None, identifier_type=None, version=DEFAULT_VERSION, checksum=None):
+        self._set(string, integer, hashcode, identifier_type, version, checksum)
 
-    def _set(self, string=None, integer=None, hashcode=None, type=None, version=DEFAULT_VERSION, checksum=None):
+    def _set(self, string=None, integer=None, hashcode=None, identifier_type=None, version=DEFAULT_VERSION, checksum=None):
         args = 0
         for v in [string, integer, hashcode]:
             if v:
@@ -107,7 +107,7 @@ class Identifier:
                 pass
 
         if resolved:
-            if type and not self._test_type(type):
+            if identifier_type and not self._test_type(identifier_type):
                 raise IdentifierError('unknown type')
             if version and not self._test_version(version):
                 raise IdentifierError('invalid version')
@@ -245,7 +245,6 @@ class Identifier:
         return self.string
 
     def set_checksum(self):
-        # pdb.set_trace()
         h = self.hashcode
         t = self.type
         v = self.version.zfill(2)

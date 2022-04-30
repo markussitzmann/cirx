@@ -58,11 +58,11 @@ class Structure(models.Model):
         return has_compound
 
     @property
-    def ens(self):
+    def to_ens(self) -> Ens:
         return self.minimol.ens
 
     def __str__(self):
-        return "[%s] %s" % (self.hashisy.padded(), self.ens.get("E_SMILES"))
+        return "[%s] %s" % (self.hashisy.padded, self.to_ens.get("E_SMILES"))
 
 
 class Record(models.Model):
