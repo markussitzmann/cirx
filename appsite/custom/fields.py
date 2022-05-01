@@ -14,8 +14,8 @@ class CactvsHashField(BigIntegerField):
     def get_db_prep_value(self, value, connection, prepared=False):
         if value is not None:
             if connection.vendor == 'postgresql':
-                return value.signed_int()
-        return value.int()
+                return value.signed_int
+        return value.int
 
     def get_prep_value(self, value):
         return value

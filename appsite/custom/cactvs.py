@@ -72,31 +72,35 @@ class CactvsHash(object):
         if self._integer > CactvsHash.MAXHASH or self._integer < CactvsHash.MINHASH:
             raise ValueError('init value is outside scope')
 
+    @property
     def unsigned_int(self) -> int:
         return self._integer
 
+    @property
     def signed_int(self) -> int:
         return self._integer - CactvsHash.SIGNSHIFT
 
+    @property
     def int(self) -> int:
-        return self.unsigned_int()
+        return self.unsigned_int
 
+    @property
     def padded(self) -> str:
         i = hex(self._integer)[2:]
         return str(i).zfill(16).upper()
 
     def format_as(self, identifier_type: IdentifierType) -> Identifier:
-        return Identifier(integer=self.int(), identifier_type=identifier_type.value)
+        return Identifier(integer=self.int, identifier_type=identifier_type.value)
 
     def __str__(self):
-        return self.padded()
+        return self.padded
 
     def __repr__(self):
-        return str(self.int())
+        return str(self.int)
 
     def __eq__(self, other):
         if isinstance(other, CactvsHash):
-            return self.int() == other.int()
+            return self.int == other.int
         return False
 
     def __hash__(self):
