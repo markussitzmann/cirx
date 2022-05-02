@@ -1,16 +1,11 @@
-
-import logging
-
-from django.db.models import QuerySet
-from pycactvs import Ens
 from typing import List
 
 from django.core.management.base import BaseCommand
+from django.db.models import QuerySet
 
-from custom.cactvs import CactvsHash, IdentifierType
+from custom.cactvs import IdentifierType, SpecialCactvsHash
 from etl.tasks import *
-from etl.models import FileCollection, StructureFile
-from etl.registration import FileRegistry
+from etl.models import StructureFileRecord
 from structure.models import Structure
 
 logger = logging.getLogger('cirx')
@@ -24,47 +19,55 @@ class Command(BaseCommand):
         _normalize()
 
 
-def checksum(string):
-    #s = sum(bytearray(string))
-    string = "B2D69B299FD8D8F1"
-    #s = sum([ord(s) for s in string + "-FICuS"]) % 256
-    #print(s)
-    #h = "%.1X" % s
-    #print(hex(s))
-    r = ''.join('%02x' % (sum([ord(s) for s in string + "-FICuS"]) % 256))
-    print(r)
-    return r
+
 
 
 def _normalize():
 
-    #query: QuerySet = Structure.objects
-
-    #structure = query.get(id=10)
-
-    #hashisy: CactvsHash = structure.hashisy
-    #ficts_parent: Structure = structure.ficts_parent
-    #ficus_parent: Structure = structure.ficus_parent
-    #uuuuu_parent: Structure = structure.uuuuu_parent
-
-
-
-
-    #logger.info("Q %s %s" % (structure, hashisy))
-    #logger.info("P %s %s" % (ficts_parent, ficts_parent.hashisy))
-
-    #identifier = uuuuu_parent.hashisy.format_as(IdentifierType.uuuuu)
-    #identifier.set_checksum()
-
-    #logger.info("C %s" % identifier)
-    #logger.info("C %s" % ficts_parent.hashisy.ficts.checksum)
+    records: QuerySet = StructureFileRecord.objects\
+        .select_related('structure')\
+        .filter(
+            structure_file_id=38,
+            structure__compound__isnull=True,
+            structure__blocked__isnull=True,
+            structure__ficts_parent__isnull=True,
+            structure__ficus_parent__isnull=True,
+            structure__uuuuu_parent__isnull=True,
+        ).exclude(
+            structure__hashisy=SpecialCactvsHash.ZERO.value
+        ).exclude(
+            structure__hashisy=SpecialCactvsHash.MAGIC.value
+        )
 
 
+    logger.info("R --> %s" % sorted([(r.id, r.structure.id) for r in records.all()]))
 
-    FileRegistry.normalize_structures(range(1, 100))
-    logger.info("ENS LIST %s", Ens.List())
+    query: QuerySet = Structure.objects
+    logger.info("--> %s" % query.count())
 
+    filtered = query.filter(
+        compound__isnull=True,
+        blocked__isnull=True,
+#        ficts_parent__isnull=True,
+#        ficus_parent__isnull=True,
+#        uuuuu_parent__isnull=True,
+    )
+
+    logger.info("--> %s", filtered.count())
+    logger.info("--> %s", [s.structure_file_records.all() for s in filtered.order_by('id').all()])
+
+
+    #logger.info("--> %s", structure.hashisy.format_as(IdentifierType.FICuS))
+    #logger.info("--> %s", structure.ficus_parent.hashisy.format_as(IdentifierType.FICuS))
+    #logger.info("--> %s", structure.ficus_parent.has_compound())
+
+
+    #logger.info("--> %s", structure.ficus_parent)
+
+
+    #FileRegistry.normalize_structures(range(1, 100))
     #logger.info("ENS LIST %s", Ens.List())
+
 
 
 

@@ -1,18 +1,18 @@
+import datetime
+import pytz
 import glob
 import logging
 import os
 from collections import namedtuple
-from typing import List, Tuple, Optional
+from typing import List
 
 from celery import subtask, group
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError, connection, reset_queries
+from django.db import transaction, DatabaseError, IntegrityError
+from pycactvs import Molfile
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
-
-from pycactvs import Molfile, Ens
-
 from structure.models import Structure, Compound
 
 logger = logging.getLogger('cirx')
@@ -26,12 +26,6 @@ class FileRegistry(object):
 
     CHUNK_SIZE = 10000
     DATABASE_ROW_BATCH_SIZE = 1000
-
-    #IDENTIFIERS = [
-    #    Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent'),
-    #    Identifier('E_FICUS_ID', 'E_FICUS_STRUCTURE', 'ficus_parent'),
-    #    Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
-    #]
 
     def __init__(self, file_collection: FileCollection):
         self.file_collection = file_collection
@@ -142,17 +136,13 @@ class FileRegistry(object):
         structures = sorted(structures, key=lambda s: s.hashisy.int)
 
         logger.info("adding registration data to database for file '%s'" % (fname, ))
-        logger.info("X")
-
         try:
             with transaction.atomic():
-                logger.info("0")
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                logger.info("1")
                 hashisy_list = [record['hashisy'] for record in records]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy')
                 record_objects = list()
@@ -163,7 +153,6 @@ class FileRegistry(object):
                         structure=structure,
                         number=record_data['index']
                     ))
-                logger.info("2")
                 StructureFileRecord.objects.bulk_create(record_objects, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE)
                 logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
@@ -181,8 +170,7 @@ class FileRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def normalize_structures(structure_ids: range):
-
+    def normalize_structures(structure_ids: list):
         # NOTE: the order matters, it has to go from broader to more specific identifier
         identifiers = [
             Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
@@ -190,16 +178,18 @@ class FileRegistry(object):
             Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent'),
         ]
 
-        source_structures = Structure.objects.in_bulk(list(structure_ids), field_name='id')
+        source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
         parent_structure_relationships = []
         source_structure_relationships = []
 
         for structure_id, structure in source_structures.items():
-            logger.info("structure id %s %s" % (structure_id, len(Ens.List())))
-            related_hashes = {}
-            for identifier in identifiers:
-                relationships = {}
-                if not getattr(structure, identifier.attr):
+            if structure.blocked:
+                logger.info("structure %s is blocked and has been skipped" % (structure_id, ))
+                continue
+            try:
+                related_hashes = {}
+                for identifier in identifiers:
+                    relationships = {}
                     ens = structure.to_ens
                     parent_ens = ens.get(identifier.parent_structure)
                     hashisy: CactvsHash = CactvsHash(parent_ens)
@@ -211,10 +201,14 @@ class FileRegistry(object):
                     parent_structure_relationships\
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
                     relationships[identifier.attr] = hashisy
-                source_structure_relationships.append(StructureRelationships(structure, relationships))
+                    source_structure_relationships.append(StructureRelationships(structure, relationships))
+                logger.info("finished normalizing structure %s" % structure_id)
+            except Exception as e:
+                structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
+                structure.save()
+                logger.error("normalizing structure %s failed : %s" % (structure_id, e))
 
         parent_structure_hash_list = list(set([p.structure.hashisy for p in parent_structure_relationships]))
-
         try:
             with transaction.atomic():
                 # create parent structures in bulk
@@ -223,8 +217,6 @@ class FileRegistry(object):
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True
                 )
-                # for p in parent_structure_relationships:
-                #     print("PPP %s %s" % (p.relationships.keys(), [h.padded for h in p.relationships.values()]))
 
                 # fetch hashisy / parent structures in bulk (by that they have an id)
                 parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy')
@@ -263,7 +255,5 @@ class FileRegistry(object):
         except Exception as e:
             logger.error(e)
             raise Exception(e)
-
-        logger.info("X -----> %s" % len(Ens.List()))
 
 

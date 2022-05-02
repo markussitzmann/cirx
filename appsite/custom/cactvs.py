@@ -106,3 +106,7 @@ class CactvsHash(object):
     def __hash__(self):
         return self._integer
 
+
+class SpecialCactvsHash(Enum):
+    ZERO = CactvsHash(16*"0")
+    MAGIC = CactvsHash(16*"F")

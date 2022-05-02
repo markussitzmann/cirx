@@ -83,7 +83,13 @@ class StructureFileField(models.Model):
 
 class StructureFileRecord(models.Model):
     structure_file = models.ForeignKey(StructureFile, blank=False, null=False, on_delete=models.CASCADE)
-    structure = models.ForeignKey(Structure, blank=True, null=True, on_delete=models.CASCADE)
+    structure = models.ForeignKey(
+        Structure,
+        related_name='structure_file_records',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL
+    )
     number = models.IntegerField(null=False, blank=False)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
