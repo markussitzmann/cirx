@@ -110,3 +110,7 @@ class CactvsHash(object):
 class SpecialCactvsHash(Enum):
     ZERO = CactvsHash(16*"0")
     MAGIC = CactvsHash(16*"F")
+
+    @property
+    def hashisy(self):
+        return self.value

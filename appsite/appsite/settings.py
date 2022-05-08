@@ -40,6 +40,9 @@ SECRET_KEY = 'django-insecure-45!c6!i^(_tq(2y4(da6w5c=%abopm1h$599$x@+*c-jwts$&u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# that is for development and might delete data!
+INIT_SYSTEM = True
+
 ALLOWED_HOSTS = os.environ['APP_VIRTUAL_HOSTNAME'].split(",")
 
 

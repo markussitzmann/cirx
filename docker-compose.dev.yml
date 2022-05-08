@@ -129,7 +129,7 @@ services:
 #    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log", "--pidfile=/pids/cirx-worker1.pid"]
     command: [ 'celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log"]
 
-    #restart: on-failure
+    restart: on-failure
     depends_on:
 #      - cirx-rabbitmq
       - cirx-cache

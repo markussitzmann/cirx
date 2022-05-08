@@ -1,12 +1,13 @@
 from typing import List
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import QuerySet
 
-from custom.cactvs import IdentifierType, SpecialCactvsHash
-from etl.tasks import *
+from custom.cactvs import SpecialCactvsHash
 from etl.models import StructureFileRecord
-from structure.models import Structure
+from etl.tasks import *
+from structure.models import Structure, Compound
 
 logger = logging.getLogger('cirx')
 
@@ -19,54 +20,66 @@ class Command(BaseCommand):
         _normalize()
 
 
+def normalize_structures(structure_ids: List[int]):
+    logger.info("--- bla ---")
+    task = normalize_structure_task
 
+    chunk_size = StructureRegistry.CHUNK_SIZE
+    chunks = [structure_ids[x:x + chunk_size] for x in range(0, len(structure_ids), chunk_size)]
+    tasks = [task.delay(chunk) for chunk in chunks]
+
+    return tasks
 
 
 def _normalize():
 
+    # TODO: is set to false
+    settings.INIT_SYSTEM = False
+    if settings.INIT_SYSTEM:
+        for c in Compound.objects.all():
+            logger.info("deleting %s", c)
+            c.delete()
+        for s in Structure.objects.all():
+            logger.info("unlink parent structures %s", s)
+            s.ficus_parent = None
+            s.ficts_parent = None
+            s.uuuuu_parent = None
+            s.save()
+
+    # TODO: remove!
+    structure_file_id = 1
     records: QuerySet = StructureFileRecord.objects\
         .select_related('structure')\
+        .values('structure__id')\
         .filter(
-            structure_file_id=38,
+            structure_file_id=structure_file_id,
             structure__compound__isnull=True,
             structure__blocked__isnull=True,
             structure__ficts_parent__isnull=True,
             structure__ficus_parent__isnull=True,
             structure__uuuuu_parent__isnull=True,
         ).exclude(
-            structure__hashisy=SpecialCactvsHash.ZERO.value
+            structure__hashisy=SpecialCactvsHash.ZERO.hashisy
         ).exclude(
-            structure__hashisy=SpecialCactvsHash.MAGIC.value
+            structure__hashisy=SpecialCactvsHash.MAGIC.hashisy
         )
 
+    structure_ids = [r['structure__id'] for r in records]
+    tasks = normalize_structures(structure_ids)
 
-    logger.info("R --> %s" % sorted([(r.id, r.structure.id) for r in records.all()]))
-
-    query: QuerySet = Structure.objects
-    logger.info("--> %s" % query.count())
-
-    filtered = query.filter(
-        compound__isnull=True,
-        blocked__isnull=True,
-#        ficts_parent__isnull=True,
-#        ficus_parent__isnull=True,
-#        uuuuu_parent__isnull=True,
-    )
-
-    logger.info("--> %s", filtered.count())
-    logger.info("--> %s", [s.structure_file_records.all() for s in filtered.order_by('id').all()])
+    for task in tasks:
+       for k, v in task.collect(intermediate=False):
+           logger.info("%s : %s" % (k.successful(), v))
 
 
-    #logger.info("--> %s", structure.hashisy.format_as(IdentifierType.FICuS))
-    #logger.info("--> %s", structure.ficus_parent.hashisy.format_as(IdentifierType.FICuS))
-    #logger.info("--> %s", structure.ficus_parent.has_compound())
+    # logger.info("R --> %s" % sorted([r.structure.id for r in records.all()]))
+    #
+    # StructureRegistry.normalize_structures([r.structure.id for r in records.all()])
+    # #logger.info("ENS LIST %s", Ens.List())
 
 
-    #logger.info("--> %s", structure.ficus_parent)
 
-
-    #FileRegistry.normalize_structures(range(1, 100))
-    #logger.info("ENS LIST %s", Ens.List())
+    #####
 
 
 

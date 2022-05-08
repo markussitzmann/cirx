@@ -169,6 +169,11 @@ class FileRegistry(object):
         logger.info("data registration data finished for file '%s'" % (fname, ))
         return structure_file_id
 
+
+class StructureRegistry(object):
+
+    CHUNK_SIZE = 100
+
     @staticmethod
     def normalize_structures(structure_ids: list):
         # NOTE: the order matters, it has to go from broader to more specific identifier
@@ -256,4 +261,4 @@ class FileRegistry(object):
             logger.error(e)
             raise Exception(e)
 
-
+        return structure_ids
