@@ -8,6 +8,7 @@ tmp/*
 /filestore
 /logging
 /pids
+/backup
 .env
 #settings.py*
 

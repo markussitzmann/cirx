@@ -6,6 +6,7 @@ from celery import Celery
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'appsite.settings')
 
 app = Celery('appsite')
+#app.conf.broker_transport_options = {'visibility_timeout': 3600}
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

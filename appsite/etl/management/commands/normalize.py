@@ -21,7 +21,6 @@ class Command(BaseCommand):
 
 
 def normalize_structures(structure_ids: List[int]):
-    logger.info("--- bla ---")
     task = normalize_structure_task
 
     chunk_size = StructureRegistry.CHUNK_SIZE
@@ -32,7 +31,6 @@ def normalize_structures(structure_ids: List[int]):
 
 
 def _normalize():
-
     # TODO: is set to false
     settings.INIT_SYSTEM = False
     if settings.INIT_SYSTEM:
@@ -48,6 +46,7 @@ def _normalize():
 
     # TODO: remove!
     structure_file_id = 1
+    # TODO: remove slicing!
     records: QuerySet = StructureFileRecord.objects\
         .select_related('structure')\
         .values('structure__id')\
@@ -62,24 +61,17 @@ def _normalize():
             structure__hashisy=SpecialCactvsHash.ZERO.hashisy
         ).exclude(
             structure__hashisy=SpecialCactvsHash.MAGIC.hashisy
-        )
+        )[0:1000]
 
     structure_ids = [r['structure__id'] for r in records]
     tasks = normalize_structures(structure_ids)
 
+    # TODO: change
     for task in tasks:
        for k, v in task.collect(intermediate=False):
            logger.info("%s : %s" % (k.successful(), v))
 
 
-    # logger.info("R --> %s" % sorted([r.structure.id for r in records.all()]))
-    #
-    # StructureRegistry.normalize_structures([r.structure.id for r in records.all()])
-    # #logger.info("ENS LIST %s", Ens.List())
-
-
-
-    #####
 
 
 

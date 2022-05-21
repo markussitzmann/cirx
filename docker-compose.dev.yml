@@ -37,9 +37,10 @@ services:
     command: python /home/app/appsite/manage.py runserver 0.0.0.0:8000
 
   cirx-postgres:
-    image: postgres:latest
+    image: postgres:13-bullseye
     container_name: ${APP_NAME}-postgres
     volumes:
+      - ${APP_HOME}:/home/app
       - postgres_db_volume:/var/lib/postgresql
     ports:
       - "5432:5432"

@@ -377,7 +377,7 @@ def init_release():
 
     open_nci_db_collection, created = FileCollection.objects.get_or_create(
         release=open_nci_db,
-        file_location_pattern_string="nci/NCI_DTP.sdf"
+        file_location_pattern_string="nci/NCI_DTP.mini.sdf"
     )
     open_nci_db_collection.save()
 

@@ -13,7 +13,9 @@ from pycactvs import Molfile
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
+from structure.inchi.identifier import InChIString
 from structure.models import Structure, Compound
+from resolver.models import InChI
 
 logger = logging.getLogger('cirx')
 Status = namedtuple('Status', 'file created')
@@ -262,3 +264,27 @@ class StructureRegistry(object):
             raise Exception(e)
 
         return structure_ids
+
+    @staticmethod
+    def calculate_inchi(structure_ids: list):
+        source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
+        for structure_id, structure in source_structures.items():
+            if structure.blocked:
+                logger.info("structure %s is blocked and has been skipped" % (structure_id, ))
+                continue
+            try:
+                print("----")
+                print(structure.id)
+                print(structure.compound.id)
+                ens = structure.to_ens
+                inchi_string = ens.get("E_STDINCHI")
+                print(inchi_string)
+                print(ens.get('E_SMILES'))
+                d = InChIString(string=inchi_string).model_dict
+                inchi: InChI = InChI(**d)
+                inchi.version_string = "1.06"
+            except Exception as e:
+                print(ens.get('E_SMILES'))
+                #structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
+                #structure.save()
+                logger.error("normalizing structure %s failed : %s" % (structure_id, e))

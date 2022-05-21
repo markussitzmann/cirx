@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'django_filters',
     'crispy_forms',
     'multiselectfield',
+    'dbbackup'
 ]
 
 MIDDLEWARE = [
@@ -306,3 +307,6 @@ CIR_FILESTORE_ROOT = os.path.join("/home/app", "filestore")
 #BASE_URL =  \
 #    '/chemical'
 #STRUCTURE_BASE_URL=BASE_URL + '/structure'
+
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': '/home/app/backup/'}

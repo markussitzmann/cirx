@@ -37,7 +37,7 @@ services:
     command: [ "/home/nginx/run.sh" ]
 
   cirx-postgres:
-    image: postgres:latest
+    image: postgres:13-bullseye
     container_name: ${APP_NAME}-postgres
     volumes:
       - postgres_db_volume:/var/lib/postgresql
