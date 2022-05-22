@@ -22,6 +22,7 @@ Status = namedtuple('Status', 'file created')
 
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
+InChIType = namedtuple('InChIType', 'property version software')
 
 class FileRegistry(object):
 
@@ -183,7 +184,10 @@ class StructureRegistry(object):
         Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent'),
     ]
 
-    INCHI_TYPES = ["E_STDINCHI", "E_TAUTO_INCHI"]
+    INCHI_TYPES = [
+        InChIType('E_STDINCHI', Prop.Ref('E_STDINCHI').softwareversion, Prop.Ref('E_STDINCHI').software),
+        InChIType('E_TAUTO_INCHI', Prop.Ref('E_TAUTO_INCHI').softwareversion, Prop.Ref('E_TAUTO_INCHI').software),
+    ]
 
     @staticmethod
     def normalize_structures(structure_ids: list):
@@ -272,7 +276,13 @@ class StructureRegistry(object):
 
     @staticmethod
     def calculate_inchi(structure_ids: list):
+        logger.info("A")
         source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
+
+        for inchi_type in StructureRegistry.INCHI_TYPES:
+            options = Prop(inchi_type.property).getparam("options")
+            options += " SaveOpt"
+            Prop(inchi_type.property).setparam("options", options)
 
         structure_to_inchi_list = []
 
@@ -284,7 +294,7 @@ class StructureRegistry(object):
                 inchi_relationships = {}
                 for inchi_type in StructureRegistry.INCHI_TYPES:
                     ens = structure.to_ens
-                    inchi_string = ens.get(inchi_type)
+                    inchi_string = ens.get(inchi_type.property).split('\\')[0]
                     inchi_dict = InChIString(string=inchi_string).model_dict
                     inchi: InChI = InChI(**inchi_dict)
                     inchi_relationships[inchi_type] = inchi
@@ -295,7 +305,10 @@ class StructureRegistry(object):
                 logger.error("calculating inchi for structure %s failed : %s" % (structure_id, e))
         try:
             with transaction.atomic():
-                inchi_list = [inchi for structure_to_inchi in structure_to_inchi_list for inchi in structure_to_inchi.relationships.values()]
+                inchi_list = [
+                    inchi for structure_to_inchi in structure_to_inchi_list
+                    for inchi in structure_to_inchi.relationships.values()
+                ]
                 InChI.objects.bulk_create(
                     inchi_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -306,19 +319,26 @@ class StructureRegistry(object):
                 inchi_id_list = [i.id for i in inchi_list]
                 structure_id_list = [s.structure for s in structure_to_inchi_list]
 
-                inchis = InChI.objects.in_bulk(inchi_id_list, field_name='id')
-                structures = Structure.objects.in_bulk(structure_id_list, field_name='id')
+                inchi_objects = InChI.objects.in_bulk(inchi_id_list, field_name='id')
+                structure_objects = Structure.objects.in_bulk(structure_id_list, field_name='id')
 
+                structure_inchis_list = []
                 for structure_to_inchi in structure_to_inchi_list:
-                    s = structure_to_inchi.structure
-                    for i in structure_to_inchi.relationships.values():
-                        rel = StructureInChIs(
-                            structure=structures[s],
-                            inchi=inchis[i.id],
-                            software_version_string=None,
+                    sid = structure_to_inchi.structure
+                    for inchi_type, inchi_data in structure_to_inchi.relationships.items():
+                        structure_inchi = StructureInChIs(
+                            structure=structure_objects[sid],
+                            inchi=inchi_objects[inchi_data.id],
+                            software_version_string=inchi_type.version,
                             save_options=None
                         )
-                        rel.save()
+                        structure_inchis_list.append(structure_inchi)
+                StructureInChIs.objects.bulk_create(
+                    structure_inchis_list,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+
         except DatabaseError as e:
             logger.error(e)
             raise(DatabaseError(e))
@@ -326,5 +346,6 @@ class StructureRegistry(object):
             logger.error(e)
             raise Exception(e)
 
+        logger.info("B")
         return structure_ids
 

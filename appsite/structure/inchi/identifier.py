@@ -138,6 +138,7 @@ class InChIString:
                 self.element['well_formatted'] = '%s%s/%s' % (
                     self.element['prefix'], self.element['version'], self.element['layers']
                 )
+            self.element['well_formatted_no_prefix'] = self.element['well_formatted'].replace(self.element['prefix'], "")
             if self.element['_key']:
                 if self._string_key_match(
                     key=self.element['_key']
@@ -159,7 +160,7 @@ class InChIString:
             'block2': self.element['block2'],
             'block3': self.element['block3'],
             'key': self.element['key'],
-            'string': '%s/%s' % (self.element['version'], self.element['layers']),
+            'string': (self.element['well_formatted_no_prefix']),
             'is_standard': self.element['is_standard'],
             #'save_options': self.element['save_options'],
             #'version_string': self.element['version_string']
