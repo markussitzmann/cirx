@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2012-04-10 16:23:21 -->
+<property name="M_STDINCHI" objclass="mol" datatype="string" classuuid="a634545c-8318-11e1-acbe-001fd05f56b7" versionuuid="d0d8e064-b43c-11ec-94f7-00d861d0b82f">
+	<version>1.1</version>
+	<date>2022-04-04 16:16</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<license class="xemistry" url="http://www.xemistry.com/license"/>
+	<description>Standard InChI identifier of molecular fragments in ensemble</description>
+	<magic>???</magic>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|hadd|atom|bond</invalidation>
+	<propertyreferences>
+		<reference class="input">B_ORDER</reference>
+		<reference class="input">B_TYPE</reference>
+		<reference class="input">A_TYPE</reference>
+		<reference class="input">A_ISOTOPE</reference>
+		<reference class="input">B_FLAGS</reference>
+		<reference class="input">A_FORMAL_CHARGE</reference>
+	</propertyreferences>
+	<software version="1.06">NIST reference InChI library</software>
+	<menuname>Fragment InChI</menuname>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+	<module source="mod_m_stdinchi.c">mod_m_stdinchi</module>
+	<functions count="1">
+		<function class="compute" name="CSgetM_STDINCHI" type="dll"/>
+	</functions>
+	<parameters count="11">
+		<parameter name="options" datatype="String">
+			<value>DONOTADDH</value>
+			<default>DONOTADDH</default>
+			<constraints>list</constraints>
+			<description>Set of default option words as defined to standard</description>
+			<comment>Many of the option words listed for E_INCHI implicitly switch off standard mode. See INChI lib docs.</comment>
+		</parameter>
+		<parameter name="fakemetalbonds" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+			<description>If set, all bonds to metals are encoded as simple single VB bonds, regardless of their real bond type</description>
+		</parameter>
+		<parameter name="autohadd" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>If set, implicitly add a standard set of hydrogens, without actually modifying the structure</description>
+		</parameter>
+		<parameter name="stereoperception" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+		</parameter>
+		<parameter name="stereomode" datatype="Integer" enumeration="snon,none:sabs,abs,absolute:srel,rel,relative:srac,rac,racemic,racemate">
+			<value>sabs</value>
+			<default>1</default>
+		</parameter>
+		<parameter name="prefix" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+		</parameter>
+		<parameter name="stripstereolayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripisotopelayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripfixedhlayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripreconnectlayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripchargelayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+	</parameters>
+</property>

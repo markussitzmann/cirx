@@ -1,9 +1,13 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import QuerySet
 
 from custom.cactvs import SpecialCactvsHash
+from structure.models import Structure, StructureInChIs
+from resolver.models import InChI
 from etl.models import StructureFileRecord
 from etl.tasks import *
+
 
 logger = logging.getLogger('cirx')
 
@@ -28,18 +32,23 @@ class Command(BaseCommand):
 
 
 def _calculate_inchi():
-    # TODO: is set to false
-    #settings.INIT_SYSTEM = False
-    #if settings.INIT_SYSTEM:
-    #    for c in Compound.objects.all():
-    #        logger.info("deleting %s", c)
-    #        c.delete()
-    #    for s in Structure.objects.all():
-    #        logger.info("unlink parent structures %s", s)
-    #        s.ficus_parent = None
-    #        s.ficts_parent = None
-    #        s.uuuuu_parent = None
-    #        s.save()
+    # TODO: is set locally
+    settings.INIT_SYSTEM = True
+    if settings.INIT_SYSTEM:
+        logger.info("--- deleting InChI ---")
+        for i in InChI.objects.all():
+            logger.info("deleting %s", i)
+            i.delete()
+        logger.info("--- deleting Structure InChI ---")
+        for r in StructureInChIs.objects.all():
+            logger.info("deleting %s", r)
+            r.delete()
+        logger.info("--- deleting blocked ---")
+        for s in Structure.objects.filter(blocked__isnull=False).all():
+            s.blocked = None
+            s.save()
+
+    logger.info("--- deleting done ---")
 
     # TODO: remove!
     structure_file_id = 1

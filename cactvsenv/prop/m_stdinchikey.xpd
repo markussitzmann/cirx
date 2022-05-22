@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2012-04-10 17:14:53 -->
+<property name="M_STDINCHIKEY" objclass="mol" datatype="string" classuuid="de12dcb6-831f-11e1-b251-001fd05f56b7" versionuuid="de12dcb6-831f-11e1-b251-001fd05f56b7">
+	<version>1.0</version>
+	<date>2012-04-10 17:14</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<license class="xemistry" url="http://www.xemistry.com/license"/>
+	<description>Hash of InChI string</description>
+	<default>???</default>
+	<magic>???</magic>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|atom|bond|mol</invalidation>
+	<software version="1.06">NIST reference InChI library</software>
+	<propertyreferences>
+		<reference class="input">E_STDINCHI</reference>
+	</propertyreferences>
+	<menuname>InChI Hash</menuname>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+	<module source="mod_m_stdinchikey.c">mod_m_stdinchikey</module>
+	<functions count="1">
+		<function class="compute" name="CSgetM_STDINCHIKEY" type="dll"/>
+	</functions>
+	<parameters count="1">
+		<parameter name="prefix" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+		</parameter>
+	</parameters>
+</property>

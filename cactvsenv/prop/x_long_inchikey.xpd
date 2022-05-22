@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2017-03-31 19:41:15 -->
+<property name="X_LONG_INCHIKEY" objclass="reaction" datatype="string" classuuid="3bb0d240-1639-11e7-bb30-d31bd78e61e8" versionuuid="3bb0d240-1639-11e7-bb30-d31bd78e61e8">
+	<version>1.0</version>
+	<date>2017-03-31 19:39</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<path>/</path>
+	<license class="Xemistry" url="http://www.xemistry.com/license"/>
+	<description>Long reaction InChI (RINCHI) key variant</description>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|atom|bond</invalidation>
+	<software version="1.00">NIST reacxtion info prototype library</software>
+	<propertyreferences>
+		<reference class="input">X_INCHI</reference>
+	</propertyreferences>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+	<module source="mod_x_long_inchikey.c">mod_x_long_inchikey</module>
+	<functions count="1">
+		<function class="compute" name="CSgetX_LONG_INCHIKEY" type="dll"/>
+	</functions>
+</property>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2012-04-10 16:25:14 -->
+<property name="M_INCHI_AUXINFO" objclass="mol" datatype="string" classuuid="df50332a-b43e-11ec-835d-00d861d0b82f" versionuuid="df50332a-b43e-11ec-835d-00d861d0b82f">
+	<version>1.0</version>
+	<date>2022-04-04 18:16</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<license class="xemistry" url="http://www.xemistry.com/license"/>
+	<description>InChI auxiliary information, as defined in the InChI file format. This data is also automatically computed as windfall when requesting M_INCHI</description>
+	<magic>???</magic>
+	<software version="1.06">NIST reference InChI library</software>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|hadd|atom|bond|mol</invalidation>
+	<propertyreferences>
+		<reference class="input">B_ORDER</reference>
+		<reference class="input">B_TYPE</reference>
+		<reference class="input">A_TYPE</reference>
+		<reference class="input">A_ISOTOPE</reference>
+		<reference class="input">B_FLAGS</reference>
+		<reference class="input">A_FORMAL_CHARGE</reference>
+		<reference class="indirect">M_INCHI</reference>
+	</propertyreferences>
+	<menuname>Standard InChI Fragment AuxInfo</menuname>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+</property>

@@ -164,8 +164,10 @@ class StructureInChIs(models.Model):
     save_options = models.CharField(max_length=2, default=None, blank=True, null=True)
 
 
-
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['structure', 'inchi', 'software_version_string', 'save_options'], name='unique_structure_inchis'),
+        ]
         db_table = 'cir_structure_inchis'
 
 

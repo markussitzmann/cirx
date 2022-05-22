@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2012-04-10 16:24:18 -->
+<property name="E_STDINCHI_AUXINFO" objclass="ens" datatype="string" classuuid="3a0a95f2-8318-11e1-9e40-001fd05f56b7" versionuuid="3a0a95f2-8318-11e1-9e40-001fd05f56b7">
+	<version>1.0</version>
+	<date>2009-01-19 18:16</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<license class="xemistry" url="http://www.xemistry.com/license"/>
+	<description>Standard InChI auxiliary information</description>
+	<magic>???</magic>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|hadd|atom|bond</invalidation>
+	<software version="1.06">NIST reference InChI library</software>
+	<propertyreferences>
+		<reference class="input">B_ORDER</reference>
+		<reference class="input">B_TYPE</reference>
+		<reference class="input">A_TYPE</reference>
+		<reference class="input">A_ISOTOPE</reference>
+		<reference class="input">B_FLAGS</reference>
+		<reference class="input">A_FORMAL_CHARGE</reference>
+		<reference class="indirect">E_STDINCHI</reference>
+	</propertyreferences>
+	<menuname>Standard InChI AuxInfo</menuname>
+	<outputmode>forced</outputmode>
+	<logmode>dontcare</logmode>
+</property>

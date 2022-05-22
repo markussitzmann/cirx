@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2017-03-31 19:38:15 -->
+<property name="X_INCHI_AUXINFO" objclass="reaction" datatype="string" classuuid="d0513f3a-1638-11e7-afc3-1f3f063705f1" versionuuid="d0513f3a-1638-11e7-afc3-1f3f063705f1">
+	<version>1.0</version>
+	<date>2017-03-31 19:37</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<path>/</path>
+	<license class="Xemistry" url="http://www.xemistry.com/license"/>
+	<description>Auxinfo part of reaction InChI (RINCHI)</description>
+	<flags>trusted|portable|export</flags>
+	<software version="1.00">NIST reacxtion info prototype library</software>
+	<invalidation>atomchange|bondchange|stereochange|atom|bond</invalidation>
+	<propertyreferences>
+		<reference class="indirect">X_INCHI</reference>
+	</propertyreferences>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+</property>
