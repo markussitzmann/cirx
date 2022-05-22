@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2012-04-10 17:13:21 -->
+<property name="E_STDINCHIKEY" objclass="ens" datatype="string" classuuid="a5944d66-831f-11e1-8df3-001fd05f56b7" versionuuid="a5944d66-831f-11e1-8df3-001fd05f56b7">
+	<version>1.0</version>
+	<date>2009-01-19 17:29</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<license class="xemistry" url="http://www.xemistry.com/license"/>
+	<description>Hash of InChI string</description>
+	<default>???</default>
+	<magic>???</magic>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|atom|bond|hadd</invalidation>
+	<software version="1.06">NIST reference InChI library</software>
+	<propertyreferences>
+		<reference class="input">E_STDINCHI</reference>
+	</propertyreferences>
+	<menuname>InChI Hash</menuname>
+	<outputmode>forced</outputmode>
+	<logmode>dontcare</logmode>
+	<regexp>^(InChIKey=)?[A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z]-[A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z][A-Z]-[A-Z]$</regexp>
+	<module source="mod_e_stdinchikey.c">mod_e_stdinchikey</module>
+	<functions count="1">
+		<function class="compute" name="CSgetE_STDINCHIKEY" type="dll"/>
+	</functions>
+	<parameters count="1">
+		<parameter name="prefix" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+		</parameter>
+	</parameters>
+</property>

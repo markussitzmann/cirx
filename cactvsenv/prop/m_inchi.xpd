@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2014-05-04 23:16:43 -->
+<property name="M_INCHI" objclass="mol" datatype="string" classuuid="1a2a2368-d3d1-11e3-b025-001fd05f56b7" versionuuid="bd2cef16-b43b-11ec-a63e-00d861d0b82f">
+	<version>2.3</version>
+	<date>2022-04-04 12:22</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<license class="xemistry" url="http://www.xemistry.com/license"/>
+	<description>Fragment-level InChI string</description>
+	<magic>???</magic>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|hadd|atom|bond|mol</invalidation>
+	<propertyreferences>
+		<reference class="input">B_ORDER</reference>
+		<reference class="input">B_TYPE</reference>
+		<reference class="input">A_TYPE</reference>
+		<reference class="input">A_ISOTOPE</reference>
+		<reference class="input">B_FLAGS</reference>
+		<reference class="input">A_FORMAL_CHARGE</reference>
+	</propertyreferences>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+	<menuname>Fragment InChI</menuname>
+	<module source="mod_m_inchi.c">mod_m_inchi</module>
+	<software version="1.06">NIST reference InChI library</software>
+	<functions count="1">
+		<function class="compute" name="CSgetM_INCHI" type="dll"/>
+	</functions>
+	<parameters count="11">
+		<parameter name="options" datatype="String">
+			<value>DONOTADDH FIXEDH RECMET NOWARNINGS</value>
+			<default>DONOTADDH FIXEDH RECMET NOWARNINGS</default>
+			<constraints>list</constraints>
+			<description>Set of option words as used in the original NIST software</description>
+			<comment>Supported option words: NOLABELS SAVEOPT AUXNONE MISMATCHISERROR OUTERRINCHI Key XHash1 XHash2 SNON NEWPSOFF DONOTADDH LooseTSACheck SREL ChiralFlagOFF SUU SLUUD FIXEDH RECMET KET 15T PT_22_00 PT_16_00 PT_06_00 PT_39_00 LargeMolecules Polymers Polymers105 NPZz NoWarnings MergeHash NoInChI FoldCRU FoldSRU FrameShift: NoFrameShift NoEdits SATZZ FNUDOFF FixSp3bugOFF FBOFF FB2OFF SPXYZOFF SASXYZOFF Polymers105+. Record processing options INPAUX START: END: RECORD: have no effect.</comment>
+		</parameter>
+		<parameter name="fakemetalbonds" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+			<description>If set, all bonds to metals are encoded as simple single VB bonds, regardless of their real bond type</description>
+		</parameter>
+		<parameter name="stereoperception" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>If set, perceive stereochemistry, if no, use what is presently set on the structure</description>
+		</parameter>
+		<parameter name="stereomode" datatype="Integer" enumeration="snon,none:sabs,abs,absolute:srel,rel,relative:srac,rac,racemic,racemate">
+			<value>sabs</value>
+			<default>sabs</default>
+		</parameter>
+		<parameter name="autohadd" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>If set, implicitly add a standard set of hydrogens, without actually modifying the structure</description>
+		</parameter>
+		<parameter name="prefix" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>If set, include InChI= prefix in output</description>
+		</parameter>
+		<parameter name="stripstereolayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripisotopelayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripfixedhlayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripreconnectlayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripchargelayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+	</parameters>
+</property>

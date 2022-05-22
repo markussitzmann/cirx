@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2017-03-31 19:49:57 -->
+<property name="X_INCHI" objclass="reaction" datatype="string" classuuid="b270675c-1638-11e7-8c2a-bbf92c83c714" versionuuid="b270675c-1638-11e7-8c2a-bbf92c83c714">
+	<version>1.0</version>
+	<date>2017-03-31 19:35</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<path>/</path>
+	<license class="Xemistry" url="http://www.xemistry.com/license"/>
+	<description>RInChI string of reaction</description>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|atom|bond</invalidation>
+	<software version="1.00">NIST reacxtion info prototype library</software>
+	<propertyreferences>
+		<reference class="input">X_DIRECTION</reference>
+		<reference class="input">X_RDF_STRING</reference>
+		<reference class="input">E_REACTION_ROLE</reference>
+		<reference class="windfall">X_INCHI_AUXINFO</reference>
+	</propertyreferences>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+	<module source="mod_x_inchi.c">mod_x_inchi</module>
+	<functions count="1">
+		<function class="compute" name="CSgetX_INCHI" type="dll"/>
+	</functions>
+	<parameters count="1">
+		<parameter name="prefix" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>Wether to include the RInChI= prefix</description>
+		</parameter>
+	</parameters>
+</property>

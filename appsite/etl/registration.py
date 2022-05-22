@@ -9,12 +9,12 @@ from typing import List
 from celery import subtask, group
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
-from pycactvs import Molfile, Ens
+from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
 from structure.inchi.identifier import InChIString
-from structure.models import Structure, Compound
+from structure.models import Structure, Compound, StructureInChIs
 from resolver.models import InChI
 
 logger = logging.getLogger('cirx')
@@ -22,7 +22,6 @@ Status = namedtuple('Status', 'file created')
 
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
-
 
 class FileRegistry(object):
 
@@ -178,14 +177,18 @@ class StructureRegistry(object):
 
     CHUNK_SIZE = 100
 
+    NCICADD_TYPES = [
+        Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
+        Identifier('E_FICUS_ID', 'E_FICUS_STRUCTURE', 'ficus_parent'),
+        Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent'),
+    ]
+
+    INCHI_TYPES = ["E_STDINCHI", "E_TAUTO_INCHI"]
+
     @staticmethod
     def normalize_structures(structure_ids: list):
         # NOTE: the order matters, it has to go from broader to more specific identifier
-        identifiers = [
-            Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
-            Identifier('E_FICUS_ID', 'E_FICUS_STRUCTURE', 'ficus_parent'),
-            Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent'),
-        ]
+        identifiers = StructureRegistry.NCICADD_TYPES
 
         source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
         parent_structure_relationships = []
@@ -270,23 +273,58 @@ class StructureRegistry(object):
     @staticmethod
     def calculate_inchi(structure_ids: list):
         source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
+
+        structure_to_inchi_list = []
+
         for structure_id, structure in source_structures.items():
             if structure.blocked:
                 logger.info("structure %s is blocked and has been skipped" % (structure_id, ))
                 continue
             try:
-                print("----")
-                print(structure.id)
-                print(structure.compound.id)
-                ens = structure.to_ens
-                inchi_string = ens.get("E_STDINCHI")
-                print(inchi_string)
-                print(ens.get('E_SMILES'))
-                d = InChIString(string=inchi_string).model_dict
-                inchi: InChI = InChI(**d)
-                inchi.version_string = "1.06"
+                inchi_relationships = {}
+                for inchi_type in StructureRegistry.INCHI_TYPES:
+                    ens = structure.to_ens
+                    inchi_string = ens.get(inchi_type)
+                    inchi_dict = InChIString(string=inchi_string).model_dict
+                    inchi: InChI = InChI(**inchi_dict)
+                    inchi_relationships[inchi_type] = inchi
+                structure_to_inchi_list.append(StructureRelationships(structure_id, inchi_relationships))
             except Exception as e:
-                print(ens.get('E_SMILES'))
-                #structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
-                #structure.save()
-                logger.error("normalizing structure %s failed : %s" % (structure_id, e))
+                structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
+                structure.save()
+                logger.error("calculating inchi for structure %s failed : %s" % (structure_id, e))
+        try:
+            with transaction.atomic():
+                inchi_list = [inchi for structure_to_inchi in structure_to_inchi_list for inchi in structure_to_inchi.relationships.values()]
+                InChI.objects.bulk_create(
+                    inchi_list,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+
+                # fetch uuid / inchi structures in bulk (by that they have an id)
+                inchi_id_list = [i.id for i in inchi_list]
+                structure_id_list = [s.structure for s in structure_to_inchi_list]
+
+                inchis = InChI.objects.in_bulk(inchi_id_list, field_name='id')
+                structures = Structure.objects.in_bulk(structure_id_list, field_name='id')
+
+                for structure_to_inchi in structure_to_inchi_list:
+                    s = structure_to_inchi.structure
+                    for i in structure_to_inchi.relationships.values():
+                        rel = StructureInChIs(
+                            structure=structures[s],
+                            inchi=inchis[i.id],
+                            software_version_string=None,
+                            save_options=None
+                        )
+                        rel.save()
+        except DatabaseError as e:
+            logger.error(e)
+            raise(DatabaseError(e))
+        except Exception as e:
+            logger.error(e)
+            raise Exception(e)
+
+        return structure_ids
+

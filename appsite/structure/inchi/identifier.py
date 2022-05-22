@@ -17,7 +17,7 @@ class InChIKey:
             block1=None,
             block2=None,
             block3=None,
-            safe_options=None,
+            save_options=None,
             version_string=None,
             *args,
             **kwargs
@@ -30,7 +30,7 @@ class InChIKey:
                 key += "-%s" % block2
             if block2 and block3:
                 key += "-%s" % block3
-        self.element = {'_key': key, 'safe_options': safe_options, 'version_string': version_string}
+        self.element = {'_key': key, 'save_options': save_options, 'version_string': version_string}
         pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PATTERN_STRING_WITH_PREFIX]
         if not bool([self._validate(key, pattern) for pattern in pattern_list if self._validate(key, pattern)]):
             raise InChIKeyError('InChIKey is not resolvable')
@@ -62,14 +62,14 @@ class InChIKey:
             'block3': self.element['block3'],
             'key': self.element['well_formatted_no_prefix'],
             'is_standard': self.element['is_standard'],
-            'safe_options': self.element['safe_options'],
-            'version_string': self.element['version_string']
+            #'save_options': self.element['save_options'],
+            #'version_string': self.element['version_string']
         }
 
     def _calculate_uuid(self):
         return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
             self.element['well_formatted_no_prefix'],
-            self.element['safe_options'] if self.element['safe_options'] else ''
+            self.element['save_options'] if self.element['save_options'] else ''
         ]))
 
     def __eq__(self, other):
@@ -159,10 +159,10 @@ class InChIString:
             'block2': self.element['block2'],
             'block3': self.element['block3'],
             'key': self.element['key'],
-            'string': self.element['well_formatted'],
+            'string': '%s/%s' % (self.element['version'], self.element['layers']),
             'is_standard': self.element['is_standard'],
-            'safe_options': self.element['safe_options'],
-            'version_string': self.element['version_string']
+            #'save_options': self.element['save_options'],
+            #'version_string': self.element['version_string']
         }
 
     def __eq__(self, other):

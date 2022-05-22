@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2017-03-31 19:42:02 -->
+<property name="X_SHORT_INCHIKEY" objclass="reaction" datatype="string" classuuid="53e9e9aa-1639-11e7-b45c-8fcfd76f72e4" versionuuid="53e9e9aa-1639-11e7-b45c-8fcfd76f72e4">
+	<version>1.0</version>
+	<date>2017-03-31 19:41</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<path>/</path>
+	<license class="Xemistry" url="http://www.xemistry.com/license"/>
+	<description>Short  reaction InChI (RINCHI) key variant</description>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|atom|bond</invalidation>
+	<software version="1.00">NIST reacxtion info prototype library</software>
+	<propertyreferences>
+		<reference class="input">X_INCHI</reference>
+	</propertyreferences>
+	<outputmode>standard</outputmode>
+	<logmode>dontcare</logmode>
+	<module source="mod_x_short_inchikey.c">mod_x_short_inchikey</module>
+	<functions count="1">
+		<function class="compute" name="CSgetX_SHORT_INCHIKEY" type="dll"/>
+	</functions>
+	<parameters count="1">
+		<parameter name="prefix" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>Flag whether to include RInChIKey= prefix</description>
+		</parameter>
+	</parameters>
+</property>

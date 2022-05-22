@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Property Definition for Cactvs Chemoinformatics Toolkit written 2014-02-21 12:26:07 -->
+<property name="E_INCHI" objclass="ens" datatype="string" classuuid="4972805e-9aea-11e3-95bc-001fd05f56b7" versionuuid="cecd450e-b43b-11ec-ba2e-00d861d0b82f">
+	<version>2.3</version>
+	<date>2022-04-04 12:22</date>
+	<author>Xemistry Developer Team</author>
+	<orcid>http://orcid.org/0000-0002-1973-1271</orcid>
+	<affiliation>Xemistry GmbH</affiliation>
+	<authorurl>http://www.xemistry.com</authorurl>
+	<email>info@xemistry.com</email>
+	<license class="xemistry" url="http://www.xemistry.com/license"/>
+	<description>First release InChI identifier (E_STDINCHI following the current standard is preferred)</description>
+	<magic>???</magic>
+	<traits>linenotation</traits>
+	<flags>trusted|portable|export</flags>
+	<invalidation>atomchange|bondchange|stereochange|hadd|atom|bond</invalidation>
+	<software version="1.06">NIST reference InChI library</software>
+	<propertyreferences>
+		<reference class="input">B_ORDER</reference>
+		<reference class="input">B_TYPE</reference>
+		<reference class="input">A_TYPE</reference>
+		<reference class="input">A_ISOTOPE</reference>
+		<reference class="input">B_FLAGS</reference>
+		<reference class="input">A_FORMAL_CHARGE</reference>
+		<reference class="input">B_STEREOGENIC</reference>
+		<reference class="input">B_ISAROMATIC</reference>
+		<reference class="input">A_ALLENE</reference>
+		<reference class="windfall">E_INCHI_AUXINFO</reference>
+	</propertyreferences>
+	<menuname>InChI</menuname>
+	<outputmode>forced</outputmode>
+	<logmode>dontcare</logmode>
+	<module source="mod_e_inchi.c">mod_e_inchi</module>
+	<functions count="1">
+		<function class="compute" name="CSgetE_INCHI" type="dll"/>
+	</functions>
+	<parameters count="10">
+		<parameter name="options" datatype="String">
+			<value>DONOTADDH FIXEDH RECMET NOWARNINGS</value>
+			<default>DONOTADDH FIXEDH RECMET NOWARNINGS</default>
+			<constraints>list</constraints>
+			<description>Set of default option words as used in the original NIST software</description>
+			<comment>Supported option words: MISMATCHISERROR OUTERRINCHI Key XHash1 XHash2 SNON NEWPSOFF DONOTADDH LooseTSACheck SREL ChiralFlagOFF SUU SLUUD FIXEDH RECMET KET 15T PT_22_00 PT_16_00 PT_06_00 PT_39_00 LargeMolecules Polymers Polymers105 NPZz NoWarnings FoldCRU FoldSRU FrameShift: NoFrameShift NoEdits SATZZ FNUDOFF FixSp3bugOFF FBOFF FB2OFF SPXYZOFF SASXYZOFF Polymers105+. Record processing and output options NOLABELS SAVEOPT AUXNONE NoInCXhI INPAUX START: END: RECORD: MergeHash have no effect.</comment>
+		</parameter>
+		<parameter name="fakemetalbonds" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+			<description>If set, all bonds to metals are encoded as simple single VB bonds, regardless of their real bond type</description>
+		</parameter>
+		<parameter name="stereoperception" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>If set, perceive stereochemistry, if no, use what is presently set on the structure</description>
+		</parameter>
+		<parameter name="stereomode" datatype="Integer" enumeration="snon,none:sabs,abs,absolute:srel,rel,relative:srac,rac,racemic,racemate">
+			<value>sabs</value>
+			<default>sabs</default>
+		</parameter>
+		<parameter name="autohadd" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>If set, implicitly add a standard set of hydrogens, without actually modifying the structure</description>
+		</parameter>
+		<parameter name="prefix" datatype="Boolean">
+			<value>1</value>
+			<default>1</default>
+			<description>If set, include InChI= prefix in output</description>
+		</parameter>
+		<parameter name="stripstereolayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripisotopelayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripfixedhlayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+			<description>If set, the /f layer *and* the following /h and /q layers are stripped</description>
+		</parameter>
+		<parameter name="stripreconnectlayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+		<parameter name="stripchargelayer" datatype="Boolean">
+			<value>0</value>
+			<default>0</default>
+		</parameter>
+	</parameters>
+</property>
