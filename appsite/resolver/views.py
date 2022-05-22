@@ -97,7 +97,6 @@ class InchiViewSet(ResourceModelViewSet):
         'key': ('icontains', 'iexact', 'contains', 'exact'),
         'string': ('icontains', 'iexact', 'contains', 'exact'),
         'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
-        'safe_options': ('icontains', 'iexact', 'contains', 'exact'),
         'entrypoints__category': ('exact', 'in'),
     }
     search_fields = ('string', 'key',)
