@@ -54,6 +54,7 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
             raise IntegrityError("fields 'string', 'key', 'version', and 'is_standard'"
                                  "are immutable for the inchis resource")
 
+
         entrypoints = validated_data.pop('entrypoints', None)
 
         instance.save()
