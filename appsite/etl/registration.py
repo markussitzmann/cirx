@@ -9,7 +9,7 @@ from typing import List
 from celery import subtask, group
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
-from pycactvs import Molfile
+from pycactvs import Molfile, Ens
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
@@ -113,7 +113,9 @@ class FileRegistry(object):
             if not record % FileRegistry.CHUNK_SIZE:
                 logger.info("processed record %s of %s", record, fname)
             try:
-                ens = molfile.read()
+                # TODO: registering structures needs improvement - hadd might do harm here
+                ens: Ens = molfile.read()
+                ens.hadd()
                 hashisy = CactvsHash(ens)
                 structure = Structure(
                      hashisy=hashisy,

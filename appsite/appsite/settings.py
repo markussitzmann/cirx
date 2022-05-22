@@ -21,7 +21,7 @@ from pycactvs import cactvs
 CACTVS_SETTINGS = cactvs
 
 propertypath = list(CACTVS_SETTINGS['propertypath'])
-propertypath.append('/home/app/cactvsenv/prop')
+propertypath.insert(1, '/home/app/cactvsenv/prop')
 
 CACTVS_SETTINGS['python_object_autodelete'] = True
 #CACTVS_SETTINGS['lookup_hosts'] = []

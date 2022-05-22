@@ -27,7 +27,7 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = InChI
-        fields = ('url', 'string', 'key', 'version', 'is_standard', 'safe_options', 'entrypoints', 'added', 'modified')
+        fields = ('url', 'string', 'key', 'version', 'is_standard', 'entrypoints', 'added', 'modified')
         read_only_fields = ('key', 'version', 'is_standard')
         meta_fields = ('added', 'modified')
 
@@ -51,8 +51,8 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, instance: InChI, validated_data: Dict):
         if 'string' in validated_data or 'key' in validated_data or 'version' in validated_data or \
                 'is_standard' in validated_data or 'safe_options' in validated_data:
-            raise IntegrityError("fields 'string', 'key', 'version', 'is_standard' and "
-                                 "'safe_options' are immutable for the inchis resource")
+            raise IntegrityError("fields 'string', 'key', 'version', and 'is_standard'"
+                                 "are immutable for the inchis resource")
 
         entrypoints = validated_data.pop('entrypoints', None)
 

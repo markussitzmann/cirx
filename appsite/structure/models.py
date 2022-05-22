@@ -160,6 +160,10 @@ class Compound(models.Model):
 class StructureInChIs(models.Model):
     structure = models.ForeignKey('Structure', on_delete=models.CASCADE)
     inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
+    software_version_string = models.CharField(max_length=64, default=None, blank=True, null=True)
+    save_options = models.CharField(max_length=2, default=None, blank=True, null=True)
+
+
 
     class Meta:
         db_table = 'cir_structure_inchis'
