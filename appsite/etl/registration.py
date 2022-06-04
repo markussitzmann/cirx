@@ -22,6 +22,7 @@ Status = namedtuple('Status', 'file created')
 
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
+InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopts')
 InChIType = namedtuple('InChIType', 'property version software')
 
 class FileRegistry(object):
@@ -294,11 +295,21 @@ class StructureRegistry(object):
                 inchi_relationships = {}
                 for inchi_type in StructureRegistry.INCHI_TYPES:
                     ens = structure.to_ens
-                    inchi_string = ens.get(inchi_type.property).split('\\')[0]
+                    split_string = ens.get(inchi_type.property).split('\\')
+                    split_length = len(split_string)
+                    if split_length:
+                        inchi_string = split_string[0]
+                    else:
+                        logging.warning("no InChI string available")
+                        continue
+                    inchi_saveopt = None
+                    if split_length >= 2:
+                        inchi_saveopt = split_string[1]
                     inchi_dict = InChIString(string=inchi_string).model_dict
                     inchi: InChI = InChI(**inchi_dict)
-                    inchi_relationships[inchi_type] = inchi
-                structure_to_inchi_list.append(StructureRelationships(structure_id, inchi_relationships))
+                    inchi_relationships[inchi_type] = InChIAndSaveOpt(inchi, inchi_saveopt)
+                structure_to_inchi_list\
+                    .append(StructureRelationships(structure_id, inchi_relationships))
             except Exception as e:
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()
@@ -306,8 +317,8 @@ class StructureRegistry(object):
         try:
             with transaction.atomic():
                 inchi_list = [
-                    inchi for structure_to_inchi in structure_to_inchi_list
-                    for inchi in structure_to_inchi.relationships.values()
+                    inchi_data.inchi for structure_to_inchi in structure_to_inchi_list
+                    for inchi_data in structure_to_inchi.relationships.values()
                 ]
                 InChI.objects.bulk_create(
                     inchi_list,
@@ -328,9 +339,9 @@ class StructureRegistry(object):
                     for inchi_type, inchi_data in structure_to_inchi.relationships.items():
                         structure_inchi = StructureInChIs(
                             structure=structure_objects[sid],
-                            inchi=inchi_objects[inchi_data.id],
+                            inchi=inchi_objects[inchi_data.inchi.id],
                             software_version_string=inchi_type.version,
-                            save_options=None
+                            save_options=inchi_data.saveopts
                         )
                         structure_inchis_list.append(structure_inchi)
                 StructureInChIs.objects.bulk_create(
