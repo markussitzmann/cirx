@@ -24,8 +24,10 @@ class InChIManager(models.Manager):
 
 
 class InChI(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     version = models.IntegerField(default=1)
+    software_version = models.CharField(max_length=16, default=None, blank=True, null=True)
+    save_options = models.CharField(max_length=2, default=None, blank=True, null=True)
     block1 = models.CharField(max_length=14)
     block2 = models.CharField(max_length=10)
     block3 = models.CharField(max_length=1)
@@ -39,7 +41,7 @@ class InChI(models.Model):
     objects = InChIManager()
 
     indexes = Index(
-        fields=['version', 'block1', 'block2', 'block3'],
+        fields=['block1', 'block2', 'block3', 'version', 'software_version', 'save_options'],
         name='inchi_index'
     )
 
@@ -49,7 +51,7 @@ class InChI(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['version', 'block1', 'block2', 'block3'],
+                fields=['block1', 'block2', 'block3', 'version', 'software_version', 'save_options'],
                 name='unique_inchi_constraint'
             ),
         ]

@@ -13,8 +13,8 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
-from structure.inchi.identifier import InChIString
-from structure.models import Structure, Compound, StructureInChIs
+from structure.inchi.identifier import InChIString, InChIKey
+from structure.models import Structure, Compound
 from resolver.models import InChI
 
 logger = logging.getLogger('cirx')
@@ -23,7 +23,7 @@ Status = namedtuple('Status', 'file created')
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
 InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopts')
-InChIType = namedtuple('InChIType', 'property version software')
+InChIType = namedtuple('InChIType', 'property key version software')
 
 class FileRegistry(object):
 
@@ -116,7 +116,7 @@ class FileRegistry(object):
             try:
                 # TODO: registering structures needs improvement - hadd might do harm here
                 ens: Ens = molfile.read()
-                ens.hadd()
+                #ens.hadd()
                 hashisy = CactvsHash(ens)
                 structure = Structure(
                      hashisy=hashisy,
@@ -166,7 +166,7 @@ class FileRegistry(object):
                     sff.structure_files.add(structure_file)
                     sff.save()
         except DatabaseError as e:
-            logger.error("file record registration failed for '%s'" % (fname,))
+            logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise(DatabaseError(e))
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -186,8 +186,8 @@ class StructureRegistry(object):
     ]
 
     INCHI_TYPES = [
-        InChIType('E_STDINCHI', Prop.Ref('E_STDINCHI').softwareversion, Prop.Ref('E_STDINCHI').software),
-        InChIType('E_TAUTO_INCHI', Prop.Ref('E_TAUTO_INCHI').softwareversion, Prop.Ref('E_TAUTO_INCHI').software),
+        InChIType('E_STDINCHI', 'E_STDINCHIKEY', Prop.Ref('E_STDINCHI').softwareversion, Prop.Ref('E_STDINCHI').software),
+        InChIType('E_TAUTO_INCHI', 'E_TAUTO_INCHIKEY', Prop.Ref('E_TAUTO_INCHI').softwareversion, Prop.Ref('E_TAUTO_INCHI').software),
     ]
 
     @staticmethod
@@ -294,6 +294,8 @@ class StructureRegistry(object):
             try:
                 inchi_relationships = {}
                 for inchi_type in StructureRegistry.INCHI_TYPES:
+                    inchi_property = Prop.Ref(inchi_type.property)
+                    inchi_software_version = inchi_property.softwareversion
                     ens = structure.to_ens
                     split_string = ens.get(inchi_type.property).split('\\')
                     split_length = len(split_string)
@@ -302,11 +304,19 @@ class StructureRegistry(object):
                     else:
                         logging.warning("no InChI string available")
                         continue
-                    inchi_saveopt = None
+                    inchi_saveopt: str = None
                     if split_length >= 2:
                         inchi_saveopt = split_string[1]
-                    inchi_dict = InChIString(string=inchi_string).model_dict
-                    inchi: InChI = InChI(**inchi_dict)
+                    key = InChIKey(ens.get(inchi_type.key))
+                    inchi_string = InChIString(
+                        key=key,
+                        string=inchi_string,
+                        save_options=inchi_saveopt,
+                        software_version_string=inchi_software_version,
+                        validate_key=False
+                    )
+                    d = inchi_string.model_dict
+                    inchi: InChI = InChI(**d)
                     inchi_relationships[inchi_type] = InChIAndSaveOpt(inchi, inchi_saveopt)
                 structure_to_inchi_list\
                     .append(StructureRelationships(structure_id, inchi_relationships))
@@ -337,18 +347,19 @@ class StructureRegistry(object):
                 for structure_to_inchi in structure_to_inchi_list:
                     sid = structure_to_inchi.structure
                     for inchi_type, inchi_data in structure_to_inchi.relationships.items():
-                        structure_inchi = StructureInChIs(
-                            structure=structure_objects[sid],
-                            inchi=inchi_objects[inchi_data.inchi.id],
-                            software_version_string=inchi_type.version,
-                            save_options=inchi_data.saveopts
-                        )
-                        structure_inchis_list.append(structure_inchi)
-                StructureInChIs.objects.bulk_create(
-                    structure_inchis_list,
-                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-                    ignore_conflicts=True
-                )
+                        structure_objects[sid].inchis.add(inchi_objects[inchi_data.inchi.id])
+                        # structure_inchi = StructureInChIs(
+                        #     structure=structure_objects[sid],
+                        #     inchi=inchi_objects[inchi_data.inchi.id],
+                        #     software_version_string=inchi_type.version,
+                        #     save_options=inchi_data.saveopts
+                        # )
+                        # structure_inchis_list.append(structure_inchi)
+                # StructureInChIs.objects.bulk_create(
+                #     structure_inchis_list,
+                #     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                #     ignore_conflicts=True
+                # )
 
         except DatabaseError as e:
             logger.error(e)

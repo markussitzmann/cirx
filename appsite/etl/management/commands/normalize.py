@@ -1,3 +1,4 @@
+import uuid
 from typing import List
 
 from django.conf import settings
@@ -20,7 +21,7 @@ class Command(BaseCommand):
         _normalize()
 
 
-def normalize_structures(structure_ids: List[int]):
+def normalize_structures(structure_ids: List[uuid.UUID]):
     task = normalize_structure_task
 
     chunk_size = StructureRegistry.CHUNK_SIZE

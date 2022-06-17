@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import QuerySet
 
 from custom.cactvs import SpecialCactvsHash
-from structure.models import Structure, StructureInChIs
+from structure.models import Structure
 from resolver.models import InChI
 from etl.models import StructureFileRecord
 from etl.tasks import *
@@ -40,9 +40,9 @@ def _calculate_inchi():
             logger.info("deleting %s", i)
             i.delete()
         logger.info("--- deleting Structure InChI ---")
-        for r in StructureInChIs.objects.all():
-            logger.info("deleting %s", r)
-            r.delete()
+        # for r in StructureInChIs.objects.all():
+        #     logger.info("deleting %s", r)
+        #     r.delete()
         logger.info("--- deleting blocked ---")
         for s in Structure.objects.filter(blocked__isnull=False).all():
             s.blocked = None

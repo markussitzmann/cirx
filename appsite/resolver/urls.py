@@ -7,6 +7,7 @@ from . import views
 from . import routers
 
 router = routers.ResolverApiRouter(trailing_slash=False)
+router.register('structures', views.StructureViewSet)
 router.register('inchis', views.InchiViewSet)
 router.register('organizations', views.OrganizationViewSet)
 router.register('publishers', views.PublisherViewSet)
@@ -23,6 +24,13 @@ urlpatterns = [
         view=views.EntryPointViewSet.as_view({'get': 'get_self_entrypoint'}),
         name='entrypoint-self'),
 
+    path('structures/<pk>/relationships/<related_field>',
+         views.StructureRelationshipView.as_view(), {'source': 'relationships'},
+         name='structure-relationships'),
+    path('structures/<pk>/<related_field>',
+         views.StructureViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
+         name='structure-related'),
+
     path('inchis/<pk>/relationships/<related_field>',
          views.InchiRelationshipView.as_view(), {'source': 'relationships'},
          name='inchi-relationships'),
@@ -37,14 +45,12 @@ urlpatterns = [
         view=views.PublisherViewSet.as_view({'get': 'retrieve_related'}),
         name='publisher-related'),
 
-
     path('entrypoints/<pk>/relationships/<related_field>',
         view=views.EntryPointRelationshipView.as_view(),
         name='entrypoint-relationships'),
     path('entrypoints/<pk>/<related_field>',
         view=views.EntryPointViewSet.as_view({'get': 'retrieve_related'}),
         name='entrypoint-related'),
-
 
     path('organizations/<pk>/relationships/<related_field>',
         view=views.OrganizationRelationshipView.as_view(),
@@ -53,14 +59,12 @@ urlpatterns = [
         view=views.OrganizationViewSet.as_view({'get': 'retrieve_related'}),
         name='organization-related'),
 
-
     path('endpoints/<pk>/relationships/<related_field>',
         view=views.EndPointRelationshipView.as_view(),
         name='endpoint-relationships'),
     path('endpoints/<pk>/<related_field>',
         view=views.EndPointViewSet.as_view({'get': 'retrieve_related'}),
         name='endpoint-related'),
-
 
     path('mediatypes/<pk>/relationships/<related_field>',
         view=views.MediaTypeRelationshipView.as_view(),

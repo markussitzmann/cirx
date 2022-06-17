@@ -1,12 +1,83 @@
 from django.db import IntegrityError
 from rest_framework.fields import MultipleChoiceField
+from rest_framework.response import Response
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
 from typing import Dict
 
+from rest_framework_json_api.relations import SerializerMethodResourceRelatedField
+
+from structure.models import Structure
 from . import defaults
 from .exceptions import ResourceExistsError
-from .models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
+from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
+
+
+class StructureSerializer(serializers.HyperlinkedModelSerializer):
+
+    inchis = relations.ResourceRelatedField(
+        queryset=InChI.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        related_link_view_name='structure-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structure-relationships',
+    )
+
+    included_serializers = {
+        'inchis': 'resolver.serializers.InchiSerializer',
+    }
+
+    smiles = serializers.SerializerMethodField('serialize_minimol')
+    hashisy = serializers.SerializerMethodField('serialize_hashisy')
+
+    def serialize_minimol(self, obj):
+        return obj.to_ens.get("E_SMILES")
+
+    def serialize_hashisy(self, obj):
+        return obj.hashisy.padded
+
+    class Meta:
+        model = Structure
+        fields = ('hashisy', 'smiles', 'inchis', 'added', 'blocked')
+        read_only_fields = ('id', 'hashisy')
+        meta_fields = ('added', 'blocked')
+
+    def create(self, validated_data: Dict):
+        #entrypoints = validated_data.pop('entrypoints', None)
+
+        self.is_valid(raise_exception=True)
+
+        try:
+            structure = Structure.objects.get(**validated_data)
+        except Structure.DoesNotExist:
+            structure = Structure.create(**validated_data)
+            try:
+                structure.save()
+            except IntegrityError as e:
+                raise ResourceExistsError("structure resource already exists", code=409)
+            # if entrypoints:
+            #     inchi.entrypoints.add(*entrypoints, bulk=True)
+        return structure
+
+    def update(self, instance: Structure, validated_data: Dict):
+        # if 'string' in validated_data or 'key' in validated_data or 'version' in validated_data or \
+        #         'is_standard' in validated_data:
+        #     raise IntegrityError("fields 'string', 'key', 'version', and 'is_standard'"
+        #                          "are immutable for the inchis resource")
+
+
+        #entrypoints = validated_data.pop('entrypoints', None)
+
+        instance.save()
+
+        # if entrypoints:
+        #     instance.entrypoints.bulk_update(entrypoints, bulk=True, clear=True)
+        # else:
+        #     instance.entrypoints.clear(bulk=True)
+
+        return instance
 
 
 class InchiSerializer(serializers.HyperlinkedModelSerializer):
@@ -27,7 +98,18 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = InChI
-        fields = ('url', 'string', 'key', 'version', 'is_standard', 'entrypoints', 'added', 'modified')
+        fields = (
+            'url',
+            'string',
+            'key',
+            'version',
+            'save_options',
+            'is_standard',
+            'software_version',
+            'entrypoints',
+            'added',
+            'modified'
+        )
         read_only_fields = ('key', 'version', 'is_standard')
         meta_fields = ('added', 'modified')
 

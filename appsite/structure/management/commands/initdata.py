@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from custom.cactvs import CactvsHash, CactvsMinimol
 from database.models import ContextTag, Database, Release
 from etl.models import FileCollection
-from structure.models import Structure, Name, NameType, StructureNames, ResponseType, StructureInChIs
+from structure.models import Structure, Name, NameType, StructureNames, ResponseType
 from resolver.models import InChI, Organization, Publisher
 
 from pycactvs import Ens

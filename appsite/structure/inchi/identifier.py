@@ -17,8 +17,9 @@ class InChIKey:
             block1=None,
             block2=None,
             block3=None,
-            save_options=None,
+            #save_options=None,
             version_string=None,
+            software_version_string=None,
             *args,
             **kwargs
     ):
@@ -30,7 +31,12 @@ class InChIKey:
                 key += "-%s" % block2
             if block2 and block3:
                 key += "-%s" % block3
-        self.element = {'_key': key, 'save_options': save_options, 'version_string': version_string}
+        self.element = {
+            '_key': key,
+            #'save_options': save_options,
+            'version_string': version_string,
+            'software_version_string': software_version_string
+        }
         pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PATTERN_STRING_WITH_PREFIX]
         if not bool([self._validate(key, pattern) for pattern in pattern_list if self._validate(key, pattern)]):
             raise InChIKeyError('InChIKey is not resolvable')
@@ -55,7 +61,7 @@ class InChIKey:
     @property
     def model_dict(self) -> Dict:
         return {
-            'id': self._calculate_uuid(),
+            #'id': self._calculate_uuid(),
             'version': self.element['version'],
             'block1': self.element['block1'],
             'block2': self.element['block2'],
@@ -63,13 +69,13 @@ class InChIKey:
             'key': self.element['well_formatted_no_prefix'],
             'is_standard': self.element['is_standard'],
             #'save_options': self.element['save_options'],
-            #'version_string': self.element['version_string']
+            'version_string': self.element['version_string']
         }
 
     def _calculate_uuid(self):
         return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
             self.element['well_formatted_no_prefix'],
-            self.element['save_options'] if self.element['save_options'] else ''
+            #self.element['save_options'] if self.element['save_options'] else ''
         ]))
 
     def __eq__(self, other):
@@ -91,10 +97,19 @@ class InChIString:
             self,
             string: str = None,
             key: InChIKey = None,
+            save_options: str = None,
+            validate_key: bool = True,
+            software_version_string: str = None,
             *arg,
             **kwarg
     ):
-        self.element = {'_string': string, '_key': key}
+        self.element = {
+            '_string': string,
+            '_key': key,
+            'software_version_string': software_version_string,
+            'save_options': save_options
+        }
+        self.validate_key = validate_key
         pattern_list = [InChIString.PATTERN_STRING, InChIString.PATTERN_STRING_WITH_PREFIX]
         if not bool([self._validate(string, pattern) for pattern in pattern_list if self._validate(string, pattern)]):
             raise InChIError('InChI string is not valid or does not match InChI key')
@@ -140,12 +155,14 @@ class InChIString:
                 )
             self.element['well_formatted_no_prefix'] = self.element['well_formatted'].replace(self.element['prefix'], "")
             if self.element['_key']:
-                if self._string_key_match(
-                    key=self.element['_key']
-                ):
+                if self.validate_key:
+                    if self._string_key_match(key=self.element['_key']):
+                        self.element.update(self.element['_key'].model_dict)
+                        return True
+                    return False
+                else:
                     self.element.update(self.element['_key'].model_dict)
                     return True
-                return False
             else:
                 self.element.update(self._calculate_inchikey().model_dict)
                 return True
@@ -154,16 +171,16 @@ class InChIString:
     @property
     def model_dict(self) -> Dict:
         return {
-            'id': self.element['id'],
+            #'id': self.element['id'],
             'version': self.element['version'],
             'block1': self.element['block1'],
             'block2': self.element['block2'],
             'block3': self.element['block3'],
             'key': self.element['key'],
-            'string': (self.element['well_formatted_no_prefix']),
+            'string': (self.element['well_formatted']),
             'is_standard': self.element['is_standard'],
-            #'save_options': self.element['save_options'],
-            #'version_string': self.element['version_string']
+            'save_options': self.element['save_options'],
+            'software_version': self.element['software_version_string']
         }
 
     def __eq__(self, other):

@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.db import models
 from django.db.models import UniqueConstraint, Index
@@ -14,8 +15,15 @@ class StructureManager(models.Manager):
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
+    def _calculate_uuid(self):
+        return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+            self.element['well_formatted_no_prefix'],
+            #self.element['save_options'] if self.element['save_options'] else ''
+        ]))
+
 
 class Structure(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hashisy = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
     ficts_parent = models.ForeignKey(
@@ -31,7 +39,6 @@ class Structure(models.Model):
     )
     inchis = models.ManyToManyField(
         'resolver.InChI',
-        through='StructureInChIs',
         related_name="structures"
     )
     added = models.DateTimeField(auto_now_add=True)
@@ -157,18 +164,17 @@ class Compound(models.Model):
 #         return "NCICADD:CID=%s" % self.id
 
 
-class StructureInChIs(models.Model):
-    structure = models.ForeignKey('Structure', on_delete=models.CASCADE)
-    inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
-    software_version_string = models.CharField(max_length=64, default=None, blank=True, null=True)
-    save_options = models.CharField(max_length=2, default=None, blank=True, null=True)
-
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(fields=['structure', 'inchi', 'software_version_string', 'save_options'], name='unique_structure_inchis'),
-        ]
-        db_table = 'cir_structure_inchis'
+# class StructureInChIs(models.Model):
+#     structure = models.ForeignKey('Structure', on_delete=models.CASCADE)
+#     inchi = models.ForeignKey('resolver.InChI', on_delete=models.CASCADE)
+#     software_version_string = models.CharField(max_length=64, default=None, blank=True, null=True)
+#     save_options = models.CharField(max_length=2, default=None, blank=True, null=True)
+#
+#     class Meta:
+#         constraints = [
+#             UniqueConstraint(fields=['structure', 'inchi', 'software_version_string', 'save_options'], name='unique_structure_inchis'),
+#         ]
+#         db_table = 'cir_structure_inchis'
 
 
 class Name(models.Model):

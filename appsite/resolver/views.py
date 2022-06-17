@@ -8,7 +8,7 @@ from rest_framework import permissions, routers, generics
 from rest_framework.decorators import action
 from rest_framework_json_api.views import RelationshipView, ModelViewSet
 
-
+from structure.models import Structure
 from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
 from resolver.serializers import (
     InchiSerializer,
@@ -16,7 +16,8 @@ from resolver.serializers import (
     PublisherSerializer,
     EntryPointSerializer,
     EndPointSerializer,
-    MediaTypeSerializer
+    MediaTypeSerializer,
+    StructureSerializer
 )
 
 
@@ -75,6 +76,42 @@ class ResourceRelationshipView(RelationshipView):
             return mark_safe(f"<p>{text}</p>")
         else:
             return text
+
+
+### STRUCTURE ###
+class StructureViewSet(ResourceModelViewSet):
+    """
+        The **Stucture resource** of the InChI Resolver API. For documentation [see here][ref]
+        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#structure-resource
+    """
+    def __init__(self, *args, **kwargs):
+        self.name = "Structure"
+        super().__init__(*args, **kwargs)
+
+    queryset = Structure.objects.filter(compound__isnull=False).all()
+    serializer_class = StructureSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    filterset_fields = {
+        'id': ('exact', 'in'),
+    }
+    search_fields = ('id',)
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
+
+
+class StructureRelationshipView(ResourceRelationshipView):
+
+    def __init__(self, *args, **kwargs):
+        self.name = "Structure"
+        super().__init__(*args, **kwargs)
+
+    queryset = Structure.objects.all()
+    self_link_view_name = 'structure-relationships'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 ### INCHI ###
