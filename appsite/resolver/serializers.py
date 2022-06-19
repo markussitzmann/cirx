@@ -7,10 +7,10 @@ from typing import Dict
 
 from rest_framework_json_api.relations import SerializerMethodResourceRelatedField
 
-from structure.models import Structure
+#from structure.models import Structure
 from . import defaults
 from .exceptions import ResourceExistsError
-from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
+from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType
 
 
 class StructureSerializer(serializers.HyperlinkedModelSerializer):
@@ -30,13 +30,13 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
     }
 
     smiles = serializers.SerializerMethodField('serialize_minimol')
-    hashisy = serializers.SerializerMethodField('serialize_hashisy')
+    #hashisy = serializers.SerializerMethodField('serialize_hashisy')
 
     def serialize_minimol(self, obj):
         return obj.to_ens.get("E_SMILES")
 
-    def serialize_hashisy(self, obj):
-        return obj.hashisy.padded
+    #def serialize_hashisy(self, obj):
+    #    return obj.hashisy.padded
 
     class Meta:
         model = Structure
@@ -80,6 +80,39 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
+class InchiTypeSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = InChIType
+        fields = (
+            'software_version',
+            'description',
+            'is_standard',
+            'newpsoff',
+            'donotaddh',
+            'snon',
+            'srel',
+            'srac',
+            'sucf',
+            'suu',
+            'sluud',
+            'recmet',
+            'fixedh',
+            'ket',
+            't15',
+            'pt_22_00',
+            'pt_16_00',
+            'pt_06_00',
+            'pt_39_00',
+            'pt_13_00',
+            'pt_18_00',
+            'added',
+            'modified'
+        )
+        #read_only_fields = ('key', 'version')
+        meta_fields = ('added', 'modified')
+
+
 class InchiSerializer(serializers.HyperlinkedModelSerializer):
 
     entrypoints = relations.ResourceRelatedField(
@@ -92,8 +125,19 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
         self_link_view_name='inchi-relationships',
     )
 
+    structures = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        related_link_view_name='inchi-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='inchi-relationships',
+    )
+
     included_serializers = {
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
+        'structures': 'resolver.serializers.StructureSerializer'
     }
 
     class Meta:
@@ -103,14 +147,15 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
             'string',
             'key',
             'version',
-            'save_options',
-            'is_standard',
-            'software_version',
+            #'save_opts',
+            #'is_standard',
+            #'software_version',
             'entrypoints',
+            'structures',
             'added',
             'modified'
         )
-        read_only_fields = ('key', 'version', 'is_standard')
+        read_only_fields = ('key', 'version')
         meta_fields = ('added', 'modified')
 
     def create(self, validated_data: Dict):

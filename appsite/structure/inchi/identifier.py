@@ -178,9 +178,9 @@ class InChIString:
             'block3': self.element['block3'],
             'key': self.element['key'],
             'string': (self.element['well_formatted']),
-            'is_standard': self.element['is_standard'],
-            'save_options': self.element['save_options'],
-            'software_version': self.element['software_version_string']
+            #'is_standard': self.element['is_standard'],
+            #'save_options': self.element['save_options'],
+            #'software_version': self.element['software_version_string']
         }
 
     def __eq__(self, other):

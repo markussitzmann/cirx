@@ -12,8 +12,9 @@ from django.core.files import File
 from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpRequest, QueryDict
 
-from structure.models import ResponseType, NameType
-from structure.resolver import ChemicalString, ChemicalStructure
+from structure.models import ResponseType
+from resolver.models import NameType
+from structure.string_resolver import ChemicalString, ChemicalStructure
 
 logger = logging.getLogger('cirx')
 

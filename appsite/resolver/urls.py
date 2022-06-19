@@ -9,6 +9,7 @@ from . import routers
 router = routers.ResolverApiRouter(trailing_slash=False)
 router.register('structures', views.StructureViewSet)
 router.register('inchis', views.InchiViewSet)
+router.register('inchitypes', views.InchiTypeViewSet)
 router.register('organizations', views.OrganizationViewSet)
 router.register('publishers', views.PublisherViewSet)
 router.register('entrypoints', views.EntryPointViewSet)
@@ -37,6 +38,13 @@ urlpatterns = [
     path('inchis/<pk>/<related_field>',
          views.InchiViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
          name='inchi-related'),
+
+    path('inchitypes/<pk>/relationships/<related_field>',
+         views.InchiTypeRelationshipView.as_view(), {'source': 'relationships'},
+         name='inchitype-relationships'),
+    path('inchitypes/<pk>/<related_field>',
+         views.InchiTypeViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
+         name='inchitype-related'),
 
     path('publishers/<pk>/relationships/<related_field>',
         view=views.PublisherRelationshipView.as_view(),

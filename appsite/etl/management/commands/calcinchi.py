@@ -3,8 +3,8 @@ from django.core.management.base import BaseCommand
 from django.db.models import QuerySet
 
 from custom.cactvs import SpecialCactvsHash
-from structure.models import Structure
-from resolver.models import InChI
+#from structure.models import Structure
+from resolver.models import InChI, Structure
 from etl.models import StructureFileRecord
 from etl.tasks import *
 
@@ -60,7 +60,7 @@ def _calculate_inchi():
              structure_file_id=structure_file_id,
              structure__compound__isnull=False,
              structure__blocked__isnull=True
-        )[10:1000]
+        )
 
     structure_ids = [r['structure__id'] for r in records]
     print("--->%s" % len(structure_ids))

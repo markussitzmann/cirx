@@ -8,8 +8,8 @@ from rest_framework import permissions, routers, generics
 from rest_framework.decorators import action
 from rest_framework_json_api.views import RelationshipView, ModelViewSet
 
-from structure.models import Structure
-from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
+#from structure.models import Structure
+from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType
 from resolver.serializers import (
     InchiSerializer,
     OrganizationSerializer,
@@ -17,7 +17,7 @@ from resolver.serializers import (
     EntryPointSerializer,
     EndPointSerializer,
     MediaTypeSerializer,
-    StructureSerializer
+    StructureSerializer, InchiTypeSerializer
 )
 
 
@@ -94,8 +94,9 @@ class StructureViewSet(ResourceModelViewSet):
 
     filterset_fields = {
         'id': ('exact', 'in'),
+        'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
     }
-    search_fields = ('id',)
+    search_fields = ('id', 'hashisy')
 
     # def retrieve(self, request, *args, **kwargs):
     #     instance = self.get_object()
@@ -148,6 +149,38 @@ class InchiRelationshipView(ResourceRelationshipView):
     queryset = InChI.objects.all()
     self_link_view_name = 'inchi-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class InchiTypeViewSet(ResourceModelViewSet):
+    """
+        The **InChI resource** of the InChI Resolver API. For documentation [see here][ref]
+        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#inchi-resource
+    """
+    def __init__(self, *args, **kwargs):
+        self.name = "InChI Type"
+        super().__init__(*args, **kwargs)
+
+    queryset = InChIType.objects.all()
+    serializer_class = InchiTypeSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    filterset_fields = {
+        'id': ('exact', 'in'),
+        #'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
+    }
+    search_fields = ('id',)
+
+
+class InchiTypeRelationshipView(ResourceRelationshipView):
+
+    def __init__(self, *args, **kwargs):
+        self.name = "InChI Type"
+        super().__init__(*args, **kwargs)
+
+    queryset = InChIType.objects.all()
+    self_link_view_name = 'inchitype-relationships'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
 
 
 ### ORGANZATION ###

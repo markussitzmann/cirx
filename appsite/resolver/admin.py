@@ -1,5 +1,6 @@
 from django.contrib import admin
-from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint
+from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, Release, Database, ContextTag, \
+    URIPattern
 
 
 @admin.register(InChI)
@@ -24,4 +25,31 @@ class EntryPointAdmin(admin.ModelAdmin):
 
 @admin.register(EndPoint)
 class EndPointAdmin(admin.ModelAdmin):
+    pass
+
+
+class ReleaseInline(admin.StackedInline):
+    model = Release
+    extra = 0
+
+
+@admin.register(Database)
+class DatabaseAdmin(admin.ModelAdmin):
+    inlines = [
+        ReleaseInline
+    ]
+
+
+@admin.register(Release)
+class ReleaseAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(ContextTag)
+class ContextTagAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(URIPattern)
+class URIPatternAdmin(admin.ModelAdmin):
     pass

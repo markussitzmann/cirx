@@ -1,11 +1,206 @@
 import uuid
+from pycactvs import Ens
 
 from django.db import models, IntegrityError
 from django.db.models import Index, UniqueConstraint
 from multiselectfield import MultiSelectField
 
+#from database.models import Release, Database
 from resolver.defaults import http_verbs
+
+#from structure.models import Structure
+from custom.cactvs import CactvsHash, CactvsMinimol
+from custom.fields import CactvsHashField, CactvsMinimolField
 from structure.inchi.identifier import InChIString
+
+
+class StructureManager(models.Manager):
+
+    def get_or_create_from_ens(self, ens: Ens):
+        return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
+
+    def _calculate_uuid(self):
+        return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+            self.element['well_formatted_no_prefix'],
+            #self.element['save_options'] if self.element['save_options'] else ''
+        ]))
+
+
+class Structure(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    hashisy_key = CactvsHashField(unique=True)
+    hashisy = models.CharField(max_length=16, null=True, blank=True)
+    minimol = CactvsMinimolField(null=False)
+    ficts_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='ficts_children', on_delete=models.PROTECT)
+    ficus_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='ficus_children', on_delete=models.PROTECT)
+    uuuuu_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='uuuuu_children', on_delete=models.PROTECT)
+    names = models.ManyToManyField(
+        'Name',
+        through='StructureNames',
+        related_name="structures"
+    )
+    inchis = models.ManyToManyField(
+        'resolver.InChI',
+        related_name="structures"
+    )
+    entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
+    added = models.DateTimeField(auto_now_add=True)
+    blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
+
+    indexes = Index(
+        fields=['ficts_parent', 'ficus_parent', 'uuuuu_parent', 'hashisy'],
+        name='structure_index'
+    )
+
+    class JSONAPIMeta:
+        resource_name = 'structures'
+
+    class Meta:
+        db_table = 'cir_structure'
+        verbose_name = "Structure"
+        verbose_name_plural = "Structures"
+
+    objects = StructureManager()
+
+    # def has_compound(self) -> bool:
+    #     has_compound = False
+    #     try:
+    #         has_compound = (self.compound is not None)
+    #     except Compound.DoesNotExist:
+    #         pass
+    #     return has_compound
+
+    @property
+    def to_ens(self) -> Ens:
+        return self.minimol.ens
+
+    def __str__(self):
+        return "[%s] %s" % (self.hashisy.padded, self.to_ens.get("E_SMILES"))
+
+
+class StructureInChIAssociation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    structure = models.ForeignKey(
+        Structure,
+        related_name='inchi_associations',
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+    inchi = models.ForeignKey(
+        'InChI',
+        related_name='inchi_associations',
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+    inchi_type = models.ForeignKey(
+        'InChIType',
+        related_name='inchi_associations',
+        on_delete=models.RESTRICT,
+        blank=False,
+        null=False
+    )
+    save_opt = models.CharField(max_length=2, default=None, blank=True, null=True)
+
+    class JSONAPIMeta:
+        resource_name = 'structure_inchi_associations'
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['structure', 'inchi'],
+                name='unique_structure_inchi_association'
+            ),
+        ]
+        db_table = 'cir_structure_inchi_associations'
+
+
+class Compound(models.Model):
+    structure = models.OneToOneField(
+        'Structure',
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT
+    )
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
+
+    class Meta:
+        db_table = 'cir_compound'
+
+    def __str__(self):
+        return "NCICADD:CID=%s" % self.id
+
+    def __repr__(self):
+        return "NCICADD:CID=%s" % self.id
+
+
+class Record(models.Model):
+    regid = models.ForeignKey('Name', on_delete=models.PROTECT)
+    version = models.IntegerField(default=1, blank=False, null=False)
+    release = models.ForeignKey('Release', blank=False, null=False, on_delete=models.CASCADE)
+    database = models.ForeignKey('Database', blank=False, null=False, on_delete=models.RESTRICT)
+    structure_file_record = models.ForeignKey(
+        'etl.StructureFileRecord',
+        blank=False,
+        null=False,
+        related_name="records",
+        on_delete=models.PROTECT
+    )
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['regid', 'version', 'release'], name='unique_record'),
+        ]
+        db_table = 'cir_record'
+
+    def __str__(self):
+        return "NCICADD:RID=%s" % self.id
+
+
+class Name(models.Model):
+    name = models.TextField(max_length=1500, unique=True)
+
+    class Meta:
+        db_table = 'cir_structure_name'
+
+    def get_structure(self):
+        return self.structure.get()
+
+    def __str__(self):
+        return "Name='%s'" % (self.name, )
+
+    def __repr__(self):
+        return self.name
+
+
+class NameType(models.Model):
+    string = models.CharField(max_length=64, unique=True, blank=False, null=False)
+    public_string = models.TextField(max_length=64, blank=False, null=False)
+    description = models.TextField(max_length=768, blank=True, null=True)
+
+    class Meta:
+        db_table = 'cir_name_type'
+
+
+class StructureNames(models.Model):
+    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, on_delete=models.CASCADE)
+    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
+        ]
+        db_table = 'cir_structure_names'
+
 
 
 class InChIManager(models.Manager):
@@ -26,14 +221,11 @@ class InChIManager(models.Manager):
 class InChI(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     version = models.IntegerField(default=1)
-    software_version = models.CharField(max_length=16, default=None, blank=True, null=True)
-    save_options = models.CharField(max_length=2, default=None, blank=True, null=True)
     block1 = models.CharField(max_length=14)
     block2 = models.CharField(max_length=10)
     block3 = models.CharField(max_length=1)
     key = models.CharField(max_length=27)
     string = models.CharField(max_length=32768, blank=True, null=True)
-    is_standard = models.BooleanField(default=False)
     entrypoints = models.ManyToManyField('EntryPoint', related_name='inchis', blank=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -41,7 +233,7 @@ class InChI(models.Model):
     objects = InChIManager()
 
     indexes = Index(
-        fields=['block1', 'block2', 'block3', 'version', 'software_version', 'save_options'],
+        fields=['block1', 'block2', 'block3', 'version'],
         name='inchi_index'
     )
 
@@ -51,7 +243,7 @@ class InChI(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['block1', 'block2', 'block3', 'version', 'software_version', 'save_options'],
+                fields=['block1', 'block2', 'block3', 'version'],
                 name='unique_inchi_constraint'
             ),
         ]
@@ -66,6 +258,66 @@ class InChI(models.Model):
 
     def __str__(self):
         return self.key
+
+
+class InChIType(models.Model):
+    id = models.CharField(max_length=32, primary_key=True, editable=False)
+    software_version = models.CharField(max_length=16, default=None, blank=True, null=True)
+    description = models.TextField(max_length=32768, blank=True, null=True)
+    is_standard = models.BooleanField(default=False)
+    newpsoff = models.BooleanField(default=False)
+    donotaddh = models.BooleanField(default=False)
+    snon = models.BooleanField(default=False)
+    srel = models.BooleanField(default=False)
+    srac = models.BooleanField(default=False)
+    sucf = models.BooleanField(default=False)
+    suu = models.BooleanField(default=False)
+    sluud = models.BooleanField(default=False)
+    recmet = models.BooleanField(default=False)
+    fixedh = models.BooleanField(default=False)
+    ket = models.BooleanField(default=False)
+    t15 = models.BooleanField(default=False)
+    pt_22_00 = models.BooleanField(default=False)
+    pt_16_00 = models.BooleanField(default=False)
+    pt_06_00 = models.BooleanField(default=False)
+    pt_39_00 = models.BooleanField(default=False)
+    pt_13_00 = models.BooleanField(default=False)
+    pt_18_00 = models.BooleanField(default=False)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class JSONAPIMeta:
+        resource_name = 'inchitypes'
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=[
+                    'software_version',
+                    'is_standard',
+                    'newpsoff',
+                    'donotaddh',
+                    'snon',
+                    'srel',
+                    'srac',
+                    'sucf',
+                    'suu',
+                    'sluud',
+                    'recmet',
+                    'fixedh',
+                    'ket',
+                    't15',
+                    'pt_22_00',
+                    'pt_16_00',
+                    'pt_06_00',
+                    'pt_39_00',
+                    'pt_13_00',
+                    'pt_18_00',
+                ],
+                name='inchi_type_constraint'
+            ),
+        ]
+        db_table = 'cir_inchi_type'
 
 
 class Organization(models.Model):
@@ -291,3 +543,125 @@ class MediaType(models.Model):
 
     def __str__(self):
         return "%s" % self.name
+
+
+class ContextTag(models.Model):
+    tag = models.CharField(max_length=128, blank=False, null=False, unique=True)
+    description = models.TextField(max_length=1500, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Context Teg"
+        verbose_name_plural = "Context Tags"
+        db_table = 'cir_database_context_tag'
+
+    def __str__(self):
+        return "%s" % self.tag
+
+
+class URIPattern(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uri = models.CharField(max_length=32768)
+    category = models.CharField(max_length=16, choices=(
+        ('schema', 'Schema'),
+        ('uritemplate', 'URI Template (RFC6570)'),
+        ('documentation', 'Documentation (HTML, PDF)'),
+    ), default='uritemplate')
+    name = models.CharField(max_length=768, null=False, blank=False)
+    description = models.TextField(max_length=32768, blank=True, null=True)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-added']
+        constraints = [
+            UniqueConstraint(
+                fields=['uri', 'category'],
+                name='unique_uripattern_constraint'
+            ),
+        ]
+        db_table = 'cir_database_uri_pattern'
+
+
+class Database(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=768, null=False, blank=False)
+    href = models.URLField(max_length=4096, null=True, blank=True)
+    description = models.TextField(max_length=4096, null=True, blank=True)
+    publisher = models.ForeignKey(Publisher, null=True, blank=True, on_delete=models.CASCADE)
+    context_tags = models.ManyToManyField(ContextTag)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-added']
+        constraints = [
+            UniqueConstraint(
+                fields=['name', 'publisher'],
+                name='unique_database_constraint'
+            ),
+        ]
+        db_table = 'cir_database'
+
+    def __str__(self):
+        return "%s" % self.name
+
+
+class Release(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    database = models.ForeignKey(Database, blank=False, null=False, on_delete=models.CASCADE)
+    publisher = models.ForeignKey(Publisher, blank=False, null=False, on_delete=models.CASCADE)
+    name = models.CharField(max_length=768, null=False, blank=False)
+    description = models.TextField(max_length=2048, blank=True, null=True)
+    href = models.URLField(max_length=4096, null=True, blank=True)
+    record_uri_pattern = models.ManyToManyField(URIPattern)
+    classification = models.CharField(
+        max_length=32,
+        db_column='class',
+        blank=True,
+        choices=(
+            ('public', 'Public'),
+            ('private', 'Private'),
+            ('internal', 'Internal'),
+            ('legacy', 'Legacy'),
+        )
+    )
+    status = models.CharField(max_length=32, blank=True, choices=(('active', 'Show'), ('inactive', 'Hide')))
+    version = models.CharField(max_length=255, null=True, blank=True)
+    released = models.DateField(null=True, blank=True, verbose_name="Date Released")
+    downloaded = models.DateField(null=True, blank=True, verbose_name="Date Downloaded")
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-added']
+        constraints = [
+            UniqueConstraint(
+                fields=['database', 'publisher', 'name', 'version', 'downloaded', 'released'],
+                name='unique_database_release_constraint'
+            ),
+        ]
+        db_table = 'cir_database_release'
+
+    @property
+    def version_string(self):
+        if self.version:
+            return self.version
+        if self.released:
+            date_string = "(%s/%s)" % (self.released.strftime('%m'), self.released.strftime('%Y'))
+            return date_string
+        else:
+            return None
+
+    @property
+    def release_name(self):
+        if self.name:
+            return self.name
+        else:
+            if self.version_string:
+                string = "%s %s" % (self.database.name, self.version_string)
+            else:
+                string = "%s (%s)" % (self.database.name, self.publisher)
+            return string
+
+    def __str__(self):
+        return "%s" % self.release_name

@@ -5,10 +5,11 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from database.models import ContextTag, Database, Release
+#from database.models import
 from etl.models import FileCollection
-from structure.models import Structure, Name, NameType, StructureNames, ResponseType
-from resolver.models import InChI, Organization, Publisher
+from structure.models import  ResponseType
+from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNames, ContextTag, \
+    Database, Release, InChIType
 
 from pycactvs import Ens
 
@@ -30,6 +31,7 @@ def _loader():
     init_organization_and_publisher_data()
     init_database()
     init_release()
+    init_inchi_type()
     #init_structures()
 
 
@@ -54,10 +56,10 @@ def init_structures():
         inchi_obj, inchi_created = InChI.objects.get_or_create(ens.get('E_STDINCHI'))
         logger.info("InChI: %s %s" % (inchi_obj, inchi_created))
 
-        structure_inchi_obj, structure_inchi_created = StructureInChIs.objects.get_or_create(
-            structure=structure_obj,
-            inchi=inchi_obj
-        )
+        # structure_inchi_obj, structure_inchi_created = StructureInChIs.objects.get_or_create(
+        #     structure=structure_obj,
+        #     inchi=inchi_obj
+        # )
 
 
 def init_response_type_data():
@@ -377,8 +379,87 @@ def init_release():
 
     open_nci_db_collection, created = FileCollection.objects.get_or_create(
         release=open_nci_db,
-        file_location_pattern_string="nci/NCI_DTP.sdf"
+        file_location_pattern_string="nci/NCI_DTP.mini.sdf"
     )
     open_nci_db_collection.save()
 
 
+def init_inchi_type():
+
+    standard_inchi_type = InChIType.objects.get_or_create(
+        id="standard",
+        software_version="1.06",
+        description="Standard InChI",
+        is_standard=True,
+        donotaddh=True,
+    )
+    #standard_inchi_type.save()
+
+    original_inchi_type = InChIType.objects.get_or_create(
+        id="original",
+        software_version="1.06",
+        description="InChI with FixedH layer and RecMet option",
+        is_standard=False,
+        donotaddh=True,
+        fixedh=True,
+        recmet=True
+    )
+    #default_inchi_type.save()
+
+    tauto_inchi_type = InChIType.objects.get_or_create(
+        id="xtauto",
+        software_version="1.06",
+        description="experimental InChI with FixedH layer, RecMet option and experimental tauto options "
+                    "KET and T15 options set",
+        is_standard=False,
+        donotaddh=True,
+        fixedh=True,
+        recmet=True,
+        ket=True,
+        t15=True
+    )
+    #tauto_inchi_type.save()
+
+    tautox_inchi_type = InChIType.objects.get_or_create(
+        id="xtautox",
+        software_version="1.06T",
+        description="experimental InChI with FixedH layer, RecMet option and experimental tauto options "
+                    "KET, T15 including NCI tautomer options set",
+        is_standard=False,
+        donotaddh=True,
+        fixedh=True,
+        recmet=True,
+        ket=True,
+        t15=True,
+        pt_22_00=True,
+        pt_16_00=True,
+        pt_06_00=True,
+        pt_39_00=True,
+        pt_13_00=True,
+        pt_18_00=True
+    )
+    #tautox_inchi_type.save()
+
+
+    # id = models.CharField(max_length=32, primary_key=True, editable=False)
+    # software_version = models.CharField(max_length=16, default=None, blank=True, null=True)
+    # description = models.TextField(max_length=32768, blank=True, null=True)
+    # is_standard = models.BooleanField(default=False)
+    # option_newpsoff = models.BooleanField(default=False)
+    # option_donotaddh = models.BooleanField(default=False)
+    # option_snon = models.BooleanField(default=False)
+    # option_srel = models.BooleanField(default=False)
+    # option_srac = models.BooleanField(default=False)
+    # option_sucf = models.BooleanField(default=False)
+    # option_suu = models.BooleanField(default=False)
+    # option_sluud = models.BooleanField(default=False)
+    # option_recmet = models.BooleanField(default=False)
+    # option_fixedh = models.BooleanField(default=False)
+    # x_option_ket = models.BooleanField(default=False)
+    # x_option_15t = models.BooleanField(default=False)
+    # x_option_pt_22_00_x = models.BooleanField(default=False)
+    # x_option_pt_16_00_x = models.BooleanField(default=False)
+    # x_option_pt_06_00_x = models.BooleanField(default=False)
+    # x_option_pt_39_00_x = models.BooleanField(default=False)
+    # x_option_pt_13_00_x = models.BooleanField(default=False)
+    # x_option_pt_18_00_x = models.BooleanField(default=False)

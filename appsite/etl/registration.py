@@ -14,8 +14,8 @@ from pycactvs import Molfile, Ens, Prop
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
 from structure.inchi.identifier import InChIString, InChIKey
-from structure.models import Structure, Compound
-from resolver.models import InChI
+#from structure.models import
+from resolver.models import InChI, Structure, Compound
 
 logger = logging.getLogger('cirx')
 Status = namedtuple('Status', 'file created')
@@ -116,18 +116,19 @@ class FileRegistry(object):
             try:
                 # TODO: registering structures needs improvement - hadd might do harm here
                 ens: Ens = molfile.read()
-                #ens.hadd()
-                hashisy = CactvsHash(ens)
+                ens.hadd()
+                hashisy_key = CactvsHash(ens)
                 structure = Structure(
-                     hashisy=hashisy,
-                     minimol=CactvsMinimol(ens)
+                    hashisy_key=hashisy_key,
+                    hashisy=hashisy_key.padded,
+                    minimol=CactvsMinimol(ens)
                 )
                 structures.append(structure)
             except Exception as e:
                 logger.error("error while registering file record '%s': %s" % (fname, e))
                 break
             record_data = {
-                'hashisy': hashisy,
+                'hashisy_key': hashisy_key,
                 'index': record,
             }
             records.append(record_data)
@@ -138,7 +139,7 @@ class FileRegistry(object):
             record += 1
         molfile.close()
 
-        structures = sorted(structures, key=lambda s: s.hashisy.int)
+        structures = sorted(structures, key=lambda s: s.hashisy_key.int)
 
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
@@ -148,11 +149,11 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                hashisy_list = [record['hashisy'] for record in records]
-                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy')
+                hashisy_list = [record['hashisy_key'] for record in records]
+                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
                 record_objects = list()
                 for record_data in records:
-                    structure = structures[record_data['hashisy']]
+                    structure = structures[record_data['hashisy_key']]
                     record_objects.append(StructureFileRecord(
                         structure_file=structure_file,
                         structure=structure,
@@ -209,15 +210,16 @@ class StructureRegistry(object):
                     relationships = {}
                     ens = structure.to_ens
                     parent_ens = ens.get(identifier.parent_structure)
-                    hashisy: CactvsHash = CactvsHash(parent_ens)
-                    related_hashes[identifier.attr] = hashisy
+                    hashisy_key: CactvsHash = CactvsHash(parent_ens)
+                    related_hashes[identifier.attr] = hashisy_key
                     parent_structure: Structure = Structure(
-                        hashisy=hashisy,
+                        hashisy_key=hashisy_key,
+                        hashisy=hashisy_key.padded,
                         minimol=CactvsMinimol(parent_ens)
                     )
                     parent_structure_relationships\
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
-                    relationships[identifier.attr] = hashisy
+                    relationships[identifier.attr] = hashisy_key
                     source_structure_relationships.append(StructureRelationships(structure, relationships))
                 logger.info("finished normalizing structure %s" % structure_id)
             except Exception as e:
@@ -225,21 +227,21 @@ class StructureRegistry(object):
                 structure.save()
                 logger.error("normalizing structure %s failed : %s" % (structure_id, e))
 
-        parent_structure_hash_list = list(set([p.structure.hashisy for p in parent_structure_relationships]))
+        parent_structure_hash_list = list(set([p.structure.hashisy_key for p in parent_structure_relationships]))
         try:
             with transaction.atomic():
                 # create parent structures in bulk
-                structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy.int)
+                structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int)
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True
                 )
 
                 # fetch hashisy / parent structures in bulk (by that they have an id)
-                parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy')
+                parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
 
                 # create compounds in bulk
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int)
+                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
                 Compound.objects.bulk_create(
                     [Compound(structure=parent_structure) for parent_structure in structures],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -250,7 +252,7 @@ class StructureRegistry(object):
                 for relationship in source_structure_relationships:
                     for attr, parent_hash in relationship.relationships.items():
                         setattr(source_structures[relationship.structure.id], attr, parent_structures[parent_hash])
-                structures = sorted(source_structures.values(), key=lambda s: s.hashisy.int)
+                structures = sorted(source_structures.values(), key=lambda s: s.hashisy_key.int)
                 Structure.objects.bulk_update(
                     structures,
                     [identifier.attr for identifier in identifiers]
@@ -259,8 +261,8 @@ class StructureRegistry(object):
                 # update parent structure relationships in bulk
                 for relationship in parent_structure_relationships:
                     for attr, parent_hash in relationship.relationships.items():
-                        setattr(parent_structures[relationship.structure.hashisy], attr, parent_structures[parent_hash])
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int)
+                        setattr(parent_structures[relationship.structure.hashisy_key], attr, parent_structures[parent_hash])
+                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
                 Structure.objects.bulk_update(
                     structures,
                     [identifier.attr for identifier in identifiers]
@@ -311,8 +313,8 @@ class StructureRegistry(object):
                     inchi_string = InChIString(
                         key=key,
                         string=inchi_string,
-                        save_options=inchi_saveopt,
-                        software_version_string=inchi_software_version,
+                        #save_options=inchi_saveopt,
+                        #software_version_string=inchi_software_version,
                         validate_key=False
                     )
                     d = inchi_string.model_dict
