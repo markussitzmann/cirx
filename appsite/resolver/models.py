@@ -99,7 +99,7 @@ class StructureInChIAssociation(models.Model):
     )
     inchi_type = models.ForeignKey(
         'InChIType',
-        related_name='inchi_associations',
+        related_name='structure_inchi_associations',
         on_delete=models.RESTRICT,
         blank=False,
         null=False

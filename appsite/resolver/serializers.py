@@ -10,7 +10,8 @@ from rest_framework_json_api.relations import SerializerMethodResourceRelatedFie
 #from structure.models import Structure
 from . import defaults
 from .exceptions import ResourceExistsError
-from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType
+from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
+    StructureInChIAssociation
 
 
 class StructureSerializer(serializers.HyperlinkedModelSerializer):
@@ -82,9 +83,24 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
 
 class InchiTypeSerializer(serializers.HyperlinkedModelSerializer):
 
+    structure_inchi_associations = relations.ResourceRelatedField(
+        queryset=StructureInChIAssociation.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        related_link_view_name='inchitype-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='inchitype-relationships',
+    )
+
+    included_serializers = {
+        'structure_inchi_associations': 'resolver.serializers.PublisherSerializer',
+    }
+
     class Meta:
         model = InChIType
         fields = (
+            'structure_inchi_associations',
             'software_version',
             'description',
             'is_standard',
