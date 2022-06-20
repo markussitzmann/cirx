@@ -16,6 +16,16 @@ from resolver.models import InChI, Structure, Organization, Publisher, EntryPoin
 
 class StructureSerializer(serializers.HyperlinkedModelSerializer):
 
+    entrypoints = relations.ResourceRelatedField(
+        queryset=EntryPoint.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        related_link_view_name='inchi-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='inchi-relationships',
+    )
+
     inchis = relations.ResourceRelatedField(
         queryset=InChI.objects,
         many=True,
@@ -27,6 +37,7 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     included_serializers = {
+        'entrypoints': 'resolver.serializers.EntryPointSerializer',
         'inchis': 'resolver.serializers.InchiSerializer',
     }
 
@@ -41,7 +52,7 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Structure
-        fields = ('hashisy', 'smiles', 'inchis', 'added', 'blocked')
+        fields = ('hashisy', 'smiles', 'inchis', 'entrypoints', 'added', 'blocked')
         read_only_fields = ('id', 'hashisy')
         meta_fields = ('added', 'blocked')
 
@@ -197,7 +208,6 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
             raise IntegrityError("fields 'string', 'key', 'version', and 'is_standard'"
                                  "are immutable for the inchis resource")
 
-
         entrypoints = validated_data.pop('entrypoints', None)
 
         instance.save()
@@ -208,6 +218,45 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
             instance.entrypoints.clear(bulk=True)
 
         return instance
+
+
+class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer):
+
+    structure = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        related_link_view_name='structureinchiassocation-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structureinchiassocation-relationships',
+    )
+
+    inchi = relations.ResourceRelatedField(
+        queryset=InChI.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        related_link_view_name='structureinchiassocation-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structureinchiassocation-relationships',
+    )
+
+    included_serializers = {
+        'inchi': 'resolver.serializers.InchiSerializer',
+        'structure': 'resolver.serializers.StructureSerializer'
+    }
+
+    class Meta:
+        model = InChI
+        fields = (
+            'structure',
+            'inchi',
+            'added',
+            'modified'
+        )
+        #read_only_fields = ('key', 'version')
+        meta_fields = ('added', 'modified')
 
 
 class OrganizationSerializer(serializers.HyperlinkedModelSerializer):

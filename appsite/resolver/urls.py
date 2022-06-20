@@ -9,12 +9,14 @@ from . import routers
 router = routers.ResolverApiRouter(trailing_slash=False)
 router.register('structures', views.StructureViewSet)
 router.register('inchis', views.InchiViewSet)
+router.register('structureinchiassociations', views.StructureInChIAssociationViewSet)
 router.register('inchitypes', views.InchiTypeViewSet)
 router.register('organizations', views.OrganizationViewSet)
 router.register('publishers', views.PublisherViewSet)
 router.register('entrypoints', views.EntryPointViewSet)
 router.register('endpoints', views.EndPointViewSet)
 router.register('mediatypes', views.MediaTypeViewSet)
+
 
 
 urlpatterns = [
@@ -80,5 +82,13 @@ urlpatterns = [
     path('mediatypes/<pk>/<related_field>',
         view=views.MediaTypeViewSet.as_view({'get': 'retrieve_related'}),
         name='mediatype-related'),
+
+    path('structureinchiassociations/<pk>/relationships/<related_field>',
+        view=views.StructureInChIAssociationRelationshipView.as_view(),
+        name='mediatype-relationships'),
+    path('structureinchiassociations/<pk>/<related_field>',
+        view=views.StructureInChIAssociationViewSet.as_view({'get': 'retrieve_related'}),
+        name='mediatype-related'),
+
 
 ]

@@ -9,7 +9,8 @@ from rest_framework.decorators import action
 from rest_framework_json_api.views import RelationshipView, ModelViewSet
 
 #from structure.models import Structure
-from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType
+from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
+    StructureInChIAssociation
 from resolver.serializers import (
     InchiSerializer,
     OrganizationSerializer,
@@ -17,7 +18,9 @@ from resolver.serializers import (
     EntryPointSerializer,
     EndPointSerializer,
     MediaTypeSerializer,
-    StructureSerializer, InchiTypeSerializer
+    StructureSerializer,
+    InchiTypeSerializer,
+    StructureInChIAssociationSerializer
 )
 
 
@@ -148,6 +151,38 @@ class InchiRelationshipView(ResourceRelationshipView):
 
     queryset = InChI.objects.all()
     self_link_view_name = 'inchi-relationships'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class StructureInChIAssociationViewSet(ResourceModelViewSet):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        self.name = "StructureInChIAssociation"
+        super().__init__(*args, **kwargs)
+
+    queryset = StructureInChIAssociation.objects.all()
+    serializer_class = StructureInChIAssociationSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    filterset_fields = {
+        'id': ('exact', 'in'),
+        #'key': ('icontains', 'iexact', 'contains', 'exact'),
+        #'string': ('icontains', 'iexact', 'contains', 'exact'),
+        #'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
+        #'entrypoints__category': ('exact', 'in'),
+    }
+    #search_fields = ('string', 'key',)
+
+
+class StructureInChIAssociationRelationshipView(ResourceRelationshipView):
+
+    def __init__(self, *args, **kwargs):
+        self.name = "StructureInChIAssociation"
+        super().__init__(*args, **kwargs)
+
+    queryset = StructureInChIAssociation.objects.all()
+    self_link_view_name = 'structureinchiassociation-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
