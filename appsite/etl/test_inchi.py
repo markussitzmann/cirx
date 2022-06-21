@@ -42,7 +42,7 @@ class EtlTests(TestCase):
                 'E_INCHIKEY',
                 Prop.Ref('E_INCHI').softwareversion,
                 Prop.Ref('E_INCHIKEY').software,
-                ["DONOTADDH RECMET NOWARNINGS FIXEDH"]
+                "DONOTADDH RECMET NOWARNINGS FIXEDH"
             ),
             InChIType(
                 'x-tauto',
@@ -50,7 +50,7 @@ class EtlTests(TestCase):
                 'E_INCHIKEY',
                 Prop.Ref('E_INCHI').softwareversion,
                 Prop.Ref('E_INCHIKEY').software,
-                ["DONOTADDH RECMET NOWARNINGS KET 15T"]
+                "DONOTADDH RECMET NOWARNINGS KET 15T"
             ),
             InChIType(
                 'x-tauto-x',

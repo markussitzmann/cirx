@@ -20,17 +20,6 @@ class Command(BaseCommand):
         _calculate_inchi()
 
 
-# def normalize_structures(structure_ids: List[int]):
-#     logger.info("--- bla ---")
-#     task = normalize_structure_task
-#
-#     chunk_size = StructureRegistry.CHUNK_SIZE
-#     chunks = [structure_ids[x:x + chunk_size] for x in range(0, len(structure_ids), chunk_size)]
-#     tasks = [task.delay(chunk) for chunk in chunks]
-#
-#     return tasks
-
-
 def _calculate_inchi():
     # TODO: is set locally
     settings.INIT_SYSTEM = True

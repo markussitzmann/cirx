@@ -23,7 +23,7 @@ Status = namedtuple('Status', 'file created')
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
 InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopts')
-InChIType = namedtuple('InChIType', 'property key version software')
+InChIType = namedtuple('InChIType', 'id property key softwareversion software options')
 
 class FileRegistry(object):
 
@@ -187,8 +187,38 @@ class StructureRegistry(object):
     ]
 
     INCHI_TYPES = [
-        InChIType('E_STDINCHI', 'E_STDINCHIKEY', Prop.Ref('E_STDINCHI').softwareversion, Prop.Ref('E_STDINCHI').software),
-        InChIType('E_TAUTO_INCHI', 'E_TAUTO_INCHIKEY', Prop.Ref('E_TAUTO_INCHI').softwareversion, Prop.Ref('E_TAUTO_INCHI').software),
+        InChIType(
+            'standard',
+            'E_STDINCHI',
+            'E_STDINCHIKEY',
+            Prop.Ref('E_STDINCHI').softwareversion,
+            Prop.Ref('E_STDINCHI').software,
+            ""
+        ),
+        InChIType(
+            'original',
+            'E_INCHI',
+            'E_INCHIKEY',
+            Prop.Ref('E_INCHI').softwareversion,
+            Prop.Ref('E_INCHI').software,
+            "DONOTADDH RECMET NOWARNINGS FIXEDH"
+        ),
+        InChIType(
+            'xtauto',
+            'E_INCHI',
+            'E_INCHIKEY',
+            Prop.Ref('E_INCHI').softwareversion,
+            Prop.Ref('E_INCHI').software,
+            "DONOTADDH RECMET NOWARNINGS KET 15T"
+        ),
+        InChIType(
+            'xtautox',
+            'E_TAUTO_INCHI',
+            'E_TAUTO_INCHIKEY',
+            Prop.Ref('E_TAUTO_INCHI').softwareversion,
+            Prop.Ref('E_TAUTO_INCHI').software,
+            "DONOTADDH RECMET NOWARNINGS KET 15T PT_22_00 PT_16_00 PT_06_00 PT_39_00 PT_13_00 PT_18_00"
+        ),
     ]
 
     @staticmethod
@@ -297,7 +327,8 @@ class StructureRegistry(object):
                 inchi_relationships = {}
                 for inchi_type in StructureRegistry.INCHI_TYPES:
                     inchi_property = Prop.Ref(inchi_type.property)
-                    inchi_software_version = inchi_property.softwareversion
+                    inchi_software_version = inchi_type.softwareversion
+                    inchi_property.setparam("options", inchi_type.options)
                     ens = structure.to_ens
                     split_string = ens.get(inchi_type.property).split('\\')
                     split_length = len(split_string)
@@ -326,6 +357,10 @@ class StructureRegistry(object):
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()
                 logger.error("calculating inchi for structure %s failed : %s" % (structure_id, e))
+
+        for s in structure_to_inchi_list:
+            logger.info("x %s" % (s,))
+
         try:
             with transaction.atomic():
                 inchi_list = [
@@ -343,13 +378,23 @@ class StructureRegistry(object):
                 structure_id_list = [s.structure for s in structure_to_inchi_list]
 
                 inchi_objects = InChI.objects.in_bulk(inchi_id_list, field_name='id')
+                inchi_objects_by_key = {i.key: i for i in inchi_objects.values()}
+
                 structure_objects = Structure.objects.in_bulk(structure_id_list, field_name='id')
 
                 structure_inchis_list = []
                 for structure_to_inchi in structure_to_inchi_list:
                     sid = structure_to_inchi.structure
                     for inchi_type, inchi_data in structure_to_inchi.relationships.items():
-                        structure_objects[sid].inchis.add(inchi_objects[inchi_data.inchi.id])
+                        logger.info("%s ---> %s | %s : %s" % (sid, inchi_data.inchi.id, inchi_type, inchi_data))
+                        if inchi_data.inchi.key in inchi_objects_by_key:
+                            inchi = inchi_objects_by_key[inchi_data.inchi.key]
+                            logger.info("I %s" % (inchi,))
+                            structure_objects[sid].inchis.add(inchi)
+                        else:
+                            logger.info("I %s" % (inchi,))
+                            logger.info("DOES NOT EXISTS %s" % (inchi_data.inchi.key,))
+
                         # structure_inchi = StructureInChIs(
                         #     structure=structure_objects[sid],
                         #     inchi=inchi_objects[inchi_data.inchi.id],
