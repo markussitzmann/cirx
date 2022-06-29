@@ -104,7 +104,10 @@ class StructureInChIAssociation(models.Model):
         blank=False,
         null=False
     )
+    software_version = models.CharField(max_length=16, default="1", blank=False, null=False)
     save_opt = models.CharField(max_length=2, default=None, blank=True, null=True)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
     class JSONAPIMeta:
         resource_name = 'structure_inchi_associations'
@@ -112,7 +115,7 @@ class StructureInChIAssociation(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['structure', 'inchi'],
+                fields=['structure', 'inchi', 'inchi_type', 'save_opt'],
                 name='unique_structure_inchi_association'
             ),
         ]
@@ -200,7 +203,6 @@ class StructureNames(models.Model):
             UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
         ]
         db_table = 'cir_structure_names'
-
 
 
 class InChIManager(models.Manager):

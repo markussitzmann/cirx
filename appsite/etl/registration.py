@@ -14,16 +14,15 @@ from pycactvs import Molfile, Ens, Prop
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
 from structure.inchi.identifier import InChIString, InChIKey
-#from structure.models import
-from resolver.models import InChI, Structure, Compound
+from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType
 
 logger = logging.getLogger('cirx')
 Status = namedtuple('Status', 'file created')
 
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
-InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopts')
-InChIType = namedtuple('InChIType', 'id property key softwareversion software options')
+InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
+InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
 
 class FileRegistry(object):
 
@@ -187,7 +186,7 @@ class StructureRegistry(object):
     ]
 
     INCHI_TYPES = [
-        InChIType(
+        InChITypeTuple(
             'standard',
             'E_STDINCHI',
             'E_STDINCHIKEY',
@@ -195,29 +194,29 @@ class StructureRegistry(object):
             Prop.Ref('E_STDINCHI').software,
             ""
         ),
-        InChIType(
+        InChITypeTuple(
             'original',
             'E_INCHI',
             'E_INCHIKEY',
             Prop.Ref('E_INCHI').softwareversion,
             Prop.Ref('E_INCHI').software,
-            "DONOTADDH RECMET NOWARNINGS FIXEDH"
+            "SAVEOPT  RECMET NOWARNINGS FIXEDH"
         ),
-        InChIType(
+        InChITypeTuple(
             'xtauto',
             'E_INCHI',
             'E_INCHIKEY',
             Prop.Ref('E_INCHI').softwareversion,
             Prop.Ref('E_INCHI').software,
-            "DONOTADDH RECMET NOWARNINGS KET 15T"
+            "SAVEOPT  RECMET NOWARNINGS KET 15T"
         ),
-        InChIType(
+        InChITypeTuple(
             'xtautox',
             'E_TAUTO_INCHI',
             'E_TAUTO_INCHIKEY',
             Prop.Ref('E_TAUTO_INCHI').softwareversion,
             Prop.Ref('E_TAUTO_INCHI').software,
-            "DONOTADDH RECMET NOWARNINGS KET 15T PT_22_00 PT_16_00 PT_06_00 PT_39_00 PT_13_00 PT_18_00"
+            "SAVEOPT DONOTADDH RECMET NOWARNINGS KET 15T PT_22_00 PT_16_00 PT_06_00 PT_39_00 PT_13_00 PT_18_00"
         ),
     ]
 
@@ -327,7 +326,7 @@ class StructureRegistry(object):
                 inchi_relationships = {}
                 for inchi_type in StructureRegistry.INCHI_TYPES:
                     inchi_property = Prop.Ref(inchi_type.property)
-                    inchi_software_version = inchi_type.softwareversion
+                    #inchi_software_version = inchi_type.softwareversion
                     inchi_property.setparam("options", inchi_type.options)
                     ens = structure.to_ens
                     split_string = ens.get(inchi_type.property).split('\\')
@@ -382,7 +381,12 @@ class StructureRegistry(object):
 
                 structure_objects = Structure.objects.in_bulk(structure_id_list, field_name='id')
 
-                structure_inchis_list = []
+                inchi_type_objects = InChIType.objects.in_bulk(
+                    [t.id for t in StructureRegistry.INCHI_TYPES],
+                    field_name='id'
+                )
+
+                structure_inchi_associations = []
                 for structure_to_inchi in structure_to_inchi_list:
                     sid = structure_to_inchi.structure
                     for inchi_type, inchi_data in structure_to_inchi.relationships.items():
@@ -394,19 +398,21 @@ class StructureRegistry(object):
                         else:
                             logger.info("I %s" % (inchi,))
                             logger.info("DOES NOT EXISTS %s" % (inchi_data.inchi.key,))
+                            continue
 
-                        # structure_inchi = StructureInChIs(
-                        #     structure=structure_objects[sid],
-                        #     inchi=inchi_objects[inchi_data.inchi.id],
-                        #     software_version_string=inchi_type.version,
-                        #     save_options=inchi_data.saveopts
-                        # )
-                        # structure_inchis_list.append(structure_inchi)
-                # StructureInChIs.objects.bulk_create(
-                #     structure_inchis_list,
-                #     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-                #     ignore_conflicts=True
-                # )
+                        structure_inchi_association = StructureInChIAssociation(
+                            structure=structure_objects[sid],
+                            inchi=inchi,
+                            inchi_type=inchi_type_objects[inchi_type.id],
+                            save_opt=inchi_data.saveopt,
+                            software_version=inchi_type.softwareversion
+                        )
+                        structure_inchi_associations.append(structure_inchi_association)
+                StructureInChIAssociation.objects.bulk_create(
+                    structure_inchi_associations,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
 
         except DatabaseError as e:
             logger.error(e)

@@ -18,7 +18,6 @@ router.register('endpoints', views.EndPointViewSet)
 router.register('mediatypes', views.MediaTypeViewSet)
 
 
-
 urlpatterns = [
 
     re_path(r'', include(router.urls)),
@@ -40,6 +39,13 @@ urlpatterns = [
     path('inchis/<pk>/<related_field>',
          views.InchiViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
          name='inchi-related'),
+
+    path('structureinchiassociations/<pk>/relationships/<related_field>',
+        view=views.StructureInChIAssociationRelationshipView.as_view(),
+        name='structureinchiassociation-relationships'),
+    path('structureinchiassociations/<pk>/<related_field>',
+        view=views.StructureInChIAssociationViewSet.as_view({'get': 'retrieve_related'}),
+        name='structureinchiassociation-related'),
 
     path('inchitypes/<pk>/relationships/<related_field>',
          views.InchiTypeRelationshipView.as_view(), {'source': 'relationships'},
@@ -82,13 +88,5 @@ urlpatterns = [
     path('mediatypes/<pk>/<related_field>',
         view=views.MediaTypeViewSet.as_view({'get': 'retrieve_related'}),
         name='mediatype-related'),
-
-    path('structureinchiassociations/<pk>/relationships/<related_field>',
-        view=views.StructureInChIAssociationRelationshipView.as_view(),
-        name='mediatype-relationships'),
-    path('structureinchiassociations/<pk>/<related_field>',
-        view=views.StructureInChIAssociationViewSet.as_view({'get': 'retrieve_related'}),
-        name='mediatype-related'),
-
 
 ]

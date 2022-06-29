@@ -226,37 +226,63 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
         queryset=Structure.objects,
         many=False,
         read_only=False,
-        required=False,
-        related_link_view_name='structureinchiassocation-related',
+        required=True,
+        related_link_view_name='structureinchiassociation-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structureinchiassocation-relationships',
+        self_link_view_name='structureinchiassociation-relationships',
     )
 
     inchi = relations.ResourceRelatedField(
         queryset=InChI.objects,
         many=False,
         read_only=False,
-        required=False,
-        related_link_view_name='structureinchiassocation-related',
+        required=True,
+        related_link_view_name='structureinchiassociation-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structureinchiassocation-relationships',
+        self_link_view_name='structureinchiassociation-relationships',
     )
+
+    inchi_type = relations.ResourceRelatedField(
+        queryset=InChIType.objects,
+        many=False,
+        read_only=False,
+        required=True,
+        related_link_view_name='structureinchiassociation-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structureinchiassociation-relationships',
+    )
+
+    inchikey = serializers.SerializerMethodField()
+    smiles = serializers.SerializerMethodField()
 
     included_serializers = {
         'inchi': 'resolver.serializers.InchiSerializer',
+        'inchi_type': 'resolver.serializers.InchiTypeSerializer',
         'structure': 'resolver.serializers.StructureSerializer'
     }
 
     class Meta:
-        model = InChI
+        model = StructureInChIAssociation
         fields = (
+            'save_opt',
+            'software_version',
             'structure',
             'inchi',
+            'inchi_type',
+            'inchikey',
+            'smiles',
             'added',
             'modified'
         )
-        #read_only_fields = ('key', 'version')
-        meta_fields = ('added', 'modified')
+        read_only_fields = ('added', 'modified')
+        meta_fields = ('inchikey', 'smiles', 'added', 'modified')
+        ordering = ['structure', 'inchi']
+
+    def get_inchikey(self, obj):
+        return obj.inchi.key
+
+    def get_smiles(self, obj):
+        return obj.structure.to_ens.get("E_SMILES")
 
 
 class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
@@ -291,7 +317,17 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Organization
         fields = (
-        'url', 'parent', 'children', 'name', 'abbreviation', 'category', 'href', 'publishers', 'added', 'modified')
+            'url',
+            'parent',
+            'children',
+            'name',
+            'abbreviation',
+            'category',
+            'href',
+            'publishers',
+            'added',
+            'modified'
+        )
         read_only_fields = ('added', 'modified')
         meta_fields = ('added', 'modified')
 
