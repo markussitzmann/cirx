@@ -40,6 +40,7 @@ services:
     image: postgres:13-bullseye
     container_name: ${APP_NAME}-postgres
     volumes:
+      - ${APP_HOME}:/home/app
       - postgres_db_volume:/var/lib/postgresql
     ports:
       - "5432:5432"
@@ -49,37 +50,64 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
 
-  cirx-rabbitmq:
-    image: rabbitmq:3.8-management
-    container_name: ${APP_NAME}-rabbitmq
-    ports:
-      - "5673:5672"
-      - "15673:15672"
-    volumes:
-      - rabbitmq_volume:/var/lib/rabbitmq/
-      - rabbitmq_volume:/var/log/rabbitmq
-    networks:
-      - app_network
-    environment:
-      - RABBITMQ_DEFAULT_USER
-      - RABBITMQ_DEFAULT_PASS
-    healthcheck:
-      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
-      interval: 5s
-      timeout: 15s
-      retries: 10
+#  cirx-rabbitmq:
+#    image: rabbitmq:3.8-management
+#    container_name: ${APP_NAME}-rabbitmq
+#    ports:
+#      - "5673:5672"
+#      - "15673:15672"
+#    volumes:
+#      - rabbitmq_volume:/var/lib/rabbitmq/
+#      - rabbitmq_volume:/var/log/rabbitmq
+#    networks:
+#      - app_network
+#    environment:
+#      - RABBITMQ_DEFAULT_USER
+#      - RABBITMQ_DEFAULT_PASS
+#    healthcheck:
+#      test: rabbitmq-diagnostics -q ping
+#      interval: 5s
+#      timeout: 15s
+#      retries: 1
 
-  cirx-worker:
-    image: ${APP_NAME}:${APP_VERSION}
-    container_name: ${APP_NAME}-python
+  cirx-cache:
+    image: redis:6.2-bullseye
+    container_name: ${APP_NAME}-cache
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning #--requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     volumes:
-      - ${APP_HOME}:/home/app
-      - ${APP_HOME}/nginx:/home/nginx
-      #    ports:
-      #      - "8000:8000"
+      - cache_volume:/data
     networks:
       - app_network
+
+  cirx-flower:
+    image: mher/flower
+    container_name: ${APP_NAME}-flower
     environment:
+      - CELERY_BROKER_URL=redis://cirx-cache
+      - CELERY_RESULT_BACKEND=redis://cirx-cache
+      - FLOWER_PORT=8888
+    #command: [ 'celery', 'flower', '--broker=redis://cirx-cache:6379', '--port=8888' ]
+    ports:
+      - 8888:8888
+    depends_on:
+      - cirx-cache
+      - cirx-worker1
+    networks:
+      - app_network
+
+  cirx-worker1:
+    image: ${APP_NAME}:${APP_VERSION}
+    container_name: ${APP_NAME}-worker1
+    volumes: &worker_volumes
+      - ${APP_HOME}:/home/app
+      - ${APP_HOME}/logging:/logging
+      - ${APP_HOME}/pids:/pids
+    networks:
+      - app_network
+    environment: &worker_env
       - APP_NAME
       - APP_VERSION
       - APP_UID
@@ -92,19 +120,37 @@ services:
       - VIRTUAL_HOST=${APP_VIRTUAL_HOSTNAME}
       - RABBITMQ_DEFAULT_USER
       - RABBITMQ_DEFAULT_PASS
-      - PYTHONSTARTUP=/home/app/cactvsenv/__init__.py
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
-    working_dir: "/home/app"
-    command: python
-    restart: on-failure
+    working_dir: "/home/app/appsite"
+#    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log", "--pidfile=/pids/cirx-worker1.pid"]
+    command: [ 'celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log"]
+
+#    restart: on-failure
     depends_on:
-      - cirx-rabbitmq
+#      - cirx-rabbitmq
+      - cirx-cache
+
+#  cirx-worker2:
+#    image: ${APP_NAME}:${APP_VERSION}
+#    container_name: ${APP_NAME}-worker2
+#    volumes: *worker_volumes
+#    networks:
+#      - app_network
+#    environment: *worker_env
+#    entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
+#    working_dir: "/home/app/appsite"
+#    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker2.log", "--pidfile=/pids/cirx-worker2.pid"]
+#    #restart: on-failure
+#    depends_on:
+#      - cirx-rabbitmq
 
 volumes:
   postgres_db_volume:
     name: ${APP_NAME}-postgres-db-volume
   rabbitmq_volume:
     name: ${APP_NAME}-rabbitmq_volume
+  cache_volume:
+    driver: local
 
 networks:
   app_network:
