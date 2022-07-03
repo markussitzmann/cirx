@@ -12,14 +12,14 @@ from rest_framework_json_api.views import RelationshipView, ModelViewSet
 from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
     StructureInChIAssociation
 from resolver.serializers import (
-    InchiSerializer,
+    InChISerializer,
     OrganizationSerializer,
     PublisherSerializer,
     EntryPointSerializer,
     EndPointSerializer,
     MediaTypeSerializer,
     StructureSerializer,
-    InchiTypeSerializer,
+    InChITypeSerializer,
     StructureInChIAssociationSerializer
 )
 
@@ -130,7 +130,7 @@ class InchiViewSet(ResourceModelViewSet):
         super().__init__(*args, **kwargs)
 
     queryset = InChI.objects.all()
-    serializer_class = InchiSerializer
+    serializer_class = InChISerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     filterset_fields = {
@@ -196,7 +196,7 @@ class InchiTypeViewSet(ResourceModelViewSet):
         super().__init__(*args, **kwargs)
 
     queryset = InChIType.objects.all()
-    serializer_class = InchiTypeSerializer
+    serializer_class = InChITypeSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     filterset_fields = {

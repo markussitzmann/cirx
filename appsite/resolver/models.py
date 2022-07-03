@@ -5,10 +5,8 @@ from django.db import models, IntegrityError
 from django.db.models import Index, UniqueConstraint
 from multiselectfield import MultiSelectField
 
-#from database.models import Release, Database
 from resolver.defaults import http_verbs
 
-#from structure.models import Structure
 from custom.cactvs import CactvsHash, CactvsMinimol
 from custom.fields import CactvsHashField, CactvsMinimolField
 from structure.inchi.identifier import InChIString
@@ -19,11 +17,11 @@ class StructureManager(models.Manager):
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
-    def _calculate_uuid(self):
-        return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-            self.element['well_formatted_no_prefix'],
-            #self.element['save_options'] if self.element['save_options'] else ''
-        ]))
+    # def _calculate_uuid(self):
+    #     return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
+    #         self.element['well_formatted_no_prefix'],
+    #         #self.element['save_options'] if self.element['save_options'] else ''
+    #     ]))
 
 
 class Structure(models.Model):
@@ -42,10 +40,12 @@ class Structure(models.Model):
         through='StructureNames',
         related_name="structures"
     )
-    inchis = models.ManyToManyField(
-        'resolver.InChI',
-        related_name="structures"
-    )
+    # inchis = models.ManyToManyField(
+    #     'InChI',
+    #     related_name="structures",
+    #     through='StructureInChIAssociation',
+    #     through_fields=('structure', 'inchi'),
+    # )
     entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
     added = models.DateTimeField(auto_now_add=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
@@ -79,131 +79,6 @@ class Structure(models.Model):
 
     def __str__(self):
         return "[%s] %s" % (self.hashisy.padded, self.to_ens.get("E_SMILES"))
-
-
-class StructureInChIAssociation(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    structure = models.ForeignKey(
-        Structure,
-        related_name='inchi_associations',
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False
-    )
-    inchi = models.ForeignKey(
-        'InChI',
-        related_name='inchi_associations',
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False
-    )
-    inchi_type = models.ForeignKey(
-        'InChIType',
-        related_name='structure_inchi_associations',
-        on_delete=models.RESTRICT,
-        blank=False,
-        null=False
-    )
-    software_version = models.CharField(max_length=16, default="1", blank=False, null=False)
-    save_opt = models.CharField(max_length=2, default=None, blank=True, null=True)
-    added = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class JSONAPIMeta:
-        resource_name = 'structure_inchi_associations'
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['structure', 'inchi', 'inchi_type', 'save_opt'],
-                name='unique_structure_inchi_association'
-            ),
-        ]
-        db_table = 'cir_structure_inchi_associations'
-
-
-class Compound(models.Model):
-    structure = models.OneToOneField(
-        'Structure',
-        blank=False,
-        null=False,
-        on_delete=models.PROTECT
-    )
-    added = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-    blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
-
-    class Meta:
-        db_table = 'cir_compound'
-
-    def __str__(self):
-        return "NCICADD:CID=%s" % self.id
-
-    def __repr__(self):
-        return "NCICADD:CID=%s" % self.id
-
-
-class Record(models.Model):
-    regid = models.ForeignKey('Name', on_delete=models.PROTECT)
-    version = models.IntegerField(default=1, blank=False, null=False)
-    release = models.ForeignKey('Release', blank=False, null=False, on_delete=models.CASCADE)
-    database = models.ForeignKey('Database', blank=False, null=False, on_delete=models.RESTRICT)
-    structure_file_record = models.ForeignKey(
-        'etl.StructureFileRecord',
-        blank=False,
-        null=False,
-        related_name="records",
-        on_delete=models.PROTECT
-    )
-    added = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(fields=['regid', 'version', 'release'], name='unique_record'),
-        ]
-        db_table = 'cir_record'
-
-    def __str__(self):
-        return "NCICADD:RID=%s" % self.id
-
-
-class Name(models.Model):
-    name = models.TextField(max_length=1500, unique=True)
-
-    class Meta:
-        db_table = 'cir_structure_name'
-
-    def get_structure(self):
-        return self.structure.get()
-
-    def __str__(self):
-        return "Name='%s'" % (self.name, )
-
-    def __repr__(self):
-        return self.name
-
-
-class NameType(models.Model):
-    string = models.CharField(max_length=64, unique=True, blank=False, null=False)
-    public_string = models.TextField(max_length=64, blank=False, null=False)
-    description = models.TextField(max_length=768, blank=True, null=True)
-
-    class Meta:
-        db_table = 'cir_name_type'
-
-
-class StructureNames(models.Model):
-    name = models.ForeignKey(Name, on_delete=models.CASCADE)
-    structure = models.ForeignKey(Structure, on_delete=models.CASCADE)
-    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
-        ]
-        db_table = 'cir_structure_names'
-
 
 class InChIManager(models.Manager):
 
@@ -320,6 +195,130 @@ class InChIType(models.Model):
             ),
         ]
         db_table = 'cir_inchi_type'
+
+
+class StructureInChIAssociation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    structure = models.ForeignKey(
+        Structure,
+        related_name='structureinchiassociations',
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+    inchi = models.ForeignKey(
+        InChI,
+        related_name='structureinchiassociations',
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+    inchitype = models.ForeignKey(
+        InChIType,
+        related_name='structureinchiassociations',
+        on_delete=models.RESTRICT,
+        blank=False,
+        null=False
+    )
+    software_version = models.CharField(max_length=16, default="1", blank=False, null=False)
+    save_opt = models.CharField(max_length=2, default=None, blank=True, null=True)
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class JSONAPIMeta:
+        resource_name = 'structureInchiAssociations'
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['structure', 'inchi', 'inchitype', 'save_opt'],
+                name='unique_structure_inchi_association'
+            ),
+        ]
+        db_table = 'cir_structure_inchi_associations'
+
+
+class Compound(models.Model):
+    structure = models.OneToOneField(
+        'Structure',
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT
+    )
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
+
+    class Meta:
+        db_table = 'cir_compound'
+
+    def __str__(self):
+        return "NCICADD:CID=%s" % self.id
+
+    def __repr__(self):
+        return "NCICADD:CID=%s" % self.id
+
+
+class Record(models.Model):
+    regid = models.ForeignKey('Name', on_delete=models.PROTECT)
+    version = models.IntegerField(default=1, blank=False, null=False)
+    release = models.ForeignKey('Release', blank=False, null=False, on_delete=models.CASCADE)
+    database = models.ForeignKey('Database', blank=False, null=False, on_delete=models.RESTRICT)
+    structure_file_record = models.ForeignKey(
+        'etl.StructureFileRecord',
+        blank=False,
+        null=False,
+        related_name="records",
+        on_delete=models.PROTECT
+    )
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['regid', 'version', 'release'], name='unique_record'),
+        ]
+        db_table = 'cir_record'
+
+    def __str__(self):
+        return "NCICADD:RID=%s" % self.id
+
+
+class Name(models.Model):
+    name = models.TextField(max_length=1500, unique=True)
+
+    class Meta:
+        db_table = 'cir_structure_name'
+
+    def get_structure(self):
+        return self.structure.get()
+
+    def __str__(self):
+        return "Name='%s'" % (self.name, )
+
+    def __repr__(self):
+        return self.name
+
+
+class NameType(models.Model):
+    string = models.CharField(max_length=64, unique=True, blank=False, null=False)
+    public_string = models.TextField(max_length=64, blank=False, null=False)
+    description = models.TextField(max_length=768, blank=True, null=True)
+
+    class Meta:
+        db_table = 'cir_name_type'
+
+
+class StructureNames(models.Model):
+    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    structure = models.ForeignKey(Structure, on_delete=models.CASCADE)
+    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
+        ]
+        db_table = 'cir_structure_names'
 
 
 class Organization(models.Model):

@@ -357,8 +357,8 @@ class StructureRegistry(object):
                 structure.save()
                 logger.error("calculating inchi for structure %s failed : %s" % (structure_id, e))
 
-        for s in structure_to_inchi_list:
-            logger.info("x %s" % (s,))
+        # for s in structure_to_inchi_list:
+        #     logger.info("x %s" % (s,))
 
         try:
             with transaction.atomic():
@@ -393,8 +393,8 @@ class StructureRegistry(object):
                         logger.info("%s ---> %s | %s : %s" % (sid, inchi_data.inchi.id, inchi_type, inchi_data))
                         if inchi_data.inchi.key in inchi_objects_by_key:
                             inchi = inchi_objects_by_key[inchi_data.inchi.key]
-                            logger.info("I %s" % (inchi,))
-                            structure_objects[sid].inchis.add(inchi)
+                        #    logger.info("I %s" % (inchi,))
+                        #    structure_objects[sid].inchis.add(inchi)
                         else:
                             logger.info("I %s" % (inchi,))
                             logger.info("DOES NOT EXISTS %s" % (inchi_data.inchi.key,))
@@ -403,7 +403,7 @@ class StructureRegistry(object):
                         structure_inchi_association = StructureInChIAssociation(
                             structure=structure_objects[sid],
                             inchi=inchi,
-                            inchi_type=inchi_type_objects[inchi_type.id],
+                            inchitype=inchi_type_objects[inchi_type.id],
                             save_opt=inchi_data.saveopt,
                             software_version=inchi_type.softwareversion
                         )

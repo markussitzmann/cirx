@@ -23,7 +23,7 @@ urlpatterns = [
     re_path(r'', include(router.urls)),
 
     path('_self',
-        view=views.EntryPointViewSet.as_view({'get': 'get_self_entrypoint'}),
+        views.EntryPointViewSet.as_view({'get': 'get_self_entrypoint'}),
         name='entrypoint-self'),
 
     path('structures/<pk>/relationships/<related_field>',
@@ -41,10 +41,10 @@ urlpatterns = [
          name='inchi-related'),
 
     path('structureinchiassociations/<pk>/relationships/<related_field>',
-        view=views.StructureInChIAssociationRelationshipView.as_view(),
+        views.StructureInChIAssociationRelationshipView.as_view(), {'source': 'relationships'},
         name='structureinchiassociation-relationships'),
     path('structureinchiassociations/<pk>/<related_field>',
-        view=views.StructureInChIAssociationViewSet.as_view({'get': 'retrieve_related'}),
+        views.StructureInChIAssociationViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
         name='structureinchiassociation-related'),
 
     path('inchitypes/<pk>/relationships/<related_field>',
@@ -55,38 +55,38 @@ urlpatterns = [
          name='inchitype-related'),
 
     path('publishers/<pk>/relationships/<related_field>',
-        view=views.PublisherRelationshipView.as_view(),
+        views.PublisherRelationshipView.as_view(), {'source': 'relationships'},
         name='publisher-relationships'),
     path('publishers/<pk>/<related_field>',
-        view=views.PublisherViewSet.as_view({'get': 'retrieve_related'}),
+        views.PublisherViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
         name='publisher-related'),
 
     path('entrypoints/<pk>/relationships/<related_field>',
-        view=views.EntryPointRelationshipView.as_view(),
+        views.EntryPointRelationshipView.as_view(), {'source': 'relationships'},
         name='entrypoint-relationships'),
     path('entrypoints/<pk>/<related_field>',
-        view=views.EntryPointViewSet.as_view({'get': 'retrieve_related'}),
+        views.EntryPointViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
         name='entrypoint-related'),
 
     path('organizations/<pk>/relationships/<related_field>',
-        view=views.OrganizationRelationshipView.as_view(),
+        views.OrganizationRelationshipView.as_view(), {'source': 'relationships'},
         name='organization-relationships'),
     path('organizations/<pk>/<related_field>',
-        view=views.OrganizationViewSet.as_view({'get': 'retrieve_related'}),
+        views.OrganizationViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
         name='organization-related'),
 
     path('endpoints/<pk>/relationships/<related_field>',
-        view=views.EndPointRelationshipView.as_view(),
+        views.EndPointRelationshipView.as_view(), {'source': 'relationships'},
         name='endpoint-relationships'),
     path('endpoints/<pk>/<related_field>',
-        view=views.EndPointViewSet.as_view({'get': 'retrieve_related'}),
+        views.EndPointViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
         name='endpoint-related'),
 
     path('mediatypes/<pk>/relationships/<related_field>',
-        view=views.MediaTypeRelationshipView.as_view(),
+        views.MediaTypeRelationshipView.as_view(), {'source': 'relationships'},
         name='mediatype-relationships'),
     path('mediatypes/<pk>/<related_field>',
-        view=views.MediaTypeViewSet.as_view({'get': 'retrieve_related'}),
+        views.MediaTypeViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
         name='mediatype-related'),
 
 ]

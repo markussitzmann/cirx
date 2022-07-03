@@ -147,8 +147,8 @@ services:
 volumes:
   postgres_db_volume:
     name: ${APP_NAME}-postgres-db-volume
-  rabbitmq_volume:
-    name: ${APP_NAME}-rabbitmq_volume
+#  rabbitmq_volume:
+#    name: ${APP_NAME}-rabbitmq_volume
   cache_volume:
     driver: local
 

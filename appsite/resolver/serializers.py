@@ -1,15 +1,12 @@
 from django.db import IntegrityError
 from rest_framework.fields import MultipleChoiceField
-from rest_framework.response import Response
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
 from typing import Dict
 
-from rest_framework_json_api.relations import SerializerMethodResourceRelatedField
 
-#from structure.models import Structure
-from . import defaults
-from .exceptions import ResourceExistsError
+from resolver import defaults
+from resolver.exceptions import ResourceExistsError
 from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
     StructureInChIAssociation
 
@@ -21,13 +18,13 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=False,
         required=False,
-        related_link_view_name='inchi-related',
+        related_link_view_name='structure-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='inchi-relationships',
+        self_link_view_name='structure-relationships',
     )
 
-    inchis = relations.ResourceRelatedField(
-        queryset=InChI.objects,
+    structureinchiassociations = relations.ResourceRelatedField(
+        queryset=StructureInChIAssociation.objects,
         many=True,
         read_only=False,
         required=False,
@@ -38,7 +35,7 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
-        'inchis': 'resolver.serializers.InchiSerializer',
+        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     smiles = serializers.SerializerMethodField('serialize_minimol')
@@ -52,7 +49,15 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Structure
-        fields = ('hashisy', 'smiles', 'inchis', 'entrypoints', 'added', 'blocked')
+        fields = (
+            'url',
+            'hashisy',
+            'smiles',
+            'structureinchiassociations',
+            'entrypoints',
+            'added',
+            'blocked'
+        )
         read_only_fields = ('id', 'hashisy')
         meta_fields = ('added', 'blocked')
 
@@ -92,9 +97,9 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
-class InchiTypeSerializer(serializers.HyperlinkedModelSerializer):
+class InChITypeSerializer(serializers.HyperlinkedModelSerializer):
 
-    structure_inchi_associations = relations.ResourceRelatedField(
+    structureinchiassociations = relations.ResourceRelatedField(
         queryset=StructureInChIAssociation.objects,
         many=True,
         read_only=False,
@@ -105,13 +110,14 @@ class InchiTypeSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     included_serializers = {
-        'structure_inchi_associations': 'resolver.serializers.PublisherSerializer',
+        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     class Meta:
         model = InChIType
         fields = (
-            'structure_inchi_associations',
+            'url',
+            'structureinchiassociations',
             'software_version',
             'description',
             'is_standard',
@@ -140,7 +146,7 @@ class InchiTypeSerializer(serializers.HyperlinkedModelSerializer):
         meta_fields = ('added', 'modified')
 
 
-class InchiSerializer(serializers.HyperlinkedModelSerializer):
+class InChISerializer(serializers.HyperlinkedModelSerializer):
 
     entrypoints = relations.ResourceRelatedField(
         queryset=EntryPoint.objects,
@@ -152,8 +158,18 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
         self_link_view_name='inchi-relationships',
     )
 
-    structures = relations.ResourceRelatedField(
-        queryset=Structure.objects,
+    # structures = relations.ResourceRelatedField(
+    #     queryset=Structure.objects,
+    #     many=True,
+    #     read_only=False,
+    #     required=False,
+    #     related_link_view_name='inchi-related',
+    #     related_link_url_kwarg='pk',
+    #     self_link_view_name='inchi-relationships',
+    # )
+
+    structureinchiassociations = relations.ResourceRelatedField(
+        queryset=StructureInChIAssociation.objects,
         many=True,
         read_only=False,
         required=False,
@@ -164,21 +180,18 @@ class InchiSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
-        'structures': 'resolver.serializers.StructureSerializer'
+        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer'
     }
 
     class Meta:
         model = InChI
         fields = (
             'url',
-            'string',
             'key',
+            'string',
             'version',
-            #'save_opts',
-            #'is_standard',
-            #'software_version',
             'entrypoints',
-            'structures',
+            'structureinchiassociations',
             'added',
             'modified'
         )
@@ -242,7 +255,7 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
         self_link_view_name='structureinchiassociation-relationships',
     )
 
-    inchi_type = relations.ResourceRelatedField(
+    inchitype = relations.ResourceRelatedField(
         queryset=InChIType.objects,
         many=False,
         read_only=False,
@@ -256,19 +269,20 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
     smiles = serializers.SerializerMethodField()
 
     included_serializers = {
-        'inchi': 'resolver.serializers.InchiSerializer',
-        'inchi_type': 'resolver.serializers.InchiTypeSerializer',
+        'inchi': 'resolver.serializers.InChISerializer',
+        'inchitype': 'resolver.serializers.InChITypeSerializer',
         'structure': 'resolver.serializers.StructureSerializer'
     }
 
     class Meta:
         model = StructureInChIAssociation
         fields = (
+            'url',
             'save_opt',
             'software_version',
             'structure',
             'inchi',
-            'inchi_type',
+            'inchitype',
             'inchikey',
             'smiles',
             'added',
