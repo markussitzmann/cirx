@@ -1,14 +1,9 @@
-import os
-
-from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
-from rest_framework.response import Response
-from rest_framework import permissions, routers, generics
+from rest_framework import permissions, routers
 from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework_json_api.views import RelationshipView, ModelViewSet
 
-#from structure.models import Structure
 from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
     StructureInChIAssociation
 from resolver.serializers import (
@@ -91,20 +86,18 @@ class StructureViewSet(ResourceModelViewSet):
         self.name = "Structure"
         super().__init__(*args, **kwargs)
 
-    queryset = Structure.objects.filter(compound__isnull=False).all()
+    queryset = Structure.objects.filter(compound__isnull=False).filter(blocked__isnull=True).all()
     serializer_class = StructureSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     filterset_fields = {
         'id': ('exact', 'in'),
         'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
+        'inchis__inchitype': ('exact', 'in'),
+        'inchis__inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
+        'inchis__inchi__string': ('icontains', 'iexact', 'contains', 'exact'),
     }
     search_fields = ('id', 'hashisy')
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance)
-    #     return Response(serializer.data)
 
 
 class StructureRelationshipView(ResourceRelationshipView):
@@ -167,7 +160,9 @@ class StructureInChIAssociationViewSet(ResourceModelViewSet):
 
     filterset_fields = {
         'id': ('exact', 'in'),
-        #'key': ('icontains', 'iexact', 'contains', 'exact'),
+        #'inchikey': ('icontains', 'iexact', 'contains', 'exact'),
+        'inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
+
         #'string': ('icontains', 'iexact', 'contains', 'exact'),
         #'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
         #'entrypoints__category': ('exact', 'in'),

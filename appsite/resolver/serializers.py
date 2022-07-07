@@ -1,9 +1,9 @@
-from django.db import IntegrityError
-from rest_framework.fields import MultipleChoiceField
-from rest_framework_json_api import serializers
-from rest_framework_json_api import relations
 from typing import Dict
 
+from django.db import IntegrityError
+from rest_framework.fields import MultipleChoiceField
+from rest_framework_json_api import relations
+from rest_framework_json_api import serializers
 
 from resolver import defaults
 from resolver.exceptions import ResourceExistsError
@@ -12,6 +12,72 @@ from resolver.models import InChI, Structure, Organization, Publisher, EntryPoin
 
 
 class StructureSerializer(serializers.HyperlinkedModelSerializer):
+
+    ficts_parent = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
+        related_link_view_name='structure-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structure-relationships',
+    )
+
+    ficts_children = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
+        related_link_view_name='structure-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structure-relationships',
+    )
+
+    ficus_parent = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
+        related_link_view_name='structure-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structure-relationships',
+    )
+
+    ficus_children = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
+        related_link_view_name='structure-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structure-relationships',
+    )
+
+    uuuuu_parent = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
+        related_link_view_name='structure-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structure-relationships',
+    )
+
+    uuuuu_children = relations.ResourceRelatedField(
+        queryset=Structure.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
+        related_link_view_name='structure-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structure-relationships',
+    )
 
     entrypoints = relations.ResourceRelatedField(
         queryset=EntryPoint.objects,
@@ -23,7 +89,7 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         self_link_view_name='structure-relationships',
     )
 
-    structureinchiassociations = relations.ResourceRelatedField(
+    inchis = relations.ResourceRelatedField(
         queryset=StructureInChIAssociation.objects,
         many=True,
         read_only=False,
@@ -34,18 +100,20 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     included_serializers = {
+        'ficts_parent': 'resolver.serializers.StructureSerializer',
+        'ficus_parent': 'resolver.serializers.StructureSerializer',
+        'uuuuu_parent': 'resolver.serializers.StructureSerializer',
+        'ficts_children': 'resolver.serializers.StructureSerializer',
+        'ficus_children': 'resolver.serializers.StructureSerializer',
+        'uuuuu_children': 'resolver.serializers.StructureSerializer',
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
-        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer',
+        'inchis': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     smiles = serializers.SerializerMethodField('serialize_minimol')
-    #hashisy = serializers.SerializerMethodField('serialize_hashisy')
 
     def serialize_minimol(self, obj):
         return obj.to_ens.get("E_SMILES")
-
-    #def serialize_hashisy(self, obj):
-    #    return obj.hashisy.padded
 
     class Meta:
         model = Structure
@@ -53,53 +121,31 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
             'url',
             'hashisy',
             'smiles',
-            'structureinchiassociations',
+            'ficts_parent',
+            'ficus_parent',
+            'uuuuu_parent',
+            'ficts_children',
+            'ficus_children',
+            'uuuuu_children',
+            'inchis',
             'entrypoints',
             'added',
-            'blocked'
         )
         read_only_fields = ('id', 'hashisy')
-        meta_fields = ('added', 'blocked')
+        meta_fields = ('added',)
 
     def create(self, validated_data: Dict):
-        #entrypoints = validated_data.pop('entrypoints', None)
-
-        self.is_valid(raise_exception=True)
-
-        try:
-            structure = Structure.objects.get(**validated_data)
-        except Structure.DoesNotExist:
-            structure = Structure.create(**validated_data)
-            try:
-                structure.save()
-            except IntegrityError as e:
-                raise ResourceExistsError("structure resource already exists", code=409)
-            # if entrypoints:
-            #     inchi.entrypoints.add(*entrypoints, bulk=True)
-        return structure
+        # not implemented yet
+        pass
 
     def update(self, instance: Structure, validated_data: Dict):
-        # if 'string' in validated_data or 'key' in validated_data or 'version' in validated_data or \
-        #         'is_standard' in validated_data:
-        #     raise IntegrityError("fields 'string', 'key', 'version', and 'is_standard'"
-        #                          "are immutable for the inchis resource")
-
-
-        #entrypoints = validated_data.pop('entrypoints', None)
-
-        instance.save()
-
-        # if entrypoints:
-        #     instance.entrypoints.bulk_update(entrypoints, bulk=True, clear=True)
-        # else:
-        #     instance.entrypoints.clear(bulk=True)
-
-        return instance
+        # not implemented yet
+        pass
 
 
 class InChITypeSerializer(serializers.HyperlinkedModelSerializer):
 
-    structureinchiassociations = relations.ResourceRelatedField(
+    associations = relations.HyperlinkedRelatedField(
         queryset=StructureInChIAssociation.objects,
         many=True,
         read_only=False,
@@ -110,14 +156,14 @@ class InChITypeSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     included_serializers = {
-        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer',
+        'associations': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     class Meta:
         model = InChIType
         fields = (
             'url',
-            'structureinchiassociations',
+            'associations',
             'software_version',
             'description',
             'is_standard',
@@ -158,17 +204,7 @@ class InChISerializer(serializers.HyperlinkedModelSerializer):
         self_link_view_name='inchi-relationships',
     )
 
-    # structures = relations.ResourceRelatedField(
-    #     queryset=Structure.objects,
-    #     many=True,
-    #     read_only=False,
-    #     required=False,
-    #     related_link_view_name='inchi-related',
-    #     related_link_url_kwarg='pk',
-    #     self_link_view_name='inchi-relationships',
-    # )
-
-    structureinchiassociations = relations.ResourceRelatedField(
+    structures = relations.ResourceRelatedField(
         queryset=StructureInChIAssociation.objects,
         many=True,
         read_only=False,
@@ -180,7 +216,7 @@ class InChISerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
-        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer'
+        'structures': 'resolver.serializers.StructureInChIAssociationSerializer'
     }
 
     class Meta:
@@ -191,7 +227,7 @@ class InChISerializer(serializers.HyperlinkedModelSerializer):
             'string',
             'version',
             'entrypoints',
-            'structureinchiassociations',
+            'structures',
             'added',
             'modified'
         )
@@ -265,9 +301,6 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
         self_link_view_name='structureinchiassociation-relationships',
     )
 
-    inchikey = serializers.SerializerMethodField()
-    smiles = serializers.SerializerMethodField()
-
     included_serializers = {
         'inchi': 'resolver.serializers.InChISerializer',
         'inchitype': 'resolver.serializers.InChITypeSerializer',
@@ -283,13 +316,11 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
             'structure',
             'inchi',
             'inchitype',
-            'inchikey',
-            'smiles',
             'added',
             'modified'
         )
         read_only_fields = ('added', 'modified')
-        meta_fields = ('inchikey', 'smiles', 'added', 'modified')
+        meta_fields = ('added', 'modified')
         ordering = ['structure', 'inchi']
 
     def get_inchikey(self, obj):
@@ -302,21 +333,33 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
 class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
 
     parent = relations.ResourceRelatedField(
-        queryset=Organization.objects, many=False, read_only=False, required=False, default=None,
+        queryset=Organization.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='organization-related',
         related_link_url_kwarg='pk',
         self_link_view_name='organization-relationships',
     )
 
     children = relations.ResourceRelatedField(
-        queryset=Organization.objects, many=True, read_only=False, required=False, default=None,
+        queryset=Organization.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='organization-related',
         related_link_url_kwarg='pk',
         self_link_view_name='organization-relationships',
     )
 
     publishers = relations.ResourceRelatedField(
-        queryset=Publisher.objects, many=True, read_only=False, required=False, default=None,
+        queryset=Publisher.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='organization-related',
         related_link_url_kwarg='pk',
         self_link_view_name='organization-relationships',
@@ -393,28 +436,44 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
 class PublisherSerializer(serializers.HyperlinkedModelSerializer):
 
     parent = relations.ResourceRelatedField(
-        queryset=Publisher.objects, many=False, read_only=False, required=False, default=None,
+        queryset=Publisher.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='publisher-related',
         related_link_url_kwarg='pk',
         self_link_view_name='publisher-relationships',
     )
 
     organizations = relations.ResourceRelatedField(
-        queryset=Organization.objects, many=True, read_only=False, required=False, default=None,
+        queryset=Organization.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='publisher-related',
         related_link_url_kwarg='pk',
         self_link_view_name='publisher-relationships',
     )
 
     children = relations.ResourceRelatedField(
-        queryset=Publisher.objects, many=True, read_only=False, required=False, default=None,
+        queryset=Publisher.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='publisher-related',
         related_link_url_kwarg='pk',
         self_link_view_name='publisher-relationships',
     )
 
     entrypoints = relations.ResourceRelatedField(
-        queryset=EntryPoint.objects, many=True, read_only=False, required=False, default=None,
+        queryset=EntryPoint.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='publisher-related',
         related_link_url_kwarg='pk',
         self_link_view_name='publisher-relationships',
@@ -429,8 +488,21 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Publisher
-        fields = ('url', 'parent', 'children', 'organizations', 'entrypoints', 'name', 'category', 'email',
-                  'address', 'href', 'orcid', 'added', 'modified')
+        fields = (
+            'url',
+            'parent',
+            'children',
+            'organizations',
+            'entrypoints',
+            'name',
+            'category',
+            'email',
+            'address',
+            'href',
+            'orcid',
+            'added',
+            'modified'
+        )
         read_only_fields = ('added', 'modified')
         meta_fields = ('added', 'modified')
 
@@ -493,28 +565,44 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
 class EntryPointSerializer(serializers.HyperlinkedModelSerializer):
 
     parent = relations.ResourceRelatedField(
-        queryset=EntryPoint.objects, many=False, read_only=False, required=False, default=None,
+        queryset=EntryPoint.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='entrypoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='entrypoint-relationships',
     )
 
     publisher = relations.ResourceRelatedField(
-        queryset=Publisher.objects, many=False, read_only=False, required=False, default=None,
+        queryset=Publisher.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='entrypoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='entrypoint-relationships',
     )
 
     children = relations.ResourceRelatedField(
-        queryset=EntryPoint.objects, many=True, read_only=False, required=False, default=None,
+        queryset=EntryPoint.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='entrypoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='entrypoint-relationships',
     )
 
     endpoints = relations.ResourceRelatedField(
-        queryset=EndPoint.objects, many=True, read_only=False, required=False, default=None,
+        queryset=EndPoint.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='entrypoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='entrypoint-relationships',
@@ -529,8 +617,20 @@ class EntryPointSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = EntryPoint
-        fields = ('url', 'parent', 'children', 'publisher', 'name', 'description',
-                  'category', 'href', 'entrypoint_href', 'endpoints', 'added', 'modified')
+        fields = (
+            'url',
+            'parent',
+            'children',
+            'publisher',
+            'name',
+            'description',
+            'category',
+            'href',
+            'entrypoint_href',
+            'endpoints',
+            'added',
+            'modified'
+        )
         read_only_fields = ('added', 'modified')
         meta_fields = ('added', 'modified')
 
@@ -591,28 +691,44 @@ class EntryPointSerializer(serializers.HyperlinkedModelSerializer):
 class EndPointSerializer(serializers.HyperlinkedModelSerializer):
 
     accept_header_media_types = relations.ResourceRelatedField(
-        queryset=MediaType.objects, many=True, read_only=False, required=False, default=None,
+        queryset=MediaType.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='endpoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='endpoint-relationships',
     )
 
     content_media_types = relations.ResourceRelatedField(
-        queryset=MediaType.objects, many=True, read_only=False, required=False, default=None,
+        queryset=MediaType.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='endpoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='endpoint-relationships',
     )
 
     request_schema_endpoint = relations.ResourceRelatedField(
-        queryset=MediaType.objects, many=False, read_only=False, required=False, default=None,
+        queryset=MediaType.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='endpoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='endpoint-relationships',
     )
 
     response_schema_endpoint = relations.ResourceRelatedField(
-        queryset=MediaType.objects, many=False, read_only=False, required=False, default=None,
+        queryset=MediaType.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='endpoint-related',
         related_link_url_kwarg='pk',
         self_link_view_name='endpoint-relationships',
@@ -632,9 +748,22 @@ class EndPointSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = EndPoint
-        fields = ('url', 'entrypoint', 'uri', 'full_path_uri', 'description', 'category', 'request_methods', 'accept_header_media_types',
-                  'content_media_types', 'request_schema_endpoint','response_schema_endpoint', 'full_path_uri',
-                  'added', 'modified')
+        fields = (
+            'url',
+            'entrypoint',
+            'uri',
+            'full_path_uri',
+            'description',
+            'category',
+            'request_methods',
+            'accept_header_media_types',
+            'content_media_types',
+            'request_schema_endpoint',
+            'response_schema_endpoint',
+            'full_path_uri',
+            'added',
+            'modified'
+        )
         read_only_fields = ('full_path_uri', 'added', 'modified')
         meta_fields = ('added', 'modified')
 
@@ -705,14 +834,22 @@ class EndPointSerializer(serializers.HyperlinkedModelSerializer):
 class MediaTypeSerializer(serializers.HyperlinkedModelSerializer):
 
     accepting_endpoints = relations.ResourceRelatedField(
-        queryset=EndPoint.objects, many=True, read_only=False, required=False, default=None,
+        queryset=EndPoint.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='mediatype-related',
         related_link_url_kwarg='pk',
         self_link_view_name='mediatype-relationships',
     )
 
     delivering_endpoints = relations.ResourceRelatedField(
-        queryset=EndPoint.objects, many=True, read_only=False, required=False, default=None,
+        queryset=EndPoint.objects,
+        many=True,
+        read_only=False,
+        required=False,
+        default=None,
         related_link_view_name='mediatype-related',
         related_link_url_kwarg='pk',
         self_link_view_name='mediatype-relationships',

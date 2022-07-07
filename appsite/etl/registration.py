@@ -24,6 +24,7 @@ StructureRelationships = namedtuple('StructureRelationships', 'structure relatio
 InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
 InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
 
+
 class FileRegistry(object):
 
     CHUNK_SIZE = 10000
@@ -326,7 +327,6 @@ class StructureRegistry(object):
                 inchi_relationships = {}
                 for inchi_type in StructureRegistry.INCHI_TYPES:
                     inchi_property = Prop.Ref(inchi_type.property)
-                    #inchi_software_version = inchi_type.softwareversion
                     inchi_property.setparam("options", inchi_type.options)
                     ens = structure.to_ens
                     split_string = ens.get(inchi_type.property).split('\\')

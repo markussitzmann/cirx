@@ -17,12 +17,6 @@ class StructureManager(models.Manager):
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
-    # def _calculate_uuid(self):
-    #     return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([
-    #         self.element['well_formatted_no_prefix'],
-    #         #self.element['save_options'] if self.element['save_options'] else ''
-    #     ]))
-
 
 class Structure(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -40,12 +34,6 @@ class Structure(models.Model):
         through='StructureNames',
         related_name="structures"
     )
-    # inchis = models.ManyToManyField(
-    #     'InChI',
-    #     related_name="structures",
-    #     through='StructureInChIAssociation',
-    #     through_fields=('structure', 'inchi'),
-    # )
     entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
     added = models.DateTimeField(auto_now_add=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
@@ -65,20 +53,13 @@ class Structure(models.Model):
 
     objects = StructureManager()
 
-    # def has_compound(self) -> bool:
-    #     has_compound = False
-    #     try:
-    #         has_compound = (self.compound is not None)
-    #     except Compound.DoesNotExist:
-    #         pass
-    #     return has_compound
-
     @property
     def to_ens(self) -> Ens:
         return self.minimol.ens
 
     def __str__(self):
         return "[%s] %s" % (self.hashisy.padded, self.to_ens.get("E_SMILES"))
+
 
 class InChIManager(models.Manager):
 
@@ -201,14 +182,14 @@ class StructureInChIAssociation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     structure = models.ForeignKey(
         Structure,
-        related_name='structureinchiassociations',
+        related_name='inchis',
         on_delete=models.CASCADE,
         blank=False,
         null=False
     )
     inchi = models.ForeignKey(
         InChI,
-        related_name='structureinchiassociations',
+        related_name='structures',
         on_delete=models.CASCADE,
         blank=False,
         null=False
@@ -224,6 +205,11 @@ class StructureInChIAssociation(models.Model):
     save_opt = models.CharField(max_length=2, default=None, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+
+    indexes = Index(
+        fields=['inchi_key'],
+        name='structure_inchi_association_index'
+    )
 
     class JSONAPIMeta:
         resource_name = 'structureInchiAssociations'
