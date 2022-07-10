@@ -13,6 +13,7 @@ djangorestframework-jsonapi[openapi]
 django-multiselectfield
 django-htmlmin
 django-celery-results
+django-debug-toolbar
 celery[librabbitmq]
 parameterized~=0.8.1
 redis

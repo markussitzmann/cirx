@@ -114,6 +114,7 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
 
     def serialize_minimol(self, obj):
         return obj.to_ens.get("E_SMILES")
+        #return "blub"
 
     class Meta:
         model = Structure

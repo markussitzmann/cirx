@@ -8,9 +8,9 @@ from . import routers
 
 router = routers.ResolverApiRouter(trailing_slash=False)
 router.register('structures', views.StructureViewSet)
-router.register('inchis', views.InchiViewSet)
+router.register('inchis', views.InChIViewSet)
 router.register('structureinchiassociations', views.StructureInChIAssociationViewSet)
-router.register('inchitypes', views.InchiTypeViewSet)
+router.register('inchitypes', views.InChITypeViewSet)
 router.register('organizations', views.OrganizationViewSet)
 router.register('publishers', views.PublisherViewSet)
 router.register('entrypoints', views.EntryPointViewSet)
@@ -34,10 +34,10 @@ urlpatterns = [
          name='structure-related'),
 
     path('inchis/<pk>/relationships/<related_field>',
-         views.InchiRelationshipView.as_view(), {'source': 'relationships'},
+         views.InChIRelationshipView.as_view(), {'source': 'relationships'},
          name='inchi-relationships'),
     path('inchis/<pk>/<related_field>',
-         views.InchiViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
+         views.InChIViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
          name='inchi-related'),
 
     path('structureinchiassociations/<pk>/relationships/<related_field>',
@@ -48,10 +48,10 @@ urlpatterns = [
         name='structureinchiassociation-related'),
 
     path('inchitypes/<pk>/relationships/<related_field>',
-         views.InchiTypeRelationshipView.as_view(), {'source': 'relationships'},
+         views.InChITypeRelationshipView.as_view(), {'source': 'relationships'},
          name='inchitype-relationships'),
     path('inchitypes/<pk>/<related_field>',
-         views.InchiTypeViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
+         views.InChITypeViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
          name='inchitype-related'),
 
     path('publishers/<pk>/relationships/<related_field>',

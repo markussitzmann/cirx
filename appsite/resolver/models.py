@@ -58,7 +58,7 @@ class Structure(models.Model):
         return self.minimol.ens
 
     def __str__(self):
-        return "[%s] %s" % (self.hashisy.padded, self.to_ens.get("E_SMILES"))
+        return "[%s] %s" % (self.hashisy_key.padded, self.to_ens.get("E_SMILES"))
 
 
 class InChIManager(models.Manager):

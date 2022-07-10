@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from django.utils.safestring import mark_safe
 from rest_framework import permissions, routers
 from rest_framework.decorators import action
@@ -32,12 +33,12 @@ class ResolverApiView(routers.APIRootView):
         #else:
         #    title = os.environ.get('INCHI_RESOLVER_TITLE', 'InChI Resolver')
         title = "CIRX API"
-        text = "API Root resource of the " + title.strip('"') + \
-               ". It lists the top-level resources generally available at this and any InChI Resolver instance."
+        text = "API Root resource of the Chemical Identifier Resolver X2"
         if html:
-            return mark_safe(f"<p>{text} For documentation <a href=\"https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst\">please see here</a>.</p>")
+            return mark_safe(f"<p>{text}</p>")
         else:
             return text
+
 
 
 class ResourceModelViewSet(ModelViewSet):
@@ -79,25 +80,54 @@ class ResourceRelationshipView(RelationshipView):
 ### STRUCTURE ###
 class StructureViewSet(ResourceModelViewSet):
     """
-        The **Stucture resource** of the InChI Resolver API. For documentation [see here][ref]
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#structure-resource
+        The **Stucture resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Structure"
         super().__init__(*args, **kwargs)
 
-    queryset = Structure.objects.filter(compound__isnull=False).filter(blocked__isnull=True).all()
+    queryset = Structure.objects.filter(compound__isnull=False, blocked__isnull=True)\
+        .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent', 'compound')\
+        .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints', 'ficts_children',
+                          'ficus_children', 'uuuuu_children')
+    # select_for_includes = {
+    #     'ficts_parent': ['ficts_parent'],
+    #     'ficus_parent': ['ficus_parent'],
+    #     'uuuuu_parent': ['uuuuu_parent'],
+    # }
+    prefetch_for_includes = {
+        '__all__': [],
+        'inchis': ['inchis__structure', 'inchis__inchi'],
+        #'all_parents': [Prefetch('all_parents', queryset=Structure.objects
+        #                         .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent'))],
+        #'category.section': ['category']
+    }
     serializer_class = StructureSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     filterset_fields = {
         'id': ('exact', 'in'),
+        'ficts_parent': ('exact', 'in'),
+        'ficus_parent': ('exact', 'in'),
+        'uuuuu_parent': ('exact', 'in'),
+        # 'ficts_children': ('exact', 'in'),
+        # 'ficus_children': ('exact', 'in'),
+        # 'uuuuu_children': ('exact', 'in'),
         'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
         'inchis__inchitype': ('exact', 'in'),
         'inchis__inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
         'inchis__inchi__string': ('icontains', 'iexact', 'contains', 'exact'),
     }
-    search_fields = ('id', 'hashisy')
+    search_fields = (
+        'id',
+        'hashisy',
+        'ficts_parent',
+        'ficus_parent',
+        'uuuuu_parent',
+        'ficts_children',
+        'ficus_children',
+        'uuuuu_children',
+    )
 
 
 class StructureRelationshipView(ResourceRelationshipView):
@@ -106,17 +136,16 @@ class StructureRelationshipView(ResourceRelationshipView):
         self.name = "Structure"
         super().__init__(*args, **kwargs)
 
-    queryset = Structure.objects.all()
+    queryset = Structure.objects
     self_link_view_name = 'structure-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 ### INCHI ###
 
-class InchiViewSet(ResourceModelViewSet):
+class InChIViewSet(ResourceModelViewSet):
     """
-        The **InChI resource** of the InChI Resolver API. For documentation [see here][ref]
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#inchi-resource
+        The **InChI resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "InChI"
@@ -136,7 +165,7 @@ class InchiViewSet(ResourceModelViewSet):
     search_fields = ('string', 'key',)
 
 
-class InchiRelationshipView(ResourceRelationshipView):
+class InChIRelationshipView(ResourceRelationshipView):
 
     def __init__(self, *args, **kwargs):
         self.name = "InChI"
@@ -167,7 +196,7 @@ class StructureInChIAssociationViewSet(ResourceModelViewSet):
         #'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
         #'entrypoints__category': ('exact', 'in'),
     }
-    #search_fields = ('string', 'key',)
+    search_fields = ('string', 'key',)
 
 
 class StructureInChIAssociationRelationshipView(ResourceRelationshipView):
@@ -181,10 +210,9 @@ class StructureInChIAssociationRelationshipView(ResourceRelationshipView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
-class InchiTypeViewSet(ResourceModelViewSet):
+class InChITypeViewSet(ResourceModelViewSet):
     """
-        The **InChI resource** of the InChI Resolver API. For documentation [see here][ref]
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#inchi-resource
+        The **InChI resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "InChI Type"
@@ -198,10 +226,9 @@ class InchiTypeViewSet(ResourceModelViewSet):
         'id': ('exact', 'in'),
         #'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
     }
-    search_fields = ('id',)
 
 
-class InchiTypeRelationshipView(ResourceRelationshipView):
+class InChITypeRelationshipView(ResourceRelationshipView):
 
     def __init__(self, *args, **kwargs):
         self.name = "InChI Type"
@@ -217,8 +244,7 @@ class InchiTypeRelationshipView(ResourceRelationshipView):
 
 class OrganizationViewSet(ResourceModelViewSet):
     """
-        The **organization resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#organization-resource
+        The **organization resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Organization"
@@ -263,8 +289,7 @@ class OrganizationRelationshipView(ResourceRelationshipView):
 
 class PublisherViewSet(ResourceModelViewSet):
     """
-        The **publisher resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#publisher-resource
+        The **publisher resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Publisher"
@@ -317,8 +342,7 @@ class PublisherRelationshipView(ResourceRelationshipView):
 
 class EntryPointViewSet(ResourceModelViewSet):
     """
-        The **entrypoint resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#entrypoint-resource
+        The **entrypoint resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Entrypoint"
@@ -368,8 +392,7 @@ class EntryPointRelationshipView(ResourceRelationshipView):
 
 class EndPointViewSet(ResourceModelViewSet):
     """
-        The **endpoint resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#endpoint-resource
+        The **endpoint resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Endpoint"
@@ -413,8 +436,7 @@ class EndPointRelationshipView(ResourceRelationshipView):
 
 class MediaTypeViewSet(ResourceModelViewSet):
     """
-        The **mediatype resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#mediatype-resource
+        The **mediatype resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Mediatype"
