@@ -28,10 +28,9 @@ def register_file_records(structure_file_id: int):
 
 
 def _register():
-
     if settings.INIT_SYSTEM:
         for f in StructureFile.objects.all():
-            logger.info("deleting %s", f)
+            logger.info("INITIALIZING SYSTEM: deleting %s", f)
             f.delete()
 
     #file_collections = FileCollection.objects.all()

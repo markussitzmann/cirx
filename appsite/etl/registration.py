@@ -223,7 +223,7 @@ class StructureRegistry(object):
 
     @staticmethod
     def normalize_structures(structure_ids: list):
-        # NOTE: the order matters, it has to go from broader to more specific identifier
+        # NOTE: the order matters, it has to go from broader to more specific identifier!!
         identifiers = StructureRegistry.NCICADD_TYPES
 
         source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
@@ -309,7 +309,6 @@ class StructureRegistry(object):
 
     @staticmethod
     def calculate_inchi(structure_ids: list):
-        logger.info("A")
         source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
 
         for inchi_type in StructureRegistry.INCHI_TYPES:
@@ -343,22 +342,15 @@ class StructureRegistry(object):
                     inchi_string = InChIString(
                         key=key,
                         string=inchi_string,
-                        #save_options=inchi_saveopt,
-                        #software_version_string=inchi_software_version,
                         validate_key=False
                     )
-                    d = inchi_string.model_dict
-                    inchi: InChI = InChI(**d)
+                    inchi: InChI = InChI(**inchi_string.model_dict)
                     inchi_relationships[inchi_type] = InChIAndSaveOpt(inchi, inchi_saveopt)
-                structure_to_inchi_list\
-                    .append(StructureRelationships(structure_id, inchi_relationships))
+                structure_to_inchi_list.append(StructureRelationships(structure_id, inchi_relationships))
             except Exception as e:
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()
                 logger.error("calculating inchi for structure %s failed : %s" % (structure_id, e))
-
-        # for s in structure_to_inchi_list:
-        #     logger.info("x %s" % (s,))
 
         try:
             with transaction.atomic():
@@ -390,14 +382,10 @@ class StructureRegistry(object):
                 for structure_to_inchi in structure_to_inchi_list:
                     sid = structure_to_inchi.structure
                     for inchi_type, inchi_data in structure_to_inchi.relationships.items():
-                        logger.info("%s ---> %s | %s : %s" % (sid, inchi_data.inchi.id, inchi_type, inchi_data))
                         if inchi_data.inchi.key in inchi_objects_by_key:
                             inchi = inchi_objects_by_key[inchi_data.inchi.key]
-                        #    logger.info("I %s" % (inchi,))
-                        #    structure_objects[sid].inchis.add(inchi)
                         else:
-                            logger.info("I %s" % (inchi,))
-                            logger.info("DOES NOT EXISTS %s" % (inchi_data.inchi.key,))
+                            logger.warning("associated inchi does not exists %s" % (inchi_data.inchi.key,))
                             continue
 
                         structure_inchi_association = StructureInChIAssociation(
@@ -420,7 +408,9 @@ class StructureRegistry(object):
         except Exception as e:
             logger.error(e)
             raise Exception(e)
-
-        logger.info("B")
         return structure_ids
 
+
+def structure_id_chunks(structure_ids):
+    chunk_size = StructureRegistry.CHUNK_SIZE
+    return [structure_ids[x:x + chunk_size] for x in range(0, len(structure_ids), chunk_size)]
