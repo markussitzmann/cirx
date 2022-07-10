@@ -1,3 +1,4 @@
+import uuid
 from typing import List
 
 from django.conf import settings
@@ -7,7 +8,7 @@ from django.db.models import QuerySet
 from custom.cactvs import SpecialCactvsHash
 from etl.models import StructureFileRecord
 from etl.tasks import *
-from structure.models import Structure, Compound
+from resolver.models import Structure, Compound
 
 logger = logging.getLogger('cirx')
 
@@ -20,7 +21,7 @@ class Command(BaseCommand):
         _normalize()
 
 
-def normalize_structures(structure_ids: List[int]):
+def normalize_structures(structure_ids: List[uuid.UUID]):
     task = normalize_structure_task
 
     chunk_size = StructureRegistry.CHUNK_SIZE
@@ -58,9 +59,9 @@ def _normalize():
             structure__ficus_parent__isnull=True,
             structure__uuuuu_parent__isnull=True,
         ).exclude(
-            structure__hashisy=SpecialCactvsHash.ZERO.hashisy
+            structure__hashisy_key=SpecialCactvsHash.ZERO.hashisy
         ).exclude(
-            structure__hashisy=SpecialCactvsHash.MAGIC.hashisy
+            structure__hashisy_key=SpecialCactvsHash.MAGIC.hashisy
         )[0:1000]
 
     structure_ids = [r['structure__id'] for r in records]

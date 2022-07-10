@@ -1,22 +1,22 @@
-import os
-
-from django.http import Http404
-from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch
 from django.utils.safestring import mark_safe
-from rest_framework.response import Response
-from rest_framework import permissions, routers, generics
+from rest_framework import permissions, routers
 from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework_json_api.views import RelationshipView, ModelViewSet
 
-
-from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, MediaType
+from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
+    StructureInChIAssociation
 from resolver.serializers import (
-    InchiSerializer,
+    InChISerializer,
     OrganizationSerializer,
     PublisherSerializer,
     EntryPointSerializer,
     EndPointSerializer,
-    MediaTypeSerializer
+    MediaTypeSerializer,
+    StructureSerializer,
+    InChITypeSerializer,
+    StructureInChIAssociationSerializer
 )
 
 
@@ -33,12 +33,12 @@ class ResolverApiView(routers.APIRootView):
         #else:
         #    title = os.environ.get('INCHI_RESOLVER_TITLE', 'InChI Resolver')
         title = "CIRX API"
-        text = "API Root resource of the " + title.strip('"') + \
-               ". It lists the top-level resources generally available at this and any InChI Resolver instance."
+        text = "API Root resource of the Chemical Identifier Resolver X2"
         if html:
-            return mark_safe(f"<p>{text} For documentation <a href=\"https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst\">please see here</a>.</p>")
+            return mark_safe(f"<p>{text}</p>")
         else:
             return text
+
 
 
 class ResourceModelViewSet(ModelViewSet):
@@ -77,19 +77,82 @@ class ResourceRelationshipView(RelationshipView):
             return text
 
 
+### STRUCTURE ###
+class StructureViewSet(ResourceModelViewSet):
+    """
+        The **Stucture resource** of the Chemical Identifier Resolver X2 API
+    """
+    def __init__(self, *args, **kwargs):
+        self.name = "Structure"
+        super().__init__(*args, **kwargs)
+
+    queryset = Structure.objects.filter(compound__isnull=False, blocked__isnull=True)\
+        .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent', 'compound')\
+        .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints', 'ficts_children',
+                          'ficus_children', 'uuuuu_children')
+    # select_for_includes = {
+    #     'ficts_parent': ['ficts_parent'],
+    #     'ficus_parent': ['ficus_parent'],
+    #     'uuuuu_parent': ['uuuuu_parent'],
+    # }
+    prefetch_for_includes = {
+        '__all__': [],
+        'inchis': ['inchis__structure', 'inchis__inchi'],
+        #'all_parents': [Prefetch('all_parents', queryset=Structure.objects
+        #                         .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent'))],
+        #'category.section': ['category']
+    }
+    serializer_class = StructureSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    filterset_fields = {
+        'id': ('exact', 'in'),
+        'ficts_parent': ('exact', 'in'),
+        'ficus_parent': ('exact', 'in'),
+        'uuuuu_parent': ('exact', 'in'),
+        # 'ficts_children': ('exact', 'in'),
+        # 'ficus_children': ('exact', 'in'),
+        # 'uuuuu_children': ('exact', 'in'),
+        'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
+        'inchis__inchitype': ('exact', 'in'),
+        'inchis__inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
+        'inchis__inchi__string': ('icontains', 'iexact', 'contains', 'exact'),
+    }
+    search_fields = (
+        'id',
+        'hashisy',
+        'ficts_parent',
+        'ficus_parent',
+        'uuuuu_parent',
+        'ficts_children',
+        'ficus_children',
+        'uuuuu_children',
+    )
+
+
+class StructureRelationshipView(ResourceRelationshipView):
+
+    def __init__(self, *args, **kwargs):
+        self.name = "Structure"
+        super().__init__(*args, **kwargs)
+
+    queryset = Structure.objects
+    self_link_view_name = 'structure-relationships'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
 ### INCHI ###
 
-class InchiViewSet(ResourceModelViewSet):
+class InChIViewSet(ResourceModelViewSet):
     """
-        The **InChI resource** of the InChI Resolver API. For documentation [see here][ref]
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#inchi-resource
+        The **InChI resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "InChI"
         super().__init__(*args, **kwargs)
 
     queryset = InChI.objects.all()
-    serializer_class = InchiSerializer
+    serializer_class = InChISerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     filterset_fields = {
@@ -102,7 +165,7 @@ class InchiViewSet(ResourceModelViewSet):
     search_fields = ('string', 'key',)
 
 
-class InchiRelationshipView(ResourceRelationshipView):
+class InChIRelationshipView(ResourceRelationshipView):
 
     def __init__(self, *args, **kwargs):
         self.name = "InChI"
@@ -113,12 +176,75 @@ class InchiRelationshipView(ResourceRelationshipView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
+class StructureInChIAssociationViewSet(ResourceModelViewSet):
+    """
+    """
+    def __init__(self, *args, **kwargs):
+        self.name = "StructureInChIAssociation"
+        super().__init__(*args, **kwargs)
+
+    queryset = StructureInChIAssociation.objects.all()
+    serializer_class = StructureInChIAssociationSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    filterset_fields = {
+        'id': ('exact', 'in'),
+        #'inchikey': ('icontains', 'iexact', 'contains', 'exact'),
+        'inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
+
+        #'string': ('icontains', 'iexact', 'contains', 'exact'),
+        #'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
+        #'entrypoints__category': ('exact', 'in'),
+    }
+    search_fields = ('string', 'key',)
+
+
+class StructureInChIAssociationRelationshipView(ResourceRelationshipView):
+
+    def __init__(self, *args, **kwargs):
+        self.name = "StructureInChIAssociation"
+        super().__init__(*args, **kwargs)
+
+    queryset = StructureInChIAssociation.objects.all()
+    self_link_view_name = 'structureinchiassociation-relationships'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class InChITypeViewSet(ResourceModelViewSet):
+    """
+        The **InChI resource** of the Chemical Identifier Resolver X2 API
+    """
+    def __init__(self, *args, **kwargs):
+        self.name = "InChI Type"
+        super().__init__(*args, **kwargs)
+
+    queryset = InChIType.objects.all()
+    serializer_class = InChITypeSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    filterset_fields = {
+        'id': ('exact', 'in'),
+        #'version': ('exact', 'in', 'gt', 'gte', 'lt', 'lte',),
+    }
+
+
+class InChITypeRelationshipView(ResourceRelationshipView):
+
+    def __init__(self, *args, **kwargs):
+        self.name = "InChI Type"
+        super().__init__(*args, **kwargs)
+
+    queryset = InChIType.objects.all()
+    self_link_view_name = 'inchitype-relationships'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+
 ### ORGANZATION ###
 
 class OrganizationViewSet(ResourceModelViewSet):
     """
-        The **organization resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#organization-resource
+        The **organization resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Organization"
@@ -163,8 +289,7 @@ class OrganizationRelationshipView(ResourceRelationshipView):
 
 class PublisherViewSet(ResourceModelViewSet):
     """
-        The **publisher resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#publisher-resource
+        The **publisher resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Publisher"
@@ -217,8 +342,7 @@ class PublisherRelationshipView(ResourceRelationshipView):
 
 class EntryPointViewSet(ResourceModelViewSet):
     """
-        The **entrypoint resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#entrypoint-resource
+        The **entrypoint resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Entrypoint"
@@ -268,8 +392,7 @@ class EntryPointRelationshipView(ResourceRelationshipView):
 
 class EndPointViewSet(ResourceModelViewSet):
     """
-        The **endpoint resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#endpoint-resource
+        The **endpoint resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Endpoint"
@@ -313,8 +436,7 @@ class EndPointRelationshipView(ResourceRelationshipView):
 
 class MediaTypeViewSet(ResourceModelViewSet):
     """
-        The **mediatype resource** of the InChI Resolver API. For documentation [please see here][ref].
-        [ref]: https://github.com/inchiresolver/inchiresolver/blob/master/docs/protocol.rst#mediatype-resource
+        The **mediatype resource** of the Chemical Identifier Resolver X2 API
     """
     def __init__(self, *args, **kwargs):
         self.name = "Mediatype"

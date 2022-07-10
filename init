@@ -3,7 +3,8 @@
 cp app.env .env
 source .env
 
-docker tag cactvs-django-app-server:1.0 $APP_NAME:$APP_VERSION
+#TODO; bad idea for hard-coded version here
+docker tag cactvs-django-app-server:1.1 $APP_NAME:$APP_VERSION
 
 if [ -z $(docker network ls --filter name=^${APP_NAME}-backend$ --format="{{ .Name }}") ] ; then
      echo "creating Docker network"

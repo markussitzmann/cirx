@@ -7,11 +7,11 @@ class ResolverAPIRenderer(BrowsableAPIRenderer):
     def get_context(self, data, accepted_media_type, renderer_context):
         context = super().get_context(data, accepted_media_type, renderer_context)
         #if os.environ['INCHI_RESOLVER_TITLE'] == '':
-        context['resolver_title'] = 'InChI Resolver'
+        context['resolver_title'] = 'Chemical Identifier Resolver X'
         #else:
         #    context['resolver_title'] = os.environ.get('INCHI_RESOLVER_TITLE', 'InChI Resolver').strip("\"")
         #if os.environ['INCHI_RESOLVER_COLOR_SCHEME'] == '':
-        context['resolver_color_scheme'] = 'dark'
+        context['resolver_color_scheme'] = 'cactus'
         #else:
         #  context['resolver_color_scheme'] = os.environ.get('INCHI_RESOLVER_COLOR_SCHEME', 'dark')
 

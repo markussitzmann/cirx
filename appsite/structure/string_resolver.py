@@ -28,9 +28,9 @@ logger = logging.getLogger('cirx')
 #import packstring
 #import smiles
 
-from database.models import Database
-from structure.models import Structure, Record, Compound, Name, StructureNames
-from resolver.models import InChI
+#from database.models import Database
+#from structure.models import Record, Compound
+from resolver.models import InChI, Structure, Compound, Name, StructureNames, Database
 
 
 # from sets import Set

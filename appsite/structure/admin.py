@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from structure.models import ResponseType, Structure
+from structure.models import ResponseType
+from resolver.models import Structure
 
 
 @admin.register(Structure)

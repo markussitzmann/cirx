@@ -13,17 +13,17 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
-from structure.inchi.identifier import InChIString
-from structure.models import Structure, Compound, StructureInChIs
-from resolver.models import InChI
+from structure.inchi.identifier import InChIString, InChIKey
+from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType
 
 logger = logging.getLogger('cirx')
 Status = namedtuple('Status', 'file created')
 
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
-InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopts')
-InChIType = namedtuple('InChIType', 'property version software')
+InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
+InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
+
 
 class FileRegistry(object):
 
@@ -117,17 +117,18 @@ class FileRegistry(object):
                 # TODO: registering structures needs improvement - hadd might do harm here
                 ens: Ens = molfile.read()
                 ens.hadd()
-                hashisy = CactvsHash(ens)
+                hashisy_key = CactvsHash(ens)
                 structure = Structure(
-                     hashisy=hashisy,
-                     minimol=CactvsMinimol(ens)
+                    hashisy_key=hashisy_key,
+                    hashisy=hashisy_key.padded,
+                    minimol=CactvsMinimol(ens)
                 )
                 structures.append(structure)
             except Exception as e:
                 logger.error("error while registering file record '%s': %s" % (fname, e))
                 break
             record_data = {
-                'hashisy': hashisy,
+                'hashisy_key': hashisy_key,
                 'index': record,
             }
             records.append(record_data)
@@ -138,7 +139,7 @@ class FileRegistry(object):
             record += 1
         molfile.close()
 
-        structures = sorted(structures, key=lambda s: s.hashisy.int)
+        structures = sorted(structures, key=lambda s: s.hashisy_key.int)
 
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
@@ -148,11 +149,11 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                hashisy_list = [record['hashisy'] for record in records]
-                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy')
+                hashisy_list = [record['hashisy_key'] for record in records]
+                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
                 record_objects = list()
                 for record_data in records:
-                    structure = structures[record_data['hashisy']]
+                    structure = structures[record_data['hashisy_key']]
                     record_objects.append(StructureFileRecord(
                         structure_file=structure_file,
                         structure=structure,
@@ -166,7 +167,7 @@ class FileRegistry(object):
                     sff.structure_files.add(structure_file)
                     sff.save()
         except DatabaseError as e:
-            logger.error("file record registration failed for '%s'" % (fname,))
+            logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise(DatabaseError(e))
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -186,8 +187,38 @@ class StructureRegistry(object):
     ]
 
     INCHI_TYPES = [
-        InChIType('E_STDINCHI', Prop.Ref('E_STDINCHI').softwareversion, Prop.Ref('E_STDINCHI').software),
-        InChIType('E_TAUTO_INCHI', Prop.Ref('E_TAUTO_INCHI').softwareversion, Prop.Ref('E_TAUTO_INCHI').software),
+        InChITypeTuple(
+            'standard',
+            'E_STDINCHI',
+            'E_STDINCHIKEY',
+            Prop.Ref('E_STDINCHI').softwareversion,
+            Prop.Ref('E_STDINCHI').software,
+            ""
+        ),
+        InChITypeTuple(
+            'original',
+            'E_INCHI',
+            'E_INCHIKEY',
+            Prop.Ref('E_INCHI').softwareversion,
+            Prop.Ref('E_INCHI').software,
+            "SAVEOPT  RECMET NOWARNINGS FIXEDH"
+        ),
+        InChITypeTuple(
+            'xtauto',
+            'E_INCHI',
+            'E_INCHIKEY',
+            Prop.Ref('E_INCHI').softwareversion,
+            Prop.Ref('E_INCHI').software,
+            "SAVEOPT  RECMET NOWARNINGS KET 15T"
+        ),
+        InChITypeTuple(
+            'xtautox',
+            'E_TAUTO_INCHI',
+            'E_TAUTO_INCHIKEY',
+            Prop.Ref('E_TAUTO_INCHI').softwareversion,
+            Prop.Ref('E_TAUTO_INCHI').software,
+            "SAVEOPT DONOTADDH RECMET NOWARNINGS KET 15T PT_22_00 PT_16_00 PT_06_00 PT_39_00 PT_13_00 PT_18_00"
+        ),
     ]
 
     @staticmethod
@@ -209,15 +240,16 @@ class StructureRegistry(object):
                     relationships = {}
                     ens = structure.to_ens
                     parent_ens = ens.get(identifier.parent_structure)
-                    hashisy: CactvsHash = CactvsHash(parent_ens)
-                    related_hashes[identifier.attr] = hashisy
+                    hashisy_key: CactvsHash = CactvsHash(parent_ens)
+                    related_hashes[identifier.attr] = hashisy_key
                     parent_structure: Structure = Structure(
-                        hashisy=hashisy,
+                        hashisy_key=hashisy_key,
+                        hashisy=hashisy_key.padded,
                         minimol=CactvsMinimol(parent_ens)
                     )
                     parent_structure_relationships\
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
-                    relationships[identifier.attr] = hashisy
+                    relationships[identifier.attr] = hashisy_key
                     source_structure_relationships.append(StructureRelationships(structure, relationships))
                 logger.info("finished normalizing structure %s" % structure_id)
             except Exception as e:
@@ -225,21 +257,21 @@ class StructureRegistry(object):
                 structure.save()
                 logger.error("normalizing structure %s failed : %s" % (structure_id, e))
 
-        parent_structure_hash_list = list(set([p.structure.hashisy for p in parent_structure_relationships]))
+        parent_structure_hash_list = list(set([p.structure.hashisy_key for p in parent_structure_relationships]))
         try:
             with transaction.atomic():
                 # create parent structures in bulk
-                structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy.int)
+                structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int)
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True
                 )
 
                 # fetch hashisy / parent structures in bulk (by that they have an id)
-                parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy')
+                parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
 
                 # create compounds in bulk
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int)
+                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
                 Compound.objects.bulk_create(
                     [Compound(structure=parent_structure) for parent_structure in structures],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -250,7 +282,7 @@ class StructureRegistry(object):
                 for relationship in source_structure_relationships:
                     for attr, parent_hash in relationship.relationships.items():
                         setattr(source_structures[relationship.structure.id], attr, parent_structures[parent_hash])
-                structures = sorted(source_structures.values(), key=lambda s: s.hashisy.int)
+                structures = sorted(source_structures.values(), key=lambda s: s.hashisy_key.int)
                 Structure.objects.bulk_update(
                     structures,
                     [identifier.attr for identifier in identifiers]
@@ -259,8 +291,8 @@ class StructureRegistry(object):
                 # update parent structure relationships in bulk
                 for relationship in parent_structure_relationships:
                     for attr, parent_hash in relationship.relationships.items():
-                        setattr(parent_structures[relationship.structure.hashisy], attr, parent_structures[parent_hash])
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy.int)
+                        setattr(parent_structures[relationship.structure.hashisy_key], attr, parent_structures[parent_hash])
+                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
                 Structure.objects.bulk_update(
                     structures,
                     [identifier.attr for identifier in identifiers]
@@ -294,6 +326,8 @@ class StructureRegistry(object):
             try:
                 inchi_relationships = {}
                 for inchi_type in StructureRegistry.INCHI_TYPES:
+                    inchi_property = Prop.Ref(inchi_type.property)
+                    inchi_property.setparam("options", inchi_type.options)
                     ens = structure.to_ens
                     split_string = ens.get(inchi_type.property).split('\\')
                     split_length = len(split_string)
@@ -302,11 +336,19 @@ class StructureRegistry(object):
                     else:
                         logging.warning("no InChI string available")
                         continue
-                    inchi_saveopt = None
+                    inchi_saveopt: str = None
                     if split_length >= 2:
                         inchi_saveopt = split_string[1]
-                    inchi_dict = InChIString(string=inchi_string).model_dict
-                    inchi: InChI = InChI(**inchi_dict)
+                    key = InChIKey(ens.get(inchi_type.key))
+                    inchi_string = InChIString(
+                        key=key,
+                        string=inchi_string,
+                        #save_options=inchi_saveopt,
+                        #software_version_string=inchi_software_version,
+                        validate_key=False
+                    )
+                    d = inchi_string.model_dict
+                    inchi: InChI = InChI(**d)
                     inchi_relationships[inchi_type] = InChIAndSaveOpt(inchi, inchi_saveopt)
                 structure_to_inchi_list\
                     .append(StructureRelationships(structure_id, inchi_relationships))
@@ -314,6 +356,10 @@ class StructureRegistry(object):
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()
                 logger.error("calculating inchi for structure %s failed : %s" % (structure_id, e))
+
+        # for s in structure_to_inchi_list:
+        #     logger.info("x %s" % (s,))
+
         try:
             with transaction.atomic():
                 inchi_list = [
@@ -331,21 +377,39 @@ class StructureRegistry(object):
                 structure_id_list = [s.structure for s in structure_to_inchi_list]
 
                 inchi_objects = InChI.objects.in_bulk(inchi_id_list, field_name='id')
+                inchi_objects_by_key = {i.key: i for i in inchi_objects.values()}
+
                 structure_objects = Structure.objects.in_bulk(structure_id_list, field_name='id')
 
-                structure_inchis_list = []
+                inchi_type_objects = InChIType.objects.in_bulk(
+                    [t.id for t in StructureRegistry.INCHI_TYPES],
+                    field_name='id'
+                )
+
+                structure_inchi_associations = []
                 for structure_to_inchi in structure_to_inchi_list:
                     sid = structure_to_inchi.structure
                     for inchi_type, inchi_data in structure_to_inchi.relationships.items():
-                        structure_inchi = StructureInChIs(
+                        logger.info("%s ---> %s | %s : %s" % (sid, inchi_data.inchi.id, inchi_type, inchi_data))
+                        if inchi_data.inchi.key in inchi_objects_by_key:
+                            inchi = inchi_objects_by_key[inchi_data.inchi.key]
+                        #    logger.info("I %s" % (inchi,))
+                        #    structure_objects[sid].inchis.add(inchi)
+                        else:
+                            logger.info("I %s" % (inchi,))
+                            logger.info("DOES NOT EXISTS %s" % (inchi_data.inchi.key,))
+                            continue
+
+                        structure_inchi_association = StructureInChIAssociation(
                             structure=structure_objects[sid],
-                            inchi=inchi_objects[inchi_data.inchi.id],
-                            software_version_string=inchi_type.version,
-                            save_options=inchi_data.saveopts
+                            inchi=inchi,
+                            inchitype=inchi_type_objects[inchi_type.id],
+                            save_opt=inchi_data.saveopt,
+                            software_version=inchi_type.softwareversion
                         )
-                        structure_inchis_list.append(structure_inchi)
-                StructureInChIs.objects.bulk_create(
-                    structure_inchis_list,
+                        structure_inchi_associations.append(structure_inchi_association)
+                StructureInChIAssociation.objects.bulk_create(
+                    structure_inchi_associations,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
