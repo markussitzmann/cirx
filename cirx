@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+echo "Running $@"
+
+docker-compose run --rm cirx bash -ci "gosu app bash -c 'cd /home/app/appsite && ./manage.py $*'"

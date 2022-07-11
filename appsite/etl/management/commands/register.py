@@ -20,7 +20,7 @@ class Command(BaseCommand):
         _register()
 
 
-def register_file_records(structure_file_id: int):
+def _register_file_records(structure_file_id: int):
     task_list = \
         (count_and_save_file_task.s(structure_file_id) |
          register_file_record_chunk_mapper.s(register_file_record_chunk_task.s()))
@@ -42,7 +42,7 @@ def _register():
         file_list: List[StructureFile] = processor.register_files()
 
         for file in file_list:
-            task = register_file_records(file.id)
+            task = _register_file_records(file.id)
             tasks.append(task)
 
     for task in tasks:
