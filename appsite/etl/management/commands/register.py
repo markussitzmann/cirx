@@ -20,7 +20,7 @@ class Command(BaseCommand):
         _register()
 
 
-def _register_file_records(structure_file_id: int):
+def register_file_records(structure_file_id: int):
     task_list = \
         (count_and_save_file_task.s(structure_file_id) |
          register_file_record_chunk_mapper.s(register_file_record_chunk_task.s()))
@@ -28,10 +28,10 @@ def _register_file_records(structure_file_id: int):
 
 
 def _register():
-    if settings.INIT_SYSTEM:
-        for f in StructureFile.objects.all():
-            logger.info("INITIALIZING SYSTEM: deleting %s", f)
-            f.delete()
+    # if settings.INIT_SYSTEM:
+    #     for f in StructureFile.objects.all():
+    #         logger.info("INITIALIZING SYSTEM: deleting %s", f)
+    #         f.delete()
 
     #file_collections = FileCollection.objects.all()
     file_collections = FileCollection.objects.filter(id=4)
@@ -42,12 +42,13 @@ def _register():
         file_list: List[StructureFile] = processor.register_files()
 
         for file in file_list:
-            task = _register_file_records(file.id)
+            task = register_file_records(file.id)
             tasks.append(task)
 
-    for task in tasks:
-        for k, v in task.collect(intermediate=False):
-            logger.info("%s : %s" % (k.successful(), v))
+    #for task in tasks:
+    #    for k, v in task.collect(intermediate=False):
+    #        logger.info("%s : %s" % (k.successful(), v))
+
 
 
 

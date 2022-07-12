@@ -123,9 +123,8 @@ services:
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
 #    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log", "--pidfile=/pids/cirx-worker1.pid"]
-    command: [ 'celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log"]
-
-#    restart: on-failure
+    command: [ 'celery', '-A', 'tasks', 'worker', '-l', 'info', "--logfile=/logging/polaris-worker1.%h.%i.log" ]
+    restart: on-failure
     depends_on:
 #      - cirx-rabbitmq
       - cirx-cache
