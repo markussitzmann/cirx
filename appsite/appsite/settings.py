@@ -24,7 +24,7 @@ propertypath = list(CACTVS_SETTINGS['propertypath'])
 propertypath.insert(1, '/home/app/cactvsenv/prop')
 
 CACTVS_SETTINGS['python_object_autodelete'] = True
-#CACTVS_SETTINGS['lookup_hosts'] = []
+CACTVS_SETTINGS['lookup_hosts'] = []
 CACTVS_SETTINGS['propertypath'] = tuple(propertypath)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -171,13 +171,6 @@ STATIC_ROOT = os.path.join("/home/app", "static/")
 MEDIA_ROOT = os.path.join("/home/app", "media/")
 MEDIA_URL = "/media/"
 
-### CORS
-
-# CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOW_HEADERS = ['*']
-#
-# CORS_ALLOW_ALL_ORIGINS = True
 
 #### JSON API
 
@@ -211,14 +204,6 @@ REST_FRAMEWORK = {
 
 JSON_API_FORMAT_FIELD_NAMES = 'camelize'
 
-#APPEND_SLASH = False
-
-
-#CSRF_TRUSTED_ORIGINS = (
-#    'http://localhost:8000'
-#)
-#CORS_ORIGIN_ALLOW_ALL = True
-#sCORS_ALLOW_CREDENTIALS = False
 
 ### LOGGING
 
@@ -261,8 +246,6 @@ LOGGING = {
 
 # CELERY SETTINGS
 
-#CELERY_BROKER_URL = 'amqp://' + os.environ['RABBITMQ_DEFAULT_USER'] + ':' + os.environ['RABBITMQ_DEFAULT_PASS'] + '@cirx-rabbitmq'
-
 CELERY_BROKER_URL = 'redis://cirx-cache:6379'
 
 CELERY_ACCEPT_CONTENT = ['json']
@@ -280,22 +263,22 @@ CIR_AVAILABLE_RESOLVERS = [
     'smiles',
     'stdinchikey',
     'stdinchi',
-    'ncicadd_identifier',
+    #'ncicadd_identifier',
     'hashisy',
     #'chemspider_id',
     #'chemnavigator_sid',
     #'pubchem_sid',
     #'emolecules_vid',
     #'ncicadd_rid',
-    'ncicadd_cid',
-    'ncicadd_sid',
-    'cas_number',
-    'nsc_number',
-    'zinc_code',
+    #'ncicadd_cid',
+    #'ncicadd_sid',
+    #'cas_number',
+    #'nsc_number',
+    #'zinc_code',
     #'opsin',
     #'chemspider_name',
     #'name_pattern',
-    'name',
+    #'name',
     #'SDFile',
     'minimol',
     'packstring',

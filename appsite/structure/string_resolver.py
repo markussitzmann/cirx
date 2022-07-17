@@ -30,7 +30,7 @@ logger = logging.getLogger('cirx')
 
 #from database.models import Database
 #from structure.models import Record, Compound
-from resolver.models import InChI, Structure, Compound, Name, StructureNames, Database
+from resolver.models import InChI, Structure, Compound, Name, StructureNames, Database, StructureInChIAssociation
 
 
 # from sets import Set
@@ -194,7 +194,7 @@ class ChemicalString:
         i = 1
 
         for resolver in resolver_list:
-            if not debug:
+            if not settings.DEBUG:
                 try:
                     resolver_method = getattr(self, '_resolver_' + resolver)
                     interpretation = self.Interpretation()
@@ -316,31 +316,32 @@ class ChemicalString:
         return False
 
     def _resolver_stdinchikey(self, interpretation_object):
-        #identifier = InChIKey(key=self.string)
-        identifier = InChI.create(key=self.string)
-        # if not k.is_standard:
-        #	return False
-        #inchikey_query = identifier.query()
-        inchikeys = InChI.objects.filter(id=identifier.id)
+        identifier: InChIKey = InChIKey(key=self.string)
+        #identifier = InChI.create(key=self.string)
+        if not identifier.is_standard:
+            return False
+        inchikey_query = identifier.query_dict
+        inchikeys = InChI.objects.filter(**inchikey_query)
         structure_set = []
         description_list = []
         for inchikey in inchikeys:
             #structures = inchikey.structure_set.all()
-            structures: List[Structure] = inchikey.structures.all()
-            full_key = InChIKey(
-                block1=identifier.block1,
-                block2=identifier.block2,
-                block3=identifier.block3,
-            )
-            for structure in structures:
+            structure_associations: List[StructureInChIAssociation] = inchikey.structures.all()
+            #full_key = InChIKey(
+            #    block1=identifier.block1,
+            #    block2=identifier.block2,
+            #    block3=identifier.block3,
+            #)
+            #full_key = identifier
+            for association in structure_associations:
                 # ens = Ens(self.cactvs, structure.object.minimol)
-                chemical_structure = ChemicalStructure(resolved=structure)
+                chemical_structure = ChemicalStructure(resolved=association.structure)
                 chemical_structure._metadata = {
                     'query_type': 'stdinchikey',
                     'query_search_string': 'Standard InChIKey',
                     'query_object': identifier,
                     'query_string': self.string,
-                    'description': full_key.element['well_formatted']
+                    'description': identifier.element['well_formatted']
                 }
                 structure_set.append(chemical_structure)
         if inchikeys:

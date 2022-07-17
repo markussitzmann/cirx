@@ -109,7 +109,8 @@ def resolve_to_response(request, string, representation, operator_parameter=None
             'response': response,
             'string': resolved_string,
             'representation': representation,
-            'base_url': settings.STRUCTURE_BASE_URL,
+            #'base_url': settings.STRUCTURE_BASE_URL,
+            'base_url': request.get_full_path_info(),
             'host': host_string
         }, content_type="text/xml")
 

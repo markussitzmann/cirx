@@ -59,6 +59,10 @@ class InChIKey:
         return False
 
     @property
+    def is_standard(self):
+        return self.element['is_standard']
+
+    @property
     def model_dict(self) -> Dict:
         return {
             #'id': self._calculate_uuid(),
@@ -71,6 +75,16 @@ class InChIKey:
             #'save_options': self.element['save_options'],
             'version_string': self.element['version_string']
         }
+
+    @property
+    def query_dict(self) -> Dict:
+        query_dict = {}
+        for i in ['block1', 'block2', 'block3']:
+            if i in self.element:
+                query_dict[i] = self.element[i]
+            else:
+                break
+        return query_dict
 
     def _calculate_uuid(self):
         return uuid.uuid5(uuid.NAMESPACE_URL, "/".join([

@@ -50,32 +50,12 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
 
-#  cirx-rabbitmq:
-#    image: rabbitmq:3.8-management
-#    container_name: ${APP_NAME}-rabbitmq
-#    ports:
-#      - "5673:5672"
-#      - "15673:15672"
-#    volumes:
-#      - rabbitmq_volume:/var/lib/rabbitmq/
-#      - rabbitmq_volume:/var/log/rabbitmq
-#    networks:
-#      - app_network
-#    environment:
-#      - RABBITMQ_DEFAULT_USER
-#      - RABBITMQ_DEFAULT_PASS
-#    healthcheck:
-#      test: rabbitmq-diagnostics -q ping
-#      interval: 5s
-#      timeout: 15s
-#      retries: 1
-
   cirx-cache:
     image: redis:6.2-bullseye
     container_name: ${APP_NAME}-cache
     restart: always
-    ports:
-      - '6379:6379'
+    #ports:
+    #  - '6379:6379'
     command: redis-server --save 20 1 --loglevel warning #--requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     volumes:
       - cache_volume:/data
@@ -89,7 +69,6 @@ services:
       - CELERY_BROKER_URL=redis://cirx-cache
       - CELERY_RESULT_BACKEND=redis://cirx-cache
       - FLOWER_PORT=8888
-    #command: [ 'celery', 'flower', '--broker=redis://cirx-cache:6379', '--port=8888' ]
     ports:
       - 8888:8888
     depends_on:
@@ -122,32 +101,14 @@ services:
       - RABBITMQ_DEFAULT_PASS
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
-#    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker1.log", "--pidfile=/pids/cirx-worker1.pid"]
-    command: [ 'celery', '-A', 'tasks', 'worker', '-l', 'info', "--logfile=/logging/polaris-worker1.%h.%i.log" ]
+    command: [ 'celery', '-A', 'appsite', 'worker', '-l', 'info', '-c', '3', "--logfile=/logging/cirx-worker1.%h.%i.log" ]
     restart: on-failure
     depends_on:
-#      - cirx-rabbitmq
       - cirx-cache
-
-#  cirx-worker2:
-#    image: ${APP_NAME}:${APP_VERSION}
-#    container_name: ${APP_NAME}-worker2
-#    volumes: *worker_volumes
-#    networks:
-#      - app_network
-#    environment: *worker_env
-#    entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
-#    working_dir: "/home/app/appsite"
-#    command: ['celery', '-A', 'appsite', 'worker', '-l', 'info', "--logfile=/logging/cirx-worker2.log", "--pidfile=/pids/cirx-worker2.pid"]
-#    #restart: on-failure
-#    depends_on:
-#      - cirx-rabbitmq
 
 volumes:
   postgres_db_volume:
     name: ${APP_NAME}-postgres-db-volume
-#  rabbitmq_volume:
-#    name: ${APP_NAME}-rabbitmq_volume
   cache_volume:
     driver: local
 
