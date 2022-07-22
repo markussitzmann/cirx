@@ -230,8 +230,9 @@ class ChemicalString:
         pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
         match = pattern.search(self.string)
         hashcode = match.group('hashcode')
-        hashcode_int = int(match.group('hashcode'), 16)
-        chemical_structure = ChemicalStructure(resolved=Structure.objects.get(hashisy=hashcode_int))
+        #hashcode_int = int(match.group('hashcode'), 16)
+        cactvs_hashcode = CactvsHash(hashcode)
+        chemical_structure = ChemicalStructure(resolved=Structure.objects.get(hashisy_key=cactvs_hashcode))
         if chemical_structure:
             chemical_structure._metadata = {
                 'query_type': 'hashisy',
@@ -300,7 +301,8 @@ class ChemicalString:
 
     def _resolver_ncicadd_identifier(self, interpretation_object):
         identifier = Identifier(string=self.string)
-        structure = Structure.objects.get(hashisy=identifier.integer)
+        hashisy_key = CactvsHash(identifier.hashcode)
+        structure = Structure.objects.get(hashisy_key=hashisy_key)
         chemical_structure = ChemicalStructure(resolved=structure)
         if chemical_structure:
             identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type

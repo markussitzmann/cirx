@@ -5,6 +5,7 @@ from rest_framework.fields import MultipleChoiceField
 from rest_framework_json_api import relations
 from rest_framework_json_api import serializers
 
+from structure.ncicadd.identifier import Identifier as NCICADDIdentifier
 from resolver import defaults
 from resolver.exceptions import ResourceExistsError
 from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
@@ -111,10 +112,31 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
     }
 
     smiles = serializers.SerializerMethodField('serialize_minimol')
+    ficts = serializers.SerializerMethodField('get_ficts')
+    ficus = serializers.SerializerMethodField('get_ficus')
+    uuuuu = serializers.SerializerMethodField('get_uuuuu')
+
 
     def serialize_minimol(self, obj):
         return obj.to_ens.get("E_SMILES")
-        #return "blub"
+
+    def get_ficts(self, obj: Structure):
+        if obj.ficts_parent:
+            return NCICADDIdentifier(hashcode=obj.ficts_parent.hashisy, identifier_type='FICTS').string
+        else:
+            None
+
+    def get_ficus(self, obj: Structure):
+        if obj.ficus_parent:
+            return NCICADDIdentifier(hashcode=obj.ficus_parent.hashisy, identifier_type='FICuS').string
+        else:
+            None
+
+    def get_uuuuu(self, obj: Structure):
+        if obj.uuuuu_parent:
+            return NCICADDIdentifier(hashcode=obj.uuuuu_parent.hashisy, identifier_type='uuuuu').string
+        else:
+            None
 
     class Meta:
         model = Structure
@@ -130,10 +152,13 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
             'uuuuu_children',
             'inchis',
             'entrypoints',
+            'ficts',
+            'ficus',
+            'uuuuu',
             'added',
         )
         read_only_fields = ('id', 'hashisy')
-        meta_fields = ('added',)
+        meta_fields = ('ficts', 'ficus', 'uuuuu', 'added')
 
     def create(self, validated_data: Dict):
         # not implemented yet

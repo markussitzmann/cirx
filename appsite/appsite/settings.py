@@ -260,11 +260,11 @@ CELERY_TIMEZONE = "Europe/Berlin"
 # CIR Settings
 
 CIR_AVAILABLE_RESOLVERS = [
-    'smiles',
-    'stdinchikey',
-    'stdinchi',
-    #'ncicadd_identifier',
-    'hashisy',
+    #'smiles',
+    #'stdinchikey',
+    #'stdinchi',
+    'ncicadd_identifier',
+    #'hashisy',
     #'chemspider_id',
     #'chemnavigator_sid',
     #'pubchem_sid',
@@ -280,8 +280,8 @@ CIR_AVAILABLE_RESOLVERS = [
     #'name_pattern',
     #'name',
     #'SDFile',
-    'minimol',
-    'packstring',
+    #'minimol',
+    #'packstring',
 ]
 
 CIR_FILESTORE_ROOT = os.path.join("/home/app", "filestore")
