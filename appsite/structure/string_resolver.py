@@ -30,7 +30,7 @@ logger = logging.getLogger('cirx')
 
 #from database.models import Database
 #from structure.models import Record, Compound
-from resolver.models import InChI, Structure, Compound, Name, StructureNames, Database, StructureInChIAssociation
+from resolver.models import InChI, Structure, Compound, Name, StructureNames, Dataset, StructureInChIAssociation
 
 
 # from sets import Set
@@ -371,7 +371,7 @@ class ChemicalString:
         if match:
             chemnavigator_id = match.group('sid')
             # TODO: id = 9 is dangerous
-            database = Database.objects.get(id=9)
+            database = Dataset.objects.get(id=9)
             record = Record.objects.get(database_record_external_identifier=chemnavigator_id, database=database)
             structure = record.get_structure()
             chemical_structure = ChemicalStructure(resolved=structure)
@@ -414,7 +414,7 @@ class ChemicalString:
         match = pattern.search(self.string)
         if match:
             emolecules_id = match.group('vid')
-            database = Database.objects.get(id=120)
+            database = Dataset.objects.get(id=120)
             record = Record.objects.get(database_record_external_identifier=emolecules_id, database=database)
             structure = record.get_structure()
             chemical_structure = ChemicalStructure(resolved=structure)
@@ -566,7 +566,7 @@ class ChemicalString:
             self.string = match.group('nsc')
             nsc_number_string = 'NSC%s' % self.string
             # TODO: that is not gonna work
-            database = Database.objects.get(id=64)
+            database = Dataset.objects.get(id=64)
             record = Record.objects.filter(database=database, database_record_external_identifier=self.string)[0]
             if record:
                 structure = record.get_structure()

@@ -50,7 +50,7 @@ def db_media(request):
 	if config_hash_list:
 		media_request.update(dict([(i,i) for i in config_hash_list]))
 	response = Response()
-	response.resolve_string_list(string_list).load_structure_objects().load_media(media_request).load_database_records()
+	response.resolve_string_list(string_list).load_structure_objects().load_media(media_request).load_dataset_records()
 
 	data = dict([
 		(
@@ -63,7 +63,7 @@ def db_media(request):
 						]) for structure in item.structure_list
 					],
 					'compound': response.structure_compound_list[structure['id']].id,
-					'database_record_count': response.short_database_record_count.get(response.structure_compound_list[structure['id']].id, None),
+					'dataset_record_count': response.short_database_record_count.get(response.structure_compound_list[structure['id']].id, None),
 					'test': 'test'
 				})
 				for item in group.item_list

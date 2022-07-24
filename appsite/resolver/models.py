@@ -249,7 +249,7 @@ class Record(models.Model):
     regid = models.ForeignKey('Name', on_delete=models.PROTECT)
     version = models.IntegerField(default=1, blank=False, null=False)
     release = models.ForeignKey('Release', blank=False, null=False, on_delete=models.CASCADE)
-    database = models.ForeignKey('Database', blank=False, null=False, on_delete=models.RESTRICT)
+    dataset = models.ForeignKey('Dataset', blank=False, null=False, on_delete=models.RESTRICT)
     structure_file_record = models.ForeignKey(
         'etl.StructureFileRecord',
         blank=False,
@@ -539,7 +539,7 @@ class ContextTag(models.Model):
     class Meta:
         verbose_name = "Context Teg"
         verbose_name_plural = "Context Tags"
-        db_table = 'cir_database_context_tag'
+        db_table = 'cir_dataset_context_tag'
 
     def __str__(self):
         return "%s" % self.tag
@@ -566,10 +566,10 @@ class URIPattern(models.Model):
                 name='unique_uripattern_constraint'
             ),
         ]
-        db_table = 'cir_database_uri_pattern'
+        db_table = 'cir_dataset_uri_pattern'
 
 
-class Database(models.Model):
+class Dataset(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=768, null=False, blank=False)
     href = models.URLField(max_length=4096, null=True, blank=True)
@@ -584,10 +584,10 @@ class Database(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=['name', 'publisher'],
-                name='unique_database_constraint'
+                name='unique_dataset_constraint'
             ),
         ]
-        db_table = 'cir_database'
+        db_table = 'cir_dataset'
 
     def __str__(self):
         return "%s" % self.name
@@ -595,7 +595,7 @@ class Database(models.Model):
 
 class Release(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    database = models.ForeignKey(Database, blank=False, null=False, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(Dataset, blank=False, null=False, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, blank=False, null=False, on_delete=models.CASCADE)
     name = models.CharField(max_length=768, null=False, blank=False)
     description = models.TextField(max_length=2048, blank=True, null=True)
@@ -623,11 +623,11 @@ class Release(models.Model):
         ordering = ['-added']
         constraints = [
             UniqueConstraint(
-                fields=['database', 'publisher', 'name', 'version', 'downloaded', 'released'],
-                name='unique_database_release_constraint'
+                fields=['dataset', 'publisher', 'name', 'version', 'downloaded', 'released'],
+                name='unique_dataset_release_constraint'
             ),
         ]
-        db_table = 'cir_database_release'
+        db_table = 'cir_dataset_release'
 
     @property
     def version_string(self):
@@ -645,9 +645,9 @@ class Release(models.Model):
             return self.name
         else:
             if self.version_string:
-                string = "%s %s" % (self.database.name, self.version_string)
+                string = "%s %s" % (self.dataset.name, self.version_string)
             else:
-                string = "%s (%s)" % (self.database.name, self.publisher)
+                string = "%s (%s)" % (self.dataset.name, self.publisher)
             return string
 
     def __str__(self):

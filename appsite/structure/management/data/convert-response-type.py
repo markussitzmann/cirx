@@ -3,7 +3,7 @@ from structure.models import ResponseType
 import os
 print(os.getcwd())
 
-with open('./structure/raw-data/response-type.txt') as f:
+with open('./structure/data/response-type.txt') as f:
     lines = f.readlines()
     response_type_dict = {}
     for line in lines:

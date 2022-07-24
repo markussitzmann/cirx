@@ -172,7 +172,7 @@ class UserFileProcessor(CactvsScript):
 		self.from_resolver = False
 		
 		script_env = CactvsScriptEnv()
-		script_env.database = {
+		script_env.dataset = {
 			'name': settings.DATABASE_NAME,
 			'user': settings.DATABASE_USER,
 			'password': settings.DATABASE_PASSWORD,

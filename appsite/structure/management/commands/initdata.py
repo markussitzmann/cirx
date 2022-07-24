@@ -9,7 +9,7 @@ from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import FileCollection
 from structure.models import  ResponseType
 from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNames, ContextTag, \
-    Database, Release, InChIType
+    Dataset, Release, InChIType
 
 from pycactvs import Ens
 
@@ -27,9 +27,9 @@ class Command(BaseCommand):
 def _loader():
     init_response_type_data()
     init_name_type_data()
-    init_database_context_type_data()
+    init_dataset_context_type_data()
     init_organization_and_publisher_data()
-    init_database()
+    init_dataset()
     init_release()
     init_inchi_type()
     #init_structures()
@@ -63,7 +63,7 @@ def init_structures():
 
 
 def init_response_type_data():
-    with open('./structure/management/raw-data/response-type.txt') as f:
+    with open('./structure/management/data/response-type.txt') as f:
         lines = f.readlines()
         response_type_dict = {}
         for line in lines:
@@ -85,7 +85,7 @@ def init_response_type_data():
             response_type_dict[id] = response_type
 
 
-def init_database_context_type_data():
+def init_dataset_context_type_data():
     context_data = [
         ("other", None),
         ("screening", None),
@@ -198,13 +198,13 @@ def init_organization_and_publisher_data():
     ebi.href = "https://www.ebi.ac.uk/"
     ebi.save()
 
-    sito, created = Organization.objects.get_or_create(
-        name="Markus Sitzmann Cheminformatics & IT Consulting",
-    )
-    sito.abbreviation = "SCIC"
-    sito.category = "other"
-    sito.href = ""
-    sito.save()
+    # sito, created = Organization.objects.get_or_create(
+    #     name="Markus Sitzmann Cheminformatics & IT Consulting",
+    # )
+    # sito.abbreviation = "SCIC"
+    # sito.category = "other"
+    # sito.href = ""
+    # sito.save()
 
     ncicadd, created = Publisher.objects.get_or_create(
         name="NCI Computer-Aided Drug Design (CADD) Group",
@@ -233,7 +233,7 @@ def init_organization_and_publisher_data():
         orcid="https://orcid.org/0000-0001-5346-1298"
     )
     sitp.email = "markus.sitzmann@gmail.com"
-    sitp.organizations.add(sito, fiz)
+    #sitp.organizations.add(sito, fiz)
     sitp.save()
 
     pubchem_division, created = Publisher.objects.get_or_create(
@@ -263,8 +263,8 @@ def init_organization_and_publisher_data():
     nci_dtp.save()
 
 
-def init_database():
-    pubchem, created = Database.objects.get_or_create(
+def init_dataset():
+    pubchem, created = Dataset.objects.get_or_create(
         name="PubChem",
         publisher=Publisher.objects.get(name="PubChem"),
     )
@@ -273,7 +273,7 @@ def init_database():
     pubchem.context_tags.add(ContextTag.objects.get(tag="meta"))
     pubchem.save()
 
-    chembl, created = Database.objects.get_or_create(
+    chembl, created = Dataset.objects.get_or_create(
         name="ChEMBL",
         publisher=Publisher.objects.get(name="ChEMBL Team"),
     )
@@ -282,8 +282,8 @@ def init_database():
     chembl.context_tags.add(ContextTag.objects.get(tag="drug"))
     chembl.save()
 
-    ncidb, created = Database.objects.get_or_create(
-        name="NCI Database",
+    ncidb, created = Dataset.objects.get_or_create(
+        name="DTP/NCI",
         publisher=Publisher.objects.get(name="DTP/NCI"),
     )
     ncidb.href = "https://dtp.cancer.gov/"
@@ -294,7 +294,7 @@ def init_database():
 
 def init_release():
     pubchem_compound, created = Release.objects.get_or_create(
-        database=Database.objects.get(name="PubChem"),
+        dataset=Dataset.objects.get(name="PubChem"),
         publisher=Publisher.objects.get(name="PubChem"),
         name="PubChem Compound",
         version=None,
@@ -313,7 +313,7 @@ def init_release():
 
 
     pubchem_substance, created = Release.objects.get_or_create(
-        database=Database.objects.get(name="PubChem"),
+        dataset=Dataset.objects.get(name="PubChem"),
         publisher=Publisher.objects.get(name="PubChem"),
         name="PubChem Substance",
         version=None,
@@ -333,7 +333,7 @@ def init_release():
 
 
     chembl_db, created = Release.objects.get_or_create(
-        database=Database.objects.get(name="ChEMBL"),
+        dataset=Dataset.objects.get(name="ChEMBL"),
         publisher=Publisher.objects.get(name="ChEMBL Team"),
         version=29,
         released=None,
@@ -351,7 +351,7 @@ def init_release():
     chembl_collection.save()
 
     nci_db, created = Release.objects.get_or_create(
-        database=Database.objects.get(name="NCI Database"),
+        dataset=Dataset.objects.get(name="DTP/NCI"),
         publisher=Publisher.objects.get(name="PubChem"),
         version=None,
         released=None,
@@ -363,8 +363,9 @@ def init_release():
     nci_db.description = "NCI database"
     nci_db.save()
 
+
     open_nci_db, created = Release.objects.get_or_create(
-        database=Database.objects.get(name="NCI Database"),
+        dataset=Dataset.objects.get(name="DTP/NCI"),
         publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
         version=None,
         released=None,

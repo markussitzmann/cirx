@@ -1,5 +1,5 @@
 from django.contrib import admin
-from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, Release, Database, ContextTag, \
+from resolver.models import InChI, Organization, Publisher, EntryPoint, EndPoint, Release, Dataset, ContextTag, \
     URIPattern
 
 
@@ -33,8 +33,8 @@ class ReleaseInline(admin.StackedInline):
     extra = 0
 
 
-@admin.register(Database)
-class DatabaseAdmin(admin.ModelAdmin):
+@admin.register(Dataset)
+class DatasetAdmin(admin.ModelAdmin):
     inlines = [
         ReleaseInline
     ]
