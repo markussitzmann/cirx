@@ -16,7 +16,11 @@ class Migration(migrations.Migration):
             name='StructureFile',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(max_length=1024, storage=django.core.files.storage.FileSystemStorage(location='/home/app/filestore'), upload_to='manual/')),
+                ('file', models.FileField(
+                    max_length=1024,
+                    storage=django.core.files.storage.FileSystemStorage(location='/filestore'),
+                    upload_to='manual/')
+                    ),
                 ('count', models.IntegerField(blank=True, null=True)),
                 ('added', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
