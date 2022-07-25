@@ -12,7 +12,7 @@ from django.db import transaction, DatabaseError, IntegrityError
 from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from etl.models import FileCollection, StructureFile, StructureFileField, StructureFileRecord
+from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord
 from structure.inchi.identifier import InChIString, InChIKey
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType
 
@@ -30,7 +30,7 @@ class FileRegistry(object):
     CHUNK_SIZE = 10000
     DATABASE_ROW_BATCH_SIZE = 1000
 
-    def __init__(self, file_collection: FileCollection):
+    def __init__(self, file_collection: StructureFileCollection):
         self.file_collection = file_collection
         self._file_name_list = glob.glob(
             os.path.join(settings.CIR_FILESTORE_ROOT, file_collection.file_location_pattern_string),
@@ -38,20 +38,25 @@ class FileRegistry(object):
         )
         self._file_list = list()
 
-    def register_files(self) -> List[StructureFile]:
+    def register_files(self, force=False) -> List[StructureFile]:
         self._file_list = \
-            [status.file for fname in self._file_name_list if (status := self.register_file(fname)).created]
+                [status.file for fname in self._file_name_list if (status := self.register_file(fname, force)).created]
         return self._file_list
 
-    def register_file(self, fname) -> Status:
+    def register_file(self, fname, force=False) -> Status:
         structure_file, created = StructureFile.objects.get_or_create(
             collection=self.file_collection,
             file=fname
         )
         if created:
             return Status(file=structure_file, created=True)
-        logger.info("file '%s' had already been registered previously (%s records)" % (fname, structure_file.count))
-        return Status(file=structure_file, created=False)
+        if not force:
+            logger.info("file '%s' had already been registered previously (%s records)" % (fname, structure_file.count))
+            return Status(file=structure_file, created=False)
+        else:
+            logger.info("file '%s' had already been registered previously (%s records) but registration was enforced"
+                        % (fname, structure_file.count))
+            return Status(file=structure_file, created=True)
 
     @staticmethod
     def count_and_save_structure_file(structure_file_id: int) -> int:
@@ -163,7 +168,7 @@ class FileRegistry(object):
                 logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.info("registering file field '%s'" % (field,))
-                    sff, created = StructureFileField.objects.get_or_create(name=field)
+                    sff, created = StructureFileField.objects.get_or_create(field_name=field)
                     sff.structure_files.add(structure_file)
                     sff.save()
         except DatabaseError as e:

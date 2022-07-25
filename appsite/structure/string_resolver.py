@@ -30,7 +30,7 @@ logger = logging.getLogger('cirx')
 
 #from database.models import Database
 #from structure.models import Record, Compound
-from resolver.models import InChI, Structure, Compound, Name, StructureNames, Dataset, StructureInChIAssociation
+from resolver.models import InChI, Structure, Compound, Name, StructureNameAssociation, Dataset, StructureInChIAssociation
 
 
 # from sets import Set
@@ -62,7 +62,7 @@ class ChemicalName:
                 mode=sphinxapi.SPH_MATCH_EXTENDED).select_related()
             self.metadata = self.query_set._sphinx
             self.names = self.query_set[0:100]
-            structure_name_objects = StructureNames.objects.filter(name__in=self.names)
+            structure_name_objects = StructureNameAssociation.objects.filter(name__in=self.names)
             structure_names = {}
             structure_rank = 1
             for structure_name in structure_name_objects:

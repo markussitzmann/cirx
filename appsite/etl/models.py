@@ -5,14 +5,12 @@ from django.db.models import UniqueConstraint
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
-#from database.models import Release
-#from custom.fields import CactvsHashField
-from resolver.models import Structure, Release
+from resolver.models import Structure, Release, NameType
 
 fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
 
 
-class FileCollection(models.Model):
+class StructureFileCollection(models.Model):
     release = models.ForeignKey(
         Release,
         related_name='collections',
@@ -45,7 +43,7 @@ class FileCollection(models.Model):
 
 class StructureFile(models.Model):
     collection = models.ForeignKey(
-        FileCollection,
+        StructureFileCollection,
         related_name='files',
         null=True,
         blank=True,
@@ -71,14 +69,48 @@ class StructureFile(models.Model):
 
 
 class StructureFileField(models.Model):
-    name = models.CharField(max_length=768, null=False, blank=False, unique=True)
+    field_name = models.CharField(max_length=768, null=False, blank=False, unique=True)
     structure_files = models.ManyToManyField(StructureFile, related_name="fields")
 
     class Meta:
         db_table = 'cir_structure_file_field'
 
     def __str__(self):
-        return "%s" % self.name
+        return "%s" % self.field_name
+
+
+class StructureFileCollectionNameField(models.Model):
+    collection = models.ForeignKey(
+        StructureFileCollection,
+        related_name='collection_name_field',
+        blank=False,
+        null=False,
+        on_delete=models.RESTRICT
+    )
+    field = models.ForeignKey(
+        StructureFileField,
+        related_name='collection_name_field',
+        blank=False,
+        null=False,
+        on_delete=models.RESTRICT
+    )
+    name_type = models.ForeignKey(
+        NameType,
+        related_name='collection_name_field',
+        blank=False,
+        null=False,
+        on_delete=models.RESTRICT
+    )
+    is_regid = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['collection_id', 'field', 'name_type'],
+                name='unique_structure_file_collection_name_field_constraint'
+            ),
+        ]
+        db_table = 'cir_structure_file_collection_name_field'
 
 
 class StructureFileRecord(models.Model):

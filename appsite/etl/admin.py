@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from etl.models import StructureFile, FileCollection
+from etl.models import StructureFile, StructureFileCollection
 
 
 @admin.register(StructureFile)
@@ -13,7 +13,7 @@ class StructureFileInline(admin.StackedInline):
     extra = 0
 
 
-@admin.register(FileCollection)
+@admin.register(StructureFileCollection)
 class FileCollectionAdmin(admin.ModelAdmin):
     inlines = [
         StructureFileInline

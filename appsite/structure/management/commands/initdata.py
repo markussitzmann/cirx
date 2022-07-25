@@ -6,9 +6,9 @@ from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 #from database.models import
-from etl.models import FileCollection
+from etl.models import StructureFileCollection
 from structure.models import  ResponseType
-from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNames, ContextTag, \
+from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, ContextTag, \
     Dataset, Release, InChIType
 
 from pycactvs import Ens
@@ -47,7 +47,7 @@ def init_structures():
         structure_obj, structure_created = Structure.objects.get_or_create_from_ens(ens)
         logger.info("Structure: %s %s" % (structure_obj, structure_created))
 
-        structure_name_obj, name_created = StructureNames.objects.get_or_create(
+        structure_name_obj, name_created = StructureNameAssociation.objects.get_or_create(
             name=name_obj,
             structure=structure_obj,
             name_type=name_type_obj
@@ -132,7 +132,7 @@ def init_name_type_data():
     ]
 
     for name_type in name_types:
-        NameType.objects.get_or_create(string=name_type[0], public_string=name_type[1])
+        NameType.objects.get_or_create(id=name_type[0], public_string=name_type[1])
 
 
 def init_organization_and_publisher_data():
@@ -305,7 +305,7 @@ def init_release():
     pubchem_compound.description = "PubChem Compound database"
     pubchem_compound.save()
 
-    pubchem_compound_collection, created = FileCollection.objects.get_or_create(
+    pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
         release=pubchem_compound,
         file_location_pattern_string="pubchem/compound/Compound_*.sdf"
     )
@@ -325,7 +325,7 @@ def init_release():
     pubchem_substance.description = "PubChem Substance database"
     pubchem_substance.save()
 
-    pubchem_substance_collection, created = FileCollection.objects.get_or_create(
+    pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
         release=pubchem_compound,
         file_location_pattern_string="pubchem/substance/Substance_*.sdf"
     )
@@ -344,7 +344,7 @@ def init_release():
     chembl_db.description = "ChEMBL database"
     chembl_db.save()
 
-    chembl_collection, created = FileCollection.objects.get_or_create(
+    chembl_collection, created = StructureFileCollection.objects.get_or_create(
         release=chembl_db,
         file_location_pattern_string="chembl/29/chembl_29.sdf"
     )
@@ -377,7 +377,7 @@ def init_release():
     open_nci_db.description = "NCI database"
     open_nci_db.save()
 
-    open_nci_db_collection, created = FileCollection.objects.get_or_create(
+    open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
         release=open_nci_db,
         file_location_pattern_string="nci/NCI_DTP.mini.sdf"
     )

@@ -8,7 +8,7 @@ from unittest import skip
 from django.test import SimpleTestCase, TestCase
 from django.conf import settings
 
-from etl.models import FileCollection, StructureFile
+from etl.models import StructureFileCollection, StructureFile
 from registration import FileRegistry
 
 logger = logging.getLogger('cirx')
@@ -21,7 +21,7 @@ class FileRegistrationTests(TestCase):
     fixtures = ["etl.json"]
 
     def setUp(self):
-        self.file_collections = FileCollection.objects.all()
+        self.file_collections = StructureFileCollection.objects.all()
 
     def test_register_files(self):
         for file_collection in self.file_collections:
@@ -80,7 +80,7 @@ class MolfileTests(TestCase):
 
     @skip
     def test_file_pattern(self):
-        collections = FileCollection.objects.all()
+        collections = StructureFileCollection.objects.all()
         for collection in collections:
             logger.info(collection.file_location_pattern_string)
             file_name_list = glob.glob(

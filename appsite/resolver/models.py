@@ -31,7 +31,7 @@ class Structure(models.Model):
         'Structure', blank=True, null=True, related_name='uuuuu_children', on_delete=models.PROTECT)
     names = models.ManyToManyField(
         'Name',
-        through='StructureNames',
+        through='StructureNameAssociation',
         related_name="structures"
     )
     entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
@@ -287,7 +287,8 @@ class Name(models.Model):
 
 
 class NameType(models.Model):
-    string = models.CharField(max_length=64, unique=True, blank=False, null=False)
+    id = models.CharField(max_length=64, primary_key=True, editable=False)
+    #string = models.CharField(max_length=64, unique=True, blank=False, null=False)
     public_string = models.TextField(max_length=64, blank=False, null=False)
     description = models.TextField(max_length=768, blank=True, null=True)
 
@@ -295,7 +296,7 @@ class NameType(models.Model):
         db_table = 'cir_name_type'
 
 
-class StructureNames(models.Model):
+class StructureNameAssociation(models.Model):
     name = models.ForeignKey(Name, on_delete=models.CASCADE)
     structure = models.ForeignKey(Structure, on_delete=models.CASCADE)
     name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
