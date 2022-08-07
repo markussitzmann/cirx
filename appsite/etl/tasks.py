@@ -3,9 +3,12 @@ import uuid
 from typing import List
 
 from celery import shared_task
+from celery.utils.log import get_task_logger
+
 from etl.registration import FileRegistry, StructureRegistry
 
-logger = logging.getLogger('cirx')
+#logger = logging.getLogger('cirx')
+logger = get_task_logger('tasks')
 
 
 @shared_task

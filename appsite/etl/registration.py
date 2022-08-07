@@ -17,6 +17,7 @@ from structure.inchi.identifier import InChIString, InChIKey
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType
 
 logger = logging.getLogger('cirx')
+
 Status = namedtuple('Status', 'file created')
 
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
