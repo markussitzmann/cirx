@@ -3,8 +3,8 @@ import pytz
 import glob
 import logging
 import os
-from collections import namedtuple
-from typing import List
+from collections import namedtuple, defaultdict
+from typing import List, Dict
 
 from celery import subtask, group
 from django.conf import settings
@@ -14,7 +14,8 @@ from pycactvs import Molfile, Ens, Prop
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord
 from structure.inchi.identifier import InChIString, InChIKey
-from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType
+from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
+    Release
 
 logger = logging.getLogger('cirx')
 Status = namedtuple('Status', 'file created')
@@ -91,7 +92,13 @@ class FileRegistry(object):
         return group(callback.clone([structure_file_id, chunk, chunk_size]) for chunk in chunks)()
 
     @staticmethod
-    def register_structure_file_record_chunk(structure_file_id: int, chunk_number: int, chunk_size: int, max_records=None) -> int:
+    def register_structure_file_record_chunk(
+            structure_file_id: int,
+            chunk_number: int,
+            chunk_size: int,
+            max_records=None,
+            #preprocessor_name=None
+    ) -> int:
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
@@ -109,6 +116,8 @@ class FileRegistry(object):
                     (structure_file.file.name, structure_file_id, chunk_number, record, last_record))
 
         fname: str = structure_file.file.name
+        preprocessor_names: List[str] = [p.preprocessor_name for p in structure_file.collection.preprocessors.all()]
+
         molfile: Molfile = Molfile.Open(fname)
         molfile.set('record', record)
         fields: set = set()
@@ -135,10 +144,15 @@ class FileRegistry(object):
             record_data = {
                 'hashisy_key': hashisy_key,
                 'index': record,
+                'preprocessors': defaultdict(dict)
             }
             records.append(record_data)
             molfile_fields = [str(f) for f in molfile.fields]
             fields.update(molfile_fields)
+            for preprocessor_name in preprocessor_names:
+                preprocessor = getattr(Preprocessors, preprocessor_name, None)
+                if callable(preprocessor):
+                    record_data['preprocessors'][preprocessor_name] = preprocessor(structure_file, ens)
             if max_records and record >= max_records:
                 break
             record += 1
@@ -164,13 +178,20 @@ class FileRegistry(object):
                         structure=structure,
                         number=record_data['index']
                     ))
-                StructureFileRecord.objects.bulk_create(record_objects, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE)
+                StructureFileRecord.objects.bulk_create(
+                    record_objects,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
+                )
                 logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.info("registering file field '%s'" % (field,))
                     sff, created = StructureFileField.objects.get_or_create(field_name=field)
                     sff.structure_files.add(structure_file)
                     sff.save()
+                for preprocessor_name in preprocessor_names:
+                    preprocessor_transaction = getattr(Preprocessors, preprocessor_name + "_transaction", None)
+                    if callable(preprocessor_transaction):
+                        preprocessor_transaction(structure_file, records)
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise(DatabaseError(e))
@@ -419,3 +440,51 @@ class StructureRegistry(object):
 def structure_id_chunks(structure_ids):
     chunk_size = StructureRegistry.CHUNK_SIZE
     return [structure_ids[x:x + chunk_size] for x in range(0, len(structure_ids), chunk_size)]
+
+
+class Preprocessors:
+
+    def __init__(self):
+        pass
+
+    def pubchem_ext_datasource(structure_file: StructureFile, ens: Ens):
+        logger.info("PREPROCESSOR")
+        logger.info("--> %s" % structure_file.collection)
+        logger.info("--> %s" % ens.props())
+        logger.info("--> %s" % ens.get('E_PUBCHEM_EXT_DATASOURCE_NAME'))
+        logger.info("--> %s" % ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None))
+        logger.info("--> %s" % ens.get('E_PUBCHEM_EXT_DATASOURCE_REGID'))
+        logger.info("--> %s" % ens.get('E_PUBCHEM_XREF_EXT_ID'))
+        logger.info("N1 --> %s" % ens.get('E_NAME'))
+        logger.info("N2 --> %s" % ens.get('E_MDL_NAME'))
+
+        datasource_name = ens.get('E_PUBCHEM_EXT_DATASOURCE_NAME')
+
+        #publisher = structure_file.collection.release.publisher
+        datasets = Dataset.objects.all()
+        logger.info("C --> %s" % [d.name for d in datasets])
+
+        return datasource_name
+
+    def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data: List):
+        logger.info("PREPROCESSOR TRANSACTION")
+        logger.info("--> %s" % record_data)
+
+        datasource_names = list(set([record['preprocessors']['pubchem_ext_datasource'] for record in record_data]))
+        logger.info("--> %s", datasource_names)
+
+        release: Release = structure_file.collection.release
+        dataset: Dataset = release.dataset
+        publisher: Publisher = release.publisher
+
+        #publisher: Publisher = Publisher.objects.filter(name="PubChem", category="division").first()
+        #release: Release = publisher.releases.filter(name="PubChem Substance").first()
+
+        logger.info("D & R %s | %s | %s" % (publisher, dataset, release))
+
+        for datasource_name in datasource_names:
+            dataset, created = Dataset.objects.get_or_create(name=datasource_name)
+            #if created:
+            logger.info("D --> %s", dataset)
+
+

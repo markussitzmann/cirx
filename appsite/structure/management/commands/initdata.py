@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 #from database.models import
-from etl.models import StructureFileCollection
+from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor
 from structure.models import  ResponseType
 from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, ContextTag, \
     Dataset, Release, InChIType
@@ -292,7 +292,12 @@ def init_dataset():
     ncidb.save()
 
 
-def init_release():
+def init_release(mini=True):
+
+    pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+        preprocessor_name="pubchem_ext_datasource",
+    )
+
     pubchem_compound, created = Release.objects.get_or_create(
         dataset=Dataset.objects.get(name="PubChem"),
         publisher=Publisher.objects.get(name="PubChem"),
@@ -305,10 +310,16 @@ def init_release():
     pubchem_compound.description = "PubChem Compound database"
     pubchem_compound.save()
 
-    pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
-        release=pubchem_compound,
-        file_location_pattern_string="pubchem/compound/Compound_*.sdf"
-    )
+    if mini:
+        pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+            release=pubchem_compound,
+            file_location_pattern_string="pubchem/compound/Compound_*.mini.sdf"
+        )
+    else:
+        pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+            release=pubchem_compound,
+            file_location_pattern_string="pubchem/compound/Compound_*.sdf.gz"
+        )
     pubchem_compound_collection.save()
 
 
@@ -325,12 +336,18 @@ def init_release():
     pubchem_substance.description = "PubChem Substance database"
     pubchem_substance.save()
 
-    pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
-        release=pubchem_compound,
-        file_location_pattern_string="pubchem/substance/Substance_*.sdf"
-    )
+    if mini:
+        pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+            release=pubchem_substance,
+            file_location_pattern_string="pubchem/substance/Substance_*.mini.sdf"
+        )
+    else:
+        pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+            release=pubchem_substance,
+            file_location_pattern_string="pubchem/substance/Substance_*.sdf.gz"
+        )
+    pubchem_substance_collection.preprocessors.add(pubchem_ext_datasource_preprocessor)
     pubchem_substance_collection.save()
-
 
     chembl_db, created = Release.objects.get_or_create(
         dataset=Dataset.objects.get(name="ChEMBL"),
@@ -344,15 +361,23 @@ def init_release():
     chembl_db.description = "ChEMBL database"
     chembl_db.save()
 
-    chembl_collection, created = StructureFileCollection.objects.get_or_create(
-        release=chembl_db,
-        file_location_pattern_string="chembl/29/chembl_29.sdf"
-    )
-    chembl_collection.save()
+    if mini:
+        chembl_collection, created = StructureFileCollection.objects.get_or_create(
+            release=chembl_db,
+            file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
+        )
+        chembl_collection.save()
+    else:
+        chembl_collection, created = StructureFileCollection.objects.get_or_create(
+            release=chembl_db,
+            file_location_pattern_string="chembl/29/chembl_29.sdf.gz"
+        )
+        chembl_collection.save()
 
     nci_db, created = Release.objects.get_or_create(
         dataset=Dataset.objects.get(name="DTP/NCI"),
         publisher=Publisher.objects.get(name="PubChem"),
+        name="DTP/NCI",
         version=None,
         released=None,
         downloaded=datetime.datetime(2022, 2, 1),
@@ -377,11 +402,18 @@ def init_release():
     open_nci_db.description = "NCI database"
     open_nci_db.save()
 
-    open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-        release=open_nci_db,
-        file_location_pattern_string="nci/NCI_DTP.mini.sdf"
-    )
-    open_nci_db_collection.save()
+    if mini:
+        open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+            release=open_nci_db,
+            file_location_pattern_string="nci/NCI_DTP.mini.sdf"
+        )
+        open_nci_db_collection.save()
+    else:
+        open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+            release=open_nci_db,
+            file_location_pattern_string="nci/NCI_DTP.sdf.gz"
+        )
+        open_nci_db_collection.save()
 
 
 def init_inchi_type():

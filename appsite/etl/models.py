@@ -10,6 +10,16 @@ from resolver.models import Structure, Release, NameType
 fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
 
 
+class StructureFileCollectionPreprocessor(models.Model):
+    preprocessor_name = models.CharField(max_length=2048, null=False, blank=False, unique=True)
+
+    class Meta:
+        db_table = 'cir_structure_file_collection_preprocessor'
+
+    def __str__(self):
+        return "%s" % self.preprocessor_name
+
+
 class StructureFileCollection(models.Model):
     release = models.ForeignKey(
         Release,
@@ -17,6 +27,10 @@ class StructureFileCollection(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE
+    )
+    preprocessors = models.ManyToManyField(
+        'StructureFileCollectionPreprocessor',
+        related_name="collections"
     )
     file_location_pattern_string = models.CharField(
         max_length=2048, blank=True, null=True
@@ -114,7 +128,13 @@ class StructureFileCollectionNameField(models.Model):
 
 
 class StructureFileRecord(models.Model):
-    structure_file = models.ForeignKey(StructureFile, blank=False, null=False, on_delete=models.CASCADE)
+    structure_file = models.ForeignKey(
+        StructureFile,
+        related_name='structure_file_records',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
     structure = models.ForeignKey(
         Structure,
         related_name='structure_file_records',

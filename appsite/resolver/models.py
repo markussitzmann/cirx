@@ -596,8 +596,8 @@ class Dataset(models.Model):
 
 class Release(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    dataset = models.ForeignKey(Dataset, blank=False, null=False, on_delete=models.CASCADE)
-    publisher = models.ForeignKey(Publisher, blank=False, null=False, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(Dataset, related_name='releases', blank=False, null=False, on_delete=models.CASCADE)
+    publisher = models.ForeignKey(Publisher, related_name='releases', blank=False, null=False, on_delete=models.CASCADE)
     name = models.CharField(max_length=768, null=False, blank=False)
     description = models.TextField(max_length=2048, blank=True, null=True)
     href = models.URLField(max_length=4096, null=True, blank=True)
