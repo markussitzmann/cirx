@@ -361,8 +361,8 @@ class Organization(models.Model):
 
 class Publisher(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, null=True)
-    organizations = models.ManyToManyField('Organization', related_name='publishers', blank=True)
+    parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, null=True, blank=True)
+    organizations = models.ManyToManyField('Organization', related_name='publishers', null=True, blank=True)
     category = models.CharField(max_length=16, choices=(
         ('entity', 'Entity'),
         ('service', 'Service'),
@@ -596,6 +596,7 @@ class Dataset(models.Model):
 
 class Release(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
     dataset = models.ForeignKey(Dataset, related_name='releases', blank=False, null=False, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, related_name='releases', blank=False, null=False, on_delete=models.CASCADE)
     name = models.CharField(max_length=768, null=False, blank=False)
