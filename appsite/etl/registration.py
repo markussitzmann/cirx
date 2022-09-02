@@ -184,7 +184,7 @@ class FileRegistry(object):
                 )
                 logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
-                    logger.info("registering file field '%s'" % (field,))
+                    logger.debug("registering file field '%s'" % (field,))
                     sff, created = StructureFileField.objects.get_or_create(field_name=field)
                     sff.structure_files.add(structure_file)
                     sff.save()
@@ -475,10 +475,9 @@ class Preprocessors:
 
         pubchem_release = structure_file.collection.release
         for datasource_name in datasource_names:
-            try:
-                dataset = Dataset.objects.get(name=datasource_name)
-            except Dataset.DoesNotExist as e:
-                dataset_publisher_name = datasource_name + " publisher (generic via PubChem)"
+            dataset, created = Dataset.objects.get_or_create(name=datasource_name)
+            if created:
+                dataset_publisher_name = datasource_name
                 dataset_publisher, created = Publisher.objects.get_or_create(
                     parent=None,
                     name=dataset_publisher_name,
@@ -486,11 +485,12 @@ class Preprocessors:
                     href=None,
                     orcid=None
                 )
-                dataset, created = Dataset.objects.get_or_create(name=datasource_name, publisher=dataset_publisher)
+                dataset.publisher = dataset_publisher
+                dataset_release_name = datasource_name
                 release, created = Release.objects.get_or_create(
                     dataset=dataset,
                     publisher=pubchem_release.publisher,
-                    name=pubchem_release.name,
+                    name=dataset_release_name,
                     version=pubchem_release.version,
                     downloaded=pubchem_release.downloaded,
                     released=pubchem_release.released
@@ -498,15 +498,6 @@ class Preprocessors:
                 release.parent = pubchem_release
                 release.save()
 
-            #if created:
-            #logger.info("D --> %s", dataset)
-
-        #release: Release = structure_file.collection.release
-        #dataset: Dataset = release.dataset
-        #publisher: Publisher = release.publisher
-
-        #publisher: Publisher = Publisher.objects.filter(name="PubChem", category="division").first()
-        #release: Release = publisher.releases.filter(name="PubChem Substance").first()
 
         logger.info("D & R %s | %s | %s" % (dataset_publisher, dataset, release))
 

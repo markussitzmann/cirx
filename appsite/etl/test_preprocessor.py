@@ -5,7 +5,7 @@ from django.test import TestCase
 from pycactvs import Molfile
 
 from etl.models import StructureFileCollection
-from resolver.models import Dataset, Publisher
+from resolver.models import Dataset, Publisher, Release
 from registration import Preprocessors
 
 logger = logging.getLogger('cirx')
@@ -40,6 +40,10 @@ class PreprocessorTests(TestCase):
         publishers = Publisher.objects.all()
         for publisher in publishers:
             logger.info("PUBLISHER: %s", publisher)
+
+        releases = Release.objects.all()
+        for release in releases:
+            logger.info("RELEASE: %s | %s | %s", release, release.parent, release.publisher)
 
     def test_preprocessor(self):
         logger.info("----- preprocessor start ----")

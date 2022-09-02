@@ -1,8 +1,11 @@
+import logging
+from typing import List
+
 from django.core.management.base import BaseCommand
 
 from etl.models import StructureFileCollection, StructureFile
-from etl.registration import FileRegistry
-from etl.tasks import *
+from etl.tasks import FileRegistry, count_and_save_file_task, register_file_record_chunk_mapper, \
+    register_file_record_chunk_task
 
 logger = logging.getLogger('cirx')
 

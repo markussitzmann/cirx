@@ -362,7 +362,7 @@ class Organization(models.Model):
 class Publisher(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, null=True, blank=True)
-    organizations = models.ManyToManyField('Organization', related_name='publishers', null=True, blank=True)
+    organizations = models.ManyToManyField('Organization', related_name='publishers', blank=True)
     category = models.CharField(max_length=16, choices=(
         ('entity', 'Entity'),
         ('service', 'Service'),
