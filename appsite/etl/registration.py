@@ -25,6 +25,8 @@ StructureRelationships = namedtuple('StructureRelationships', 'structure relatio
 InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
 InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
 
+PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
+
 
 class FileRegistry(object):
 
@@ -448,48 +450,40 @@ class Preprocessors:
         pass
 
     def pubchem_ext_datasource(structure_file: StructureFile, ens: Ens):
-        logger.info("PREPROCESSOR")
-        logger.info("--> %s" % structure_file.collection)
-        logger.info("--> %s" % ens.props())
-        logger.info("--> %s" % ens.get('E_PUBCHEM_EXT_DATASOURCE_NAME'))
-        logger.info("--> %s" % ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None))
-        logger.info("--> %s" % ens.get('E_PUBCHEM_EXT_DATASOURCE_REGID'))
-        logger.info("--> %s" % ens.get('E_PUBCHEM_XREF_EXT_ID'))
-        logger.info("N1 --> %s" % ens.get('E_NAME'))
-        logger.info("N2 --> %s" % ens.get('E_MDL_NAME'))
-
-        datasource_name = ens.get('E_PUBCHEM_EXT_DATASOURCE_NAME')
-
-        #publisher = structure_file.collection.release.publisher
-        datasets = Dataset.objects.all()
-        logger.info("C --> %s" % [d.name for d in datasets])
-
-        return datasource_name
+        datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
+        try:
+            datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
+        except Exception as e:
+            logger.error("getting URL failed: %s", e)
+            datasource_name_url = None
+        return PubChemDatasource(datasource_name, datasource_name_url)
 
     def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data: List):
-        logger.info("PREPROCESSOR TRANSACTION")
-        logger.info("--> %s" % record_data)
-
         datasource_names = list(set([record['preprocessors']['pubchem_ext_datasource'] for record in record_data]))
-        logger.info("--> %s", datasource_names)
-
         pubchem_release = structure_file.collection.release
-        for datasource_name in datasource_names:
-            dataset, created = Dataset.objects.get_or_create(name=datasource_name)
+        pubchem_publisher = pubchem_release.publisher
+        for data in datasource_names:
+            dataset, created = Dataset.objects.get_or_create(name=data.name)
             if created:
-                dataset_publisher_name = datasource_name
+                dataset_publisher_name = data.name
                 dataset_publisher, created = Publisher.objects.get_or_create(
-                    parent=None,
                     name=dataset_publisher_name,
-                    category='none',
+                    category='generic',
                     href=None,
                     orcid=None
                 )
+                dataset_publisher.parent = pubchem_publisher
+                dataset_publisher.description = "generic from Pubchem"
+                dataset_publisher.save()
+                dataset.description = "generic from PubChem"
                 dataset.publisher = dataset_publisher
-                dataset_release_name = datasource_name
+                dataset.href = data.url
+                dataset.save()
+                dataset_release_name = data.name
                 release, created = Release.objects.get_or_create(
                     dataset=dataset,
                     publisher=pubchem_release.publisher,
+                    description="generic from PubChem",
                     name=dataset_release_name,
                     version=pubchem_release.version,
                     downloaded=pubchem_release.downloaded,
@@ -497,10 +491,3 @@ class Preprocessors:
                 )
                 release.parent = pubchem_release
                 release.save()
-
-
-        logger.info("D & R %s | %s | %s" % (dataset_publisher, dataset, release))
-
-
-
-

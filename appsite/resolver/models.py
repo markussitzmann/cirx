@@ -327,6 +327,7 @@ class Organization(models.Model):
         ('charity', "Charity"),
         ('other', 'Other'),
         ('none', 'None'),
+        ('generic', 'Generic'),
     ), default='none')
     href = models.URLField(max_length=4096, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
@@ -372,8 +373,10 @@ class Publisher(models.Model):
         ('person', 'Person'),
         ('other', 'Other'),
         ('none', 'None'),
+        ('generic', 'Generic'),
     ), default='none')
     name = models.CharField(max_length=1024)
+    description = models.TextField(max_length=32768, blank=True, null=True)
     email = models.EmailField(max_length=254, blank=True, null=True)
     address = models.CharField(max_length=8192, blank=True, null=True)
     href = models.URLField(max_length=4096, blank=True, null=True)
