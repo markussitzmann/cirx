@@ -99,7 +99,6 @@ class FileRegistry(object):
             chunk_number: int,
             chunk_size: int,
             max_records=None,
-            #preprocessor_name=None
     ) -> int:
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
@@ -146,7 +145,9 @@ class FileRegistry(object):
             record_data = {
                 'hashisy_key': hashisy_key,
                 'index': record,
-                'preprocessors': defaultdict(dict)
+                'preprocessors': defaultdict(dict),
+                'release_names': [],
+                'release_objects': []
             }
             records.append(record_data)
             molfile_fields = [str(f) for f in molfile.fields]
@@ -154,7 +155,7 @@ class FileRegistry(object):
             for preprocessor_name in preprocessor_names:
                 preprocessor = getattr(Preprocessors, preprocessor_name, None)
                 if callable(preprocessor):
-                    record_data['preprocessors'][preprocessor_name] = preprocessor(structure_file, ens)
+                    preprocessor(structure_file, ens, record_data)
             if max_records and record >= max_records:
                 break
             record += 1
@@ -165,6 +166,12 @@ class FileRegistry(object):
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
+
+                for preprocessor_name in preprocessor_names:
+                    preprocessor_transaction = getattr(Preprocessors, preprocessor_name + "_transaction", None)
+                    if callable(preprocessor_transaction):
+                        preprocessor_transaction(structure_file, records)
+
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -172,15 +179,18 @@ class FileRegistry(object):
                 )
                 hashisy_list = [record['hashisy_key'] for record in records]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
+
                 record_objects = list()
                 for record_data in records:
                     structure = structures[record_data['hashisy_key']]
-                    record_objects.append(StructureFileRecord(
+                    structure_file_record = StructureFileRecord(
                         structure_file=structure_file,
                         structure=structure,
-                        number=record_data['index']
-                    ))
-                StructureFileRecord.objects.bulk_create(
+                        number=record_data['index'],
+                    )
+                    #structure_file_record.releases.add(record_data['release_objects'])
+                    record_objects.append(structure_file_record)
+                structure_file_records = StructureFileRecord.objects.bulk_create(
                     record_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
@@ -190,10 +200,7 @@ class FileRegistry(object):
                     sff, created = StructureFileField.objects.get_or_create(field_name=field)
                     sff.structure_files.add(structure_file)
                     sff.save()
-                for preprocessor_name in preprocessor_names:
-                    preprocessor_transaction = getattr(Preprocessors, preprocessor_name + "_transaction", None)
-                    if callable(preprocessor_transaction):
-                        preprocessor_transaction(structure_file, records)
+
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise(DatabaseError(e))
@@ -449,19 +456,30 @@ class Preprocessors:
     def __init__(self):
         pass
 
-    def pubchem_ext_datasource(structure_file: StructureFile, ens: Ens):
+    @staticmethod
+    def pubchem_ext_datasource(structure_file: StructureFile, ens: Ens, record_data: Dict):
+        logger.debug("preprocesser pubchem_ext_datasource")
         datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
+        record_data['release_names'].append(datasource_name)
         try:
             datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
         except Exception as e:
             logger.error("getting URL failed: %s", e)
             datasource_name_url = None
-        return PubChemDatasource(datasource_name, datasource_name_url)
+        record_data['preprocessors']['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
 
+    @staticmethod
     def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data: List):
+        logger.debug("preprocesser transaction pubchem_ext_datasource")
         datasource_names = list(set([record['preprocessors']['pubchem_ext_datasource'] for record in record_data]))
         pubchem_release = structure_file.collection.release
         pubchem_publisher = pubchem_release.publisher
+        pubchem_release_status = pubchem_release.status
+        pubchem_release_classification = pubchem_release.classification
+        pubchem_release_version = pubchem_release.version
+        pubchem_release_downloaded = pubchem_release.downloaded
+        pubchem_release_released = pubchem_release.released
+        release_objects = {}
         for data in datasource_names:
             dataset, created = Dataset.objects.get_or_create(name=data.name)
             if created:
@@ -479,15 +497,23 @@ class Preprocessors:
                 dataset.publisher = dataset_publisher
                 dataset.href = data.url
                 dataset.save()
-                dataset_release_name = data.name
-                release, created = Release.objects.get_or_create(
-                    dataset=dataset,
-                    publisher=pubchem_release.publisher,
-                    description="generic from PubChem",
-                    name=dataset_release_name,
-                    version=pubchem_release.version,
-                    downloaded=pubchem_release.downloaded,
-                    released=pubchem_release.released
-                )
+
+            dataset_release_name = data.name
+            release, created = Release.objects.get_or_create(
+                dataset=dataset,
+                publisher=pubchem_publisher,
+                name=dataset_release_name,
+                version=pubchem_release_version,
+                downloaded=pubchem_release_downloaded,
+                released=pubchem_release_released
+            )
+            if created:
                 release.parent = pubchem_release
+                release.description = "generic from PubChem"
+                release.status = pubchem_release_status
+                release.classification = pubchem_release_classification
                 release.save()
+            release_objects[data.name] = release
+        for record in record_data:
+            for name in record['release_names']:
+                record['release_objects'].append(release_objects[name])

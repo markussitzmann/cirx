@@ -143,6 +143,7 @@ class StructureFileRecord(models.Model):
         on_delete=models.SET_NULL
     )
     number = models.IntegerField(null=False, blank=False)
+    releases = models.ManyToManyField(Release, related_name="records")
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     processed = models.DateTimeField(auto_now=False, blank=True, null=True)

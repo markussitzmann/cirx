@@ -4,8 +4,8 @@ from collections import defaultdict
 from django.test import TestCase
 from pycactvs import Molfile
 
-from etl.models import StructureFileCollection
-from resolver.models import Dataset, Publisher, Release
+from etl.models import StructureFileCollection, StructureFileRecord
+from resolver.models import Dataset, Publisher, Release, Structure
 from registration import Preprocessors
 
 logger = logging.getLogger('cirx')
@@ -54,20 +54,25 @@ class PreprocessorTests(TestCase):
         record_data = {
             'hashisy_key': self.ens.get('E_HASHISY'),
             'index': 1,
-            'preprocessors': defaultdict(dict)
+            'preprocessors': defaultdict(dict),
+            'release_names': [],
+            'release_objects': []
         }
 
         preprocessor_names = [p.preprocessor_name for p in self.structure_file_collection.preprocessors.all()]
         for preprocessor_name in preprocessor_names:
             preprocessor = getattr(Preprocessors, preprocessor_name, None)
-            record_data['preprocessors'][preprocessor_name] = preprocessor(self.structure_file, self.ens)
+            preprocessor(self.structure_file, self.ens, record_data)
 
         for preprocessor_name in preprocessor_names:
             preprocessor_transaction_name = preprocessor_name + '_transaction'
             preprocessor_transaction = getattr(Preprocessors, preprocessor_transaction_name, None)
             preprocessor_transaction(self.structure_file, [record_data, ])
 
+        ####
 
+
+        logger.info("finished")
 
 
 
