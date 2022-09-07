@@ -13,10 +13,10 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    StructureFileRecordRelease
+    StructureFileRecordRelease, ReleaseNameField
 from structure.inchi.identifier import InChIString, InChIKey
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
-    Release
+    Release, NameType
 
 logger = logging.getLogger('cirx')
 Status = namedtuple('Status', 'file created')
@@ -525,11 +525,22 @@ class Preprocessors:
                 released=pubchem_release_released
             )
             if created:
+                regid_id_field, created = StructureFileField.objects.get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
+                name_type, created = NameType.objects.get_or_create(id="REGID")
+                name_type.save()
                 release.parent = pubchem_release
                 release.description = "generic from PubChem"
                 release.status = pubchem_release_status
                 release.classification = pubchem_release_classification
                 release.save()
+                release_name_field, created = ReleaseNameField.objects.get_or_create(
+                    release=release,
+                    structure_file_field=regid_id_field,
+                    name_type=name_type
+                )
+                if created:
+                    release_name_field.is_regid = True
+                    release_name_field.save()
             release_objects[data.name] = release
         for record in record_data:
             for name in record['release_names']:

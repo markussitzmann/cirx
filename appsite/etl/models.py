@@ -93,24 +93,24 @@ class StructureFileField(models.Model):
         return "%s" % self.field_name
 
 
-class StructureFileCollectionNameField(models.Model):
-    collection = models.ForeignKey(
-        StructureFileCollection,
-        related_name='collection_name_field',
+class ReleaseNameField(models.Model):
+    release = models.ForeignKey(
+        Release,
+        related_name='name_fields',
         blank=False,
         null=False,
         on_delete=models.RESTRICT
     )
-    field = models.ForeignKey(
+    structure_file_field = models.ForeignKey(
         StructureFileField,
-        related_name='collection_name_field',
+        related_name='name_fields',
         blank=False,
         null=False,
         on_delete=models.RESTRICT
     )
     name_type = models.ForeignKey(
         NameType,
-        related_name='collection_name_field',
+        related_name='name_fields',
         blank=False,
         null=False,
         on_delete=models.RESTRICT
@@ -120,11 +120,11 @@ class StructureFileCollectionNameField(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['collection_id', 'field', 'name_type'],
-                name='unique_structure_file_collection_name_field_constraint'
+                fields=['release', 'structure_file_field', 'name_type'],
+                name='unique_release_name_field_constraint'
             ),
         ]
-        db_table = 'cir_structure_file_collection_name_field'
+        db_table = 'cir_release_name_field'
 
 
 class StructureFileRecord(models.Model):

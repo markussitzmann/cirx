@@ -6,7 +6,8 @@ from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 #from database.models import
-from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor
+from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor, StructureFileField, \
+    ReleaseNameField
 from structure.models import  ResponseType
 from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, ContextTag, \
     Dataset, Release, InChIType
@@ -25,8 +26,9 @@ class Command(BaseCommand):
 
 
 def _loader():
-    init_response_type_data()
+    init_structure_fields()
     init_name_type_data()
+    init_response_type_data()
     init_dataset_context_type_data()
     init_organization_and_publisher_data()
     init_dataset()
@@ -118,6 +120,7 @@ def init_dataset_context_type_data():
 
 def init_name_type_data():
     name_types = [
+        ('REGID', 'Registration ID'),
         ('PUBCHEM_IUPAC_NAME', 'PubChem IUPAC NAME'),
         ('PUBCHEM_IUPAC_OPENEYE_NAME', 'PubChem IUPAC OPENEYE NAME'),
         ('PUBCHEM_IUPAC_CAS_NAME', 'PubChem IUPAC CAS NAME'),
@@ -310,6 +313,16 @@ def init_release(mini=True):
     pubchem_compound.description = "PubChem Compound database"
     pubchem_compound.save()
 
+    name_type = NameType.objects.get(id="REGID")
+    structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
+    release_name_field, created = ReleaseNameField.objects.get_or_create(
+        release=pubchem_compound,
+        structure_file_field=structure_file_field,
+        name_type=name_type
+    )
+    release_name_field.is_regid = True
+    release_name_field.save()
+
     if mini:
         pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
             release=pubchem_compound,
@@ -387,7 +400,6 @@ def init_release(mini=True):
     nci_db.status = 'active'
     nci_db.description = "NCI database"
     nci_db.save()
-
 
     open_nci_db, created = Release.objects.get_or_create(
         dataset=Dataset.objects.get(name="DTP/NCI"),
@@ -473,3 +485,58 @@ def init_inchi_type():
     tautox_inchi_type.pt_13_00 = True
     tautox_inchi_type.pt_18_00 = True
     tautox_inchi_type.save()
+
+
+def init_structure_fields():
+
+    fields = [
+        'E_WEIGHT',
+        'E_TPSA',
+        'E_TAUTOMER_COUNT',
+        'E_STEREO_COUNT',
+        'E_STDINCHIKEY',
+        'E_STDINCHI',
+        'E_SCREEN',
+        'E_PUBCHEM_XREF_EXT_ID',
+        'E_*PUBCHEM_XLOGP3_AA*',
+        'E_PUBCHEM_XLOGP3',
+        'E_*PUBCHEM_SUBSTANCE_VERSION*',
+        'E_*PUBCHEM_SUBSTANCE_SYNONYM*',
+        'E_*PUBCHEM_SUBSTANCE_ID*',
+        'E_PUBCHEM_SUBSTANCE_COMMENT',
+        'E_*PUBCHEM_OPENEYE_ISO_SMILES*',
+        'E_*PUBCHEM_OPENEYE_CAN_SMILES*',
+        'E_*PUBCHEM_IUPAC_OPENEYE_NAME*',
+        'E_*PUBCHEM_IUPAC_NAME_MARKUP*',
+        'E_*PUBCHEM_IUPAC_CAS_NAME*',
+        'E_PUBCHEM_GENERIC_REGISTRY_NAME',
+        'E_PUBCHEM_EXT_SUBSTANCE_URL',
+        'E_PUBCHEM_EXT_DATASOURCE_URL',
+        'E_PUBCHEM_EXT_DATASOURCE_REGID',
+        'E_PUBCHEM_EXT_DATASOURCE_NAME',
+        'E_*PUBCHEM_COORDINATE_TYPE*',
+        'E_*PUBCHEM_COMPOUND_ID_TYPE*',
+        'E_PUBCHEM_COMPOUND_CANONICALIZED',
+        'E_*PUBCHEM_COMPONENT_COUNT*',
+        'E_*PUBCHEM_CID_ASSOCIATIONS*',
+        'E_NROTBONDS',
+        'E_NHDONORS',
+        'E_NHACCEPTORS',
+        'E_MONOISOTOPIC_MASS',
+        'E_IUPAC_TRADITIONAL_NAME',
+        'E_IUPAC_SYSTEMATIC_NAME',
+        'E_IUPAC_PREFERRED_NAME',
+        'E_ISOTOPE_COUNT',
+        'E_HEAVY_ATOM_COUNT',
+        'E_FORMULA',
+        'E_EXACT_MASS',
+        'E_COMPLEXITY',
+        'E_CID',
+        'E_CHEMBL_ID',
+        'E_CHARGE'
+    ]
+
+    for field in fields:
+        f, created = StructureFileField.objects.get_or_create(
+            field_name=field
+        )
