@@ -143,7 +143,10 @@ class StructureFileRecord(models.Model):
         on_delete=models.SET_NULL
     )
     number = models.IntegerField(null=False, blank=False)
-    releases = models.ManyToManyField(Release, related_name="records")
+    releases = models.ManyToManyField(Release,
+        through='StructureFileRecordRelease',
+        related_name="records"
+    )
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     processed = models.DateTimeField(auto_now=False, blank=True, null=True)
@@ -159,3 +162,29 @@ class StructureFileRecord(models.Model):
 
     def __str__(self):
         return "%s (%s)" % (self.structure_file, self.number)
+
+
+class StructureFileRecordRelease(models.Model):
+    structure_file_record = models.ForeignKey(
+        StructureFileRecord,
+        related_name='structure_file_record_releases',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+    release = models.ForeignKey(
+        Release,
+        related_name='structure_file_records',
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['structure_file_record', 'release'],
+                name='unique_structure_file_record_release_constraint'
+            ),
+        ]
+        db_table = 'cir_structure_file_record_release'

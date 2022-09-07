@@ -2,7 +2,7 @@ import logging
 
 from django.test import TestCase
 
-from etl.models import StructureFileCollection, StructureFile, StructureFileRecord
+from etl.models import StructureFileCollection, StructureFile, StructureFileRecord, StructureFileRecordRelease
 from resolver.models import Structure
 from registration import Preprocessors, FileRegistry
 
@@ -26,6 +26,9 @@ class FileRegistryTests(TestCase):
 
         structure_file_record_count = StructureFileRecord.objects.count()
         logger.info("RECORD %s", structure_file_record_count)
+
+        release_count = StructureFileRecordRelease.objects.count()
+        logger.info("RELEASES %s", release_count)
 
     def test_file_registry(self):
         logger.info("----- file registry test ----")

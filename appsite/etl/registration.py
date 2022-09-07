@@ -12,7 +12,8 @@ from django.db import transaction, DatabaseError, IntegrityError
 from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord
+from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
+    StructureFileRecordRelease
 from structure.inchi.identifier import InChIString, InChIKey
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release
@@ -183,17 +184,36 @@ class FileRegistry(object):
                 record_objects = list()
                 for record_data in records:
                     structure = structures[record_data['hashisy_key']]
-                    structure_file_record = StructureFileRecord(
-                        structure_file=structure_file,
-                        structure=structure,
-                        number=record_data['index'],
+                    structure_file_record_releases_pair = (
+                        StructureFileRecord(
+                            structure_file=structure_file,
+                            structure=structure,
+                            number=record_data['index'],
+                        ),
+                        record_data['release_objects']
                     )
-                    #structure_file_record.releases.add(record_data['release_objects'])
-                    record_objects.append(structure_file_record)
+                    record_objects.append(structure_file_record_releases_pair)
                 structure_file_records = StructureFileRecord.objects.bulk_create(
-                    record_objects,
+                    [r[0] for r in record_objects],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
+                for p in record_objects:
+                    logger.info(">>> %s %s", p[0].id, p[1])
+
+                record_release_objects = list()
+                for record in record_objects:
+                    for release in record[1]:
+                        record_release_objects.append(StructureFileRecordRelease(
+                            structure_file_record=record[0],
+                            release=release
+                        ))
+
+                structure_file_record_releases = StructureFileRecordRelease.objects.bulk_create(
+                    record_release_objects,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
+                )
+
+
                 logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
                     logger.debug("registering file field '%s'" % (field,))
