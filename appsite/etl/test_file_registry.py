@@ -17,7 +17,6 @@ class FileRegistryTests(TestCase):
         logger.info("----- file registry set up ----")
         self.structure_file_collection = StructureFileCollection.objects.get(id=2)
 
-
     def tearDown(self):
         logger.info("----- file registry tear down ----")
 

@@ -187,4 +187,4 @@ class StructureFileRecordRelease(models.Model):
                 name='unique_structure_file_record_release_constraint'
             ),
         ]
-        db_table = 'cir_structure_file_record_release'
+        db_table = 'cir_structure_file_record_releases'

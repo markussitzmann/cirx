@@ -25,6 +25,7 @@ Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
 InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
 InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
+StructureFileRecordReleaseTuple = namedtuple('StructureFileRecordRelease', 'record releases')
 
 PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
 
@@ -181,10 +182,11 @@ class FileRegistry(object):
                 hashisy_list = [record['hashisy_key'] for record in records]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
 
+                logger.info("registering structure file records for '%s'" % (fname,))
                 record_objects = list()
                 for record_data in records:
                     structure = structures[record_data['hashisy_key']]
-                    structure_file_record_releases_pair = (
+                    record_releases = StructureFileRecordReleaseTuple(
                         StructureFileRecord(
                             structure_file=structure_file,
                             structure=structure,
@@ -192,27 +194,23 @@ class FileRegistry(object):
                         ),
                         record_data['release_objects']
                     )
-                    record_objects.append(structure_file_record_releases_pair)
-                structure_file_records = StructureFileRecord.objects.bulk_create(
-                    [r[0] for r in record_objects],
+                    record_objects.append(record_releases)
+                StructureFileRecord.objects.bulk_create(
+                    [r.record for r in record_objects],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
-                for p in record_objects:
-                    logger.info(">>> %s %s", p[0].id, p[1])
 
                 record_release_objects = list()
-                for record in record_objects:
-                    for release in record[1]:
+                for r in record_objects:
+                    for release in r.releases:
                         record_release_objects.append(StructureFileRecordRelease(
-                            structure_file_record=record[0],
+                            structure_file_record=r.record,
                             release=release
                         ))
-
-                structure_file_record_releases = StructureFileRecordRelease.objects.bulk_create(
+                StructureFileRecordRelease.objects.bulk_create(
                     record_release_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
-
 
                 logger.info("registering file fields for '%s'" % (fname,))
                 for field in list(fields):
@@ -456,7 +454,6 @@ class StructureRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-
         except DatabaseError as e:
             logger.error(e)
             raise(DatabaseError(e))
