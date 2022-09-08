@@ -313,7 +313,7 @@ def init_release(mini=True):
     pubchem_compound.description = "PubChem Compound database"
     pubchem_compound.save()
 
-    name_type = NameType.objects.get(id="REGID")
+    name_type = NameType.objects.get(id="PUBCHEM_CID")
     structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
     release_name_field, created = ReleaseNameField.objects.get_or_create(
         release=pubchem_compound,
@@ -348,6 +348,16 @@ def init_release(mini=True):
     pubchem_substance.status = 'active'
     pubchem_substance.description = "PubChem Substance database"
     pubchem_substance.save()
+
+    name_type = NameType.objects.get(id="PUBCHEM_SID")
+    structure_file_field = StructureFileField.objects.filter(field_name="E_*PUBCHEM_SUBSTANCE_ID*").first()
+    release_name_field, created = ReleaseNameField.objects.get_or_create(
+        release=pubchem_substance,
+        structure_file_field=structure_file_field,
+        name_type=name_type
+    )
+    release_name_field.is_regid = True
+    release_name_field.save()
 
     if mini:
         pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(

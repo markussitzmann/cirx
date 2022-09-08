@@ -30,11 +30,6 @@ def register_file_records(structure_file_id: int):
 
 
 def _register(options):
-    # if settings.INIT_SYSTEM:
-    #     for f in StructureFile.objects.all():
-    #         logger.info("INITIALIZING SYSTEM: deleting %s", f)
-    #         f.delete()
-
     file_collections = StructureFileCollection.objects.all()
     if 'file_collection_id' in options and options['file_collection_id']:
         file_collections = file_collections.filter(id=options['file_collection_id'])

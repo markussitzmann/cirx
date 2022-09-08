@@ -525,7 +525,8 @@ class Preprocessors:
                 released=pubchem_release_released
             )
             if created:
-                regid_id_field, created = StructureFileField.objects.get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
+                regid_id_field, created = StructureFileField.objects\
+                    .get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
                 name_type, created = NameType.objects.get_or_create(id="REGID")
                 name_type.save()
                 release.parent = pubchem_release
