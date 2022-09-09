@@ -295,107 +295,109 @@ def init_dataset():
     ncidb.save()
 
 
-def init_release(mini=True):
+def init_release(mini=False, init_pubchem_compound=False, init_pubchem_substance=True, init_chembl=False, init_nci=False):
 
     pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
         preprocessor_name="pubchem_ext_datasource",
     )
 
-    pubchem_compound, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="PubChem"),
-        publisher=Publisher.objects.get(name="PubChem"),
-        name="PubChem Compound",
-        version=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    pubchem_compound.classification = 'public'
-    pubchem_compound.status = 'active'
-    pubchem_compound.description = "PubChem Compound database"
-    pubchem_compound.save()
+    if init_pubchem_compound:
+        pubchem_compound, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="PubChem"),
+            publisher=Publisher.objects.get(name="PubChem"),
+            name="PubChem Compound",
+            version=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        pubchem_compound.classification = 'public'
+        pubchem_compound.status = 'active'
+        pubchem_compound.description = "PubChem Compound database"
+        pubchem_compound.save()
 
-    name_type = NameType.objects.get(id="PUBCHEM_CID")
-    structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
-    release_name_field, created = ReleaseNameField.objects.get_or_create(
-        release=pubchem_compound,
-        structure_file_field=structure_file_field,
-        name_type=name_type
-    )
-    release_name_field.is_regid = True
-    release_name_field.save()
-
-    if mini:
-        pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+        name_type = NameType.objects.get(id="PUBCHEM_CID")
+        structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
+        release_name_field, created = ReleaseNameField.objects.get_or_create(
             release=pubchem_compound,
-            file_location_pattern_string="pubchem/compound/Compound_*.mini.sdf"
+            structure_file_field=structure_file_field,
+            name_type=name_type
         )
-    else:
-        pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
-            release=pubchem_compound,
-            file_location_pattern_string="pubchem/compound/Compound_*.sdf.gz"
+        release_name_field.is_regid = True
+        release_name_field.save()
+
+        if mini:
+            pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_compound,
+                file_location_pattern_string="pubchem/compound/Compound_*.mini.sdf"
+            )
+        else:
+            pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_compound,
+                file_location_pattern_string="pubchem/compound/Compound_*.sdf.gz"
+            )
+        pubchem_compound_collection.save()
+
+    if init_pubchem_substance:
+        pubchem_substance, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="PubChem"),
+            publisher=Publisher.objects.get(name="PubChem"),
+            name="PubChem Substance",
+            version=None,
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
         )
-    pubchem_compound_collection.save()
+        pubchem_substance.classification = 'public'
+        pubchem_substance.status = 'active'
+        pubchem_substance.description = "PubChem Substance database"
+        pubchem_substance.save()
 
-
-    pubchem_substance, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="PubChem"),
-        publisher=Publisher.objects.get(name="PubChem"),
-        name="PubChem Substance",
-        version=None,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    pubchem_substance.classification = 'public'
-    pubchem_substance.status = 'active'
-    pubchem_substance.description = "PubChem Substance database"
-    pubchem_substance.save()
-
-    name_type = NameType.objects.get(id="PUBCHEM_SID")
-    structure_file_field = StructureFileField.objects.filter(field_name="E_*PUBCHEM_SUBSTANCE_ID*").first()
-    release_name_field, created = ReleaseNameField.objects.get_or_create(
-        release=pubchem_substance,
-        structure_file_field=structure_file_field,
-        name_type=name_type
-    )
-    release_name_field.is_regid = True
-    release_name_field.save()
-
-    if mini:
-        pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+        name_type = NameType.objects.get(id="PUBCHEM_SID")
+        structure_file_field = StructureFileField.objects.filter(field_name="E_*PUBCHEM_SUBSTANCE_ID*").first()
+        release_name_field, created = ReleaseNameField.objects.get_or_create(
             release=pubchem_substance,
-            file_location_pattern_string="pubchem/substance/Substance_*.mini.sdf"
+            structure_file_field=structure_file_field,
+            name_type=name_type
         )
-    else:
-        pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
-            release=pubchem_substance,
-            file_location_pattern_string="pubchem/substance/Substance_*.sdf.gz"
-        )
-    pubchem_substance_collection.preprocessors.add(pubchem_ext_datasource_preprocessor)
-    pubchem_substance_collection.save()
+        release_name_field.is_regid = True
+        release_name_field.save()
 
-    chembl_db, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="ChEMBL"),
-        publisher=Publisher.objects.get(name="ChEMBL Team"),
-        version=29,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    chembl_db.classification = 'public'
-    chembl_db.status = 'active'
-    chembl_db.description = "ChEMBL database"
-    chembl_db.save()
+        if mini:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="pubchem/substance/Substance_*.mini.sdf"
+            )
+        else:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="pubchem/substance/Substance_*.sdf.gz"
+            )
+        pubchem_substance_collection.preprocessors.add(pubchem_ext_datasource_preprocessor)
+        pubchem_substance_collection.save()
 
-    if mini:
-        chembl_collection, created = StructureFileCollection.objects.get_or_create(
-            release=chembl_db,
-            file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
+    if init_chembl:
+        chembl_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="ChEMBL"),
+            publisher=Publisher.objects.get(name="ChEMBL Team"),
+            version=29,
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
         )
-        chembl_collection.save()
-    else:
-        chembl_collection, created = StructureFileCollection.objects.get_or_create(
-            release=chembl_db,
-            file_location_pattern_string="chembl/29/chembl_29.sdf.gz"
-        )
-        chembl_collection.save()
+        chembl_db.classification = 'public'
+        chembl_db.status = 'active'
+        chembl_db.description = "ChEMBL database"
+        chembl_db.save()
+
+        if mini:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
+            )
+            chembl_collection.save()
+        else:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="chembl/29/chembl_29.sdf.gz"
+            )
+            chembl_collection.save()
 
     nci_db, created = Release.objects.get_or_create(
         dataset=Dataset.objects.get(name="DTP/NCI"),
@@ -411,31 +413,32 @@ def init_release(mini=True):
     nci_db.description = "NCI database"
     nci_db.save()
 
-    open_nci_db, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="DTP/NCI"),
-        publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
-        version=None,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    open_nci_db.name = "Open NCI Database"
-    open_nci_db.classification = 'public'
-    open_nci_db.status = 'active'
-    open_nci_db.description = "NCI database"
-    open_nci_db.save()
+    if init_nci:
+        open_nci_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="DTP/NCI"),
+            publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
+            version=None,
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        open_nci_db.name = "Open NCI Database"
+        open_nci_db.classification = 'public'
+        open_nci_db.status = 'active'
+        open_nci_db.description = "NCI database"
+        open_nci_db.save()
 
-    if mini:
-        open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-            release=open_nci_db,
-            file_location_pattern_string="nci/NCI_DTP.mini.sdf"
-        )
-        open_nci_db_collection.save()
-    else:
-        open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-            release=open_nci_db,
-            file_location_pattern_string="nci/NCI_DTP.sdf.gz"
-        )
-        open_nci_db_collection.save()
+        if mini:
+            open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                release=open_nci_db,
+                file_location_pattern_string="nci/NCI_DTP.mini.sdf"
+            )
+            open_nci_db_collection.save()
+        else:
+            open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                release=open_nci_db,
+                file_location_pattern_string="nci/NCI_DTP.sdf.gz"
+            )
+            open_nci_db_collection.save()
 
 
 def init_inchi_type():
