@@ -295,7 +295,13 @@ def init_dataset():
     ncidb.save()
 
 
-def init_release(mini=False, init_pubchem_compound=False, init_pubchem_substance=True, init_chembl=False, init_nci=False):
+def init_release(
+        mini=False,
+        init_pubchem_compound=False,
+        init_pubchem_substance=True,
+        init_chembl=False,
+        init_nci=False
+    ):
 
     pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
         preprocessor_name="pubchem_ext_datasource",
@@ -399,21 +405,21 @@ def init_release(mini=False, init_pubchem_compound=False, init_pubchem_substance
             )
             chembl_collection.save()
 
-    nci_db, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="DTP/NCI"),
-        publisher=Publisher.objects.get(name="PubChem"),
-        name="DTP/NCI",
-        version=None,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    nci_db.description = 'NCI Database downloaded from PubChem'
-    nci_db.classification = 'public'
-    nci_db.status = 'active'
-    nci_db.description = "NCI database"
-    nci_db.save()
-
     if init_nci:
+        nci_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="DTP/NCI"),
+            publisher=Publisher.objects.get(name="PubChem"),
+            name="DTP/NCI",
+            version=None,
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        nci_db.description = 'NCI Database downloaded from PubChem'
+        nci_db.classification = 'public'
+        nci_db.status = 'active'
+        nci_db.description = "NCI database"
+        nci_db.save()
+
         open_nci_db, created = Release.objects.get_or_create(
             dataset=Dataset.objects.get(name="DTP/NCI"),
             publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
