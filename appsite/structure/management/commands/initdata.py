@@ -297,10 +297,10 @@ def init_dataset():
 
 def init_release(
         mini=False,
-        init_pubchem_compound=False,
+        init_pubchem_compound=True,
         init_pubchem_substance=True,
-        init_chembl=False,
-        init_nci=False
+        init_chembl=True,
+        init_nci=True
     ):
 
     pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
@@ -312,7 +312,6 @@ def init_release(
             dataset=Dataset.objects.get(name="PubChem"),
             publisher=Publisher.objects.get(name="PubChem"),
             name="PubChem Compound",
-            version=None,
             downloaded=datetime.datetime(2022, 2, 1),
         )
         pubchem_compound.classification = 'public'
@@ -347,7 +346,6 @@ def init_release(
             dataset=Dataset.objects.get(name="PubChem"),
             publisher=Publisher.objects.get(name="PubChem"),
             name="PubChem Substance",
-            version=None,
             released=None,
             downloaded=datetime.datetime(2022, 2, 1),
         )
@@ -410,7 +408,6 @@ def init_release(
             dataset=Dataset.objects.get(name="DTP/NCI"),
             publisher=Publisher.objects.get(name="PubChem"),
             name="DTP/NCI",
-            version=None,
             released=None,
             downloaded=datetime.datetime(2022, 2, 1),
         )
@@ -423,7 +420,6 @@ def init_release(
         open_nci_db, created = Release.objects.get_or_create(
             dataset=Dataset.objects.get(name="DTP/NCI"),
             publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
-            version=None,
             released=None,
             downloaded=datetime.datetime(2022, 2, 1),
         )

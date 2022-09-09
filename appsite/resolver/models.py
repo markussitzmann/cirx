@@ -78,10 +78,10 @@ class InChIManager(models.Manager):
 
 class InChI(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    version = models.IntegerField(default=1)
-    block1 = models.CharField(max_length=14)
-    block2 = models.CharField(max_length=10)
-    block3 = models.CharField(max_length=1)
+    version = models.IntegerField(default=1, blank=False, null=False)
+    block1 = models.CharField(max_length=14, blank=False, null=False)
+    block2 = models.CharField(max_length=10, blank=False, null=False)
+    block3 = models.CharField(max_length=1, blank=False, null=False)
     key = models.CharField(max_length=27)
     string = models.CharField(max_length=32768, blank=True, null=True)
     entrypoints = models.ManyToManyField('EntryPoint', related_name='inchis', blank=True)
@@ -202,7 +202,7 @@ class StructureInChIAssociation(models.Model):
         null=False
     )
     software_version = models.CharField(max_length=16, default="1", blank=False, null=False)
-    save_opt = models.CharField(max_length=2, default=None, blank=True, null=True)
+    save_opt = models.CharField(max_length=2, default=None, blank=False, null=False)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -246,7 +246,7 @@ class Compound(models.Model):
 
 
 class Record(models.Model):
-    regid = models.ForeignKey('Name', on_delete=models.PROTECT)
+    regid = models.ForeignKey('Name', on_delete=models.PROTECT, blank=False, null=False)
     version = models.IntegerField(default=1, blank=False, null=False)
     release = models.ForeignKey('Release', blank=False, null=False, on_delete=models.CASCADE)
     dataset = models.ForeignKey('Dataset', blank=False, null=False, on_delete=models.RESTRICT)
@@ -344,7 +344,7 @@ class Organization(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['parent', 'name'],
+                fields=['name', 'category'],
                 name='unique_organization_constraint'
             ),
         ]
@@ -375,7 +375,7 @@ class Publisher(models.Model):
         ('none', 'None'),
         ('generic', 'Generic'),
     ), default='none')
-    name = models.CharField(max_length=1024)
+    name = models.CharField(max_length=1024, blank=False, null=False)
     description = models.TextField(max_length=32768, blank=True, null=True)
     email = models.EmailField(max_length=254, blank=True, null=True)
     address = models.CharField(max_length=8192, blank=True, null=True)
@@ -395,7 +395,7 @@ class Publisher(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['parent', 'name', 'category', 'href', 'orcid'],
+                fields=['name', 'category'],
                 name='unique_publisher_constraint'
             ),
         ]
@@ -438,7 +438,7 @@ class EntryPoint(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['parent', 'publisher', 'href'],
+                fields=['category', 'href'],
                 name='unique_entrypoint_constraint'
             ),
         ]
@@ -493,7 +493,7 @@ class EndPoint(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['entrypoint', 'uri'],
+                fields=['category', 'uri'],
                 name='unique_endpoint_constraint'
             ),
         ]
@@ -618,7 +618,7 @@ class Release(models.Model):
         )
     )
     status = models.CharField(max_length=32, blank=True, choices=(('active', 'Show'), ('inactive', 'Hide')))
-    version = models.CharField(max_length=255, null=True, blank=True)
+    version = models.CharField(max_length=255, null=False, blank=False, default="0")
     released = models.DateField(null=True, blank=True, verbose_name="Date Released")
     downloaded = models.DateField(null=True, blank=True, verbose_name="Date Downloaded")
     added = models.DateTimeField(auto_now_add=True)
