@@ -30,8 +30,6 @@ def _normalize_structures(structure_ids: List[uuid.UUID]):
 
 
 def _normalize():
-
-    # TODO: remove slicing!
     records: QuerySet = StructureFileRecord.objects\
         .select_related('structure')\
         .values('structure__id')\
