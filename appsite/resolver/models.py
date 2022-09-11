@@ -482,7 +482,7 @@ class EndPoint(models.Model):
         ('uritemplate', 'URI Template (RFC6570)'),
         ('documentation', 'Documentation (HTML, PDF)'),
     ), default='uritemplate')
-    request_methods = MultiSelectField(choices=http_verbs, default=['GET'])
+    request_methods = MultiSelectField(choices=http_verbs, default=['GET'], max_length=16)
     description = models.TextField(max_length=32768, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

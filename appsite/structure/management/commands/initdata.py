@@ -296,7 +296,7 @@ def init_dataset():
 
 
 def init_release(
-        mini=False,
+        mini=True,
         init_pubchem_compound=True,
         init_pubchem_substance=True,
         init_chembl=True,
