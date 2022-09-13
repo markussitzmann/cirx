@@ -108,13 +108,19 @@ class FileRegistry(object):
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
-        count: int
+        count: intcji
         if not structure_file.count:
             count = Molfile.count()
         else:
             count = structure_file.count
         file_records = range(1, count+1)
-        chunk_records = [file_records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)][chunk_number]
+        chunks = [file_records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
+        try:
+            chunk_records = chunks[chunk_number]
+        except IndexError as e:
+            logging.info("chunks %s index %s" % (len(chunks), chunk_number))
+            logging.warning("chunk index exceeded - skipped")
+            return structure_file_id
         record: int = chunk_records[0]
         last_record: int = chunk_records[-1]
 
@@ -530,28 +536,6 @@ class Preprocessors:
                 dataset.publisher = dataset_publisher
                 dataset.href = data.url
                 dataset.save()
-
-        ######
-
-        for data in datasource_names:
-            dataset, created = Dataset.objects.get_or_create(name=data.name)
-            if created:
-                dataset_publisher_name = data.name
-                dataset_publisher, created = Publisher.objects.get_or_create(
-                    name=dataset_publisher_name,
-                    category='generic',
-                    href=None,
-                    orcid=None
-                )
-                dataset_publisher.parent = pubchem_publisher
-                dataset_publisher.description = "generic from Pubchem"
-                dataset_publisher.save()
-                dataset.description = "generic from PubChem"
-                dataset.publisher = dataset_publisher
-                dataset.href = data.url
-                dataset.save()
-
-        ######
 
             dataset_release_name = data.name
             release, created = Release.objects.get_or_create(
