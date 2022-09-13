@@ -497,6 +497,31 @@ class Preprocessors:
         pubchem_release_downloaded = pubchem_release.downloaded
         pubchem_release_released = pubchem_release.released
         release_objects = {}
+
+        for data in datasource_names:
+            dataset_publisher_name = data.name
+            dataset_publisher, created = Publisher.objects.get_or_create(
+                name=dataset_publisher_name,
+                category='generic',
+                href=None,
+                orcid=None
+            )
+            if created:
+                dataset_publisher.parent = pubchem_publisher
+                dataset_publisher.description = "generic from Pubchem"
+                dataset_publisher.save()
+            dataset, created = Dataset.objects.get_or_create(
+                name=data.name,
+                publisher=dataset_publisher
+            )
+            if created:
+                dataset.description = "generic from PubChem"
+                dataset.publisher = dataset_publisher
+                dataset.href = data.url
+                dataset.save()
+
+        ######
+
         for data in datasource_names:
             dataset, created = Dataset.objects.get_or_create(name=data.name)
             if created:
@@ -514,6 +539,8 @@ class Preprocessors:
                 dataset.publisher = dataset_publisher
                 dataset.href = data.url
                 dataset.save()
+
+        ######
 
             dataset_release_name = data.name
             release, created = Release.objects.get_or_create(
