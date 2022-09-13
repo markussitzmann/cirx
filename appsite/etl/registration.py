@@ -1,4 +1,6 @@
 import datetime
+import time
+
 import pytz
 import glob
 import logging
@@ -32,7 +34,7 @@ PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
 
 class FileRegistry(object):
 
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 100000
     DATABASE_ROW_BATCH_SIZE = 1000
 
     def __init__(self, file_collection: StructureFileCollection):
@@ -102,6 +104,7 @@ class FileRegistry(object):
             chunk_size: int,
             max_records=None,
     ) -> int:
+        i0 = time.perf_counter()
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
@@ -127,6 +130,7 @@ class FileRegistry(object):
         structures: list = list()
         records: list = list()
 
+        g0 = time.perf_counter()
         while record <= last_record:
             if not record % FileRegistry.CHUNK_SIZE:
                 logger.info("processed record %s of %s", record, fname)
@@ -168,7 +172,7 @@ class FileRegistry(object):
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
-
+                time0 = time.perf_counter()
                 for preprocessor_name in preprocessor_names:
                     preprocessor_transaction = getattr(Preprocessors, preprocessor_name + "_transaction", None)
                     if callable(preprocessor_transaction):
@@ -179,6 +183,8 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
+                time1 = time.perf_counter()
+
                 hashisy_list = [record['hashisy_key'] for record in records]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
 
@@ -199,6 +205,7 @@ class FileRegistry(object):
                     [r.record for r in record_objects],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
+                time2 = time.perf_counter()
 
                 record_release_objects = list()
                 for r in record_objects:
@@ -218,6 +225,8 @@ class FileRegistry(object):
                     sff, created = StructureFileField.objects.get_or_create(field_name=field)
                     sff.structure_files.add(structure_file)
                     sff.save()
+                time3 = time.perf_counter()
+                logger.info("TIMING 1 %s 2 %s 3 %s T %s" % ((time1-time0), (time2-time1), (time3-time2), (time3-time0)))
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -225,13 +234,15 @@ class FileRegistry(object):
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise Exception(e)
+        g1 = time.perf_counter()
+        logger.info("INIT %s GLOBAL %s" % ((g0 - i0), (g1 - g0)))
         logger.info("data registration data finished for file '%s'" % (fname, ))
         return structure_file_id
 
 
 class StructureRegistry(object):
 
-    CHUNK_SIZE = 100
+    #CHUNK_SIZE = 100
 
     NCICADD_TYPES = [
         Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),

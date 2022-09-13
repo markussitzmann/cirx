@@ -212,7 +212,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {funcName} | {message}',
+            'format': '{levelname} {asctime} {process:d} : {funcName} | {message}',
             'style': '{',
         },
         'simple': {
@@ -250,6 +250,7 @@ CELERY_BROKER_URL = 'redis://cirx-cache:6379'
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_MAX_TASKS_PER_CHILD = 1
 
 #CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
