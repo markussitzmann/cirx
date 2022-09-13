@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os
 
@@ -9,8 +10,8 @@ from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor, StructureFileField, \
     ReleaseNameField
 from structure.models import  ResponseType
-from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, ContextTag, \
-    Dataset, Release, InChIType
+from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, \
+    ContextTag, Dataset, Release, InChIType
 
 from pycactvs import Ens
 
@@ -304,10 +305,23 @@ def init_release(
     ):
 
     pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
-        preprocessor_name="pubchem_ext_datasource",
+        name="pubchem_ext_datasource",
     )
 
     if init_pubchem_compound:
+        pubchem_compound_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['PUBCHEM_COMPOUND_CID', ],
+                'names': [
+                    {'field': 'PUBCHEM_IUPAC_OPENEYE_NAME', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_CAS_NAME', 'type': 'PUBCHEM_IUPAC_CAS_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_NAME', 'type': 'PUBCHEM_IUPAC_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'type': 'PUBCHEM_IUPAC_SYSTEMATIC_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_TRADITIONAL_NAME', 'type': 'PUBCHEM_IUPAC_TRADITIONAL_NAME'},
+                ]
+            })
+        )
+
         pubchem_compound, created = Release.objects.get_or_create(
             dataset=Dataset.objects.get(name="PubChem"),
             publisher=Publisher.objects.get(name="PubChem"),
@@ -342,6 +356,15 @@ def init_release(
         pubchem_compound_collection.save()
 
     if init_pubchem_substance:
+        pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['PUBCHEM_SUBSTANCE_ID', ],
+                'names': [
+                    {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
+                ]
+            })
+        )
+
         pubchem_substance, created = Release.objects.get_or_create(
             dataset=Dataset.objects.get(name="PubChem"),
             publisher=Publisher.objects.get(name="PubChem"),

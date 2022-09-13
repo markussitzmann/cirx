@@ -3,7 +3,7 @@
     "model": "etl.structurefilecollectionpreprocessor",
     "pk": 1,
     "fields": {
-      "preprocessor_name": "pubchem_ext_datasource"
+      "preprocessor": "pubchem_ext_datasource"
     }
   },
   {

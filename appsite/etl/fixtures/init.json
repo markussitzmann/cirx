@@ -3,7 +3,8 @@
     "model": "etl.structurefilecollectionpreprocessor",
     "pk": 1,
     "fields": {
-      "preprocessor_name": "pubchem_ext_datasource"
+      "name": "pubchem_ext_datasource",
+      "params": "{\"test\": \"hallo\"}"
     }
   },
   {
@@ -685,7 +686,6 @@
       "href": null,
       "classification": "public",
       "status": "active",
-      "version": null,
       "released": null,
       "downloaded": "2022-02-01",
       "added": "2022-09-06T21:03:44.976Z",
@@ -725,7 +725,6 @@
       "href": null,
       "classification": "public",
       "status": "active",
-      "version": null,
       "released": null,
       "downloaded": "2022-02-01",
       "added": "2022-09-06T21:03:44.944Z",
@@ -745,7 +744,6 @@
       "href": null,
       "classification": "public",
       "status": "active",
-      "version": null,
       "released": null,
       "downloaded": "2022-02-01",
       "added": "2022-09-06T21:03:44.985Z",
@@ -765,7 +763,6 @@
       "href": null,
       "classification": "public",
       "status": "active",
-      "version": null,
       "released": null,
       "downloaded": "2022-02-01",
       "added": "2022-09-06T21:03:44.929Z",

@@ -59,7 +59,7 @@ class PreprocessorTests(TestCase):
             'release_objects': []
         }
 
-        preprocessor_names = [p.preprocessor_name for p in self.structure_file_collection.preprocessors.all()]
+        preprocessor_names = [p.name for p in self.structure_file_collection.preprocessors.all()]
         for preprocessor_name in preprocessor_names:
             preprocessor = getattr(Preprocessors, preprocessor_name, None)
             preprocessor(self.structure_file, self.ens, record_data)

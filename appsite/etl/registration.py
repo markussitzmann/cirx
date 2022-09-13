@@ -119,7 +119,7 @@ class FileRegistry(object):
                     (structure_file.file.name, structure_file_id, chunk_number, record, last_record))
 
         fname: str = structure_file.file.name
-        preprocessor_names: List[str] = [p.preprocessor_name for p in structure_file.collection.preprocessors.all()]
+        preprocessor_names: List[str] = [p.name for p in structure_file.collection.preprocessors.all()]
 
         molfile: Molfile = Molfile.Open(fname)
         molfile.set('record', record)

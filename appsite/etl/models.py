@@ -11,21 +11,28 @@ fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
 
 
 class StructureFileCollectionPreprocessor(models.Model):
-    preprocessor_name = models.CharField(max_length=2048, null=False, blank=False, unique=True)
+    name = models.CharField(max_length=2048, null=False, blank=False, default="generic")
+    params = models.JSONField(null=False, blank=False, default=dict)
 
     class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['name', 'params'],
+                name='unique_file_collection_preprocessor_constraint'
+            ),
+        ]
         db_table = 'cir_structure_file_collection_preprocessor'
 
     def __str__(self):
-        return "%s" % self.preprocessor_name
+        return "%s" % self.name
 
 
 class StructureFileCollection(models.Model):
     release = models.ForeignKey(
         Release,
         related_name='collections',
-        blank=True,
-        null=True,
+        blank=False,
+        null=False,
         on_delete=models.CASCADE
     )
     preprocessors = models.ManyToManyField(
@@ -33,7 +40,7 @@ class StructureFileCollection(models.Model):
         related_name="collections"
     )
     file_location_pattern_string = models.CharField(
-        max_length=2048, blank=True, null=True
+        max_length=2048, blank=False, null=False, default="*"
     )
     description = models.TextField(max_length=768, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
