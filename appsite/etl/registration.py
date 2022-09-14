@@ -104,11 +104,12 @@ class FileRegistry(object):
             chunk_size: int,
             max_records=None,
     ) -> int:
+        logger.info("---------- STARTED with file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
         i0 = time.perf_counter()
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
-        count: intcji
+        count: int
         if not structure_file.count:
             count = Molfile.count()
         else:
@@ -132,16 +133,20 @@ class FileRegistry(object):
 
         molfile: Molfile = Molfile.Open(fname)
         molfile.set('record', record)
+
         fields: set = set()
         structures: list = list()
         records: list = list()
 
         g0 = time.perf_counter()
+        record -= 1
         while record <= last_record:
+            record += 1
             if not record % FileRegistry.CHUNK_SIZE:
                 logger.info("processed record %s of %s", record, fname)
             try:
                 # TODO: registering structures needs improvement - hadd might do harm here
+                molfile.set('record', record)
                 ens: Ens = molfile.read()
                 ens.hadd()
                 hashisy_key = CactvsHash(ens)
@@ -170,7 +175,6 @@ class FileRegistry(object):
                     preprocessor(structure_file, ens, record_data)
             if max_records and record >= max_records:
                 break
-            record += 1
         molfile.close()
 
         structures = sorted(structures, key=lambda s: s.hashisy_key.int)
@@ -243,6 +247,7 @@ class FileRegistry(object):
         g1 = time.perf_counter()
         logger.info("INIT %s GLOBAL %s" % ((g0 - i0), (g1 - g0)))
         logger.info("data registration data finished for file '%s'" % (fname, ))
+        logger.info("---------- FINISHED file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
         return structure_file_id
 
 
@@ -550,7 +555,7 @@ class Preprocessors:
                 regid_id_field, created = StructureFileField.objects\
                     .get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
                 name_type, created = NameType.objects.get_or_create(id="REGID")
-                name_type.save()
+                #name_type.save()
                 release.parent = pubchem_release
                 release.description = "generic from PubChem"
                 release.status = pubchem_release_status

@@ -257,6 +257,8 @@ CELERY_CACHE_BACKEND = 'default'
 CELERY_RESULT_BACKEND = 'django-cache'
 CELERY_TIMEZONE = "Europe/Berlin"
 
+CELERYD_HIJACK_ROOT_LOGGER = False
+
 
 # CIR Settings
 
