@@ -35,7 +35,7 @@ PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
 class FileRegistry(object):
 
     CHUNK_SIZE = 100000
-    DATABASE_ROW_BATCH_SIZE = 1000
+    DATABASE_ROW_BATCH_SIZE = 10000
 
     def __init__(self, file_collection: StructureFileCollection):
         self.file_collection = file_collection
@@ -140,7 +140,7 @@ class FileRegistry(object):
 
         g0 = time.perf_counter()
         record -= 1
-        while record <= last_record:
+        while record < last_record:
             record += 1
             if not record % FileRegistry.CHUNK_SIZE:
                 logger.info("processed record %s of %s", record, fname)
@@ -213,7 +213,8 @@ class FileRegistry(object):
                     record_objects.append(record_releases)
                 StructureFileRecord.objects.bulk_create(
                     [r.record for r in record_objects],
-                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    #ignore_conflicts=True
                 )
                 time2 = time.perf_counter()
 
@@ -226,7 +227,8 @@ class FileRegistry(object):
                         ))
                 StructureFileRecordRelease.objects.bulk_create(
                     record_release_objects,
-                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    #ignore_conflicts=True
                 )
 
                 logger.info("registering file fields for '%s'" % (fname,))
