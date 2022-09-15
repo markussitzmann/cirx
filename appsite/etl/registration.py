@@ -195,7 +195,7 @@ class FileRegistry(object):
                 )
                 time1 = time.perf_counter()
 
-                hashisy_list = [record['hashisy_key'] for record in records]
+                hashisy_list = [r['hashisy_key'] for r in records]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
 
                 logger.info("registering structure file records for '%s'" % (fname,))
@@ -232,7 +232,8 @@ class FileRegistry(object):
                 )
 
                 logger.info("registering file fields for '%s'" % (fname,))
-                for field in list(fields):
+
+                for field in sorted(list(fields)):
                     logger.debug("registering file field '%s'" % (field,))
                     sff, created = StructureFileField.objects.get_or_create(field_name=field)
                     sff.structure_files.add(structure_file)

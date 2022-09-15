@@ -296,11 +296,11 @@ def init_dataset():
 
 
 def init_release(
-        mini=False,
+        mini=True,
         init_pubchem_compound=True,
         init_pubchem_substance=True,
-        init_chembl=False,
-        init_nci=False
+        init_chembl=True,
+        init_nci=True
     ):
 
     pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
