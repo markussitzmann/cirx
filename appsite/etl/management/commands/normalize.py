@@ -30,20 +30,6 @@ def _normalize_structures(structure_ids: List[uuid.UUID]):
 
 
 def _normalize():
-    #if settings.INIT_SYSTEM:
-    #    for c in Compound.objects.all():
-    #        logger.info("deleting %s", c)
-    #        c.delete()
-    #    for s in Structure.objects.all():
-    #        logger.info("unlink parent structures %s", s)
-    #        s.ficus_parent = None
-    #        s.ficts_parent = None
-    #        s.uuuuu_parent = None
-    #        s.save()
-
-    # TODO: remove!
-    structure_file_id = 1
-    # TODO: remove slicing!
     records: QuerySet = StructureFileRecord.objects\
         .select_related('structure')\
         .values('structure__id')\
@@ -65,10 +51,6 @@ def _normalize():
 
     logger.info("normalize: submitting %s structure IDs in %s task(s)" % (len(structure_ids), len(tasks)))
 
-    # TODO: change
-    #for task in tasks:
-    #  for k, v in task.collect(intermediate=False):
-    #      logger.info("%s : %s" % (k.successful(), v))
 
 
 

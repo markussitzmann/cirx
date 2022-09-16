@@ -1,10 +1,12 @@
 import datetime
+import time
+
 import pytz
 import glob
 import logging
 import os
-from collections import namedtuple
-from typing import List
+from collections import namedtuple, defaultdict
+from typing import List, Dict
 
 from celery import subtask, group
 from django.conf import settings
@@ -12,9 +14,11 @@ from django.db import transaction, DatabaseError, IntegrityError
 from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
-from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord
+from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
+    StructureFileRecordRelease, ReleaseNameField
 from structure.inchi.identifier import InChIString, InChIKey
-from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType
+from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
+    Release, NameType
 
 logger = logging.getLogger('cirx')
 
@@ -24,12 +28,15 @@ Identifier = namedtuple('Identifier', 'property parent_structure attr')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
 InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
 InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
+StructureFileRecordReleaseTuple = namedtuple('StructureFileRecordRelease', 'record releases')
+
+PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
 
 
 class FileRegistry(object):
 
-    CHUNK_SIZE = 10000
-    DATABASE_ROW_BATCH_SIZE = 1000
+    CHUNK_SIZE = 100000
+    DATABASE_ROW_BATCH_SIZE = 10000
 
     def __init__(self, file_collection: StructureFileCollection):
         self.file_collection = file_collection
@@ -92,7 +99,14 @@ class FileRegistry(object):
         return group(callback.clone([structure_file_id, chunk, chunk_size]) for chunk in chunks)()
 
     @staticmethod
-    def register_structure_file_record_chunk(structure_file_id: int, chunk_number: int, chunk_size: int, max_records=None) -> int:
+    def register_structure_file_record_chunk(
+            structure_file_id: int,
+            chunk_number: int,
+            chunk_size: int,
+            max_records=None,
+    ) -> int:
+        logger.info("---------- STARTED with file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
+        i0 = time.perf_counter()
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
@@ -102,7 +116,13 @@ class FileRegistry(object):
         else:
             count = structure_file.count
         file_records = range(1, count+1)
-        chunk_records = [file_records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)][chunk_number]
+        chunks = [file_records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
+        try:
+            chunk_records = chunks[chunk_number]
+        except IndexError as e:
+            logging.info("chunks %s index %s" % (len(chunks), chunk_number))
+            logging.warning("chunk index exceeded - skipped")
+            return structure_file_id
         record: int = chunk_records[0]
         last_record: int = chunk_records[-1]
 
@@ -110,17 +130,24 @@ class FileRegistry(object):
                     (structure_file.file.name, structure_file_id, chunk_number, record, last_record))
 
         fname: str = structure_file.file.name
+        preprocessor_names: List[str] = [p.name for p in structure_file.collection.preprocessors.all()]
+
         molfile: Molfile = Molfile.Open(fname)
         molfile.set('record', record)
-        fields: set = set()
+
+        #fields: set = set()
         structures: list = list()
         records: list = list()
 
-        while record <= last_record:
+        g0 = time.perf_counter()
+        record -= 1
+        while record < last_record:
+            record += 1
             if not record % FileRegistry.CHUNK_SIZE:
                 logger.info("processed record %s of %s", record, fname)
             try:
                 # TODO: registering structures needs improvement - hadd might do harm here
+                molfile.set('record', record)
                 ens: Ens = molfile.read()
                 ens.hadd()
                 hashisy_key = CactvsHash(ens)
@@ -136,13 +163,19 @@ class FileRegistry(object):
             record_data = {
                 'hashisy_key': hashisy_key,
                 'index': record,
+                'preprocessors': defaultdict(dict),
+                'release_names': [],
+                'release_objects': []
             }
             records.append(record_data)
-            molfile_fields = [str(f) for f in molfile.fields]
-            fields.update(molfile_fields)
+            #molfile_fields = [str(f) for f in molfile.fields]
+            #fields.update(molfile_fields)
+            for preprocessor_name in preprocessor_names:
+                preprocessor = getattr(Preprocessors, preprocessor_name, None)
+                if callable(preprocessor):
+                    preprocessor(structure_file, ens, record_data)
             if max_records and record >= max_records:
                 break
-            record += 1
         molfile.close()
 
         structures = sorted(structures, key=lambda s: s.hashisy_key.int)
@@ -150,41 +183,82 @@ class FileRegistry(object):
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
+                time0 = time.perf_counter()
+                for preprocessor_name in preprocessor_names:
+                    preprocessor_transaction = getattr(Preprocessors, preprocessor_name + "_transaction", None)
+                    if callable(preprocessor_transaction):
+                        preprocessor_transaction(structure_file, records)
+
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                hashisy_list = [record['hashisy_key'] for record in records]
+                time1 = time.perf_counter()
+
+                hashisy_list = [r['hashisy_key'] for r in records]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
+
+                logger.info("registering structure file records for '%s'" % (fname,))
                 record_objects = list()
                 for record_data in records:
                     structure = structures[record_data['hashisy_key']]
-                    record_objects.append(StructureFileRecord(
-                        structure_file=structure_file,
-                        structure=structure,
-                        number=record_data['index']
-                    ))
-                StructureFileRecord.objects.bulk_create(record_objects, batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE)
-                logger.info("registering file fields for '%s'" % (fname,))
-                for field in list(fields):
-                    logger.info("registering file field '%s'" % (field,))
-                    sff, created = StructureFileField.objects.get_or_create(field_name=field)
-                    sff.structure_files.add(structure_file)
-                    sff.save()
+                    record_releases = StructureFileRecordReleaseTuple(
+                        StructureFileRecord(
+                            structure_file=structure_file,
+                            structure=structure,
+                            number=record_data['index'],
+                        ),
+                        record_data['release_objects']
+                    )
+                    record_objects.append(record_releases)
+                StructureFileRecord.objects.bulk_create(
+                    [r.record for r in record_objects],
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    #ignore_conflicts=True
+                )
+                time2 = time.perf_counter()
+
+                record_release_objects = list()
+                for r in record_objects:
+                    for release in r.releases:
+                        record_release_objects.append(StructureFileRecordRelease(
+                            structure_file_record=r.record,
+                            release=release
+                        ))
+                StructureFileRecordRelease.objects.bulk_create(
+                    record_release_objects,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    #ignore_conflicts=True
+                )
+
+                #logger.info("registering file fields for '%s'" % (fname,))
+                #
+                #for field in sorted(list(fields)):
+                #    logger.debug("registering file field '%s'" % (field,))
+                #    sff, created = StructureFileField.objects.get_or_create(field_name=field)
+                #    sff.structure_files.add(structure_file)
+                #    sff.save()
+
+                time3 = time.perf_counter()
+                logger.info("TIMING 1 %s 2 %s 3 %s T %s" % ((time1-time0), (time2-time1), (time3-time2), (time3-time0)))
+
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise(DatabaseError(e))
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise Exception(e)
+        g1 = time.perf_counter()
+        logger.info("INIT %s GLOBAL %s" % ((g0 - i0), (g1 - g0)))
         logger.info("data registration data finished for file '%s'" % (fname, ))
+        logger.info("---------- FINISHED file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
         return structure_file_id
 
 
 class StructureRegistry(object):
 
-    CHUNK_SIZE = 100
+    #CHUNK_SIZE = 100
 
     NCICADD_TYPES = [
         Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
@@ -407,7 +481,6 @@ class StructureRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-
         except DatabaseError as e:
             logger.error(e)
             raise(DatabaseError(e))
@@ -420,3 +493,88 @@ class StructureRegistry(object):
 def structure_id_chunks(structure_ids):
     chunk_size = StructureRegistry.CHUNK_SIZE
     return [structure_ids[x:x + chunk_size] for x in range(0, len(structure_ids), chunk_size)]
+
+
+class Preprocessors:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def pubchem_ext_datasource(structure_file: StructureFile, ens: Ens, record_data: Dict):
+        logger.debug("preprocesser pubchem_ext_datasource")
+        datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
+        record_data['release_names'].append(datasource_name)
+        try:
+            datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
+        except Exception as e:
+            logger.error("getting URL failed: %s", e)
+            datasource_name_url = None
+        record_data['preprocessors']['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
+
+    @staticmethod
+    def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data: List):
+        logger.debug("preprocesser transaction pubchem_ext_datasource")
+        datasource_names = list(set([record['preprocessors']['pubchem_ext_datasource'] for record in record_data]))
+        pubchem_release = structure_file.collection.release
+        pubchem_publisher = pubchem_release.publisher
+        pubchem_release_status = pubchem_release.status
+        pubchem_release_classification = pubchem_release.classification
+        pubchem_release_version = pubchem_release.version
+        pubchem_release_downloaded = pubchem_release.downloaded
+        pubchem_release_released = pubchem_release.released
+        release_objects = {}
+
+        for data in datasource_names:
+            dataset_publisher_name = data.name
+            dataset_publisher, created = Publisher.objects.get_or_create(
+                name=dataset_publisher_name,
+                category='generic',
+                href=None,
+                orcid=None
+            )
+            if created:
+                dataset_publisher.parent = pubchem_publisher
+                dataset_publisher.description = "generic from Pubchem"
+                dataset_publisher.save()
+            dataset, created = Dataset.objects.get_or_create(
+                name=data.name,
+                publisher=dataset_publisher
+            )
+            if created:
+                dataset.description = "generic from PubChem"
+                dataset.publisher = dataset_publisher
+                dataset.href = data.url
+                dataset.save()
+
+            dataset_release_name = data.name
+            release, created = Release.objects.get_or_create(
+                dataset=dataset,
+                publisher=pubchem_publisher,
+                name=dataset_release_name,
+                version=pubchem_release_version,
+                downloaded=pubchem_release_downloaded,
+                released=pubchem_release_released
+            )
+            if created:
+                regid_id_field, created = StructureFileField.objects\
+                    .get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
+                name_type, created = NameType.objects.get_or_create(id="REGID")
+                #name_type.save()
+                release.parent = pubchem_release
+                release.description = "generic from PubChem"
+                release.status = pubchem_release_status
+                release.classification = pubchem_release_classification
+                release.save()
+                release_name_field, created = ReleaseNameField.objects.get_or_create(
+                    release=release,
+                    structure_file_field=regid_id_field,
+                    name_type=name_type
+                )
+                if created:
+                    release_name_field.is_regid = True
+                    release_name_field.save()
+            release_objects[data.name] = release
+        for record in record_data:
+            for name in record['release_names']:
+                record['release_objects'].append(release_objects[name])

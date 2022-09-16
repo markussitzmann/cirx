@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os
 
@@ -6,10 +7,11 @@ from django.core.management.base import BaseCommand, CommandError
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 #from database.models import
-from etl.models import StructureFileCollection
+from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor, StructureFileField, \
+    ReleaseNameField
 from structure.models import  ResponseType
-from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, ContextTag, \
-    Dataset, Release, InChIType
+from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, \
+    ContextTag, Dataset, Release, InChIType
 
 from pycactvs import Ens
 
@@ -25,8 +27,9 @@ class Command(BaseCommand):
 
 
 def _loader():
-    init_response_type_data()
+    #init_structure_fields()
     init_name_type_data()
+    init_response_type_data()
     init_dataset_context_type_data()
     init_organization_and_publisher_data()
     init_dataset()
@@ -118,17 +121,19 @@ def init_dataset_context_type_data():
 
 def init_name_type_data():
     name_types = [
-        ('PUBCHEM_IUPAC_NAME', 'PubChem IUPAC NAME'),
-        ('PUBCHEM_IUPAC_OPENEYE_NAME', 'PubChem IUPAC OPENEYE NAME'),
-        ('PUBCHEM_IUPAC_CAS_NAME', 'PubChem IUPAC CAS NAME'),
-        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', 'PubChem IUPAC TRADITIONAL NAME'),
-        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'PubChem IUPAC SYSTEMATIC NAME'),
-        ('PUBCHEM_GENERIC_REGISTRY_NAME', 'PubChem GENERIC REGISTRY NAME'),
-        ('PUBCHEM_SUBSTANCE_SYNONYM', 'PubChem SUBSTANCE SYNONYM'),
-        ('NSC_NUMBER', 'NSC number'),
-        ('NSC_NUMBER_PREFIXED', 'NSC number prefixed'),
-        ('PUBCHEM_SID', 'PubChem SID'),
-        ('PUBCHEM_CID', 'PubChem CID'),
+        ('REGID', None, 'Registration ID'),
+        ('NAME', None, 'Chemical Name or Synonym'),
+        ('PUBCHEM_IUPAC_NAME', 'NAME', 'PubChem IUPAC NAME'),
+        ('PUBCHEM_IUPAC_OPENEYE_NAME', 'NAME', 'PubChem IUPAC OPENEYE NAME'),
+        ('PUBCHEM_IUPAC_CAS_NAME', 'NAME', 'PubChem IUPAC CAS NAME'),
+        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', 'NAME', 'PubChem IUPAC TRADITIONAL NAME'),
+        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'NAME', 'PubChem IUPAC SYSTEMATIC NAME'),
+        ('PUBCHEM_GENERIC_REGISTRY_NAME', 'NAME', 'PubChem GENERIC REGISTRY NAME'),
+        ('PUBCHEM_SUBSTANCE_SYNONYM', 'NAME', 'PubChem SUBSTANCE SYNONYM'),
+        ('NSC_NUMBER', 'REGID', 'NSC number'),
+        ('NSC_NUMBER_PREFIXED', 'REGID', 'NSC number prefixed'),
+        ('PUBCHEM_SID', 'REGID', 'PubChem SID'),
+        ('PUBCHEM_CID', 'REGID', 'PubChem CID'),
     ]
 
     for name_type in name_types:
@@ -292,96 +297,192 @@ def init_dataset():
     ncidb.save()
 
 
-def init_release():
-    pubchem_compound, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="PubChem"),
-        publisher=Publisher.objects.get(name="PubChem"),
-        name="PubChem Compound",
-        version=None,
-        downloaded=datetime.datetime(2022, 2, 1),
+def init_release(
+        mini=True,
+        init_pubchem_compound=True,
+        init_pubchem_substance=True,
+        init_chembl=True,
+        init_nci=True
+    ):
+
+    pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+        name="pubchem_ext_datasource",
     )
-    pubchem_compound.classification = 'public'
-    pubchem_compound.status = 'active'
-    pubchem_compound.description = "PubChem Compound database"
-    pubchem_compound.save()
 
-    pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
-        release=pubchem_compound,
-        file_location_pattern_string="pubchem/compound/Compound_*.sdf"
-    )
-    pubchem_compound_collection.save()
+    if init_pubchem_compound:
+        pubchem_compound_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['PUBCHEM_COMPOUND_CID', ],
+                'names': [
+                    {'field': 'PUBCHEM_IUPAC_OPENEYE_NAME', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_CAS_NAME', 'type': 'PUBCHEM_IUPAC_CAS_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_NAME', 'type': 'PUBCHEM_IUPAC_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'type': 'PUBCHEM_IUPAC_SYSTEMATIC_NAME'},
+                    {'field': 'PUBCHEM_IUPAC_TRADITIONAL_NAME', 'type': 'PUBCHEM_IUPAC_TRADITIONAL_NAME'},
+                ]
+            })
+        )
 
+        pubchem_compound, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="PubChem"),
+            publisher=Publisher.objects.get(name="PubChem"),
+            name="PubChem Compound",
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        pubchem_compound.classification = 'public'
+        pubchem_compound.status = 'active'
+        pubchem_compound.description = "PubChem Compound database"
+        pubchem_compound.save()
 
-    pubchem_substance, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="PubChem"),
-        publisher=Publisher.objects.get(name="PubChem"),
-        name="PubChem Substance",
-        version=None,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    pubchem_substance.classification = 'public'
-    pubchem_substance.status = 'active'
-    pubchem_substance.description = "PubChem Substance database"
-    pubchem_substance.save()
+        #name_type = NameType.objects.get(id="PUBCHEM_CID")
+        #structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
+        #release_name_field, created = ReleaseNameField.objects.get_or_create(
+        #    release=pubchem_compound,
+        #    structure_file_field=structure_file_field,
+        #    name_type=name_type
+        #)
+        #release_name_field.is_regid = True
+        #release_name_field.save()
 
-    pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
-        release=pubchem_compound,
-        file_location_pattern_string="pubchem/substance/Substance_*.sdf"
-    )
-    pubchem_substance_collection.save()
+        if mini:
+            pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_compound,
+                file_location_pattern_string="pubchem/compound/Compound_*.mini.sdf"
+            )
+        else:
+            pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_compound,
+                file_location_pattern_string="pubchem/compound/Compound_*.sdf.gz"
+            )
+        pubchem_compound_collection.save()
 
+    if init_pubchem_substance:
+        pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['PUBCHEM_SUBSTANCE_ID', ],
+                'names': [
+                    {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
+                    {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
+                ]
+            })
+        )
 
-    chembl_db, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="ChEMBL"),
-        publisher=Publisher.objects.get(name="ChEMBL Team"),
-        version=29,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    chembl_db.classification = 'public'
-    chembl_db.status = 'active'
-    chembl_db.description = "ChEMBL database"
-    chembl_db.save()
+        pubchem_substance, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="PubChem"),
+            publisher=Publisher.objects.get(name="PubChem"),
+            name="PubChem Substance",
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        pubchem_substance.classification = 'public'
+        pubchem_substance.status = 'active'
+        pubchem_substance.description = "PubChem Substance database"
+        pubchem_substance.save()
 
-    chembl_collection, created = StructureFileCollection.objects.get_or_create(
-        release=chembl_db,
-        file_location_pattern_string="chembl/29/chembl_29.sdf"
-    )
-    chembl_collection.save()
+        #name_type = NameType.objects.get(id="PUBCHEM_SID")
+        #structure_file_field = StructureFileField.objects.filter(field_name="E_*PUBCHEM_SUBSTANCE_ID*").first()
+        #release_name_field, created = ReleaseNameField.objects.get_or_create(
+        #    release=pubchem_substance,
+        #    structure_file_field=structure_file_field,
+        #    name_type=name_type
+        #)
+        #release_name_field.is_regid = True
+        #release_name_field.save()
 
-    nci_db, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="DTP/NCI"),
-        publisher=Publisher.objects.get(name="PubChem"),
-        version=None,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    nci_db.description = 'NCI Database downloaded from PubChem'
-    nci_db.classification = 'public'
-    nci_db.status = 'active'
-    nci_db.description = "NCI database"
-    nci_db.save()
+        if mini:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="pubchem/substance/Substance_*.mini.sdf"
+            )
+        else:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="pubchem/substance/Substance_*.sdf.gz"
+            )
+        pubchem_substance_collection.preprocessors.add(pubchem_ext_datasource_preprocessor)
+        pubchem_substance_collection.save()
 
+    if init_chembl:
+        chembl_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['chembl_id', ],
+                'names': []
+            })
+        )
 
-    open_nci_db, created = Release.objects.get_or_create(
-        dataset=Dataset.objects.get(name="DTP/NCI"),
-        publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
-        version=None,
-        released=None,
-        downloaded=datetime.datetime(2022, 2, 1),
-    )
-    open_nci_db.name = "Open NCI Database"
-    open_nci_db.classification = 'public'
-    open_nci_db.status = 'active'
-    open_nci_db.description = "NCI database"
-    open_nci_db.save()
+        chembl_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="ChEMBL"),
+            publisher=Publisher.objects.get(name="ChEMBL Team"),
+            version=29,
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        chembl_db.classification = 'public'
+        chembl_db.status = 'active'
+        chembl_db.description = "ChEMBL database"
+        chembl_db.save()
 
-    open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-        release=open_nci_db,
-        file_location_pattern_string="nci/NCI_DTP.mini.sdf"
-    )
-    open_nci_db_collection.save()
+        if mini:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
+            )
+            chembl_collection.save()
+        else:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="chembl/29/chembl_29.sdf.gz"
+            )
+            chembl_collection.save()
+
+    if init_nci:
+        pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['PUBCHEM_EXT_DATASOURCE_REGID', ],
+                'names': [
+                    {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
+                    {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
+                ]
+            })
+        )
+
+        nci_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="DTP/NCI"),
+            publisher=Publisher.objects.get(name="PubChem"),
+            name="DTP/NCI",
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        nci_db.description = 'NCI Database downloaded from PubChem'
+        nci_db.classification = 'public'
+        nci_db.status = 'active'
+        nci_db.description = "NCI database"
+        nci_db.save()
+
+        open_nci_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="DTP/NCI"),
+            publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        open_nci_db.name = "Open NCI Database"
+        open_nci_db.classification = 'public'
+        open_nci_db.status = 'active'
+        open_nci_db.description = "NCI database"
+        open_nci_db.save()
+
+        if mini:
+            open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                release=open_nci_db,
+                file_location_pattern_string="nci/NCI_DTP.mini.sdf"
+            )
+            open_nci_db_collection.save()
+        else:
+            open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                release=open_nci_db,
+                file_location_pattern_string="nci/NCI_DTP.sdf.gz"
+            )
+            open_nci_db_collection.save()
 
 
 def init_inchi_type():
@@ -441,3 +542,58 @@ def init_inchi_type():
     tautox_inchi_type.pt_13_00 = True
     tautox_inchi_type.pt_18_00 = True
     tautox_inchi_type.save()
+
+
+def init_structure_fields():
+
+    fields = [
+        'E_WEIGHT',
+        'E_TPSA',
+        'E_TAUTOMER_COUNT',
+        'E_STEREO_COUNT',
+        'E_STDINCHIKEY',
+        'E_STDINCHI',
+        'E_SCREEN',
+        'E_PUBCHEM_XREF_EXT_ID',
+        'E_*PUBCHEM_XLOGP3_AA*',
+        'E_PUBCHEM_XLOGP3',
+        'E_*PUBCHEM_SUBSTANCE_VERSION*',
+        'E_*PUBCHEM_SUBSTANCE_SYNONYM*',
+        'E_*PUBCHEM_SUBSTANCE_ID*',
+        'E_PUBCHEM_SUBSTANCE_COMMENT',
+        'E_*PUBCHEM_OPENEYE_ISO_SMILES*',
+        'E_*PUBCHEM_OPENEYE_CAN_SMILES*',
+        'E_*PUBCHEM_IUPAC_OPENEYE_NAME*',
+        'E_*PUBCHEM_IUPAC_NAME_MARKUP*',
+        'E_*PUBCHEM_IUPAC_CAS_NAME*',
+        'E_PUBCHEM_GENERIC_REGISTRY_NAME',
+        'E_PUBCHEM_EXT_SUBSTANCE_URL',
+        'E_PUBCHEM_EXT_DATASOURCE_URL',
+        'E_PUBCHEM_EXT_DATASOURCE_REGID',
+        'E_PUBCHEM_EXT_DATASOURCE_NAME',
+        'E_*PUBCHEM_COORDINATE_TYPE*',
+        'E_*PUBCHEM_COMPOUND_ID_TYPE*',
+        'E_PUBCHEM_COMPOUND_CANONICALIZED',
+        'E_*PUBCHEM_COMPONENT_COUNT*',
+        'E_*PUBCHEM_CID_ASSOCIATIONS*',
+        'E_NROTBONDS',
+        'E_NHDONORS',
+        'E_NHACCEPTORS',
+        'E_MONOISOTOPIC_MASS',
+        'E_IUPAC_TRADITIONAL_NAME',
+        'E_IUPAC_SYSTEMATIC_NAME',
+        'E_IUPAC_PREFERRED_NAME',
+        'E_ISOTOPE_COUNT',
+        'E_HEAVY_ATOM_COUNT',
+        'E_FORMULA',
+        'E_EXACT_MASS',
+        'E_COMPLEXITY',
+        'E_CID',
+        'E_CHEMBL_ID',
+        'E_CHARGE'
+    ]
+
+    for field in fields:
+        f, created = StructureFileField.objects.get_or_create(
+            field_name=field
+        )

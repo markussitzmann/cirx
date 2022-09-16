@@ -1,0 +1,773 @@
+[
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 1,
+    "fields": {
+      "name": "pubchem_ext_datasource",
+      "params": "{\"test\": \"hallo\"}"
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 1,
+    "fields": {
+      "release": "efdb033c-a0b0-4684-b6d5-3c09100ab35e",
+      "file_location_pattern_string": "pubchem/compound/Compound_*.mini.sdf",
+      "description": null,
+      "added": "2022-09-06T21:03:44.936Z",
+      "modified": "2022-09-06T21:03:44.938Z",
+      "preprocessors": []
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 2,
+    "fields": {
+      "release": "9802c2b7-41be-421c-99d4-0f4019572a43",
+      "file_location_pattern_string": "pubchem/substance/Substance_*.mini.sdf",
+      "description": null,
+      "added": "2022-09-06T21:03:44.951Z",
+      "modified": "2022-09-06T21:03:44.956Z",
+      "preprocessors": [
+        1
+      ]
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 3,
+    "fields": {
+      "release": "8e1fe4de-6296-4a50-b217-743d570141cb",
+      "file_location_pattern_string": "chembl/29/chembl_29.mini.sdf",
+      "description": null,
+      "added": "2022-09-06T21:03:44.968Z",
+      "modified": "2022-09-06T21:03:44.969Z",
+      "preprocessors": []
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 4,
+    "fields": {
+      "release": "ec607306-4438-46fa-b84c-ce0f7787c2b5",
+      "file_location_pattern_string": "nci/NCI_DTP.mini.sdf",
+      "description": null,
+      "added": "2022-09-06T21:03:44.990Z",
+      "modified": "2022-09-06T21:03:44.992Z",
+      "preprocessors": []
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": "original",
+    "fields": {
+      "software_version": "('1.06',)",
+      "description": "('InChI with FixedH layer and RecMet option',)",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": false,
+      "t15": false,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2022-09-06T21:03:45.003Z",
+      "modified": "2022-09-06T21:03:45.005Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": "standard",
+    "fields": {
+      "software_version": "1.06",
+      "description": "Standard InChI",
+      "is_standard": true,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": false,
+      "fixedh": false,
+      "ket": false,
+      "t15": false,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2022-09-06T21:03:44.996Z",
+      "modified": "2022-09-06T21:03:44.999Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": "xtauto",
+    "fields": {
+      "software_version": "('1.06',)",
+      "description": "experimental InChI with FixedH layer, RecMet option and experimental tauto optionsKET and T15 options set",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": true,
+      "t15": true,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2022-09-06T21:03:45.008Z",
+      "modified": "2022-09-06T21:03:45.009Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": "xtautox",
+    "fields": {
+      "software_version": "('1.06T',)",
+      "description": "('experimental InChI with FixedH layer, RecMet option and experimental tauto options KET, T15 including NCI tautomer options set',)",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": true,
+      "t15": true,
+      "pt_22_00": true,
+      "pt_16_00": true,
+      "pt_06_00": true,
+      "pt_39_00": true,
+      "pt_13_00": true,
+      "pt_18_00": true,
+      "added": "2022-09-06T21:03:45.013Z",
+      "modified": "2022-09-06T21:03:45.015Z"
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "NSC_NUMBER",
+    "fields": {
+      "public_string": "NSC number",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "NSC_NUMBER_PREFIXED",
+    "fields": {
+      "public_string": "NSC number prefixed",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_CID",
+    "fields": {
+      "public_string": "PubChem CID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_GENERIC_REGISTRY_NAME",
+    "fields": {
+      "public_string": "PubChem GENERIC REGISTRY NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_IUPAC_CAS_NAME",
+    "fields": {
+      "public_string": "PubChem IUPAC CAS NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_IUPAC_NAME",
+    "fields": {
+      "public_string": "PubChem IUPAC NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_IUPAC_OPENEYE_NAME",
+    "fields": {
+      "public_string": "PubChem IUPAC OPENEYE NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_IUPAC_SYSTEMATIC_NAME",
+    "fields": {
+      "public_string": "PubChem IUPAC SYSTEMATIC NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_IUPAC_TRADITIONAL_NAME",
+    "fields": {
+      "public_string": "PubChem IUPAC TRADITIONAL NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_SID",
+    "fields": {
+      "public_string": "PubChem SID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": "PUBCHEM_SUBSTANCE_SYNONYM",
+    "fields": {
+      "public_string": "PubChem SUBSTANCE SYNONYM",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": "21fb48c4-a402-42e5-b9aa-994af4ce4764",
+    "fields": {
+      "parent": "f32ae07c-a29b-4e55-be63-fd5ebebed31b",
+      "name": "U.S. National Library of Medicine",
+      "abbreviation": "NLM",
+      "category": "government",
+      "href": "https://www.nlm.nih.gov",
+      "added": "2022-09-06T21:03:44.824Z",
+      "modified": "2022-09-06T21:03:44.826Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": "625c6c11-2fa4-41b5-88c0-bebb77236acc",
+    "fields": {
+      "parent": "f32ae07c-a29b-4e55-be63-fd5ebebed31b",
+      "name": "U.S. National Cancer Institute",
+      "abbreviation": "NCI",
+      "category": "government",
+      "href": "https://www.cancer.gov",
+      "added": "2022-09-06T21:03:44.819Z",
+      "modified": "2022-09-06T21:03:44.821Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": "b1d18378-3d14-4840-be7f-2042d9d89bd4",
+    "fields": {
+      "parent": "21fb48c4-a402-42e5-b9aa-994af4ce4764",
+      "name": "U.S. National Center for Biotechnology Information",
+      "abbreviation": "NCBI",
+      "category": "government",
+      "href": "https://www.ncbi.nlm.nih.gov",
+      "added": "2022-09-06T21:03:44.829Z",
+      "modified": "2022-09-06T21:03:44.832Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": "d0debf6f-a819-482b-8e7b-cf97ac1e529f",
+    "fields": {
+      "parent": null,
+      "name": "European Molecular Biology Laboratory",
+      "abbreviation": "EMBL",
+      "category": "public",
+      "href": "https://www.embl.org/",
+      "added": "2022-09-06T21:03:44.839Z",
+      "modified": "2022-09-06T21:03:44.840Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": "ec7ad672-7337-42b6-883a-f1c3145c61e5",
+    "fields": {
+      "parent": null,
+      "name": "FIZ Karlsruhe – Leibniz-Institut für Informationsinfrastruktur",
+      "abbreviation": "FIZ Karlsruhe",
+      "category": "public",
+      "href": "https://www.fiz-karlsruhe.de",
+      "added": "2022-09-06T21:03:44.835Z",
+      "modified": "2022-09-06T21:03:44.836Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": "f32ae07c-a29b-4e55-be63-fd5ebebed31b",
+    "fields": {
+      "parent": null,
+      "name": "U.S. National Institutes of Health",
+      "abbreviation": "NIH",
+      "category": "government",
+      "href": "https://www.nih.gov",
+      "added": "2022-09-06T21:03:44.813Z",
+      "modified": "2022-09-06T21:03:44.815Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": "f672d014-c34d-4bf5-bda9-e7d69168ca01",
+    "fields": {
+      "parent": "d0debf6f-a819-482b-8e7b-cf97ac1e529f",
+      "name": "EMBL's European Bioinformatics Institute",
+      "abbreviation": "EMBL-EBI",
+      "category": "public",
+      "href": "https://www.ebi.ac.uk/",
+      "added": "2022-09-06T21:03:44.843Z",
+      "modified": "2022-09-06T21:03:44.845Z"
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": "35c8c102-7fbf-4ce2-8d46-900c3a8b6de6",
+    "fields": {
+      "parent": null,
+      "category": "person",
+      "name": "Markus Sitzmann",
+      "description": null,
+      "email": "markus.sitzmann@gmail.com",
+      "address": null,
+      "href": null,
+      "orcid": "https://orcid.org/0000-0001-5346-1298",
+      "added": "2022-09-06T21:03:44.868Z",
+      "modified": "2022-09-06T21:03:44.869Z",
+      "organizations": []
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": "47ee885b-6a66-404f-8a03-4b068deeceb4",
+    "fields": {
+      "parent": null,
+      "category": "group",
+      "name": "NCI Computer-Aided Drug Design (CADD) Group",
+      "description": null,
+      "email": null,
+      "address": "Frederick, MD 21702-1201, USA",
+      "href": "https://cactus.nci.nih.gov",
+      "orcid": null,
+      "added": "2022-09-06T21:03:44.850Z",
+      "modified": "2022-09-06T21:03:44.855Z",
+      "organizations": [
+        "625c6c11-2fa4-41b5-88c0-bebb77236acc",
+        "f32ae07c-a29b-4e55-be63-fd5ebebed31b"
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": "93e23eed-690e-47cf-bbb2-05300807116b",
+    "fields": {
+      "parent": null,
+      "category": "division",
+      "name": "PubChem",
+      "description": null,
+      "email": "pubchem-help@ncbi.nlm.nih.gov",
+      "address": "8600 Rockville Pike; Bethesda, MD  20894; USA",
+      "href": "https://pubchemdocs.ncbi.nlm.nih.gov/contact",
+      "orcid": null,
+      "added": "2022-09-06T21:03:44.872Z",
+      "modified": "2022-09-06T21:03:44.876Z",
+      "organizations": [
+        "21fb48c4-a402-42e5-b9aa-994af4ce4764",
+        "b1d18378-3d14-4840-be7f-2042d9d89bd4"
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": "9fe82a24-493c-4987-bdbb-66eadee6121c",
+    "fields": {
+      "parent": null,
+      "category": "group",
+      "name": "ChEMBL Team",
+      "description": null,
+      "email": null,
+      "address": null,
+      "href": "https://chembl.gitbook.io/chembl-interface-documentation/about",
+      "orcid": null,
+      "added": "2022-09-06T21:03:44.879Z",
+      "modified": "2022-09-06T21:03:44.884Z",
+      "organizations": [
+        "d0debf6f-a819-482b-8e7b-cf97ac1e529f",
+        "f672d014-c34d-4bf5-bda9-e7d69168ca01"
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": "bf27a9a7-274d-48d4-a6ab-c52a1af64082",
+    "fields": {
+      "parent": "47ee885b-6a66-404f-8a03-4b068deeceb4",
+      "category": "person",
+      "name": "Marc Nicklaus",
+      "description": null,
+      "email": "mn1ahelix@gmail.com",
+      "address": "Frederick, MD 21702-1201, USA",
+      "href": "https://ccr.cancer.gov/staff-directory/marc-c-nicklaus",
+      "orcid": "https://orcid.org/0000-0002-4775-7030",
+      "added": "2022-09-06T21:03:44.858Z",
+      "modified": "2022-09-06T21:03:44.864Z",
+      "organizations": [
+        "625c6c11-2fa4-41b5-88c0-bebb77236acc",
+        "f32ae07c-a29b-4e55-be63-fd5ebebed31b"
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": "d5aac100-531f-4410-a670-d004f21315d6",
+    "fields": {
+      "parent": null,
+      "category": "division",
+      "name": "DTP/NCI",
+      "description": null,
+      "email": null,
+      "address": null,
+      "href": "https://dtp.cancer.gov/",
+      "orcid": null,
+      "added": "2022-09-06T21:03:44.887Z",
+      "modified": "2022-09-06T21:03:44.891Z",
+      "organizations": [
+        "625c6c11-2fa4-41b5-88c0-bebb77236acc",
+        "f32ae07c-a29b-4e55-be63-fd5ebebed31b"
+      ]
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 1,
+    "fields": {
+      "tag": "other",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 2,
+    "fields": {
+      "tag": "screening",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 3,
+    "fields": {
+      "tag": "building blocks",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 4,
+    "fields": {
+      "tag": "toxicology",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 5,
+    "fields": {
+      "tag": "environmental",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 6,
+    "fields": {
+      "tag": "patent",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 7,
+    "fields": {
+      "tag": "journal",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 8,
+    "fields": {
+      "tag": "literature",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 9,
+    "fields": {
+      "tag": "natural product",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 10,
+    "fields": {
+      "tag": "imaging",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 11,
+    "fields": {
+      "tag": "contrast agent",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 12,
+    "fields": {
+      "tag": "meta",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 13,
+    "fields": {
+      "tag": "vendor",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 14,
+    "fields": {
+      "tag": "drug",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 15,
+    "fields": {
+      "tag": "SAR",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 16,
+    "fields": {
+      "tag": "QSAR",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 17,
+    "fields": {
+      "tag": "physicochemical property",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 18,
+    "fields": {
+      "tag": "ligand",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 19,
+    "fields": {
+      "tag": "small molecule",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 20,
+    "fields": {
+      "tag": "crystal-structure",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": "3f44d686-cc84-42b8-a2bc-c3a4f7d38714",
+    "fields": {
+      "name": "ChEMBL",
+      "href": "https://www.ebi.ac.uk/chembl/",
+      "description": "ChEMBL is a manually curated database of bioactive molecules with drug-like properties",
+      "publisher": "9fe82a24-493c-4987-bdbb-66eadee6121c",
+      "added": "2022-09-06T21:03:44.906Z",
+      "modified": "2022-09-06T21:03:44.909Z",
+      "context_tags": [
+        14
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": "7a957400-dad0-48a0-8688-d58d421e7494",
+    "fields": {
+      "name": "PubChem",
+      "href": "https://pubchem.ncbi.nlm.nih.gov/",
+      "description": "PubChem is an open chemistry database at the National Institutes of Health (NIH)",
+      "publisher": "93e23eed-690e-47cf-bbb2-05300807116b",
+      "added": "2022-09-06T21:03:44.895Z",
+      "modified": "2022-09-06T21:03:44.901Z",
+      "context_tags": [
+        12
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": "c9ec5e9c-244f-4f12-a2a2-04219a842c52",
+    "fields": {
+      "name": "DTP/NCI",
+      "href": "https://dtp.cancer.gov/",
+      "description": "NCI database",
+      "publisher": "d5aac100-531f-4410-a670-d004f21315d6",
+      "added": "2022-09-06T21:03:44.913Z",
+      "modified": "2022-09-06T21:03:44.919Z",
+      "context_tags": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": "10c8e246-610a-4b08-b4fb-240ca1b0a623",
+    "fields": {
+      "parent": null,
+      "dataset": "c9ec5e9c-244f-4f12-a2a2-04219a842c52",
+      "publisher": "93e23eed-690e-47cf-bbb2-05300807116b",
+      "name": "DTP/NCI",
+      "description": "NCI database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2022-09-06T21:03:44.976Z",
+      "modified": "2022-09-06T21:03:44.977Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": "8e1fe4de-6296-4a50-b217-743d570141cb",
+    "fields": {
+      "parent": null,
+      "dataset": "3f44d686-cc84-42b8-a2bc-c3a4f7d38714",
+      "publisher": "9fe82a24-493c-4987-bdbb-66eadee6121c",
+      "name": "",
+      "description": "ChEMBL database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "version": "29",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2022-09-06T21:03:44.961Z",
+      "modified": "2022-09-06T21:03:44.964Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": "9802c2b7-41be-421c-99d4-0f4019572a43",
+    "fields": {
+      "parent": null,
+      "dataset": "7a957400-dad0-48a0-8688-d58d421e7494",
+      "publisher": "93e23eed-690e-47cf-bbb2-05300807116b",
+      "name": "PubChem Substance",
+      "description": "PubChem Substance database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2022-09-06T21:03:44.944Z",
+      "modified": "2022-09-06T21:03:44.947Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": "ec607306-4438-46fa-b84c-ce0f7787c2b5",
+    "fields": {
+      "parent": null,
+      "dataset": "c9ec5e9c-244f-4f12-a2a2-04219a842c52",
+      "publisher": "47ee885b-6a66-404f-8a03-4b068deeceb4",
+      "name": "Open NCI Database",
+      "description": "NCI database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2022-09-06T21:03:44.985Z",
+      "modified": "2022-09-06T21:03:44.987Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": "efdb033c-a0b0-4684-b6d5-3c09100ab35e",
+    "fields": {
+      "parent": null,
+      "dataset": "7a957400-dad0-48a0-8688-d58d421e7494",
+      "publisher": "93e23eed-690e-47cf-bbb2-05300807116b",
+      "name": "PubChem Compound",
+      "description": "PubChem Compound database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2022-09-06T21:03:44.929Z",
+      "modified": "2022-09-06T21:03:44.932Z",
+      "record_uri_pattern": []
+    }
+  }
+]

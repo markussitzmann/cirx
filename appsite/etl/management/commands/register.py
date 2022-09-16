@@ -1,8 +1,11 @@
+import logging
+from typing import List
+
 from django.core.management.base import BaseCommand
 
 from etl.models import StructureFileCollection, StructureFile
-from etl.registration import FileRegistry
-from etl.tasks import *
+from etl.tasks import FileRegistry, count_and_save_file_task, register_file_record_chunk_mapper, \
+    register_file_record_chunk_task
 
 logger = logging.getLogger('cirx')
 
@@ -27,11 +30,6 @@ def register_file_records(structure_file_id: int):
 
 
 def _register(options):
-    # if settings.INIT_SYSTEM:
-    #     for f in StructureFile.objects.all():
-    #         logger.info("INITIALIZING SYSTEM: deleting %s", f)
-    #         f.delete()
-
     file_collections = StructureFileCollection.objects.all()
     if 'file_collection_id' in options and options['file_collection_id']:
         file_collections = file_collections.filter(id=options['file_collection_id'])
