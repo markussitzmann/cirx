@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
 
 def _loader():
-    init_structure_fields()
+    #init_structure_fields()
     init_name_type_data()
     init_response_type_data()
     init_dataset_context_type_data()
@@ -121,18 +121,19 @@ def init_dataset_context_type_data():
 
 def init_name_type_data():
     name_types = [
-        ('REGID', 'Registration ID'),
-        ('PUBCHEM_IUPAC_NAME', 'PubChem IUPAC NAME'),
-        ('PUBCHEM_IUPAC_OPENEYE_NAME', 'PubChem IUPAC OPENEYE NAME'),
-        ('PUBCHEM_IUPAC_CAS_NAME', 'PubChem IUPAC CAS NAME'),
-        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', 'PubChem IUPAC TRADITIONAL NAME'),
-        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'PubChem IUPAC SYSTEMATIC NAME'),
-        ('PUBCHEM_GENERIC_REGISTRY_NAME', 'PubChem GENERIC REGISTRY NAME'),
-        ('PUBCHEM_SUBSTANCE_SYNONYM', 'PubChem SUBSTANCE SYNONYM'),
-        ('NSC_NUMBER', 'NSC number'),
-        ('NSC_NUMBER_PREFIXED', 'NSC number prefixed'),
-        ('PUBCHEM_SID', 'PubChem SID'),
-        ('PUBCHEM_CID', 'PubChem CID'),
+        ('REGID', None, 'Registration ID'),
+        ('NAME', None, 'Chemical Name or Synonym'),
+        ('PUBCHEM_IUPAC_NAME', 'NAME', 'PubChem IUPAC NAME'),
+        ('PUBCHEM_IUPAC_OPENEYE_NAME', 'NAME', 'PubChem IUPAC OPENEYE NAME'),
+        ('PUBCHEM_IUPAC_CAS_NAME', 'NAME', 'PubChem IUPAC CAS NAME'),
+        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', 'NAME', 'PubChem IUPAC TRADITIONAL NAME'),
+        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'NAME', 'PubChem IUPAC SYSTEMATIC NAME'),
+        ('PUBCHEM_GENERIC_REGISTRY_NAME', 'NAME', 'PubChem GENERIC REGISTRY NAME'),
+        ('PUBCHEM_SUBSTANCE_SYNONYM', 'NAME', 'PubChem SUBSTANCE SYNONYM'),
+        ('NSC_NUMBER', 'REGID', 'NSC number'),
+        ('NSC_NUMBER_PREFIXED', 'REGID', 'NSC number prefixed'),
+        ('PUBCHEM_SID', 'REGID', 'PubChem SID'),
+        ('PUBCHEM_CID', 'REGID', 'PubChem CID'),
     ]
 
     for name_type in name_types:
@@ -333,15 +334,15 @@ def init_release(
         pubchem_compound.description = "PubChem Compound database"
         pubchem_compound.save()
 
-        name_type = NameType.objects.get(id="PUBCHEM_CID")
-        structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
-        release_name_field, created = ReleaseNameField.objects.get_or_create(
-            release=pubchem_compound,
-            structure_file_field=structure_file_field,
-            name_type=name_type
-        )
-        release_name_field.is_regid = True
-        release_name_field.save()
+        #name_type = NameType.objects.get(id="PUBCHEM_CID")
+        #structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
+        #release_name_field, created = ReleaseNameField.objects.get_or_create(
+        #    release=pubchem_compound,
+        #    structure_file_field=structure_file_field,
+        #    name_type=name_type
+        #)
+        #release_name_field.is_regid = True
+        #release_name_field.save()
 
         if mini:
             pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
@@ -360,7 +361,8 @@ def init_release(
             params=json.dumps({
                 'ids': ['PUBCHEM_SUBSTANCE_ID', ],
                 'names': [
-                    {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
+                    {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
+                    {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
                 ]
             })
         )
@@ -377,15 +379,15 @@ def init_release(
         pubchem_substance.description = "PubChem Substance database"
         pubchem_substance.save()
 
-        name_type = NameType.objects.get(id="PUBCHEM_SID")
-        structure_file_field = StructureFileField.objects.filter(field_name="E_*PUBCHEM_SUBSTANCE_ID*").first()
-        release_name_field, created = ReleaseNameField.objects.get_or_create(
-            release=pubchem_substance,
-            structure_file_field=structure_file_field,
-            name_type=name_type
-        )
-        release_name_field.is_regid = True
-        release_name_field.save()
+        #name_type = NameType.objects.get(id="PUBCHEM_SID")
+        #structure_file_field = StructureFileField.objects.filter(field_name="E_*PUBCHEM_SUBSTANCE_ID*").first()
+        #release_name_field, created = ReleaseNameField.objects.get_or_create(
+        #    release=pubchem_substance,
+        #    structure_file_field=structure_file_field,
+        #    name_type=name_type
+        #)
+        #release_name_field.is_regid = True
+        #release_name_field.save()
 
         if mini:
             pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
@@ -401,6 +403,13 @@ def init_release(
         pubchem_substance_collection.save()
 
     if init_chembl:
+        chembl_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['chembl_id', ],
+                'names': []
+            })
+        )
+
         chembl_db, created = Release.objects.get_or_create(
             dataset=Dataset.objects.get(name="ChEMBL"),
             publisher=Publisher.objects.get(name="ChEMBL Team"),
@@ -427,6 +436,16 @@ def init_release(
             chembl_collection.save()
 
     if init_nci:
+        pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'ids': ['PUBCHEM_EXT_DATASOURCE_REGID', ],
+                'names': [
+                    {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
+                    {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
+                ]
+            })
+        )
+
         nci_db, created = Release.objects.get_or_create(
             dataset=Dataset.objects.get(name="DTP/NCI"),
             publisher=Publisher.objects.get(name="PubChem"),

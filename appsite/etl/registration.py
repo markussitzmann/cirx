@@ -134,7 +134,7 @@ class FileRegistry(object):
         molfile: Molfile = Molfile.Open(fname)
         molfile.set('record', record)
 
-        fields: set = set()
+        #fields: set = set()
         structures: list = list()
         records: list = list()
 
@@ -167,8 +167,8 @@ class FileRegistry(object):
                 'release_objects': []
             }
             records.append(record_data)
-            molfile_fields = [str(f) for f in molfile.fields]
-            fields.update(molfile_fields)
+            #molfile_fields = [str(f) for f in molfile.fields]
+            #fields.update(molfile_fields)
             for preprocessor_name in preprocessor_names:
                 preprocessor = getattr(Preprocessors, preprocessor_name, None)
                 if callable(preprocessor):
@@ -231,13 +231,14 @@ class FileRegistry(object):
                     #ignore_conflicts=True
                 )
 
-                logger.info("registering file fields for '%s'" % (fname,))
+                #logger.info("registering file fields for '%s'" % (fname,))
+                #
+                #for field in sorted(list(fields)):
+                #    logger.debug("registering file field '%s'" % (field,))
+                #    sff, created = StructureFileField.objects.get_or_create(field_name=field)
+                #    sff.structure_files.add(structure_file)
+                #    sff.save()
 
-                for field in sorted(list(fields)):
-                    logger.debug("registering file field '%s'" % (field,))
-                    sff, created = StructureFileField.objects.get_or_create(field_name=field)
-                    sff.structure_files.add(structure_file)
-                    sff.save()
                 time3 = time.perf_counter()
                 logger.info("TIMING 1 %s 2 %s 3 %s T %s" % ((time1-time0), (time2-time1), (time3-time2), (time3-time0)))
 

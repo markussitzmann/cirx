@@ -212,7 +212,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {process:d} : {funcName} | {message}',
+            'format': '{levelname} {asctime} {process} : {funcName} | {message}',
             'style': '{',
         },
         'simple': {
