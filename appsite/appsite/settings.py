@@ -230,6 +230,11 @@ LOGGING = {
             'filename': '/home/app/logging/cirx.log',
             'formatter': 'verbose'
         },
+        'celery': {
+            'class': 'logging.FileHandler',
+            'filename': '/home/app/logging/celery.log',
+            'formatter': 'verbose'
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -241,12 +246,18 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'celery.task': {
+            'handlers': ['console', 'celery'],
+            'level': 'INFO',
+        },
     },
 }
 
 # CELERY SETTINGS
 
 CELERY_BROKER_URL = 'redis://cirx-cache:6379'
+
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 10000000}
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'

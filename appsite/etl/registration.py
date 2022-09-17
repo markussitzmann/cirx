@@ -9,6 +9,7 @@ from collections import namedtuple, defaultdict
 from typing import List, Dict
 
 from celery import subtask, group
+from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
 from pycactvs import Molfile, Ens, Prop
@@ -20,7 +21,9 @@ from structure.inchi.identifier import InChIString, InChIKey
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType
 
-logger = logging.getLogger('cirx')
+logger = logging.getLogger('celery.task')
+#logger = get_task_logger('celery.tasks')
+
 
 Status = namedtuple('Status', 'file created')
 

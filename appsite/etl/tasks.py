@@ -7,8 +7,8 @@ from celery.utils.log import get_task_logger
 
 from etl.registration import FileRegistry, StructureRegistry
 
-#logger = logging.getLogger('cirx')
-logger = get_task_logger('tasks')
+logger = logging.getLogger('celery.task')
+#logger = get_task_logger('celery.tasks')
 
 
 @shared_task(name="register count")
