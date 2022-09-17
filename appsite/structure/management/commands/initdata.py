@@ -312,7 +312,7 @@ def init_release(
     if init_pubchem_compound:
         pubchem_compound_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'ids': ['PUBCHEM_COMPOUND_CID', ],
+                'regids': ['PUBCHEM_COMPOUND_CID', ],
                 'names': [
                     {'field': 'PUBCHEM_IUPAC_OPENEYE_NAME', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
                     {'field': 'PUBCHEM_IUPAC_CAS_NAME', 'type': 'PUBCHEM_IUPAC_CAS_NAME'},
@@ -334,16 +334,6 @@ def init_release(
         pubchem_compound.description = "PubChem Compound database"
         pubchem_compound.save()
 
-        #name_type = NameType.objects.get(id="PUBCHEM_CID")
-        #structure_file_field = StructureFileField.objects.filter(field_name="E_CID").first()
-        #release_name_field, created = ReleaseNameField.objects.get_or_create(
-        #    release=pubchem_compound,
-        #    structure_file_field=structure_file_field,
-        #    name_type=name_type
-        #)
-        #release_name_field.is_regid = True
-        #release_name_field.save()
-
         if mini:
             pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_compound,
@@ -354,12 +344,16 @@ def init_release(
                 release=pubchem_compound,
                 file_location_pattern_string="pubchem/compound/Compound_*.sdf.gz"
             )
+        pubchem_compound_collection.preprocessors.add(
+            pubchem_ext_datasource_preprocessor,
+            pubchem_compound_preprocessor
+        )
         pubchem_compound_collection.save()
 
     if init_pubchem_substance:
         pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'ids': ['PUBCHEM_SUBSTANCE_ID', ],
+                'regids': ['PUBCHEM_SUBSTANCE_ID', ],
                 'names': [
                     {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
                     {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
@@ -399,13 +393,16 @@ def init_release(
                 release=pubchem_substance,
                 file_location_pattern_string="pubchem/substance/Substance_*.sdf.gz"
             )
-        pubchem_substance_collection.preprocessors.add(pubchem_ext_datasource_preprocessor)
+        pubchem_substance_collection.preprocessors.add(
+            pubchem_ext_datasource_preprocessor,
+            pubchem_substance_preprocessor
+        )
         pubchem_substance_collection.save()
 
     if init_chembl:
         chembl_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'ids': ['chembl_id', ],
+                'regids': ['chembl_id', ],
                 'names': []
             })
         )
@@ -427,18 +424,21 @@ def init_release(
                 release=chembl_db,
                 file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
             )
-            chembl_collection.save()
         else:
             chembl_collection, created = StructureFileCollection.objects.get_or_create(
                 release=chembl_db,
                 file_location_pattern_string="chembl/29/chembl_29.sdf.gz"
             )
             chembl_collection.save()
+        chembl_collection.preprocessors.add(
+            chembl_preprocessor
+        )
+        chembl_collection.save()
 
     if init_nci:
-        pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+        nci_db_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'ids': ['PUBCHEM_EXT_DATASOURCE_REGID', ],
+                'regids': ['PUBCHEM_EXT_DATASOURCE_REGID', ],
                 'names': [
                     {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
                     {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
@@ -483,6 +483,11 @@ def init_release(
                 file_location_pattern_string="nci/NCI_DTP.sdf.gz"
             )
             open_nci_db_collection.save()
+
+        open_nci_db_collection.preprocessors.add(
+            nci_db_preprocessor
+        )
+        open_nci_db_collection.save()
 
 
 def init_inchi_type():

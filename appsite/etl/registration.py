@@ -16,7 +16,7 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    StructureFileRecordRelease, ReleaseNameField
+    StructureFileRecordRelease, ReleaseNameField, StructureFileCollectionPreprocessor
 from structure.inchi.identifier import InChIString, InChIKey
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType
@@ -133,14 +133,15 @@ class FileRegistry(object):
                     (structure_file.file.name, structure_file_id, chunk_number, record, last_record))
 
         fname: str = structure_file.file.name
-        preprocessor_names: List[str] = [p.name for p in structure_file.collection.preprocessors.all()]
+        preprocessors: List[StructureFileCollectionPreprocessor] = [
+            p for p in structure_file.collection.preprocessors.all()
+        ]
 
         molfile: Molfile = Molfile.Open(fname)
         molfile.set('record', record)
 
-        #fields: set = set()
         structures: list = list()
-        records: list = list()
+        record_data_list: list[[Dict]] = list()
 
         g0 = time.perf_counter()
         record -= 1
@@ -163,20 +164,21 @@ class FileRegistry(object):
             except Exception as e:
                 logger.error("error while registering file record '%s': %s" % (fname, e))
                 break
-            record_data = {
-                'hashisy_key': hashisy_key,
-                'index': record,
-                'preprocessors': defaultdict(dict),
-                'release_names': [],
-                'release_objects': []
-            }
-            records.append(record_data)
-            #molfile_fields = [str(f) for f in molfile.fields]
-            #fields.update(molfile_fields)
-            for preprocessor_name in preprocessor_names:
-                preprocessor = getattr(Preprocessors, preprocessor_name, None)
-                if callable(preprocessor):
-                    preprocessor(structure_file, ens, record_data)
+
+            for preprocessor in preprocessors:
+                record_data = {
+                    'hashisy_key': hashisy_key,
+                    'index': record,
+                    'preprocessors': defaultdict(dict),
+                    'release_names': [],
+                    'release_objects': []
+                }
+                record_data_list.append(record_data)
+                preprocessor_callable = getattr(Preprocessors, preprocessor.name, None)
+                if callable(preprocessor_callable):
+                    preprocessor_callable(structure_file, preprocessor, ens, record_data)
+                else:
+                    logger.warning("preprocessor '%s' was not callable", preprocessor_callable)
             if max_records and record >= max_records:
                 break
         molfile.close()
@@ -187,10 +189,10 @@ class FileRegistry(object):
         try:
             with transaction.atomic():
                 time0 = time.perf_counter()
-                for preprocessor_name in preprocessor_names:
-                    preprocessor_transaction = getattr(Preprocessors, preprocessor_name + "_transaction", None)
+                for preprocessor in preprocessors:
+                    preprocessor_transaction = getattr(Preprocessors, preprocessor.name + "_transaction", None)
                     if callable(preprocessor_transaction):
-                        preprocessor_transaction(structure_file, records)
+                        preprocessor_transaction(structure_file, record_data_list)
 
                 Structure.objects.bulk_create(
                     structures,
@@ -199,49 +201,30 @@ class FileRegistry(object):
                 )
                 time1 = time.perf_counter()
 
-                hashisy_list = [r['hashisy_key'] for r in records]
+                hashisy_list = [r['hashisy_key'] for r in record_data_list]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
 
                 logger.info("registering structure file records for '%s'" % (fname,))
-                record_objects = list()
-                for record_data in records:
-                    structure = structures[record_data['hashisy_key']]
-                    record_releases = StructureFileRecordReleaseTuple(
+                structure_file_record_objects = list()
+                unique_record_data_list = \
+                    sorted(
+                        list(set([(structures[r['hashisy_key']], r['index']) for r in record_data_list])),
+                        key=lambda u: u[1]
+                    )
+                for t in unique_record_data_list:
+                    structure, index = t
+                    structure_file_record_objects.append(
                         StructureFileRecord(
                             structure_file=structure_file,
                             structure=structure,
-                            number=record_data['index'],
-                        ),
-                        record_data['release_objects']
+                            number=index,
+                        )
                     )
-                    record_objects.append(record_releases)
                 StructureFileRecord.objects.bulk_create(
-                    [r.record for r in record_objects],
+                    structure_file_record_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-                    #ignore_conflicts=True
                 )
                 time2 = time.perf_counter()
-
-                record_release_objects = list()
-                for r in record_objects:
-                    for release in r.releases:
-                        record_release_objects.append(StructureFileRecordRelease(
-                            structure_file_record=r.record,
-                            release=release
-                        ))
-                StructureFileRecordRelease.objects.bulk_create(
-                    record_release_objects,
-                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-                    #ignore_conflicts=True
-                )
-
-                #logger.info("registering file fields for '%s'" % (fname,))
-                #
-                #for field in sorted(list(fields)):
-                #    logger.debug("registering file field '%s'" % (field,))
-                #    sff, created = StructureFileField.objects.get_or_create(field_name=field)
-                #    sff.structure_files.add(structure_file)
-                #    sff.save()
 
                 time3 = time.perf_counter()
                 logger.info("TIMING 1 %s 2 %s 3 %s T %s" % ((time1-time0), (time2-time1), (time3-time2), (time3-time0)))
@@ -504,8 +487,13 @@ class Preprocessors:
         pass
 
     @staticmethod
-    def pubchem_ext_datasource(structure_file: StructureFile, ens: Ens, record_data: Dict):
-        logger.debug("preprocesser pubchem_ext_datasource")
+    def generic(
+            structure_file: StructureFile,
+            preprocessor: StructureFileCollectionPreprocessor,
+            ens: Ens,
+            record_data: Dict
+    ):
+        logger.debug("generic preprocessor")
         datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
         record_data['release_names'].append(datasource_name)
         try:
@@ -516,9 +504,36 @@ class Preprocessors:
         record_data['preprocessors']['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
 
     @staticmethod
-    def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data: List):
-        logger.debug("preprocesser transaction pubchem_ext_datasource")
-        datasource_names = list(set([record['preprocessors']['pubchem_ext_datasource'] for record in record_data]))
+    def pubchem_ext_datasource(
+            structure_file: StructureFile,
+            preprocessor: StructureFileCollectionPreprocessor,
+            ens: Ens,
+            record_data: Dict
+    ):
+        logger.debug("preprocessr pubchem_ext_datasource")
+        # datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
+        # record_data['release_names'].append(datasource_name)
+        # try:
+        #     datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
+        # except Exception as e:
+        #     logger.error("getting URL failed: %s", e)
+        #     datasource_name_url = None
+        # record_data['preprocessors']['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
+
+    @staticmethod
+    def generic_transaction(structure_file: StructureFile, record_data_list: List):
+        logger.info("GENERIC TRANSACTION")
+
+    @staticmethod
+    def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data_list: List):
+        logger.debug("preprocessor transaction pubchem_ext_datasource")
+
+        datasource_names = []
+        for record_data in record_data_list:
+            if 'pubchem_ext_datasource' in record_data['preprocessors']:
+                datasource_names.append(record_data['preprocessors']['pubchem_ext_datasource'])
+        datasource_names = list(set(datasource_names))
+
         pubchem_release = structure_file.collection.release
         pubchem_publisher = pubchem_release.publisher
         pubchem_release_status = pubchem_release.status
@@ -563,7 +578,6 @@ class Preprocessors:
                 regid_id_field, created = StructureFileField.objects\
                     .get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
                 name_type, created = NameType.objects.get_or_create(id="REGID")
-                #name_type.save()
                 release.parent = pubchem_release
                 release.description = "generic from PubChem"
                 release.status = pubchem_release_status
@@ -578,6 +592,6 @@ class Preprocessors:
                     release_name_field.is_regid = True
                     release_name_field.save()
             release_objects[data.name] = release
-        for record in record_data:
+        for record in record_data_list:
             for name in record['release_names']:
                 record['release_objects'].append(release_objects[name])
