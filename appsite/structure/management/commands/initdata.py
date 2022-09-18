@@ -312,7 +312,7 @@ def init_release(
     if init_pubchem_compound:
         pubchem_compound_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'regids': ['PUBCHEM_COMPOUND_CID', ],
+                'regid': {'field': 'PUBCHEM_COMPOUND_CID', 'type': 'PUBCHEM_CID'},
                 'names': [
                     {'field': 'PUBCHEM_IUPAC_OPENEYE_NAME', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
                     {'field': 'PUBCHEM_IUPAC_CAS_NAME', 'type': 'PUBCHEM_IUPAC_CAS_NAME'},
@@ -353,7 +353,7 @@ def init_release(
     if init_pubchem_substance:
         pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'regids': ['PUBCHEM_SUBSTANCE_ID', ],
+                'regid': {'field': 'PUBCHEM_SUBSTANCE_ID', 'type': 'PUBCHEM_SID'},
                 'names': [
                     {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
                     {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
@@ -402,7 +402,7 @@ def init_release(
     if init_chembl:
         chembl_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'regids': ['chembl_id', ],
+                'regid': {'field': 'chembl_id', 'type': 'REGID'},
                 'names': []
             })
         )
@@ -438,7 +438,7 @@ def init_release(
     if init_nci:
         nci_db_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'regids': ['PUBCHEM_EXT_DATASOURCE_REGID', ],
+                'regid': {'field': 'PUBCHEM_EXT_DATASOURCE_REGID', 'type': 'NSC_NUMBER'},
                 'names': [
                     {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
                     {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},

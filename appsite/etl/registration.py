@@ -1,25 +1,26 @@
 import datetime
-import time
-
-import pytz
 import glob
+from dataclasses import dataclass, field
+
+import ujson as json
 import logging
 import os
+import time
 from collections import namedtuple, defaultdict
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
+import pytz
 from celery import subtask, group
-from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
 from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    StructureFileRecordRelease, ReleaseNameField, StructureFileCollectionPreprocessor
-from structure.inchi.identifier import InChIString, InChIKey
+    ReleaseNameField, StructureFileCollectionPreprocessor
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType
+from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
 #logger = get_task_logger('celery.tasks')
@@ -34,6 +35,19 @@ InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion softw
 StructureFileRecordReleaseTuple = namedtuple('StructureFileRecordRelease', 'record releases')
 
 PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
+
+@dataclass
+class RecordData:
+    hashisy_key: CactvsHash
+    index: int
+    preprocessors: defaultdict = field(default_factory=lambda: defaultdict(dict))
+    release_name: str = None
+    release_object: Release = None
+    regid: str = None
+    names: List[Tuple[str, str]] = field(default_factory=lambda: [])
+
+    def __str__(self):
+        return "RecordData[%s, %s]" % (self.index, self.release_object)
 
 
 class FileRegistry(object):
@@ -141,7 +155,7 @@ class FileRegistry(object):
         molfile.set('record', record)
 
         structures: list = list()
-        record_data_list: list[[Dict]] = list()
+        record_data_list: List[RecordData] = list()
 
         g0 = time.perf_counter()
         record -= 1
@@ -166,13 +180,7 @@ class FileRegistry(object):
                 break
 
             for preprocessor in preprocessors:
-                record_data = {
-                    'hashisy_key': hashisy_key,
-                    'index': record,
-                    'preprocessors': defaultdict(dict),
-                    'release_names': [],
-                    'release_objects': []
-                }
+                record_data = RecordData(hashisy_key=hashisy_key, index=record)
                 record_data_list.append(record_data)
                 preprocessor_callable = getattr(Preprocessors, preprocessor.name, None)
                 if callable(preprocessor_callable):
@@ -201,14 +209,14 @@ class FileRegistry(object):
                 )
                 time1 = time.perf_counter()
 
-                hashisy_list = [r['hashisy_key'] for r in record_data_list]
+                hashisy_list = [record_data.hashisy_key for record_data in record_data_list]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
 
                 logger.info("registering structure file records for '%s'" % (fname,))
                 structure_file_record_objects = list()
                 unique_record_data_list = \
                     sorted(
-                        list(set([(structures[r['hashisy_key']], r['index']) for r in record_data_list])),
+                        list(set([(structures[record_data.hashisy_key], record_data.index) for record_data in record_data_list])),
                         key=lambda u: u[1]
                     )
                 for t in unique_record_data_list:
@@ -226,8 +234,7 @@ class FileRegistry(object):
                 )
                 time2 = time.perf_counter()
 
-                time3 = time.perf_counter()
-                logger.info("TIMING 1 %s 2 %s 3 %s T %s" % ((time1-time0), (time2-time1), (time3-time2), (time3-time0)))
+                logger.info("TIMING 1 %s 2 %s T %s" % ((time1-time0), (time2-time1), (time2-time0)))
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -243,8 +250,6 @@ class FileRegistry(object):
 
 
 class StructureRegistry(object):
-
-    #CHUNK_SIZE = 100
 
     NCICADD_TYPES = [
         Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
@@ -491,17 +496,34 @@ class Preprocessors:
             structure_file: StructureFile,
             preprocessor: StructureFileCollectionPreprocessor,
             ens: Ens,
-            record_data: Dict
+            record_data: RecordData
     ):
         logger.debug("generic preprocessor")
-        datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
-        record_data['release_names'].append(datasource_name)
+        params = json.loads(preprocessor.params)
+        regid_field_name = params['regid']['field']
+        regid_field_type = params['regid']['type']
         try:
-            datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
+            regid = ens.dget(regid_field_name, None)
+            logger.info("---> %s", regid)
+            record_data.regid = regid
+            release_object = structure_file.collection.release
+            record_data.release_name = release_object.name
+            record_data.release_object = release_object
+            record_data.names.append((regid, regid_field_type))
         except Exception as e:
-            logger.error("getting URL failed: %s", e)
-            datasource_name_url = None
-        record_data['preprocessors']['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
+            logger.error("getting regid failed: %s", e)
+        name_field_names = [n for n in params['names']]
+        for name_field_name in name_field_names:
+            try:
+                name = ens.dget(name_field_name['field'], None)
+                if name:
+                    add_names = name.split()
+                    name_type = name_field_name['type']
+                    for n in add_names:
+                        record_data.names.append((n, name_type))
+            except Exception as e:
+                logger.warning("getting name failed: %s", e)
+        logger.info("T> %s" % record_data.names)
 
     @staticmethod
     def pubchem_ext_datasource(
@@ -510,19 +532,23 @@ class Preprocessors:
             ens: Ens,
             record_data: Dict
     ):
-        logger.debug("preprocessr pubchem_ext_datasource")
-        # datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
-        # record_data['release_names'].append(datasource_name)
-        # try:
-        #     datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
-        # except Exception as e:
-        #     logger.error("getting URL failed: %s", e)
-        #     datasource_name_url = None
-        # record_data['preprocessors']['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
+        logger.debug("preprocessor pubchem_ext_datasource")
+        datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
+        record_data.release_name = datasource_name
+        try:
+            datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
+        except Exception as e:
+            logger.error("getting URL failed: %s", e)
+            datasource_name_url = None
+        record_data.preprocessors['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
 
     @staticmethod
     def generic_transaction(structure_file: StructureFile, record_data_list: List):
         logger.info("GENERIC TRANSACTION")
+
+        unique_name_list = {record_data.names[0] for record_data in record_data_list if len(record_data.names)}
+        logger.info("NAME LIST %s", unique_name_list)
+
 
     @staticmethod
     def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data_list: List):
@@ -530,8 +556,8 @@ class Preprocessors:
 
         datasource_names = []
         for record_data in record_data_list:
-            if 'pubchem_ext_datasource' in record_data['preprocessors']:
-                datasource_names.append(record_data['preprocessors']['pubchem_ext_datasource'])
+            if 'pubchem_ext_datasource' in record_data.preprocessors:
+                datasource_names.append(record_data.preprocessors['pubchem_ext_datasource'])
         datasource_names = list(set(datasource_names))
 
         pubchem_release = structure_file.collection.release
@@ -592,6 +618,6 @@ class Preprocessors:
                     release_name_field.is_regid = True
                     release_name_field.save()
             release_objects[data.name] = release
-        for record in record_data_list:
-            for name in record['release_names']:
-                record['release_objects'].append(release_objects[name])
+        for record_data in record_data_list:
+            if not record_data.release_object and record_data.release_name:
+                record_data.release_object = release_objects[record_data.release_name]

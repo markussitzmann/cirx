@@ -15,7 +15,7 @@ class FileRegistryTests(TestCase):
 
     def setUp(self):
         logger.info("----- file registry set up ----")
-        self.structure_file_collection = StructureFileCollection.objects.get(id=2)
+        self.structure_file_collection = StructureFileCollection.objects.get(id=4)
         logger.info("COLLECTION %s", self.structure_file_collection)
         for f in self.structure_file_collection.files.all():
             logger.info("FILE %s", f)

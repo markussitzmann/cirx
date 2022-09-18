@@ -267,7 +267,7 @@ class Record(models.Model):
         db_table = 'cir_record'
 
     def __str__(self):
-        return "NCICADD:RID=%s" % self.id
+        return "NCICADD:RID=%s" % self.regid
 
 
 class Name(models.Model):
@@ -289,7 +289,6 @@ class Name(models.Model):
 class NameType(models.Model):
     id = models.CharField(max_length=64, primary_key=True, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
-    #string = models.CharField(max_length=64, unique=True, blank=False, null=False)
     public_string = models.TextField(max_length=64, blank=True, null=True)
     description = models.TextField(max_length=768, blank=True, null=True)
 

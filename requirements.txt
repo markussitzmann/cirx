@@ -1,3 +1,4 @@
+ujson
 backports.zoneinfo
 psycopg2-binary
 requests
