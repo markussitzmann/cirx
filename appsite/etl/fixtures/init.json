@@ -49,7 +49,6 @@
       "added": "2022-09-18T17:43:57.245Z",
       "modified": "2022-09-18T17:43:57.249Z",
       "preprocessors": [
-        1,
         2
       ]
     }
@@ -219,105 +218,6 @@
     "fields": {
       "parent": null,
       "public_string": null,
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "NSC_NUMBER",
-    "fields": {
-      "parent": null,
-      "public_string": "REGID",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "NSC_NUMBER_PREFIXED",
-    "fields": {
-      "parent": null,
-      "public_string": "REGID",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_CID",
-    "fields": {
-      "parent": null,
-      "public_string": "REGID",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_GENERIC_REGISTRY_NAME",
-    "fields": {
-      "parent": null,
-      "public_string": "NAME",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_IUPAC_CAS_NAME",
-    "fields": {
-      "parent": null,
-      "public_string": "NAME",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_IUPAC_NAME",
-    "fields": {
-      "parent": null,
-      "public_string": "NAME",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_IUPAC_OPENEYE_NAME",
-    "fields": {
-      "parent": null,
-      "public_string": "NAME",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_IUPAC_SYSTEMATIC_NAME",
-    "fields": {
-      "parent": null,
-      "public_string": "NAME",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_IUPAC_TRADITIONAL_NAME",
-    "fields": {
-      "parent": null,
-      "public_string": "NAME",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_SID",
-    "fields": {
-      "parent": null,
-      "public_string": "REGID",
-      "description": null
-    }
-  },
-  {
-    "model": "resolver.nametype",
-    "pk": "PUBCHEM_SUBSTANCE_SYNONYM",
-    "fields": {
-      "parent": null,
-      "public_string": "NAME",
       "description": null
     }
   },

@@ -19,7 +19,7 @@ from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
     ReleaseNameField, StructureFileCollectionPreprocessor
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
-    Release, NameType
+    Release, NameType, Name
 from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
@@ -36,6 +36,14 @@ StructureFileRecordReleaseTuple = namedtuple('StructureFileRecordRelease', 'reco
 
 PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
 
+
+@dataclass(frozen=True)
+class NameTriple:
+    name: str = None
+    name_type: str = None
+    parent: str = None
+
+
 @dataclass
 class RecordData:
     hashisy_key: CactvsHash
@@ -44,7 +52,7 @@ class RecordData:
     release_name: str = None
     release_object: Release = None
     regid: str = None
-    names: List[Tuple[str, str]] = field(default_factory=lambda: [])
+    names: List[NameTriple] = field(default_factory=lambda: [])
 
     def __str__(self):
         return "RecordData[%s, %s]" % (self.index, self.release_object)
@@ -161,7 +169,7 @@ class FileRegistry(object):
         record -= 1
         while record < last_record:
             record += 1
-            if not record % FileRegistry.CHUNK_SIZE:
+            if not record % 1000:
                 logger.info("processed record %s of %s", record, fname)
             try:
                 # TODO: registering structures needs improvement - hadd might do harm here
@@ -190,24 +198,28 @@ class FileRegistry(object):
             if max_records and record >= max_records:
                 break
         molfile.close()
+        logger.info("finished reading records")
 
         structures = sorted(structures, key=lambda s: s.hashisy_key.int)
 
         logger.info("adding registration data to database for file '%s'" % (fname, ))
         try:
             with transaction.atomic():
-                time0 = time.perf_counter()
                 for preprocessor in preprocessors:
                     preprocessor_transaction = getattr(Preprocessors, preprocessor.name + "_transaction", None)
                     if callable(preprocessor_transaction):
+                        logger.info("starting preprocessor transaction %s" % preprocessor.name)
                         preprocessor_transaction(structure_file, record_data_list)
+                        logger.info("finished preprocessor %s transaction" % preprocessor.name)
 
+                time0 = time.perf_counter()
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
                 time1 = time.perf_counter()
+                logging.info("STRUCTURE BULK T: %s C: %s" % ((time1 - time0), len(structures)))
 
                 hashisy_list = [record_data.hashisy_key for record_data in record_data_list]
                 structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
@@ -232,9 +244,8 @@ class FileRegistry(object):
                     structure_file_record_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
-                time2 = time.perf_counter()
 
-                logger.info("TIMING 1 %s 2 %s T %s" % ((time1-time0), (time2-time1), (time2-time0)))
+                #logger.info("TIMING 1 %s 2 %s T %s" % ((time1-time0), (time2-time1), (time2-time0)))
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -243,9 +254,9 @@ class FileRegistry(object):
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise Exception(e)
         g1 = time.perf_counter()
-        logger.info("INIT %s GLOBAL %s" % ((g0 - i0), (g1 - g0)))
-        logger.info("data registration data finished for file '%s'" % (fname, ))
-        logger.info("---------- FINISHED file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
+        #logger.info("INIT %s GLOBAL %s STRUCTURE %s" % ((g0 - i0), (g1 - g0), len(structures)))
+        #logger.info("data registration data finished for file '%s'" % (fname, ))
+        #logger.info("---------- FINISHED file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
         return structure_file_id
 
 
@@ -504,12 +515,11 @@ class Preprocessors:
         regid_field_type = params['regid']['type']
         try:
             regid = ens.dget(regid_field_name, None)
-            logger.info("---> %s", regid)
             record_data.regid = regid
             release_object = structure_file.collection.release
             record_data.release_name = release_object.name
             record_data.release_object = release_object
-            record_data.names.append((regid, regid_field_type))
+            record_data.names.append(NameTriple(regid, regid_field_type, "REGID"))
         except Exception as e:
             logger.error("getting regid failed: %s", e)
         name_field_names = [n for n in params['names']]
@@ -520,10 +530,11 @@ class Preprocessors:
                     add_names = name.split()
                     name_type = name_field_name['type']
                     for n in add_names:
-                        record_data.names.append((n, name_type))
+                        record_data.names.append(NameTriple(n, name_type, "NAME"))
             except Exception as e:
-                logger.warning("getting name failed: %s", e)
-        logger.info("T> %s" % record_data.names)
+                #logger.warning("getting name failed: %s", e)
+                pass
+        #logger.info("T> %s" % record_data.names)
 
     @staticmethod
     def pubchem_ext_datasource(
@@ -546,9 +557,33 @@ class Preprocessors:
     def generic_transaction(structure_file: StructureFile, record_data_list: List):
         logger.info("GENERIC TRANSACTION")
 
-        unique_name_list = {record_data.names[0] for record_data in record_data_list if len(record_data.names)}
-        logger.info("NAME LIST %s", unique_name_list)
+        name_set, name_type_set = set(), set()
+        for record_data in record_data_list:
+            for triplet in record_data.names:
+                name_set.add(triplet.name)
+                name_type_set.add((triplet.name_type, triplet.parent))
+                #parent_set.add(triplet.parent)
 
+        parent_name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
+            [NameType(id=item[1]) for item in name_type_set],
+            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+            ignore_conflicts=True
+        )}
+
+        name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
+            [NameType(id=item[0], parent=parent_name_types[item[1]]) for item in name_type_set],
+            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+            ignore_conflicts=True
+        )}
+
+        names = {name.name: name for name in Name.objects.bulk_create(
+            [Name(name=name) for name in name_set],
+            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+            ignore_conflicts=True
+        )}
+
+        #for name in names:
+        #    logger.info("NNNN %s", name)
 
     @staticmethod
     def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data_list: List):
@@ -571,6 +606,7 @@ class Preprocessors:
 
         for data in datasource_names:
             dataset_publisher_name = data.name
+            logger.info("--------------> %s", dataset_publisher_name)
             dataset_publisher, created = Publisher.objects.get_or_create(
                 name=dataset_publisher_name,
                 category='generic',

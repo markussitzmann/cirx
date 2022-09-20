@@ -12,6 +12,9 @@ if [ -z $(docker network ls --filter name=^${APP_NAME}-backend$ --format="{{ .Na
 fi
 
 ./remove
+
+cd ./logging && rm -rf *.log && cd ..
+
 ./init
 ./up
 

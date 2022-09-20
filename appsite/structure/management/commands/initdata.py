@@ -298,12 +298,48 @@ def init_dataset():
 
 
 def init_release(
-        mini=True,
-        init_pubchem_compound=True,
+        mini=False,
+        init_pubchem_compound=False,
         init_pubchem_substance=True,
         init_chembl=True,
-        init_nci=True
+        init_nci=False
     ):
+
+    if init_chembl:
+        chembl_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'regid': {'field': 'chembl_id', 'type': 'REGID'},
+                'names': []
+            })
+        )
+
+        chembl_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="ChEMBL"),
+            publisher=Publisher.objects.get(name="ChEMBL Team"),
+            version=29,
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        chembl_db.classification = 'public'
+        chembl_db.status = 'active'
+        chembl_db.description = "ChEMBL database"
+        chembl_db.save()
+
+        if mini:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
+            )
+        else:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="chembl/29/chembl_29.sdf"
+            )
+            chembl_collection.save()
+        chembl_collection.preprocessors.add(
+            chembl_preprocessor
+        )
+        chembl_collection.save()
 
     pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
         name="pubchem_ext_datasource",
@@ -342,10 +378,9 @@ def init_release(
         else:
             pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_compound,
-                file_location_pattern_string="pubchem/compound/Compound_*.sdf.gz"
+                file_location_pattern_string="pubchem/compound/Compound_*.sdf"
             )
         pubchem_compound_collection.preprocessors.add(
-            pubchem_ext_datasource_preprocessor,
             pubchem_compound_preprocessor
         )
         pubchem_compound_collection.save()
@@ -391,49 +426,13 @@ def init_release(
         else:
             pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_substance,
-                file_location_pattern_string="pubchem/substance/Substance_*.sdf.gz"
+                file_location_pattern_string="pubchem/substance/Substance_*.sdf"
             )
         pubchem_substance_collection.preprocessors.add(
             pubchem_ext_datasource_preprocessor,
             pubchem_substance_preprocessor
         )
         pubchem_substance_collection.save()
-
-    if init_chembl:
-        chembl_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
-            params=json.dumps({
-                'regid': {'field': 'chembl_id', 'type': 'REGID'},
-                'names': []
-            })
-        )
-
-        chembl_db, created = Release.objects.get_or_create(
-            dataset=Dataset.objects.get(name="ChEMBL"),
-            publisher=Publisher.objects.get(name="ChEMBL Team"),
-            version=29,
-            released=None,
-            downloaded=datetime.datetime(2022, 2, 1),
-        )
-        chembl_db.classification = 'public'
-        chembl_db.status = 'active'
-        chembl_db.description = "ChEMBL database"
-        chembl_db.save()
-
-        if mini:
-            chembl_collection, created = StructureFileCollection.objects.get_or_create(
-                release=chembl_db,
-                file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
-            )
-        else:
-            chembl_collection, created = StructureFileCollection.objects.get_or_create(
-                release=chembl_db,
-                file_location_pattern_string="chembl/29/chembl_29.sdf.gz"
-            )
-            chembl_collection.save()
-        chembl_collection.preprocessors.add(
-            chembl_preprocessor
-        )
-        chembl_collection.save()
 
     if init_nci:
         nci_db_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
@@ -480,7 +479,7 @@ def init_release(
         else:
             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
                 release=open_nci_db,
-                file_location_pattern_string="nci/NCI_DTP.sdf.gz"
+                file_location_pattern_string="nci/NCI_DTP.sdf"
             )
             open_nci_db_collection.save()
 

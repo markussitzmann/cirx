@@ -39,7 +39,7 @@ class Structure(models.Model):
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
     indexes = Index(
-        fields=['ficts_parent', 'ficus_parent', 'uuuuu_parent', 'hashisy'],
+        fields=['ficts_parent', 'ficus_parent', 'uuuuu_parent', 'hashisy_key', 'hashisy'],
         name='structure_index'
     )
 
@@ -271,13 +271,14 @@ class Record(models.Model):
 
 
 class Name(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.TextField(max_length=1500, unique=True)
 
     class Meta:
         db_table = 'cir_structure_name'
 
-    def get_structure(self):
-        return self.structure.get()
+    # def get_structure(self):
+    #     return self.structure.get()
 
     def __str__(self):
         return "Name='%s'" % (self.name, )
