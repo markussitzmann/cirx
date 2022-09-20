@@ -60,7 +60,7 @@ class RecordData:
 
 class FileRegistry(object):
 
-    CHUNK_SIZE = 100000
+    CHUNK_SIZE = 30000
     DATABASE_ROW_BATCH_SIZE = 10000
 
     def __init__(self, file_collection: StructureFileCollection):
@@ -261,6 +261,8 @@ class FileRegistry(object):
 
 
 class StructureRegistry(object):
+
+    CHUNK_SIZE = 1000
 
     NCICADD_TYPES = [
         Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
@@ -527,7 +529,7 @@ class Preprocessors:
             try:
                 name = ens.dget(name_field_name['field'], None)
                 if name:
-                    add_names = name.split()
+                    add_names = name.replace("\n", "\t").split("\t")
                     name_type = name_field_name['type']
                     for n in add_names:
                         record_data.names.append(NameTriple(n, name_type, "NAME"))
