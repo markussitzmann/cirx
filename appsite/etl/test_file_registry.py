@@ -1,4 +1,5 @@
 import logging
+from pycactvs import Ens
 
 from django.test import TestCase
 
@@ -15,7 +16,7 @@ class FileRegistryTests(TestCase):
 
     def setUp(self):
         logger.info("----- file registry set up ----")
-        self.structure_file_collection = StructureFileCollection.objects.get(id=1)
+        self.structure_file_collection = StructureFileCollection.objects.get(id=2)
         logger.info("COLLECTION %s", self.structure_file_collection)
         for f in self.structure_file_collection.files.all():
             logger.info("FILE %s", f)
@@ -23,8 +24,12 @@ class FileRegistryTests(TestCase):
         for t in NameType.objects.all():
             logger.info("NAME TYPE %s : %s :", t.id, t.parent)
 
+        for r in StructureFileRecord.objects.all():
+            logger.info("NAME TYPE %s : %s :", r.id, r)
+
     def tearDown(self):
         logger.info("----- file registry tear down ----")
+        logger.info("ENS COUNT: %s" % len(Ens.List()))
 
 
     def test_file_registry(self):
@@ -54,6 +59,9 @@ class FileRegistryTests(TestCase):
 
         for t in NameType.objects.all():
             logger.info("NAME TYPE %s : %s :", t.id, t.parent)
+
+        for r in StructureFileRecord.objects.all():
+            logger.info("NAME TYPE %s : %s :", r.id, r)
 
         #for n in Name.objects.all():
         #   logger.info("NAME %s ", n)

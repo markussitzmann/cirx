@@ -19,7 +19,7 @@ from custom.cactvs import CactvsHash, CactvsMinimol
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
     ReleaseNameField, StructureFileCollectionPreprocessor
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
-    Release, NameType, Name
+    Release, NameType, Name, Record
 from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
@@ -46,6 +46,7 @@ class NameTriple:
 
 @dataclass
 class RecordData:
+    structure_file: StructureFile
     hashisy_key: CactvsHash
     index: int
     preprocessors: defaultdict = field(default_factory=lambda: defaultdict(dict))
@@ -60,7 +61,7 @@ class RecordData:
 
 class FileRegistry(object):
 
-    CHUNK_SIZE = 30000
+    CHUNK_SIZE = 500000
     DATABASE_ROW_BATCH_SIZE = 10000
 
     def __init__(self, file_collection: StructureFileCollection):
@@ -131,7 +132,6 @@ class FileRegistry(object):
             max_records=None,
     ) -> int:
         logger.info("---------- STARTED with file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
-        i0 = time.perf_counter()
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
@@ -165,7 +165,6 @@ class FileRegistry(object):
         structures: list = list()
         record_data_list: List[RecordData] = list()
 
-        g0 = time.perf_counter()
         record -= 1
         while record < last_record:
             record += 1
@@ -188,7 +187,7 @@ class FileRegistry(object):
                 break
 
             for preprocessor in preprocessors:
-                record_data = RecordData(hashisy_key=hashisy_key, index=record)
+                record_data = RecordData(structure_file=structure_file, hashisy_key=hashisy_key, index=record)
                 record_data_list.append(record_data)
                 preprocessor_callable = getattr(Preprocessors, preprocessor.name, None)
                 if callable(preprocessor_callable):
@@ -240,12 +239,58 @@ class FileRegistry(object):
                             number=index,
                         )
                     )
-                StructureFileRecord.objects.bulk_create(
+                structure_file_records = StructureFileRecord.objects.bulk_create(
                     structure_file_record_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
 
-                #logger.info("TIMING 1 %s 2 %s T %s" % ((time1-time0), (time2-time1), (time2-time0)))
+                name_set, name_type_set = set(), set()
+                for record_data in record_data_list:
+                    for triplet in record_data.names:
+                        name_set.add(triplet.name)
+                        name_type_set.add((triplet.name_type, triplet.parent))
+
+                parent_name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
+                    [NameType(id=item[1]) for item in name_type_set],
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )}
+
+                name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
+                    [NameType(id=item[0], parent=parent_name_types[item[1]]) for item in name_type_set],
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )}
+
+                names = {name.name: name for name in Name.objects.bulk_create(
+                    [Name(name=name) for name in name_set],
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )}
+
+                structure_file_record_dict = {
+                    str(r.structure_file.id) + ":" + str(r.number): r for r in structure_file_records
+                }
+                logging.info("test %s", structure_file_record_dict)
+
+                record_list = list()
+                for record_data in record_data_list:
+                    key = str(record_data.structure_file.id) + ":" + str(record_data.index)
+                    sfr = structure_file_record_dict[key]
+                    record_list.append(
+                        Record(
+                            regid=names[record_data.regid],
+                            version=1,
+                            release=record_data.release_object,
+                            dataset=record_data.release_object.dataset,
+                            structure_file_record=sfr
+                        )
+                    )
+
+                record_object_list = Record.objects.bulk_create(
+                    record_list,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                )
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -253,10 +298,6 @@ class FileRegistry(object):
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise Exception(e)
-        g1 = time.perf_counter()
-        #logger.info("INIT %s GLOBAL %s STRUCTURE %s" % ((g0 - i0), (g1 - g0), len(structures)))
-        #logger.info("data registration data finished for file '%s'" % (fname, ))
-        #logger.info("---------- FINISHED file %s chunk %s size %s" % (structure_file_id, chunk_number, chunk_size))
         return structure_file_id
 
 
@@ -547,6 +588,7 @@ class Preprocessors:
     ):
         logger.debug("preprocessor pubchem_ext_datasource")
         datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
+        datasource_regid = ens.dget('E_PUBCHEM_EXT_DATASOURCE_REGID', None)
         record_data.release_name = datasource_name
         try:
             datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
@@ -554,38 +596,16 @@ class Preprocessors:
             logger.error("getting URL failed: %s", e)
             datasource_name_url = None
         record_data.preprocessors['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
+        record_data.names = [NameTriple(datasource_regid, "E_PUBCHEM_EXT_DATASOURCE_REGID", "REGID"), ]
+        record_data.regid = datasource_regid
 
     @staticmethod
     def generic_transaction(structure_file: StructureFile, record_data_list: List):
+        g0 = time.perf_counter()
         logger.info("GENERIC TRANSACTION")
 
-        name_set, name_type_set = set(), set()
-        for record_data in record_data_list:
-            for triplet in record_data.names:
-                name_set.add(triplet.name)
-                name_type_set.add((triplet.name_type, triplet.parent))
-                #parent_set.add(triplet.parent)
-
-        parent_name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
-            [NameType(id=item[1]) for item in name_type_set],
-            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-            ignore_conflicts=True
-        )}
-
-        name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
-            [NameType(id=item[0], parent=parent_name_types[item[1]]) for item in name_type_set],
-            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-            ignore_conflicts=True
-        )}
-
-        names = {name.name: name for name in Name.objects.bulk_create(
-            [Name(name=name) for name in name_set],
-            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-            ignore_conflicts=True
-        )}
-
-        #for name in names:
-        #    logger.info("NNNN %s", name)
+        g1 = time.perf_counter()
+        logger.info("GENERIC TRANSACTION T %s", (g1 -g0))
 
     @staticmethod
     def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data_list: List):

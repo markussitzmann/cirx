@@ -298,10 +298,10 @@ def init_dataset():
 
 
 def init_release(
-        mini=False,
+        mini=True,
         init_pubchem_compound=False,
         init_pubchem_substance=True,
-        init_chembl=True,
+        init_chembl=False,
         init_nci=False
     ):
 
