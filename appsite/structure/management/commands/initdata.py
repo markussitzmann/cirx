@@ -1,19 +1,14 @@
 import datetime
 import json
 import logging
-import os
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
+from pycactvs import Ens
 
-from custom.cactvs import CactvsHash, CactvsMinimol
-#from database.models import
-from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor, StructureFileField, \
-    ReleaseNameField
-from structure.models import  ResponseType
+from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor, StructureFileField
 from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, \
     ContextTag, Dataset, Release, InChIType
-
-from pycactvs import Ens
+from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
@@ -298,11 +293,11 @@ def init_dataset():
 
 
 def init_release(
-        mini=True,
-        init_pubchem_compound=False,
+        mini=False,
+        init_pubchem_compound=True,
         init_pubchem_substance=True,
-        init_chembl=False,
-        init_nci=False
+        init_chembl=True,
+        init_nci=True
     ):
 
     if init_chembl:
