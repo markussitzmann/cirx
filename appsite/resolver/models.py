@@ -19,7 +19,7 @@ class StructureManager(models.Manager):
 
 
 class Structure(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hashisy_key = CactvsHashField(unique=True)
     hashisy = models.CharField(max_length=16, null=True, blank=True)
     minimol = CactvsMinimolField(null=False)
@@ -77,7 +77,7 @@ class InChIManager(models.Manager):
 
 
 class InChI(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     version = models.IntegerField(default=1, blank=False, null=False)
     block1 = models.CharField(max_length=14, blank=False, null=False)
     block2 = models.CharField(max_length=10, blank=False, null=False)
@@ -179,7 +179,7 @@ class InChIType(models.Model):
 
 
 class StructureInChIAssociation(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     structure = models.ForeignKey(
         Structure,
         related_name='inchis',
@@ -271,7 +271,7 @@ class Record(models.Model):
 
 
 class Name(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.TextField(max_length=1500, unique=True)
 
     class Meta:
@@ -310,7 +310,7 @@ class StructureNameAssociation(models.Model):
 
 
 class Organization(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=32768)
     abbreviation = models.CharField(max_length=32, blank=True, null=True)
@@ -362,7 +362,7 @@ class Organization(models.Model):
 
 
 class Publisher(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, null=True, blank=True)
     organizations = models.ManyToManyField('Organization', related_name='publishers', blank=True)
     category = models.CharField(max_length=16, choices=(
@@ -412,7 +412,7 @@ class Publisher(models.Model):
 
 
 class EntryPoint(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='children', null=True)
     category = models.CharField(max_length=16, choices=(
         ('self', 'Self'),
@@ -455,7 +455,7 @@ class EntryPoint(models.Model):
 
 
 class EndPoint(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     entrypoint = models.ForeignKey('EntryPoint', related_name='endpoints', on_delete=models.SET_NULL, null=True)
     uri = models.CharField(max_length=32768)
     accept_header_media_types = models.ManyToManyField(
@@ -516,7 +516,7 @@ class EndPoint(models.Model):
 
 
 class MediaType(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=1024, blank=False, null=False, unique=True)
     description = models.TextField(max_length=32768, blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
@@ -551,7 +551,7 @@ class ContextTag(models.Model):
 
 
 class URIPattern(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     uri = models.CharField(max_length=32768)
     category = models.CharField(max_length=16, choices=(
         ('schema', 'Schema'),
@@ -575,7 +575,7 @@ class URIPattern(models.Model):
 
 
 class Dataset(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=768, null=False, blank=False)
     href = models.URLField(max_length=4096, null=True, blank=True)
     description = models.TextField(max_length=4096, null=True, blank=True)
@@ -599,7 +599,7 @@ class Dataset(models.Model):
 
 
 class Release(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
     dataset = models.ForeignKey(Dataset, related_name='releases', blank=False, null=False, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, related_name='releases', blank=False, null=False, on_delete=models.CASCADE)

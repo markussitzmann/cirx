@@ -104,7 +104,7 @@ services:
       - RABBITMQ_DEFAULT_PASS
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
-    command: [ 'celery', '-A', 'appsite', 'worker', '-l', 'info', '-c', '1', "--logfile=/logging/cirx-worker1.%h.%i.log" ]
+    command: [ 'celery', '-A', 'appsite', 'worker', '-l', 'info', '-c', '3', "--logfile=/logging/cirx-worker1.%h.%i.log" ]
     restart: on-failure
     depends_on:
       - cirx-cache

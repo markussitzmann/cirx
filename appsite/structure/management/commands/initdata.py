@@ -299,10 +299,10 @@ def init_dataset():
 
 def init_release(
         mini=True,
-        init_pubchem_compound=False,
+        init_pubchem_compound=True,
         init_pubchem_substance=True,
-        init_chembl=False,
-        init_nci=False
+        init_chembl=True,
+        init_nci=True
     ):
 
     if init_chembl:

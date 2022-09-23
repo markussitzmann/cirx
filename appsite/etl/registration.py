@@ -262,16 +262,18 @@ class FileRegistry(object):
                     ignore_conflicts=True
                 )}
 
+                time0 = time.perf_counter()
                 names = {name.name: name for name in Name.objects.bulk_create(
                     [Name(name=name) for name in name_set],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )}
+                time1 = time.perf_counter()
+                logging.info("NAME BULK T: %s C: %s" % ((time1 - time0), len(structures)))
 
                 structure_file_record_dict = {
                     str(r.structure_file.id) + ":" + str(r.number): r for r in structure_file_records
                 }
-                logging.info("test %s", structure_file_record_dict)
 
                 record_list = list()
                 for record_data in record_data_list:
@@ -287,10 +289,13 @@ class FileRegistry(object):
                         )
                     )
 
+                time0 = time.perf_counter()
                 record_object_list = Record.objects.bulk_create(
                     record_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
+                time1 = time.perf_counter()
+                logging.info("RECORD BULK T: %s C: %s" % ((time1 - time0), len(structures)))
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
