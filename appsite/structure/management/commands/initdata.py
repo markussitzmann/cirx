@@ -293,7 +293,7 @@ def init_dataset():
 
 
 def init_release(
-        mini=True,
+        mini=False,
         init_pubchem_compound=True,
         init_pubchem_substance=True,
         init_chembl=True,

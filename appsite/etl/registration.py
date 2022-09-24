@@ -26,6 +26,9 @@ logger = logging.getLogger('celery.task')
 #logger = get_task_logger('celery.tasks')
 
 
+DEFAULT_CHUNK_SIZE = 20000
+DEFAULT_DATABASE_ROW_BATCH_SIZE = 1000
+
 Status = namedtuple('Status', 'file created')
 
 Identifier = namedtuple('Identifier', 'property parent_structure attr')
@@ -61,8 +64,8 @@ class RecordData:
 
 class FileRegistry(object):
 
-    CHUNK_SIZE = 500000
-    DATABASE_ROW_BATCH_SIZE = 10000
+    CHUNK_SIZE = DEFAULT_CHUNK_SIZE
+    DATABASE_ROW_BATCH_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
 
     def __init__(self, file_collection: StructureFileCollection):
         self.file_collection = file_collection
@@ -202,6 +205,7 @@ class FileRegistry(object):
         structures = sorted(structures, key=lambda s: s.hashisy_key.int)
 
         logger.info("adding registration data to database for file '%s'" % (fname, ))
+        g0 = time.perf_counter()
         try:
             with transaction.atomic():
                 for preprocessor in preprocessors:
@@ -239,10 +243,15 @@ class FileRegistry(object):
                             number=index,
                         )
                     )
+
+                time0 = time.perf_counter()
                 structure_file_records = StructureFileRecord.objects.bulk_create(
                     structure_file_record_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
+                time1 = time.perf_counter()
+                logging.info("STRUCTURE RECORD BULK T: %s C: %s" % ((time1 - time0), len(structure_file_records)))
+
 
                 name_set, name_type_set = set(), set()
                 for record_data in record_data_list:
@@ -259,11 +268,12 @@ class FileRegistry(object):
                 name_type_list = [NameType(id=item[0], parent=parent_name_types[item[1]]) for item in name_type_set]
                 NameType.objects.bulk_create(
                     name_type_list,
-                    batch_size = FileRegistry.DATABASE_ROW_BATCH_SIZE,
-                    ignore_conflicts = True
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
                 )
                 name_types = NameType.objects.in_bulk(name_set, field_name='id')
 
+                time0 = time.perf_counter()
                 name_list = [Name(name=name) for name in name_set]
                 Name.objects.bulk_create(
                     name_list,
@@ -271,6 +281,9 @@ class FileRegistry(object):
                     ignore_conflicts=True
                 )
                 names = Name.objects.in_bulk(name_set, field_name='name')
+                time1 = time.perf_counter()
+                logging.info("NAME BULK T: %s C: %s" % ((time1 - time0), len(names)))
+
 
                 structure_file_record_dict = {
                     str(r.structure_file.id) + ":" + str(r.number): r for r in structure_file_records
@@ -291,10 +304,13 @@ class FileRegistry(object):
                         )
                     )
 
+                time0 = time.perf_counter()
                 record_object_list = Record.objects.bulk_create(
                     record_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
+                time1 = time.perf_counter()
+                logging.info("RECORD BULK T: %s C: %s" % ((time1 - time0), len(record_object_list)))
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -302,12 +318,16 @@ class FileRegistry(object):
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise Exception(e)
+
+        g1 = time.perf_counter()
+        logging.info("TRANSACTION BULK T: %s" % (g1 - g0))
+
         return structure_file_id
 
 
 class StructureRegistry(object):
 
-    CHUNK_SIZE = 1000
+    CHUNK_SIZE = DEFAULT_CHUNK_SIZE
 
     NCICADD_TYPES = [
         Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
