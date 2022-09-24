@@ -30,7 +30,8 @@ class FileRegistryTests(TestCase):
     def tearDown(self):
         logger.info("----- file registry tear down ----")
         logger.info("ENS COUNT: %s" % len(Ens.List()))
-
+        for n in Name.objects.all():
+            logger.info("NAME %s : %s :", n.id, n)
 
     def test_file_registry(self):
         logger.info("----- file registry test ----")

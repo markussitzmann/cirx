@@ -256,30 +256,34 @@ class FileRegistry(object):
                     ignore_conflicts=True
                 )}
 
-                name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
-                    [NameType(id=item[0], parent=parent_name_types[item[1]]) for item in name_type_set],
-                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-                    ignore_conflicts=True
-                )}
+                name_type_list = [NameType(id=item[0], parent=parent_name_types[item[1]]) for item in name_type_set]
+                NameType.objects.bulk_create(
+                    name_type_list,
+                    batch_size = FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts = True
+                )
+                name_types = NameType.objects.in_bulk(name_set, field_name='id')
 
-                names = {name.name: name for name in Name.objects.bulk_create(
-                    [Name(name=name) for name in name_set],
+                name_list = [Name(name=name) for name in name_set]
+                Name.objects.bulk_create(
+                    name_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
-                )}
+                )
+                names = Name.objects.in_bulk(name_set, field_name='name')
 
                 structure_file_record_dict = {
                     str(r.structure_file.id) + ":" + str(r.number): r for r in structure_file_records
                 }
-                logging.info("test %s", structure_file_record_dict)
 
                 record_list = list()
                 for record_data in record_data_list:
                     key = str(record_data.structure_file.id) + ":" + str(record_data.index)
                     sfr = structure_file_record_dict[key]
+                    #logger.info("KEY %s %s %s" % (names[record_data.regid].id, record_data.regid, names[record_data.regid]))
                     record_list.append(
                         Record(
-                            regid=names[record_data.regid],
+                            regid=names[str(record_data.regid)],
                             version=1,
                             release=record_data.release_object,
                             dataset=record_data.release_object.dataset,
