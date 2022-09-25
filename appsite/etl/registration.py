@@ -26,8 +26,9 @@ logger = logging.getLogger('celery.task')
 #logger = get_task_logger('celery.tasks')
 
 
-DEFAULT_CHUNK_SIZE = 20000
+DEFAULT_CHUNK_SIZE = 100000
 DEFAULT_DATABASE_ROW_BATCH_SIZE = 1000
+DEFAULT_LOGGER_BLOCK = 1000
 
 Status = namedtuple('Status', 'file created')
 
@@ -171,7 +172,7 @@ class FileRegistry(object):
         record -= 1
         while record < last_record:
             record += 1
-            if not record % 1000:
+            if not record % DEFAULT_LOGGER_BLOCK:
                 logger.info("processed record %s of %s", record, fname)
             try:
                 # TODO: registering structures needs improvement - hadd might do harm here

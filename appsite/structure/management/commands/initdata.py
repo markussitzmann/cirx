@@ -12,6 +12,12 @@ from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
+MINI = False
+INIT_PUBCHEM_COMPOUND = True
+INIT_PUBCHEM_SUBSTANCE = True
+INIT_CHEMBL = True
+INIT_NCI = True
+
 
 class Command(BaseCommand):
     help = 'loading some initial data'
@@ -293,11 +299,11 @@ def init_dataset():
 
 
 def init_release(
-        mini=False,
-        init_pubchem_compound=True,
-        init_pubchem_substance=True,
-        init_chembl=True,
-        init_nci=True
+        mini=MINI,
+        init_pubchem_compound=INIT_PUBCHEM_COMPOUND,
+        init_pubchem_substance=INIT_PUBCHEM_SUBSTANCE,
+        init_chembl=INIT_CHEMBL,
+        init_nci=INIT_NCI
     ):
 
     if init_chembl:
@@ -323,7 +329,7 @@ def init_release(
         if mini:
             chembl_collection, created = StructureFileCollection.objects.get_or_create(
                 release=chembl_db,
-                file_location_pattern_string="chembl/29/chembl_29.mini.sdf"
+                file_location_pattern_string="MINI/chembl/29/chembl_29.sdf"
             )
         else:
             chembl_collection, created = StructureFileCollection.objects.get_or_create(
@@ -368,7 +374,7 @@ def init_release(
         if mini:
             pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_compound,
-                file_location_pattern_string="pubchem/compound/Compound_*.mini.sdf"
+                file_location_pattern_string="MINI/pubchem/compound/Compound_*.sdf"
             )
         else:
             pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
@@ -416,7 +422,7 @@ def init_release(
         if mini:
             pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_substance,
-                file_location_pattern_string="pubchem/substance/Substance_*.mini.sdf"
+                file_location_pattern_string="MINI/pubchem/substance/Substance_*.sdf"
             )
         else:
             pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
@@ -468,7 +474,7 @@ def init_release(
         if mini:
             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
                 release=open_nci_db,
-                file_location_pattern_string="nci/NCI_DTP.mini.sdf"
+                file_location_pattern_string="MINI/nci/NCI_DTP.sdf"
             )
             open_nci_db_collection.save()
         else:
