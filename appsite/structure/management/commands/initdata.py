@@ -138,7 +138,7 @@ def init_name_type_data():
     ]
 
     for name_type in name_types:
-        NameType.objects.get_or_create(id=name_type[0], public_string=name_type[1])
+        NameType.objects.get_or_create(id=name_type[0], public_string=name_type[2], parent_id=name_type[1])
 
 
 def init_organization_and_publisher_data():

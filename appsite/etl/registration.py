@@ -328,7 +328,7 @@ class FileRegistry(object):
 
 class StructureRegistry(object):
 
-    CHUNK_SIZE = DEFAULT_CHUNK_SIZE
+    CHUNK_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
 
     NCICADD_TYPES = [
         Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
@@ -401,7 +401,8 @@ class StructureRegistry(object):
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
                     relationships[identifier.attr] = hashisy_key
                     source_structure_relationships.append(StructureRelationships(structure, relationships))
-                logger.info("finished normalizing structure %s" % structure_id)
+                if not structure_id % DEFAULT_LOGGER_BLOCK:
+                    logger.info("finished normalizing structure %s" % structure_id)
             except Exception as e:
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()
@@ -414,7 +415,8 @@ class StructureRegistry(object):
                 structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int)
                 Structure.objects.bulk_create(
                     structures,
-                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE, ignore_conflicts=True
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
                 )
 
                 # fetch hashisy / parent structures in bulk (by that they have an id)
@@ -602,7 +604,6 @@ class Preprocessors:
             except Exception as e:
                 #logger.warning("getting name failed: %s", e)
                 pass
-        #logger.info("T> %s" % record_data.names)
 
     @staticmethod
     def pubchem_ext_datasource(

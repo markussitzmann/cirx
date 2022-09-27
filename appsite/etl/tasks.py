@@ -28,10 +28,10 @@ def register_file_record_chunk_task(file_id: int, chunk_number: int, chunk_size:
 
 
 @shared_task(name="normalize")
-def normalize_structure_task(structure_ids: List[uuid.UUID]):
+def normalize_structure_task(structure_ids: List[int]):
     return StructureRegistry.normalize_structures(structure_ids)
 
 
 @shared_task(name="calcinchi")
-def calculate_inchi_task(structure_ids: List[uuid.UUID]):
+def calculate_inchi_task(structure_ids: List[int]):
     return StructureRegistry.calculate_inchi(structure_ids)

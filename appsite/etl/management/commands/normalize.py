@@ -22,7 +22,7 @@ class Command(BaseCommand):
         _normalize()
 
 
-def _normalize_structures(structure_ids: List[uuid.UUID]):
+def _normalize_structures(structure_ids: List[int]):
     task = normalize_structure_task
     chunks = structure_id_chunks(structure_ids)
     tasks = [task.delay(chunk) for chunk in chunks]
