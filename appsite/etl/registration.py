@@ -253,7 +253,6 @@ class FileRegistry(object):
                 time1 = time.perf_counter()
                 logging.info("STRUCTURE RECORD BULK T: %s C: %s" % ((time1 - time0), len(structure_file_records)))
 
-
                 name_set, name_type_set = set(), set()
                 for record_data in record_data_list:
                     for triplet in record_data.names:
@@ -285,7 +284,6 @@ class FileRegistry(object):
                 time1 = time.perf_counter()
                 logging.info("NAME BULK T: %s C: %s" % ((time1 - time0), len(names)))
 
-
                 structure_file_record_dict = {
                     str(r.structure_file.id) + ":" + str(r.number): r for r in structure_file_records
                 }
@@ -294,7 +292,6 @@ class FileRegistry(object):
                 for record_data in record_data_list:
                     key = str(record_data.structure_file.id) + ":" + str(record_data.index)
                     sfr = structure_file_record_dict[key]
-                    #logger.info("KEY %s %s %s" % (names[record_data.regid].id, record_data.regid, names[record_data.regid]))
                     record_list.append(
                         Record(
                             regid=names[str(record_data.regid)],
@@ -449,7 +446,6 @@ class StructureRegistry(object):
                     structures,
                     [identifier.attr for identifier in identifiers]
                 )
-
         except DatabaseError as e:
             logger.error(e)
             raise(DatabaseError(e))
@@ -610,11 +606,12 @@ class Preprocessors:
             structure_file: StructureFile,
             preprocessor: StructureFileCollectionPreprocessor,
             ens: Ens,
-            record_data: Dict
+            record_data: RecordData
     ):
         logger.debug("preprocessor pubchem_ext_datasource")
         datasource_name = ens.dget('E_PUBCHEM_EXT_DATASOURCE_NAME', None)
         datasource_regid = ens.dget('E_PUBCHEM_EXT_DATASOURCE_REGID', None)
+        record_data.version = ens.dget('PUBCHEM_SUBSTANCE_VERSION', None)
         record_data.release_name = datasource_name
         try:
             datasource_name_url = ens.dget('E_PUBCHEM_EXT_DATASOURCE_URL', None)
@@ -627,11 +624,7 @@ class Preprocessors:
 
     @staticmethod
     def generic_transaction(structure_file: StructureFile, record_data_list: List):
-        g0 = time.perf_counter()
-        logger.info("GENERIC TRANSACTION")
-
-        g1 = time.perf_counter()
-        logger.info("GENERIC TRANSACTION T %s", (g1 -g0))
+        pass
 
     @staticmethod
     def pubchem_ext_datasource_transaction(structure_file: StructureFile, record_data_list: List):
@@ -654,7 +647,6 @@ class Preprocessors:
 
         for data in datasource_names:
             dataset_publisher_name = data.name
-            logger.info("--------------> %s", dataset_publisher_name)
             dataset_publisher, created = Publisher.objects.get_or_create(
                 name=dataset_publisher_name,
                 category='generic',
@@ -678,7 +670,7 @@ class Preprocessors:
             dataset_release_name = data.name
             release, created = Release.objects.get_or_create(
                 dataset=dataset,
-                publisher=pubchem_publisher,
+                publisher=dataset_publisher,
                 name=dataset_release_name,
                 version=pubchem_release_version,
                 downloaded=pubchem_release_downloaded,

@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
+    'django.contrib.messages',#
     'django.contrib.staticfiles',
     'django_celery_results',
     'rest_framework',
@@ -299,6 +299,7 @@ CIR_AVAILABLE_RESOLVERS = [
 ]
 
 CIR_FILESTORE_ROOT = os.path.join("/filestore")
+CIR_INSTORE_ROOT = os.path.join("/instore")
 
 
 ### THE WE HAVE TO GET RID OF THIS SECTION

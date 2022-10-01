@@ -9,6 +9,7 @@ services:
       - ${APP_HOME}:/home/app
       - ${APP_HOME}/nginx:/home/nginx
       - ${APP_FILESTORE}:/filestore
+      - ${APP_INSTORE}:/instore
     ports:
       - ${APP_CONNECTION_PORT}:80
     networks:

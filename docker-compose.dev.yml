@@ -9,6 +9,7 @@ services:
       - ${APP_HOME}:/home/app
       - ${APP_HOME}/nginx:/home/nginx
       - ${APP_FILESTORE}:/filestore
+      - ${APP_INSTORE}:/instore
     ports:
       - "8000:8000"
     networks:
@@ -86,6 +87,7 @@ services:
       - ${APP_HOME}/logging:/logging
       #- ${APP_HOME}/pids:/pids
       - ${APP_FILESTORE}:/filestore
+      - ${APP_INSTORE}:/instore
     networks:
       - app_network
     environment: &worker_env
