@@ -88,6 +88,7 @@ services:
       - ${APP_HOME}/logging:/logging
       #- ${APP_HOME}/pids:/pids
       - ${APP_FILESTORE}:/filestore
+      - ${APP_INSTORE}:/instore
     networks:
       - app_network
     environment: &worker_env

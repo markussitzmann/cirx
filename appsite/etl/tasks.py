@@ -11,6 +11,11 @@ logger = logging.getLogger('celery.task')
 #logger = get_task_logger('celery.tasks')
 
 
+@shared_task(name="add file")
+def add_file_task(file_path: str, check: bool):
+    return FileRegistry.add_file(file_path, check)
+
+
 @shared_task(name="register count")
 def count_and_save_file_task(file_id: int):
     return FileRegistry.count_and_save_structure_file(file_id)

@@ -24,8 +24,8 @@ class Command(BaseCommand):
 
 def register_file_records(structure_file_id: int):
     task_list = \
-        (count_and_save_file_task.s(structure_file_id) |
-         register_file_record_chunk_mapper.s(register_file_record_chunk_task.s()))
+        (count_and_save_file_task.s(structure_file_id) | register_file_record_chunk_mapper.s(register_file_record_chunk_task.s()))
+    logger.info("submitting %s tasks", len(task_list))
     return task_list.delay()
 
 
@@ -40,6 +40,7 @@ def _register(options):
         file_list: List[StructureFile] = processor.register_files(force=options['force'])
 
         for file in file_list:
+            logger.info("creating register task for %s", file)
             task = register_file_records(file.id)
             tasks.append(task)
 

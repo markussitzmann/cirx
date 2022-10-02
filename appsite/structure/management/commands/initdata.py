@@ -12,11 +12,12 @@ from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
-MINI = True
+MINI = False
 INIT_PUBCHEM_COMPOUND = True
 INIT_PUBCHEM_SUBSTANCE = True
 INIT_CHEMBL = True
-INIT_NCI = True
+INIT_NCI = False
+INIT_TT = False
 
 
 class Command(BaseCommand):
@@ -303,7 +304,8 @@ def init_release(
         init_pubchem_compound=INIT_PUBCHEM_COMPOUND,
         init_pubchem_substance=INIT_PUBCHEM_SUBSTANCE,
         init_chembl=INIT_CHEMBL,
-        init_nci=INIT_NCI
+        init_nci=INIT_NCI,
+        init_tt=INIT_TT
     ):
 
     if init_chembl:
@@ -334,7 +336,7 @@ def init_release(
         else:
             chembl_collection, created = StructureFileCollection.objects.get_or_create(
                 release=chembl_db,
-                file_location_pattern_string="chembl/29/chembl_29.sdf"
+                file_location_pattern_string="29/chembl_29/chembl_29.*.sdf"
             )
             chembl_collection.save()
         chembl_collection.preprocessors.add(
@@ -379,7 +381,7 @@ def init_release(
         else:
             pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_compound,
-                file_location_pattern_string="pubchem/compound/Compound_*.sdf"
+                file_location_pattern_string="compound/Compound_*/*.sdf"
             )
         pubchem_compound_collection.preprocessors.add(
             pubchem_compound_preprocessor
@@ -409,16 +411,6 @@ def init_release(
         pubchem_substance.description = "PubChem Substance database"
         pubchem_substance.save()
 
-        #name_type = NameType.objects.get(id="PUBCHEM_SID")
-        #structure_file_field = StructureFileField.objects.filter(field_name="E_*PUBCHEM_SUBSTANCE_ID*").first()
-        #release_name_field, created = ReleaseNameField.objects.get_or_create(
-        #    release=pubchem_substance,
-        #    structure_file_field=structure_file_field,
-        #    name_type=name_type
-        #)
-        #release_name_field.is_regid = True
-        #release_name_field.save()
-
         if mini:
             pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_substance,
@@ -427,7 +419,7 @@ def init_release(
         else:
             pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_substance,
-                file_location_pattern_string="pubchem/substance/Substance_*.sdf"
+                file_location_pattern_string="substance/Substance_*/*.sdf"
             )
         pubchem_substance_collection.preprocessors.add(
             pubchem_ext_datasource_preprocessor,
@@ -489,6 +481,44 @@ def init_release(
         )
         open_nci_db_collection.save()
 
+    if init_tt:
+        pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'regid': {'field': 'PUBCHEM_SUBSTANCE_ID', 'type': 'PUBCHEM_SID'},
+                'names': [
+                    {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
+                    {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
+                ]
+            })
+        )
+
+        pubchem_substance, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="PubChem"),
+            publisher=Publisher.objects.get(name="PubChem"),
+            name="PubChem Substance",
+            released=None,
+            downloaded=datetime.datetime(2022, 2, 1),
+        )
+        pubchem_substance.classification = 'public'
+        pubchem_substance.status = 'active'
+        pubchem_substance.description = "PubChem Substance database"
+        pubchem_substance.save()
+
+        if mini:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="MINI/pubchem/substance/Substance_*.sdf"
+            )
+        else:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="tt/*/Substance_*.sdf.gz"
+            )
+        pubchem_substance_collection.preprocessors.add(
+            pubchem_ext_datasource_preprocessor,
+            pubchem_substance_preprocessor
+        )
+        pubchem_substance_collection.save()
 
 def init_inchi_type():
 
