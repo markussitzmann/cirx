@@ -1,6 +1,7 @@
 import datetime
 import glob
 import gzip
+import math
 import shutil
 from dataclasses import dataclass, field
 from pathlib import PurePath, Path
@@ -10,7 +11,7 @@ import logging
 import os
 import time
 from collections import namedtuple, defaultdict
-from typing import List, Dict, Tuple
+from typing import List
 
 import pytz
 from celery import subtask, group
@@ -175,7 +176,7 @@ class FileRegistry(object):
             logger.error("structure file and count not available")
             raise Exception(e)
         chunk_size = FileRegistry.CHUNK_SIZE
-        chunk_number = int(count / chunk_size) + 1
+        chunk_number = math.ceil(count / chunk_size)
         chunks = range(0, chunk_number)
         callback = subtask(callback)
         return group(callback.clone([structure_file_id, chunk, chunk_size]) for chunk in chunks)()
@@ -379,6 +380,8 @@ class FileRegistry(object):
         parent = file_path.parent
         stem = file_path.stem
         suffixes = file_path.suffixes
+        if suffixes[-1] != ".gz":
+            suffixes.append(".gz")
         splitted_stem = stem.split(".", 1)
 
         name_elements = [splitted_stem[0], "." + str(index)]
@@ -388,7 +391,7 @@ class FileRegistry(object):
 
         filestore_name = os.path.join(
             str(settings.CIR_FILESTORE_ROOT),
-            str(os.path.split(parent)[1:][0]),
+            *[str(p) for p in parent.parts[2:]],
             str(dir_name),
             str(new_name)
         )
