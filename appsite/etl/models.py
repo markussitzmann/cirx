@@ -74,7 +74,7 @@ class StructureFile(models.Model):
     count = models.IntegerField(null=True, blank=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    processed = models.DateTimeField(auto_now=False, blank=True, null=True)
+    #processed = models.DateTimeField(auto_now=False, blank=True, null=True)
 
     class Meta:
         constraints = [
@@ -87,6 +87,32 @@ class StructureFile(models.Model):
 
     def __str__(self):
         return "%s (%s)" % (self.file, self.count)
+
+
+class StructureFileStatus(models.Model):
+    structure_file = models.OneToOneField(
+        'StructureFile',
+        primary_key=True,
+        blank=False,
+        null=False,
+        related_name='file_status',
+        on_delete=models.CASCADE,
+    )
+    normalization = models.DateTimeField(auto_now_add=True, blank=False, null=False)
+    normalization_finished = models.BooleanField(default=False)
+    inchi_calculation = models.DateTimeField(auto_now_add=True, blank=False, null=False)
+    inchi_calculation_finished = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'cir_structure_file_status'
+
+    def __str__(self):
+        return "normalized %s (%s) inchi_calculated %s (%s)" % (
+            self.normalized,
+            self.normalization_finished,
+            self.inchi_calculated,
+            self.inchi_calculation_finished
+        )
 
 
 class StructureFileField(models.Model):

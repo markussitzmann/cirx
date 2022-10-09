@@ -23,8 +23,10 @@ class Command(BaseCommand):
 
 
 def register_file_records(structure_file_id: int):
-    task_list = \
-        (count_and_save_file_task.s(structure_file_id) | register_file_record_chunk_mapper.s(register_file_record_chunk_task.s()))
+    task_list = (
+            count_and_save_file_task.s(structure_file_id)
+            | register_file_record_chunk_mapper.s(register_file_record_chunk_task.s())
+    )
     logger.info("submitting %s tasks", len(task_list))
     return task_list.delay()
 

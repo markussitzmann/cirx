@@ -1,9 +1,7 @@
 import logging
-import uuid
 from typing import List
 
 from celery import shared_task
-from celery.utils.log import get_task_logger
 
 from etl.registration import FileRegistry, StructureRegistry
 
@@ -31,11 +29,31 @@ def register_file_record_chunk_mapper(file_id: int, callback):
 def register_file_record_chunk_task(file_id: int, chunk_number: int, chunk_size: int):
     return FileRegistry.register_structure_file_record_chunk(file_id, chunk_number, chunk_size)
 
+### Normalize
+
+
+@shared_task(bind=True, name="normalize fetch")
+def fetch_structure_file_for_normalization_task(self, file_id: int):
+    if file_id := StructureRegistry.fetch_structure_file_for_normalization(file_id):
+        logger.info("structure file %s fetched for normalization" % (file_id, ))
+        return file_id
+    else:
+        logger.info("structure file %s skipped for normalization" % (file_id, ))
+        self.request.callbacks = None
+
+
+@shared_task(name="normalize mapper")
+def normalize_chunk_mapper(file_id: int, callback):
+    logger.info("args %s %s" % (file_id, callback))
+    return StructureRegistry.normalize_chunk_mapper(file_id, callback)
+
 
 @shared_task(name="normalize")
 def normalize_structure_task(structure_ids: List[int]):
     return StructureRegistry.normalize_structures(structure_ids)
 
+
+### InCHI
 
 @shared_task(name="calcinchi")
 def calculate_inchi_task(structure_ids: List[int]):

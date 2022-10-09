@@ -11,19 +11,20 @@ import logging
 import os
 import time
 from collections import namedtuple, defaultdict
-from typing import List
+from typing import List, Optional
 
 import pytz
 from celery import subtask, group
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
+from django.db.models import QuerySet
 from pycactvs import Molfile, Ens, Prop
 
-from custom.cactvs import CactvsHash, CactvsMinimol
+from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
-    Release, NameType, Name, Record
+    Release, NameType, Name, Record, StructureHashisy, StructureParentStructure
 from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
@@ -32,7 +33,7 @@ logger = logging.getLogger('celery.task')
 
 DEFAULT_CHUNK_SIZE = 10000
 DEFAULT_DATABASE_ROW_BATCH_SIZE = 1000
-DEFAULT_LOGGER_BLOCK = 1000
+DEFAULT_LOGGER_BLOCK = 10
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
 Status = namedtuple('Status', 'file created')
@@ -95,6 +96,8 @@ class FileRegistry(object):
         if check:
             molfile_count = molfile.count()
             logger.info("file count %s" % molfile_count)
+        else:
+            molfile_count = -1
         i = 0
         finished = False
         chunk_sum_count = 0
@@ -235,10 +238,11 @@ class FileRegistry(object):
                 hashisy_key = CactvsHash(ens)
                 structure = Structure(
                     hashisy_key=hashisy_key,
-                    hashisy=hashisy_key.padded,
+                    #hashisy=hashisy_key.padded,
                     minimol=CactvsMinimol(ens)
                 )
                 structures.append(structure)
+
             except Exception as e:
                 logger.error("error while registering file record '%s': %s" % (fname, e))
                 break
@@ -278,8 +282,16 @@ class FileRegistry(object):
                 time1 = time.perf_counter()
                 logging.info("STRUCTURE BULK T: %s C: %s" % ((time1 - time0), len(structures)))
 
-                hashisy_list = [record_data.hashisy_key for record_data in record_data_list]
-                structures = Structure.objects.in_bulk(hashisy_list, field_name='hashisy_key')
+                hashisy_key_list = [record_data.hashisy_key for record_data in record_data_list]
+                structures = Structure.objects.in_bulk(hashisy_key_list, field_name='hashisy_key')
+
+                structure_hashisy_list = [StructureHashisy(structure=structures[key], hashisy=key.padded) for key in hashisy_key_list]
+                StructureHashisy.objects.bulk_create(
+                    structure_hashisy_list,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+
 
                 logger.info("registering structure file records for '%s'" % (fname,))
                 structure_file_record_objects = list()
@@ -398,6 +410,7 @@ class FileRegistry(object):
 
         return filestore_name, Path(filestore_name)
 
+
 class StructureRegistry(object):
 
     CHUNK_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
@@ -444,7 +457,58 @@ class StructureRegistry(object):
     ]
 
     @staticmethod
+    def fetch_structure_file_for_normalization(structure_file_id: int) -> Optional[int]:
+        try:
+            structure_file = StructureFile.objects.get(id=structure_file_id)
+        except StructureFile.DoesNotExist:
+            return None
+        logger.info("normalize structure file %s", structure_file)
+        if hasattr(structure_file, 'file_status'):
+            status = structure_file.file_status
+        else:
+            status = StructureFileStatus(structure_file=structure_file)
+            status.save()
+        if status.normalization_finished:
+            return None
+        return structure_file_id
+
+    @staticmethod
+    def normalize_chunk_mapper(structure_file_id: int, callback):
+        try:
+            structure_file = StructureFile.objects.get(id=structure_file_id)
+            records: QuerySet = StructureFileRecord.objects \
+                .select_related('structure') \
+                .values('structure__id') \
+                .filter(
+                    structure_file=structure_file,
+                    structure__compound__isnull=True,
+                    structure__blocked__isnull=True,
+                ).exclude(
+                    structure__hashisy_key=SpecialCactvsHash.ZERO.hashisy
+                ).exclude(
+                    structure__hashisy_key=SpecialCactvsHash.MAGIC.hashisy
+                )
+        except Exception as e:
+            logger.error("structure file and count not available")
+            raise Exception(e)
+        count = len(records)
+        chunk_size = StructureRegistry.CHUNK_SIZE
+        chunk_number = math.ceil(count / chunk_size)
+        #chunks = range(0, chunk_number)
+
+        chunks = [records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
+        logger.info("-----> %s" % chunks)
+        #[r['structure__id'] for r in chunk]
+
+        callback = subtask(callback)
+        return group(callback.clone([[r['structure__id'] for r in chunk]]) for chunk in chunks)()
+
+    @staticmethod
     def normalize_structures(structure_ids: list):
+
+        logger.info("!-----> %s" % structure_ids)
+
+
         # NOTE: the order matters, it has to go from broader to more specific identifier!!
         identifiers = StructureRegistry.NCICADD_TYPES
 
@@ -466,7 +530,6 @@ class StructureRegistry(object):
                     related_hashes[identifier.attr] = hashisy_key
                     parent_structure: Structure = Structure(
                         hashisy_key=hashisy_key,
-                        hashisy=hashisy_key.padded,
                         minimol=CactvsMinimol(parent_ens)
                     )
                     parent_structure_relationships\
@@ -484,7 +547,9 @@ class StructureRegistry(object):
         try:
             with transaction.atomic():
                 # create parent structures in bulk
-                structures = sorted([p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int)
+                structures = sorted(
+                    [p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int
+                )
                 Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -495,31 +560,37 @@ class StructureRegistry(object):
                 parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
 
                 # create compounds in bulk
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
+                compound_structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
                 Compound.objects.bulk_create(
-                    [Compound(structure=parent_structure) for parent_structure in structures],
+                    [Compound(structure=compound_structure) for compound_structure in compound_structures],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
 
-                # update normalized structure with parent structure relationships in bulk
+                source_structure_dict = {
+                    id: StructureParentStructure(structure=source_structures[id]) for id in source_structures
+                }
                 for relationship in source_structure_relationships:
+                    parent = source_structure_dict[relationship.structure.id]
                     for attr, parent_hash in relationship.relationships.items():
-                        setattr(source_structures[relationship.structure.id], attr, parent_structures[parent_hash])
-                structures = sorted(source_structures.values(), key=lambda s: s.hashisy_key.int)
-                Structure.objects.bulk_update(
-                    structures,
-                    [identifier.attr for identifier in identifiers]
+                        setattr(parent, attr, parent_structures[parent_hash])
+                StructureParentStructure.objects.bulk_create(
+                    sorted(source_structure_dict.values(), key=lambda p: p.structure_id),
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
                 )
 
-                # update parent structure relationships in bulk
+                parent_structure_dict = {
+                    id: StructureParentStructure(structure=parent_structures[id]) for id in parent_structures
+                }
                 for relationship in parent_structure_relationships:
+                    parent = parent_structure_dict[relationship.structure.hashisy_key]
                     for attr, parent_hash in relationship.relationships.items():
-                        setattr(parent_structures[relationship.structure.hashisy_key], attr, parent_structures[parent_hash])
-                structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
-                Structure.objects.bulk_update(
-                    structures,
-                    [identifier.attr for identifier in identifiers]
+                        setattr(parent, attr, parent_structures[parent_hash])
+                StructureParentStructure.objects.bulk_create(
+                    sorted(parent_structure_dict.values(), key=lambda p: p.structure_id),
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
                 )
         except DatabaseError as e:
             logger.error(e)

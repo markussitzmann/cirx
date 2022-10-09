@@ -21,14 +21,7 @@ class StructureManager(models.Manager):
 class Structure(models.Model):
     #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hashisy_key = CactvsHashField(unique=True)
-    hashisy = models.CharField(max_length=16, null=True, blank=True)
     minimol = CactvsMinimolField(null=False)
-    ficts_parent = models.ForeignKey(
-        'Structure', blank=True, null=True, related_name='ficts_children', on_delete=models.PROTECT)
-    ficus_parent = models.ForeignKey(
-        'Structure', blank=True, null=True, related_name='ficus_children', on_delete=models.PROTECT)
-    uuuuu_parent = models.ForeignKey(
-        'Structure', blank=True, null=True, related_name='uuuuu_children', on_delete=models.PROTECT)
     names = models.ManyToManyField(
         'Name',
         through='StructureNameAssociation',
@@ -38,10 +31,10 @@ class Structure(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
-    indexes = Index(
-        fields=['ficts_parent', 'ficus_parent', 'uuuuu_parent', 'hashisy_key', 'hashisy'],
-        name='structure_index'
-    )
+    #indexes = Index(
+    #    fields=['ficts_parent', 'ficus_parent', 'uuuuu_parent', 'hashisy_key', 'hashisy'],
+    #    name='structure_index'
+    #)
 
     class JSONAPIMeta:
         resource_name = 'structures'
@@ -59,6 +52,39 @@ class Structure(models.Model):
 
     def __str__(self):
         return "[%s] %s" % (self.hashisy_key.padded, self.to_ens.get("E_SMILES"))
+
+
+class StructureHashisy(models.Model):
+    structure = models.OneToOneField(
+        'Structure',
+        primary_key=True,
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT,
+    )
+    hashisy = models.CharField(max_length=16, null=False, blank=False, db_index=True)
+
+    class Meta:
+        db_table = 'cir_structure_hashisy'
+
+
+class StructureParentStructure(models.Model):
+    structure = models.OneToOneField(
+        'Structure',
+        primary_key=True,
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT
+    )
+    ficts_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='ficts_children', on_delete=models.PROTECT)
+    ficus_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='ficus_children', on_delete=models.PROTECT)
+    uuuuu_parent = models.ForeignKey(
+        'Structure', blank=True, null=True, related_name='uuuuu_children', on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = 'cir_structure_parent'
 
 
 class InChIManager(models.Manager):

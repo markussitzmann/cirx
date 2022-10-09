@@ -12,7 +12,7 @@ from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
-MINI = False
+MINI = True
 INIT_PUBCHEM_COMPOUND = True
 INIT_PUBCHEM_SUBSTANCE = True
 INIT_CHEMBL = True
@@ -336,7 +336,7 @@ def init_release(
         else:
             chembl_collection, created = StructureFileCollection.objects.get_or_create(
                 release=chembl_db,
-                file_location_pattern_string="29/chembl_29/chembl_29.*.sdf"
+                file_location_pattern_string="chembl/29/chembl_29/chembl_29.*.sdf.gz"
             )
             chembl_collection.save()
         chembl_collection.preprocessors.add(
@@ -381,7 +381,7 @@ def init_release(
         else:
             pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_compound,
-                file_location_pattern_string="compound/Compound_*/*.sdf"
+                file_location_pattern_string="pubchem/compound/Compound_*/*.sdf.gz"
             )
         pubchem_compound_collection.preprocessors.add(
             pubchem_compound_preprocessor
@@ -419,7 +419,7 @@ def init_release(
         else:
             pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
                 release=pubchem_substance,
-                file_location_pattern_string="substance/Substance_*/*.sdf"
+                file_location_pattern_string="pubchem/substance/Substance_*/*.sdf.gz"
             )
         pubchem_substance_collection.preprocessors.add(
             pubchem_ext_datasource_preprocessor,
