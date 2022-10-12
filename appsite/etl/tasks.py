@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from celery import shared_task
+from celery import shared_task, Task
 
 from etl.registration import FileRegistry, StructureRegistry
 
@@ -34,12 +34,16 @@ def register_file_record_chunk_task(file_id: int, chunk_number: int, chunk_size:
 
 @shared_task(bind=True, name="normalize fetch")
 def fetch_structure_file_for_normalization_task(self, file_id: int):
-    if file_id := StructureRegistry.fetch_structure_file_for_normalization(file_id):
+    file_id = StructureRegistry.fetch_structure_file_for_normalization(file_id)
+    if file_id:
         logger.info("structure file %s fetched for normalization" % (file_id, ))
         return file_id
-    else:
-        logger.info("structure file %s skipped for normalization" % (file_id, ))
-        self.request.callbacks = None
+    return None
+    #else:
+    #    logger.info("structure file %s skipped for normalization" % (file_id, ))
+    #    #self.request.callbacks = None
+    #    self.request.callbacks[:] = []
+
 
 
 @shared_task(name="normalize mapper")

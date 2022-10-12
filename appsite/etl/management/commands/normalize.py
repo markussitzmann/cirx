@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from custom.cactvs import SpecialCactvsHash
 from etl.models import StructureFileRecord, StructureFile
@@ -19,11 +19,14 @@ class Command(BaseCommand):
 
 def _normalize_structures(structure_file_id: int):
     task_list = (
-            fetch_structure_file_for_normalization_task.s(structure_file_id)
-            | normalize_chunk_mapper.s(normalize_structure_task.s())
+        fetch_structure_file_for_normalization_task.s(structure_file_id)
+        | normalize_chunk_mapper.s(normalize_structure_task.s())
     )
     logger.info("submitting %s tasks", len(task_list))
     return task_list.delay()
+
+
+
 
 #def _normalize_structures(structure_ids: List[int]):
 #    task = normalize_structure_task
@@ -32,7 +35,10 @@ def _normalize_structures(structure_file_id: int):
 #    return tasks
 
 def _normalize():
-    for file in StructureFile.objects.all():
+    files: QuerySet = StructureFile.objects.filter(
+        Q(normalization_status__isnull=True) | Q(normalization_status__finished=False)
+    ).all()
+    for file in files:
         _normalize_structures(file.id)
 
 

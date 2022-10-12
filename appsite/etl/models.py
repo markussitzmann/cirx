@@ -89,29 +89,47 @@ class StructureFile(models.Model):
         return "%s (%s)" % (self.file, self.count)
 
 
-class StructureFileStatus(models.Model):
+class StructureFileNormalizationStatus(models.Model):
     structure_file = models.OneToOneField(
         'StructureFile',
         primary_key=True,
         blank=False,
         null=False,
-        related_name='file_status',
+        related_name='normalization_status',
         on_delete=models.CASCADE,
     )
-    normalization = models.DateTimeField(auto_now_add=True, blank=False, null=False)
-    normalization_finished = models.BooleanField(default=False)
-    inchi_calculation = models.DateTimeField(auto_now_add=True, blank=False, null=False)
-    inchi_calculation_finished = models.BooleanField(default=False)
+    updated = models.DateTimeField(auto_now=True, blank=True, null=True)
+    finished = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'cir_structure_file_status'
+        db_table = 'cir_structure_file_normalization_status'
 
     def __str__(self):
-        return "normalized %s (%s) inchi_calculated %s (%s)" % (
-            self.normalized,
-            self.normalization_finished,
-            self.inchi_calculated,
-            self.inchi_calculation_finished
+        return "normalization status %s (%s)" % (
+            self.updated,
+            self.finished
+        )
+
+
+class StructureFileInChIStatus(models.Model):
+    structure_file = models.OneToOneField(
+        'StructureFile',
+        primary_key=True,
+        blank=False,
+        null=False,
+        related_name='inchi_status',
+        on_delete=models.CASCADE,
+    )
+    updated = models.DateTimeField(auto_now=True, blank=True, null=True)
+    finished = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'cir_structure_file_inchi_status'
+
+    def __str__(self):
+        return "inchi status %s (%s)" % (
+            self.updated,
+            self.finished
         )
 
 

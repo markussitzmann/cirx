@@ -22,7 +22,7 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileStatus
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure
 from structure.inchi.identifier import InChIString, InChIKey
@@ -292,7 +292,6 @@ class FileRegistry(object):
                     ignore_conflicts=True
                 )
 
-
                 logger.info("registering structure file records for '%s'" % (fname,))
                 structure_file_record_objects = list()
                 unique_record_data_list = \
@@ -463,18 +462,19 @@ class StructureRegistry(object):
         except StructureFile.DoesNotExist:
             return None
         logger.info("normalize structure file %s", structure_file)
-        if hasattr(structure_file, 'file_status'):
-            status = structure_file.file_status
+        if hasattr(structure_file, 'normalization_status'):
+            status = structure_file.normalization_status
         else:
-            status = StructureFileStatus(structure_file=structure_file)
+            status = StructureFileNormalizationStatus(structure_file=structure_file)
             status.save()
-        if status.normalization_finished:
+        if status.finished:
             return None
         return structure_file_id
 
     @staticmethod
     def normalize_chunk_mapper(structure_file_id: int, callback):
         try:
+            logger.info("!!!>>>> %s", structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
             records: QuerySet = StructureFileRecord.objects \
                 .select_related('structure') \
@@ -493,26 +493,20 @@ class StructureRegistry(object):
             raise Exception(e)
         count = len(records)
         chunk_size = StructureRegistry.CHUNK_SIZE
-        chunk_number = math.ceil(count / chunk_size)
-        #chunks = range(0, chunk_number)
-
         chunks = [records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
-        logger.info("-----> %s" % chunks)
-        #[r['structure__id'] for r in chunk]
-
         callback = subtask(callback)
-        return group(callback.clone([[r['structure__id'] for r in chunk]]) for chunk in chunks)()
+        callback_args = [(structure_file_id, [r['structure__id'] for r in chunk]) for chunk in chunks]
+        return group(callback.clone(callback_args))()
 
     @staticmethod
-    def normalize_structures(structure_ids: list):
+    def normalize_structures(arg_tuple):
 
-        logger.info("!-----> %s" % structure_ids)
-
+        structure_file_id, structure_ids = arg_tuple
 
         # NOTE: the order matters, it has to go from broader to more specific identifier!!
         identifiers = StructureRegistry.NCICADD_TYPES
 
-        source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
+        source_structures: List[Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
         parent_structure_relationships = []
         source_structure_relationships = []
 
@@ -599,7 +593,24 @@ class StructureRegistry(object):
             logger.error(e)
             raise Exception(e)
 
+        StructureRegistry.check_normalization_finished(structure_file_id)
+
         return structure_ids
+
+    @staticmethod
+    def check_normalization_finished(file_id):
+        structure_file = StructureFile.objects.get(id=file_id)
+        records: QuerySet = StructureFileRecord.objects \
+            .select_related('structure')\
+            .values('structure__id')\
+            .filter(
+                structure_file=structure_file,
+                structure__compound__isnull=False,
+            )
+        if structure_file.count == records.count():
+            status, created = StructureFileNormalizationStatus.objects.get_or_create(structure_file=structure_file)
+            status.finished = True
+            status.save()
 
     @staticmethod
     def calculate_inchi(structure_ids: list):
