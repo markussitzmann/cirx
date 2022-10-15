@@ -11,7 +11,7 @@ import logging
 import os
 import time
 from collections import namedtuple, defaultdict
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import pytz
 from celery import subtask, group
@@ -22,7 +22,7 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileInChIStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure
 from structure.inchi.identifier import InChIString, InChIKey
@@ -33,7 +33,7 @@ logger = logging.getLogger('celery.task')
 
 DEFAULT_CHUNK_SIZE = 10000
 DEFAULT_DATABASE_ROW_BATCH_SIZE = 1000
-DEFAULT_LOGGER_BLOCK = 10
+DEFAULT_LOGGER_BLOCK = 100
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
 Status = namedtuple('Status', 'file created')
@@ -474,7 +474,6 @@ class StructureRegistry(object):
     @staticmethod
     def normalize_chunk_mapper(structure_file_id: int, callback):
         try:
-            logger.info("!!!>>>> %s", structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
             records: QuerySet = StructureFileRecord.objects \
                 .select_related('structure') \
@@ -491,22 +490,24 @@ class StructureRegistry(object):
         except Exception as e:
             logger.error("structure file and count not available")
             raise Exception(e)
-        count = len(records)
-        chunk_size = StructureRegistry.CHUNK_SIZE
-        chunks = [records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
-        callback = subtask(callback)
-        callback_args = [(structure_file_id, [r['structure__id'] for r in chunk]) for chunk in chunks]
-        return group(callback.clone(callback_args))()
+        return StructureRegistry.structure_records_to_chunk_callbacks(records, structure_file_id, callback)
+
+        # count = len(records)
+        # chunk_size = StructureRegistry.CHUNK_SIZE
+        # chunks = [records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
+        # callback = subtask(callback)
+        # callback_args = [[r['structure__id'] for r in chunk] for chunk in chunks]
+        # clones = [callback.clone(((structure_file_id, args, ), ), ) for args in callback_args]
+        # return group(clones)()
 
     @staticmethod
     def normalize_structures(arg_tuple):
-
         structure_file_id, structure_ids = arg_tuple
 
         # NOTE: the order matters, it has to go from broader to more specific identifier!!
         identifiers = StructureRegistry.NCICADD_TYPES
 
-        source_structures: List[Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
+        source_structures: Dict[int, Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
         parent_structure_relationships = []
         source_structure_relationships = []
 
@@ -613,8 +614,53 @@ class StructureRegistry(object):
             status.save()
 
     @staticmethod
-    def calculate_inchi(structure_ids: list):
-        source_structures = Structure.objects.in_bulk(structure_ids, field_name='id')
+    def fetch_structure_file_for_calcinchi(structure_file_id: int) -> Optional[int]:
+        try:
+            structure_file = StructureFile.objects.get(id=structure_file_id)
+        except StructureFile.DoesNotExist:
+            return None
+        logger.info("calc inchi structure file %s", structure_file)
+        if hasattr(structure_file, 'calcinchi_status'):
+            status = structure_file.calcinchi_status
+        else:
+            status = StructureFileInChIStatus(structure_file=structure_file)
+            status.save()
+        if status.finished:
+            return None
+        return structure_file_id
+
+    @staticmethod
+    def calcinchi_chunk_mapper(structure_file_id: int, callback):
+        try:
+            structure_file = StructureFile.objects.get(id=structure_file_id)
+            records: QuerySet = StructureFileRecord.objects \
+                .select_related('structure') \
+                .values('structure__id') \
+                .filter(
+                    structure_file=structure_file,
+                    structure__compound__isnull=False,
+                    structure__blocked__isnull=True,
+                    structure__inchis__isnull=True,
+                )
+        except Exception as e:
+            logger.error("selecting structure records for InChI calculation failed")
+            raise Exception(e)
+
+        return StructureRegistry.structure_records_to_chunk_callbacks(records, structure_file_id, callback)
+
+        # count = len(records)
+        # chunk_size = StructureRegistry.CHUNK_SIZE
+        # chunks = [records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
+        # callback = subtask(callback)
+        # callback_args = [[r['structure__id'] for r in chunk] for chunk in chunks]
+        # clones = [callback.clone(((structure_file_id, args, ), ), ) for args in callback_args]
+        # return group(clones)()
+
+    @staticmethod
+    def calculate_inchi(arg_tuple):
+        structure_file_id, structure_ids = arg_tuple
+
+        source_structures: Dict[int, Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
 
         for inchi_type in StructureRegistry.INCHI_TYPES:
             options = Prop(inchi_type.property).getparam("options")
@@ -713,6 +759,35 @@ class StructureRegistry(object):
             logger.error(e)
             raise Exception(e)
         return structure_ids
+
+    @staticmethod
+    def check_calcinchi_finished(file_id):
+        structure_file = StructureFile.objects.get(id=file_id)
+        records: QuerySet = StructureFileRecord.objects \
+            .select_related('structure') \
+            .values('structure__id') \
+            .filter(
+                structure_file=structure_file,
+                structure__compound__isnull=False,
+                structure__inchis__isnull=False
+        )
+        if structure_file.count == records.count():
+            status, created = StructureFileInChIStatus.objects.get_or_create(structure_file=structure_file)
+            status.finished = True
+            status.save()
+
+    @staticmethod
+    def structure_records_to_chunk_callbacks(records: QuerySet, structure_file_id: int, callback):
+        count = len(records)
+        logger.info("XXX ---> %s" % records)
+        chunk_size = StructureRegistry.CHUNK_SIZE
+        chunks = [records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
+        callback = subtask(callback)
+        callback_args = [[r['structure__id'] for r in chunk] for chunk in chunks]
+        logger.info("CCC ---> %s" % callback_args)
+        callbacks = [callback.clone(((structure_file_id, args,),), ) for args in callback_args]
+        logger.info("AAA ---> %s" % callbacks)
+        return group(callbacks)()
 
 
 def structure_id_chunks(structure_ids):

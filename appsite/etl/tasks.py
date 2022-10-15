@@ -31,7 +31,6 @@ def register_file_record_chunk_task(file_id: int, chunk_number: int, chunk_size:
 
 ### Normalize
 
-
 @shared_task(bind=True, name="normalize fetch")
 def fetch_structure_file_for_normalization_task(self, file_id: int):
     file_id = StructureRegistry.fetch_structure_file_for_normalization(file_id)
@@ -39,12 +38,6 @@ def fetch_structure_file_for_normalization_task(self, file_id: int):
         logger.info("structure file %s fetched for normalization" % (file_id, ))
         return file_id
     return None
-    #else:
-    #    logger.info("structure file %s skipped for normalization" % (file_id, ))
-    #    #self.request.callbacks = None
-    #    self.request.callbacks[:] = []
-
-
 
 @shared_task(name="normalize mapper")
 def normalize_chunk_mapper(file_id: int, callback):
