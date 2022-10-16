@@ -282,10 +282,10 @@ class FileRegistry(object):
                 logging.info("STRUCTURE BULK T: %s C: %s" % ((time1 - time0), len(structures)))
 
                 hashisy_key_list = [record_data.hashisy_key for record_data in record_data_list]
-                structures = Structure.objects.in_bulk(hashisy_key_list, field_name='hashisy_key')
+                structure_hashkey_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(hashisy_key_list, field_name='hashisy_key')
 
                 structure_hashisy_list = [
-                    StructureHashisy(structure=structures[key], hashisy=key.padded) for key in hashisy_key_list
+                    StructureHashisy(structure=structure_hashkey_dict[key], hashisy=key.padded) for key in hashisy_key_list
                 ]
                 StructureHashisy.objects.bulk_create(
                     structure_hashisy_list,
@@ -295,11 +295,13 @@ class FileRegistry(object):
 
                 logger.info("registering structure file records for '%s'" % (fname,))
                 structure_file_record_objects = list()
-                unique_record_data_list = \
-                    sorted(
-                        list(set([(structures[record_data.hashisy_key], record_data.index) for record_data in record_data_list])),
-                        key=lambda u: u[1]
-                    )
+                unique_record_data_list = sorted(
+                    list(set([
+                        (structure_hashkey_dict[record_data.hashisy_key], record_data.index)
+                        for record_data in record_data_list]
+                    )),
+                    key=lambda u: u[1]
+                )
                 for t in unique_record_data_list:
                     structure, index = t
                     structure_file_record_objects.append(
