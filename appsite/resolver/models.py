@@ -1,4 +1,6 @@
 import uuid
+from typing import List
+
 from pycactvs import Ens
 
 from django.db import models, IntegrityError
@@ -89,18 +91,31 @@ class StructureParentStructure(models.Model):
 
 class InChIManager(models.Manager):
 
-    def create(self, string=None, *args, **kwargs):
-        if not string and 'string' not in kwargs:
-            raise IntegrityError('InChI string required for creation of InChI instance')
-        inchi = InChIString(string, *args, **kwargs)
-        return super(InChIManager, self).create(**inchi.model_dict)
+    #def create(self, string=None, *args, **kwargs):
+    #    if not string and 'string' not in kwargs:
+    #        raise IntegrityError('InChI string required for creation of InChI instance')
+    #    inchi = InChIString(string, *args, **kwargs)
+    #    return super(InChIManager, self).create(**inchi.model_dict)
 
-    def get_or_create(self, string=None, *args, **kwargs):
-        if not string and 'string' not in kwargs:
-            raise IntegrityError('InChI string required for creation of InChI instance')
-        inchi = InChIString(string, *args, **kwargs)
-        return super(InChIManager, self).get_or_create(**inchi.model_dict)
+    #def get_or_create(self, string=None, *args, **kwargs):
+    #    if not string and 'string' not in kwargs:
+    #        raise IntegrityError('InChI string required for creation of InChI instance')
+    #    inchi = InChIString(string, *args, **kwargs)
+    #    return super(InChIManager, self).get_or_create(**inchi.model_dict)
 
+    def bulk_get_from_objects(self, object_list: List['InChI']):
+        inchi_list = []
+        for o in object_list:
+            if o.pk:
+                inchi_list.append(o)
+            else:
+                i = InChI.objects.get(
+                    block1=o.block1,
+                    block2=o.block2,
+                    block3=o.block3
+                )
+                inchi_list.append(i)
+        return inchi_list
 
 class InChI(models.Model):
     #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -228,7 +243,7 @@ class StructureInChIAssociation(models.Model):
         null=False
     )
     software_version = models.CharField(max_length=16, default="1", blank=False, null=False)
-    save_opt = models.CharField(max_length=2, default=None, blank=False, null=False)
+    save_opt = models.CharField(max_length=2, default="", blank=True, null=False)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
