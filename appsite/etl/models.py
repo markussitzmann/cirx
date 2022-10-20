@@ -99,7 +99,8 @@ class StructureFileNormalizationStatus(models.Model):
         on_delete=models.CASCADE,
     )
     updated = models.DateTimeField(auto_now=True, blank=True, null=True)
-    finished = models.BooleanField(default=False)
+    progress = models.FloatField(default=0.0)
+    #finished = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'cir_structure_file_normalization_status'
@@ -121,7 +122,9 @@ class StructureFileInChIStatus(models.Model):
         on_delete=models.CASCADE,
     )
     updated = models.DateTimeField(auto_now=True, blank=True, null=True)
-    finished = models.BooleanField(default=False)
+    progress = models.FloatField(default=0.0)
+
+    #finished = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'cir_structure_file_inchi_status'

@@ -52,7 +52,7 @@ class StructureNormalizationTests(TestCase):
         n = StructureRegistry.normalize_structures((files[6].id, [r['structure__id'] for r in t[0]]))
         logger.info("N --> %s" % (n, ))
 
-        StructureRegistry.check_normalization_finished(files[6].id)
+        StructureRegistry.update_normalization_status(files[6].id)
 
         # registry = FileRegistry(self.structure_file_collection)
         # registry.register_files()

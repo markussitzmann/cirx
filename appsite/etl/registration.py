@@ -470,7 +470,7 @@ class StructureRegistry(object):
         else:
             status = StructureFileNormalizationStatus(structure_file=structure_file)
             status.save()
-        if status.finished:
+        if status.progress > 0.95:
             return None
         return structure_file_id
 
@@ -588,11 +588,11 @@ class StructureRegistry(object):
         except Exception as e:
             logger.error(e)
             raise Exception(e)
-        StructureRegistry.check_normalization_finished(structure_file_id)
+        StructureRegistry.update_normalization_status(structure_file_id)
         return True
 
     @staticmethod
-    def check_normalization_finished(file_id):
+    def update_normalization_status(file_id):
         structure_file = StructureFile.objects.get(id=file_id)
         records: QuerySet = StructureFileRecord.objects \
             .select_related('structure')\
@@ -609,10 +609,10 @@ class StructureRegistry(object):
             structure_file_count,
             records_count
         ))
-        if structure_file.count == records.count():
-            status, created = StructureFileNormalizationStatus.objects.get_or_create(structure_file=structure_file)
-            status.finished = True
-            status.save()
+        #if structure_file.count == records.count():
+        status, created = StructureFileNormalizationStatus.objects.get_or_create(structure_file=structure_file)
+        status.progress = records_count / structure_file_count
+        status.save()
 
     @staticmethod
     def fetch_structure_file_for_calcinchi(structure_file_id: int) -> Optional[int]:
@@ -626,7 +626,7 @@ class StructureRegistry(object):
         else:
             status = StructureFileInChIStatus(structure_file=structure_file)
             status.save()
-        if status.finished:
+        if status.objects > 0.95:
             return None
         return structure_file_id
 
@@ -748,11 +748,11 @@ class StructureRegistry(object):
         except Exception as e:
             logger.error(e)
             raise Exception(e)
-        StructureRegistry.check_calcinchi_finished(structure_file_id)
+        StructureRegistry.update_calcinchi_progress(structure_file_id)
         return True
 
     @staticmethod
-    def check_calcinchi_finished(file_id):
+    def update_calcinchi_progress(file_id):
         structure_file = StructureFile.objects.get(id=file_id)
         records: QuerySet = StructureFileRecord.objects \
             .select_related('structure') \
@@ -770,10 +770,10 @@ class StructureRegistry(object):
             structure_file_count,
             records_count
         ))
-        if structure_file.count == records.count():
-            status, created = StructureFileInChIStatus.objects.get_or_create(structure_file=structure_file)
-            status.finished = True
-            status.save()
+        #if structure_file.count == records.count():
+        status, created = StructureFileInChIStatus.objects.get_or_create(structure_file=structure_file)
+        status.progress = records_count / structure_file_count
+        status.save()
 
     @staticmethod
     def structure_records_to_chunk_callbacks(records: QuerySet, structure_file_id: int, callback):
