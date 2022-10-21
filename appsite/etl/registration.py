@@ -57,7 +57,6 @@ class NameTriple:
 
 @dataclass
 class RecordData:
-
     structure_file: StructureFile
     hashisy_key: CactvsHash
     index: int
@@ -67,6 +66,7 @@ class RecordData:
     record_object: Record = None
     structure_file_record_object: StructureFileRecord = None
     regid: str = None
+    version: int = 1
     names: List[NameTriple] = field(default_factory=lambda: [])
 
     def __str__(self):
@@ -302,27 +302,35 @@ class FileRegistry(object):
                 )
 
                 logger.info("registering structure file records for '%s'" % (fname,))
+                #####
+                #for data in record_data:
+                #    index, structure = data
+                #
+                #
+                ####
                 structure_file_record_objects = list()
-                unique_record_data_list = sorted(
-                    list(set([
+                sorted_record_data_structure_list = sorted(
+                    [
                         (record_data.index, record_data, structure_hashkey_dict[record_data.hashisy_key])
-                        for record_data in record_data_list]
-                    )),
+                        for record_data in record_data_list
+                    ],
                     key=lambda u: u[0]
                 )
-                for data_triplet in unique_record_data_list:
-                    index, record_data, structure = data_triplet
-                    structure_file_record_object = StructureFileRecord(
-                        structure_file=structure_file,
-                        structure=structure,
-                        number=index,
-                    )
-                    structure_file_record_objects.append(structure_file_record_object)
-                    record_data.structure_file_record_object = structure_file_record_object
+                structure_file_record_object_dict = {}
+                for data in sorted_record_data_structure_list:
+                    index, record_data, structure = data
+                    if index not in structure_file_record_object_dict:
+                        structure_file_record_object = StructureFileRecord(
+                            structure_file=structure_file,
+                            structure=structure,
+                            number=index,
+                        )
+                        structure_file_record_object_dict[index] = structure_file_record_object
+                    record_data.structure_file_record_object = structure_file_record_object_dict[index]
 
                 time0 = time.perf_counter()
                 structure_file_records = StructureFileRecord.objects.bulk_create(
-                    structure_file_record_objects,
+                    structure_file_record_object_dict.values(),
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
                 time1 = time.perf_counter()
@@ -371,8 +379,9 @@ class FileRegistry(object):
                     key = str(record_data.structure_file.id) + ":" + str(record_data.index)
                     sfr = structure_file_record_dict[key]
                     record_object = Record(
-                        regid=names[str(record_data.regid)],
-                        version=1,
+                        name=names[str(record_data.regid)],
+                        regid=record_data.regid,
+                        version=record_data.version,
                         release=record_data.release_object,
                         dataset=record_data.release_object.dataset,
                         structure_file_record=sfr
@@ -401,9 +410,8 @@ class FileRegistry(object):
                 StructureFileRecordNameAssociation.objects.bulk_create(
                     structure_file_record_name_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
                 )
-
-
                 #logging.info("--> %s", record_name_list)
 
         except DatabaseError as e:

@@ -285,7 +285,7 @@ class Record(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['regid', 'version', 'release'], name='unique_record'),
+            UniqueConstraint(fields=['name', 'version', 'release'], name='unique_record'),
         ]
         db_table = 'cir_record'
 
