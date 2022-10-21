@@ -3,7 +3,7 @@ from pycactvs import Ens
 
 from django.test import TestCase
 
-from etl.models import StructureFileCollection, StructureFileRecord
+from etl.models import StructureFileCollection, StructureFileRecord, StructureFileRecordNameAssociation
 from registration import FileRegistry
 from resolver.models import Structure, Dataset, Release, NameType, Name
 
@@ -27,11 +27,16 @@ class FileRegistryTests(TestCase):
         for r in StructureFileRecord.objects.all():
             logger.info("NAME TYPE %s : %s :", r.id, r)
 
+
+
     def tearDown(self):
         logger.info("----- file registry tear down ----")
         logger.info("ENS COUNT: %s" % len(Ens.List()))
         for n in Name.objects.all():
             logger.info("NAME %s : %s :", n.id, n)
+
+        for a in StructureFileRecordNameAssociation.objects.all():
+            logger.info("ASSOCIATIONS %s : %s :", a.id, a)
 
     def test_file_registry(self):
         logger.info("----- file registry test ----")

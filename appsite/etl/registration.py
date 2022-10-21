@@ -22,7 +22,8 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileInChIStatus
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileInChIStatus, \
+    StructureFileRecordNameAssociation
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure
 from structure.inchi.identifier import InChIString, InChIKey
@@ -56,17 +57,23 @@ class NameTriple:
 
 @dataclass
 class RecordData:
+
     structure_file: StructureFile
     hashisy_key: CactvsHash
     index: int
     preprocessors: defaultdict = field(default_factory=lambda: defaultdict(dict))
     release_name: str = None
     release_object: Release = None
+    record_object: Record = None
+    structure_file_record_object: StructureFileRecord = None
     regid: str = None
     names: List[NameTriple] = field(default_factory=lambda: [])
 
     def __str__(self):
         return "RecordData[%s, %s]" % (self.index, self.release_object)
+
+    def __hash__(self) -> int:
+        return hash(repr(self.structure_file.id) + ":" + repr(self.index))
 
 
 class FileRegistry(object):
@@ -282,8 +289,9 @@ class FileRegistry(object):
                 logging.info("STRUCTURE BULK T: %s C: %s" % ((time1 - time0), len(structures)))
 
                 hashisy_key_list = [record_data.hashisy_key for record_data in record_data_list]
-                structure_hashkey_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(hashisy_key_list, field_name='hashisy_key')
-
+                structure_hashkey_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(
+                    hashisy_key_list, field_name='hashisy_key'
+                )
                 structure_hashisy_list = [
                     StructureHashisy(structure=structure_hashkey_dict[key], hashisy=key.padded) for key in hashisy_key_list
                 ]
@@ -297,20 +305,20 @@ class FileRegistry(object):
                 structure_file_record_objects = list()
                 unique_record_data_list = sorted(
                     list(set([
-                        (structure_hashkey_dict[record_data.hashisy_key], record_data.index)
+                        (record_data.index, record_data, structure_hashkey_dict[record_data.hashisy_key])
                         for record_data in record_data_list]
                     )),
-                    key=lambda u: u[1]
+                    key=lambda u: u[0]
                 )
-                for t in unique_record_data_list:
-                    structure, index = t
-                    structure_file_record_objects.append(
-                        StructureFileRecord(
-                            structure_file=structure_file,
-                            structure=structure,
-                            number=index,
-                        )
+                for data_triplet in unique_record_data_list:
+                    index, record_data, structure = data_triplet
+                    structure_file_record_object = StructureFileRecord(
+                        structure_file=structure_file,
+                        structure=structure,
+                        number=index,
                     )
+                    structure_file_record_objects.append(structure_file_record_object)
+                    record_data.structure_file_record_object = structure_file_record_object
 
                 time0 = time.perf_counter()
                 structure_file_records = StructureFileRecord.objects.bulk_create(
@@ -338,7 +346,10 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                name_types = NameType.objects.in_bulk(name_set, field_name='id')
+                name_type_dict = {t.id: t for t in name_type_list}
+
+                #name_types = NameType.objects.in_bulk(name_type_list, field_name='id')
+                #logging.info("---> %s", name_types)
 
                 time0 = time.perf_counter()
                 name_list = [Name(name=name) for name in name_set]
@@ -359,23 +370,41 @@ class FileRegistry(object):
                 for record_data in record_data_list:
                     key = str(record_data.structure_file.id) + ":" + str(record_data.index)
                     sfr = structure_file_record_dict[key]
-                    record_list.append(
-                        Record(
-                            regid=names[str(record_data.regid)],
-                            version=1,
-                            release=record_data.release_object,
-                            dataset=record_data.release_object.dataset,
-                            structure_file_record=sfr
-                        )
+                    record_object = Record(
+                        regid=names[str(record_data.regid)],
+                        version=1,
+                        release=record_data.release_object,
+                        dataset=record_data.release_object.dataset,
+                        structure_file_record=sfr
                     )
+                    record_list.append(record_object)
+                    record_data.record_object = record_object
 
                 time0 = time.perf_counter()
-                record_object_list = Record.objects.bulk_create(
+                Record.objects.bulk_create(
                     record_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
                 time1 = time.perf_counter()
-                logging.info("RECORD BULK T: %s C: %s" % ((time1 - time0), len(record_object_list)))
+                logging.info("RECORD BULK T: %s" % ((time1 - time0)))
+
+                structure_file_record_name_objects = []
+                for record_data in record_data_list:
+                   for name in record_data.names:
+                       sfr_name_association = StructureFileRecordNameAssociation(
+                           name=names[str(name.name)],
+                           structure_file_record=record_data.structure_file_record_object,
+                           name_type=name_type_dict[name.name_type]
+                       )
+                       structure_file_record_name_objects.append(sfr_name_association)
+
+                StructureFileRecordNameAssociation.objects.bulk_create(
+                    structure_file_record_name_objects,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                )
+
+
+                #logging.info("--> %s", record_name_list)
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -609,7 +638,6 @@ class StructureRegistry(object):
             structure_file_count,
             records_count
         ))
-        #if structure_file.count == records.count():
         status, created = StructureFileNormalizationStatus.objects.get_or_create(structure_file=structure_file)
         status.progress = records_count / structure_file_count
         status.save()
@@ -770,7 +798,6 @@ class StructureRegistry(object):
             structure_file_count,
             records_count
         ))
-        #if structure_file.count == records.count():
         status, created = StructureFileInChIStatus.objects.get_or_create(structure_file=structure_file)
         status.progress = records_count / structure_file_count
         status.save()

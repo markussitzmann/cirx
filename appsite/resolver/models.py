@@ -32,11 +32,6 @@ class Structure(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
-    #indexes = Index(
-    #    fields=['ficts_parent', 'ficus_parent', 'uuuuu_parent', 'hashisy_key', 'hashisy'],
-    #    name='structure_index'
-    #)
-
     class JSONAPIMeta:
         resource_name = 'structures'
 
@@ -90,18 +85,6 @@ class StructureParentStructure(models.Model):
 
 class InChIManager(models.Manager):
 
-    #def create(self, string=None, *args, **kwargs):
-    #    if not string and 'string' not in kwargs:
-    #        raise IntegrityError('InChI string required for creation of InChI instance')
-    #    inchi = InChIString(string, *args, **kwargs)
-    #    return super(InChIManager, self).create(**inchi.model_dict)
-
-    #def get_or_create(self, string=None, *args, **kwargs):
-    #    if not string and 'string' not in kwargs:
-    #        raise IntegrityError('InChI string required for creation of InChI instance')
-    #    inchi = InChIString(string, *args, **kwargs)
-    #    return super(InChIManager, self).get_or_create(**inchi.model_dict)
-
     def bulk_get_from_objects(self, object_list: List['InChI']):
         inchi_list = []
         for o in object_list:
@@ -115,6 +98,7 @@ class InChIManager(models.Manager):
                 )
                 inchi_list.append(i)
         return inchi_list
+
 
 class InChI(models.Model):
     version = models.IntegerField(default=1, blank=False, null=False)
@@ -284,7 +268,8 @@ class Compound(models.Model):
 
 
 class Record(models.Model):
-    regid = models.ForeignKey('Name', on_delete=models.PROTECT, blank=False, null=False)
+    name = models.ForeignKey('Name', on_delete=models.PROTECT, blank=False, null=False)
+    regid = models.TextField(max_length=1500)
     version = models.IntegerField(default=1, blank=False, null=False)
     release = models.ForeignKey('Release', blank=False, null=False, on_delete=models.CASCADE)
     dataset = models.ForeignKey('Dataset', blank=False, null=False, on_delete=models.RESTRICT)
@@ -313,9 +298,6 @@ class Name(models.Model):
 
     class Meta:
         db_table = 'cir_structure_name'
-
-    # def get_structure(self):
-    #     return self.structure.get()
 
     def __str__(self):
         return "Name='%s'" % (self.name, )

@@ -5,7 +5,7 @@ from django.db.models import UniqueConstraint
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
-from resolver.models import Structure, Release, NameType
+from resolver.models import Structure, Release, Name, NameType
 
 fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
 
@@ -108,7 +108,7 @@ class StructureFileNormalizationStatus(models.Model):
     def __str__(self):
         return "normalization status %s (%s)" % (
             self.updated,
-            self.finished
+            self.progress
         )
 
 
@@ -124,15 +124,13 @@ class StructureFileInChIStatus(models.Model):
     updated = models.DateTimeField(auto_now=True, blank=True, null=True)
     progress = models.FloatField(default=0.0)
 
-    #finished = models.BooleanField(default=False)
-
     class Meta:
         db_table = 'cir_structure_file_inchi_status'
 
     def __str__(self):
         return "inchi status %s (%s)" % (
             self.updated,
-            self.finished
+            self.progress
         )
 
 
@@ -199,7 +197,12 @@ class StructureFileRecord(models.Model):
     number = models.IntegerField(null=False, blank=False)
     releases = models.ManyToManyField(Release,
         through='StructureFileRecordRelease',
-        related_name="records"
+        #related_name='structure_file_records'
+    )
+    names = models.ManyToManyField(
+        Name,
+        through='StructureFileRecordNameAssociation',
+        #related_name='structure_file_records'
     )
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -209,13 +212,28 @@ class StructureFileRecord(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=['structure_file', 'number'],
-                name='unique_structure_file__record_constraint'
+                name='unique_structure_file_record_constraint'
             ),
         ]
         db_table = 'cir_structure_file_record'
 
     def __str__(self):
         return "%s (%s)" % (self.structure_file, self.number)
+
+
+class StructureFileRecordNameAssociation(models.Model):
+    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    structure_file_record = models.ForeignKey(StructureFileRecord, on_delete=models.CASCADE)
+    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['name', 'structure_file_record', 'name_type'], name='structure_file_record_names'),
+        ]
+        db_table = 'cir_structure_file_record_names'
+
+    def __str__(self):
+        return "%s %s %s" % (self.name, self.structure_file_record, self.name_type)
 
 
 class StructureFileRecordRelease(models.Model):
