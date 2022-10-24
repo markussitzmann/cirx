@@ -1,8 +1,8 @@
 tmp/*
 .project/*
 .idea/
-/static
-/media
-/filestore
-/logging
-/backup
+static/*
+media/*
+filestore/*
+logging/*
+backup/*

@@ -288,27 +288,12 @@ class FileRegistry(object):
                 time1 = time.perf_counter()
                 logging.info("STRUCTURE BULK T: %s C: %s" % ((time1 - time0), len(structures)))
 
-                hashisy_key_list = [record_data.hashisy_key for record_data in record_data_list]
-                structure_hashkey_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(
-                    hashisy_key_list, field_name='hashisy_key'
-                )
-                structure_hashisy_list = [
-                    StructureHashisy(structure=structure_hashkey_dict[key], hashisy=key.padded) for key in hashisy_key_list
-                ]
-                StructureHashisy.objects.bulk_create(
-                    structure_hashisy_list,
-                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-                    ignore_conflicts=True
+                structure_hashkey_dict = StructureHashisy.objects.bulk_create_from_hash_list(
+                    [record_data.hashisy_key for record_data in record_data_list],
+                    FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
 
                 logger.info("registering structure file records for '%s'" % (fname,))
-                #####
-                #for data in record_data:
-                #    index, structure = data
-                #
-                #
-                ####
-                structure_file_record_objects = list()
                 sorted_record_data_structure_list = sorted(
                     [
                         (record_data.index, record_data, structure_hashkey_dict[record_data.hashisy_key])
@@ -356,8 +341,6 @@ class FileRegistry(object):
                 )
                 name_type_dict = {t.id: t for t in name_type_list}
 
-                #name_types = NameType.objects.in_bulk(name_type_list, field_name='id')
-                #logging.info("---> %s", name_types)
 
                 time0 = time.perf_counter()
                 name_list = [Name(name=name) for name in name_set]
@@ -399,20 +382,19 @@ class FileRegistry(object):
 
                 structure_file_record_name_objects = []
                 for record_data in record_data_list:
-                   for name in record_data.names:
-                       sfr_name_association = StructureFileRecordNameAssociation(
+                    for name in record_data.names:
+                        sfr_name_association = StructureFileRecordNameAssociation(
                            name=names[str(name.name)],
                            structure_file_record=record_data.structure_file_record_object,
                            name_type=name_type_dict[name.name_type]
-                       )
-                       structure_file_record_name_objects.append(sfr_name_association)
+                        )
+                        structure_file_record_name_objects.append(sfr_name_association)
 
                 StructureFileRecordNameAssociation.objects.bulk_create(
                     structure_file_record_name_objects,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                #logging.info("--> %s", record_name_list)
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
@@ -585,6 +567,8 @@ class StructureRegistry(object):
 
                 # fetch hashisy / parent structures in bulk (by that they have an id)
                 parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
+                StructureHashisy.objects.bulk_create_from_hash_list(parent_structures.keys())
+
 
                 # create compounds in bulk
                 compound_structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
@@ -601,8 +585,9 @@ class StructureRegistry(object):
                     parent = source_structure_dict[relationship.structure.id]
                     for attr, parent_hash in relationship.relationships.items():
                         setattr(parent, attr, parent_structures[parent_hash])
+                sorted_source_structures = sorted(source_structure_dict.values(), key=lambda p: p.structure_id)
                 StructureParentStructure.objects.bulk_create(
-                    sorted(source_structure_dict.values(), key=lambda p: p.structure_id),
+                    sorted_source_structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
@@ -614,11 +599,13 @@ class StructureRegistry(object):
                     parent = parent_structure_dict[relationship.structure.hashisy_key]
                     for attr, parent_hash in relationship.relationships.items():
                         setattr(parent, attr, parent_structures[parent_hash])
+                sorted_parent_structure = sorted(parent_structure_dict.values(), key=lambda p: p.structure_id)
                 StructureParentStructure.objects.bulk_create(
-                    sorted(parent_structure_dict.values(), key=lambda p: p.structure_id),
+                    sorted_parent_structure,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
+
         except DatabaseError as e:
             logger.error(e)
             raise(DatabaseError(e))
@@ -662,7 +649,7 @@ class StructureRegistry(object):
         else:
             status = StructureFileInChIStatus(structure_file=structure_file)
             status.save()
-        if status.objects > 0.95:
+        if status.progress > 0.95:
             return None
         return structure_file_id
 
@@ -675,7 +662,7 @@ class StructureRegistry(object):
                 .values('structure__id') \
                 .filter(
                     structure_file=structure_file,
-                    structure__compound__isnull=False,
+                    #structure__compound__isnull=False,
                     structure__blocked__isnull=True,
                     structure__inchis__isnull=True,
                 )

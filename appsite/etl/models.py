@@ -178,6 +178,11 @@ class ReleaseNameField(models.Model):
         ]
         db_table = 'cir_release_name_field'
 
+# class StructureFileRecordManager(models.Manager):
+#
+#     def all_parent_structures(self):
+#         return self.
+
 
 class StructureFileRecord(models.Model):
     structure_file = models.ForeignKey(

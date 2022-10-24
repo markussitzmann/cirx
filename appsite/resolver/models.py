@@ -1,5 +1,5 @@
 import uuid
-from typing import List
+from typing import List, Dict
 
 from pycactvs import Ens
 
@@ -11,7 +11,6 @@ from resolver.defaults import http_verbs
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from custom.fields import CactvsHashField, CactvsMinimolField
-from structure.inchi.identifier import InChIString
 
 
 class StructureManager(models.Manager):
@@ -50,6 +49,24 @@ class Structure(models.Model):
         return "[%s] %s" % (self.hashisy_key.padded, self.to_ens.get("E_SMILES"))
 
 
+class StructureHashisyManager(models.Manager):
+
+    def bulk_create_from_hash_list(self, hashisy_key_list: List[CactvsHash], batch_size=1000) -> Dict[CactvsHash, Structure]:
+        structure_hashkey_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(
+            hashisy_key_list, field_name='hashisy_key'
+        )
+        structure_hashisy_list = [
+            StructureHashisy(structure=structure_hashkey_dict[key], hashisy=key.padded)
+            for key in hashisy_key_list
+        ]
+        StructureHashisy.objects.bulk_create(
+            structure_hashisy_list,
+            batch_size=batch_size,
+            ignore_conflicts=True
+        )
+        return structure_hashkey_dict
+
+
 class StructureHashisy(models.Model):
     structure = models.OneToOneField(
         'Structure',
@@ -57,11 +74,14 @@ class StructureHashisy(models.Model):
         blank=False,
         null=False,
         on_delete=models.PROTECT,
+        related_name='hashisy'
     )
     hashisy = models.CharField(max_length=16, null=False, blank=False, db_index=True)
 
     class Meta:
         db_table = 'cir_structure_hashisy'
+
+    objects = StructureHashisyManager()
 
 
 class StructureParentStructure(models.Model):
@@ -70,6 +90,7 @@ class StructureParentStructure(models.Model):
         primary_key=True,
         blank=False,
         null=False,
+        related_name='parents',
         on_delete=models.PROTECT
     )
     ficts_parent = models.ForeignKey(
