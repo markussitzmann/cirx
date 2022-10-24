@@ -23,7 +23,7 @@ from pycactvs import Molfile, Ens, Prop
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
     ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileInChIStatus, \
-    StructureFileRecordNameAssociation
+    StructureFileRecordNameAssociation, StructureFileSourceManager, StructureFileSource
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure
 from structure.inchi.identifier import InChIString, InChIKey
@@ -280,10 +280,15 @@ class FileRegistry(object):
                         logger.info("finished preprocessor %s transaction" % preprocessor.name)
 
                 time0 = time.perf_counter()
-                Structure.objects.bulk_create(
+                structure_objects = Structure.objects.bulk_create(
                     structures,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
+                )
+                StructureFileSource.objects.bulk_create_from(
+                    structures=structure_objects,
+                    structure_file=structure_file,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
                 time1 = time.perf_counter()
                 logging.info("STRUCTURE BULK T: %s C: %s" % ((time1 - time0), len(structures)))
@@ -340,7 +345,6 @@ class FileRegistry(object):
                     ignore_conflicts=True
                 )
                 name_type_dict = {t.id: t for t in name_type_list}
-
 
                 time0 = time.perf_counter()
                 name_list = [Name(name=name) for name in name_set]
@@ -568,7 +572,6 @@ class StructureRegistry(object):
                 # fetch hashisy / parent structures in bulk (by that they have an id)
                 parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
                 StructureHashisy.objects.bulk_create_from_hash_list(parent_structures.keys())
-
 
                 # create compounds in bulk
                 compound_structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)

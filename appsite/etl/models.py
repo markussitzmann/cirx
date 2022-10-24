@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -5,6 +7,7 @@ from django.db.models import UniqueConstraint
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
+from custom.cactvs import CactvsHash
 from resolver.models import Structure, Release, Name, NameType
 
 fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
@@ -74,7 +77,6 @@ class StructureFile(models.Model):
     count = models.IntegerField(null=True, blank=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    #processed = models.DateTimeField(auto_now=False, blank=True, null=True)
 
     class Meta:
         constraints = [
@@ -100,7 +102,6 @@ class StructureFileNormalizationStatus(models.Model):
     )
     updated = models.DateTimeField(auto_now=True, blank=True, null=True)
     progress = models.FloatField(default=0.0)
-    #finished = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'cir_structure_file_normalization_status'
@@ -265,3 +266,47 @@ class StructureFileRecordRelease(models.Model):
             ),
         ]
         db_table = 'cir_structure_file_record_releases'
+
+
+class StructureFileSourceManager(models.Manager):
+
+    def bulk_create_from(self, structures: List[Structure], structure_file: StructureFile, batch_size=1000):
+
+        hashisy_key_list = [structure.hashisy_key for structure in structures]
+
+        structure_hash_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(
+            hashisy_key_list, field_name='hashisy_key'
+        )
+
+        structure_source_file_objects = [
+            StructureFileSource(
+                structure=structure,
+                structure_file=structure_file
+            ) for structure in structure_hash_dict.values() if structure.pk
+        ]
+
+        StructureFileSource.objects.bulk_create(
+            structure_source_file_objects,
+            batch_size=batch_size,
+            ignore_conflicts=True
+        )
+        return structure_source_file_objects
+
+
+class StructureFileSource(models.Model):
+    structure = models.OneToOneField(
+        Structure,
+        primary_key=True,
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT,
+        related_name='structure_file_source'
+    )
+    structure_file = models.ForeignKey(
+        'StructureFile', blank=False, null=False, related_name='structure_file_source', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'cir_structure_file_source'
+
+    objects = StructureFileSourceManager()
+
