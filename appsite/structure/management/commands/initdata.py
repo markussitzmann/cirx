@@ -12,11 +12,11 @@ from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
-MINI = True
-INIT_PUBCHEM_COMPOUND = True
-INIT_PUBCHEM_SUBSTANCE = True
-INIT_CHEMBL = True
-INIT_NCI = False
+MINI = False
+INIT_PUBCHEM_COMPOUND = False
+INIT_PUBCHEM_SUBSTANCE = False
+INIT_CHEMBL = False
+INIT_NCI = True
 INIT_TT = False
 
 
@@ -472,7 +472,7 @@ def init_release(
         else:
             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
                 release=open_nci_db,
-                file_location_pattern_string="nci/NCI_DTP.sdf"
+                file_location_pattern_string="nci/NCI_DTP/*.sdf.gz"
             )
             open_nci_db_collection.save()
 

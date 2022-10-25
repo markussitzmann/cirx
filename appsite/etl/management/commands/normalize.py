@@ -26,7 +26,7 @@ def _normalize_structures(structure_file_id: int):
 
 def _normalize():
     files: QuerySet = StructureFile.objects.filter(
-        Q(normalization_status__isnull=True) | Q(normalization_status__progress__lte=0.95)
+        Q(normalization_status__isnull=True) | Q(normalization_status__progress__lte=0.98)
     ).all()
     for file in files:
         logger.info("normalize structure %s" % file.id)

@@ -285,7 +285,7 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                StructureFileSource.objects.bulk_create_from(
+                StructureFileSource.objects.bulk_create_from_structures(
                     structures=structure_objects,
                     structure_file=structure_file,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
@@ -522,6 +522,7 @@ class StructureRegistry(object):
     def normalize_structures(arg_tuple):
         structure_file_id, structure_ids = arg_tuple
 
+        structure_file = StructureFile.objects.get(id=structure_file_id)
         # NOTE: the order matters, it has to go from broader to more specific identifier!!
         identifiers = StructureRegistry.NCICADD_TYPES
 
@@ -572,6 +573,11 @@ class StructureRegistry(object):
                 # fetch hashisy / parent structures in bulk (by that they have an id)
                 parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
                 StructureHashisy.objects.bulk_create_from_hash_list(parent_structures.keys())
+                StructureFileSource.objects.bulk_create_from_structures(
+                    parent_structures.values(),
+                    structure_file,
+                    FileRegistry.DATABASE_ROW_BATCH_SIZE
+                )
 
                 # create compounds in bulk
                 compound_structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
@@ -616,6 +622,7 @@ class StructureRegistry(object):
             logger.error(e)
             raise Exception(e)
         StructureRegistry.update_normalization_status(structure_file_id)
+        StructureRegistry.update_calcinchi_progress(structure_file_id)
         return True
 
     @staticmethod
@@ -630,7 +637,7 @@ class StructureRegistry(object):
             )
         structure_file_count = structure_file.count
         records_count = records.count()
-        logger.info("structure normalization finished for file %s: %s (%s : %s)" % (
+        logger.info("structure normalization progress for file %s: %s (%s : %s)" % (
             structure_file.id,
             structure_file_count == records_count,
             structure_file_count,
@@ -652,7 +659,7 @@ class StructureRegistry(object):
         else:
             status = StructureFileInChIStatus(structure_file=structure_file)
             status.save()
-        if status.progress > 0.95:
+        if status.progress > 0.98:
             return None
         return structure_file_id
 
@@ -660,12 +667,11 @@ class StructureRegistry(object):
     def calcinchi_chunk_mapper(structure_file_id: int, callback):
         try:
             structure_file = StructureFile.objects.get(id=structure_file_id)
-            records: QuerySet = StructureFileRecord.objects \
+            structure_id_list: QuerySet = StructureFileSource.objects \
                 .select_related('structure') \
                 .values('structure__id') \
                 .filter(
                     structure_file=structure_file,
-                    #structure__compound__isnull=False,
                     structure__blocked__isnull=True,
                     structure__inchis__isnull=True,
                 )
@@ -673,7 +679,7 @@ class StructureRegistry(object):
             logger.error("selecting structure records for InChI calculation failed")
             raise Exception(e)
 
-        return StructureRegistry.structure_records_to_chunk_callbacks(records, structure_file_id, callback)
+        return StructureRegistry.structure_records_to_chunk_callbacks(structure_id_list, structure_file_id, callback)
 
     @staticmethod
     def calculate_inchi(arg_tuple):
@@ -780,24 +786,23 @@ class StructureRegistry(object):
     @staticmethod
     def update_calcinchi_progress(file_id):
         structure_file = StructureFile.objects.get(id=file_id)
-        records: QuerySet = StructureFileRecord.objects \
-            .select_related('structure') \
-            .values('structure__id') \
+        structure_count: QuerySet = StructureFileSource.objects \
             .filter(
                 structure_file=structure_file,
-                structure__compound__isnull=False,
+            ).distinct().count()
+        structure_count_with_inchi: QuerySet = StructureFileSource.objects \
+            .filter(
+                structure_file=structure_file,
                 structure__inchis__isnull=False
-        )
-        structure_file_count = structure_file.count
-        records_count = records.count()
-        logger.info("inchi calculation finished for file %s: %s (%s : %s)" % (
+            ).distinct().count()
+        logger.info("inchi calculation progress file %s: %s (%s : %s)" % (
             structure_file.id,
-            structure_file_count == records_count,
-            structure_file_count,
-            records_count
+            structure_count == structure_count_with_inchi,
+            structure_count_with_inchi,
+            structure_count
         ))
         status, created = StructureFileInChIStatus.objects.get_or_create(structure_file=structure_file)
-        status.progress = records_count / structure_file_count
+        status.progress = structure_count_with_inchi / structure_count
         status.save()
 
     @staticmethod

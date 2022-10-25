@@ -270,19 +270,16 @@ class StructureFileRecordRelease(models.Model):
 
 class StructureFileSourceManager(models.Manager):
 
-    def bulk_create_from(self, structures: List[Structure], structure_file: StructureFile, batch_size=1000):
+    def bulk_create_from_structures(self, structures: List[Structure], structure_file: StructureFile, batch_size=1000):
 
         hashisy_key_list = [structure.hashisy_key for structure in structures]
-
         structure_hash_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(
             hashisy_key_list, field_name='hashisy_key'
         )
 
         structure_source_file_objects = [
-            StructureFileSource(
-                structure=structure,
-                structure_file=structure_file
-            ) for structure in structure_hash_dict.values() if structure.pk
+            StructureFileSource(structure=structure, structure_file=structure_file)
+            for structure in structure_hash_dict.values() if structure.pk
         ]
 
         StructureFileSource.objects.bulk_create(
