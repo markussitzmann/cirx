@@ -1,3 +1,4 @@
+from pycactvs import Molfile
 from typing import List, Dict
 
 from django.core.validators import RegexValidator
@@ -222,6 +223,14 @@ class StructureFileRecord(models.Model):
             ),
         ]
         db_table = 'cir_structure_file_record'
+
+    @property
+    def molfile(self):
+        fname = self.structure_file.file.name
+        molfile: Molfile = Molfile.Open(fname)
+        molfile.set('record', self.number)
+        return Molfile.String(molfile.read())
+
 
     def __str__(self):
         return "%s (%s)" % (self.structure_file, self.number)

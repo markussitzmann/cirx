@@ -45,8 +45,12 @@ class Structure(models.Model):
     def to_ens(self) -> Ens:
         return self.minimol.ens
 
+    @property
+    def smiles(self) -> str:
+        return self.to_ens.get("E_SMILES")
+
     def __str__(self):
-        return "[%s] %s" % (self.hashisy_key.padded, self.to_ens.get("E_SMILES"))
+        return "%s: [%s] %s" % (self.id, self.hashisy_key.padded, self.smiles)
 
 
 class StructureHashisyManager(models.Manager):
@@ -284,8 +288,8 @@ class Compound(models.Model):
     def __str__(self):
         return "NCICADD:CID=%s" % self.id
 
-    def __repr__(self):
-        return "NCICADD:CID=%s" % self.id
+    #def __repr__(self):
+    #    return "NCICADD:CID=%s" % self.id
 
 
 class Record(models.Model):

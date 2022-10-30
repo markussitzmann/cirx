@@ -241,7 +241,7 @@ class FileRegistry(object):
                 # TODO: registering structures needs improvement - hadd might do harm here
                 molfile.set('record', record)
                 ens: Ens = molfile.read()
-                ens.hadd()
+                #ens.hadd()
                 hashisy_key = CactvsHash(ens)
                 structure = Structure(
                     hashisy_key=hashisy_key,
