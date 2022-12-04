@@ -1,17 +1,22 @@
 import logging
+from collections import defaultdict
 from unittest import skip
 
+from django.conf import settings
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import F
+from django.db import connection
 from django.test import TestCase
-from parameterized import parameterized
 
-from etl.models import StructureFileRecord
-from resolver.models import InChIManager, InChI, Structure, StructureInChIAssociation, Name, StructureNameAssociation
-
-from identifier import InChIKey, InChIString
+from etl.models import StructureFile, StructureFileRecordNameAssociation
+from resolver.models import InChI, Structure, StructureInChIAssociation, Name, StructureNameAssociation, \
+    Compound, StructureParentStructure
 
 logger = logging.getLogger('cirx')
 
 FIXTURES = ['mini.json']
+
+settings.DEBUG = True
 
 
 class ResolverModelTests(TestCase):
@@ -21,117 +26,237 @@ class ResolverModelTests(TestCase):
         pass
 
     def tearDown(self):
-        inchis = InChI.objects.count()
-        logger.info("InChI count %s" % inchis)
 
-        inchi_associations = StructureInChIAssociation.objects.count()
-        logger.info("InChI association %s" % inchi_associations)
+        # name_association_objects = StructureNameAssociation.objects.all()
+        # for a in name_association_objects:
+        #     logger.info("Associations %s" % a)
+        #     if a.structure.parents:
+        #         logger.info("Parents      %s" % a.structure.parents)
+        #     else:
+        #         logger.info("SMILES       %s" % a.structure)
+        #
+        #
+        # structures = Structure.objects.count()
+        # logger.info("Structure count %s" % structures)
+        #
+        # inchis = InChI.objects.count()
+        # logger.info("InChI count %s" % inchis)
+        #
+        # inchi_associations = StructureInChIAssociation.objects.count()
+        # logger.info("InChI association %s" % inchi_associations)
+        #
+        # names = Name.objects.count()
+        # logger.info("Names %s" % names)
+        #
+        # compounds = Compound.objects.count()
+        # logger.info("Compound %s" % compounds)
 
-        names = Name.objects.count()
-        logger.info("Names %s" % names)
+        ####
+        for structure in Structure.objects.all():
+            names = structure.structurenameassociation_set.all()
+            logger.info("-- Structure: %s" % (structure))
+            try:
+                logger.info("     ->: %s" % structure.parents if structure.parents else None)
+            except:
+                logger.info("     ->: None")
+            if len(names):
+                for name in names:
+                    logger.info("      affinity: %s -> name: %s | %s : %s" % (name.affinity_class, name.name_id, name.name_type_id, name.name.name))
+            else:
+                logger.info("     ->: None")
 
-        name_associations = StructureNameAssociation.objects.count()
-        logger.info("Name association %s" % name_associations)
-
-    def test_structure(self):
-        logging.info("---------")
-
-        structure: Structure = Structure.objects.get(id=100)
-        logger.info("Structure %s", structure)
-
-        ficus_parent: Structure = structure.parents.ficus_parent
-        logger.info("Structure %s", ficus_parent)
-
-
-        i = structure.inchis.filter(inchitype='standard').get()
-
-        logger.info("InChI %s %s" % (i, i.inchi.key))
-
-        filtered_structure = Structure.objects\
-            .filter(inchis__inchitype='standard', inchis__inchi__key=i.inchi.key).get()
-
-        logger.info("Structure %s %s" % (filtered_structure, filtered_structure.smiles))
-
-        names = filtered_structure.names.all()
-
-        logger.info("Name %s" % (names,))
-
-        record: StructureFileRecord = structure.structure_file_records.first()
-
-        logger.info("Records %s" % (record,))
-
-        names = record.names.all()
-
-        for name in names:
-            logger.info("Name %s %s" % (name.id, name))
-
-        for a in record.structurefilerecordnameassociation_set.all():
-            logger.info("A %s" % (a, ))
-
-    # @parameterized.expand([
-    #     ['LFQSCWFLJHTTHZ-UHFFFAOYSA-N', 'InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3', (1, True)],
-    #     #[None, 'InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3', (1, True)],
-    #     #['BSYNRYMUTXBXSQ-UHFFFAOYSA-N', (2, False)],
-    # ])
-    # def test_inchi(self, key, string, expectations):
-    #     logger.info("------------- Test InChI models (%s) -------------" % key)
-    #     expected_count, expected_status = expectations
-    #
-    #     if key:
-    #         inchistring = InChIString(string=string, key=InChIKey(key))
-    #     else:
-    #         inchistring = InChIString(string=string)
-    #
-    #     logger.info("S >>> %s" % inchistring.element)
-    #     logger.info("S >>> %s" % inchistring.model_dict)
-    #
-    #     inchi_1 = InChI.objects.get_or_create(string)
-    #     inchi_2 = InChI.objects.get_or_create(string=string, key=InChIKey(key))
-    #     inchi_3 = InChI.objects.get_or_create(key=InChIKey(key))
-    #
-    #
-    #     logger.info("IS >>>> %s : %s", inchi_1, inchi_2, inchi_3)
-    #
-    #
-    #
-    #
-    #
-    #     requested = InChI.objects.filter(block1="LFQSCWFLJHTTHZ").all()
-    #     logger.info("R >>>> %s", requested)
-    #
-    #
-    #     # inchi2, created = InChI.objects.get_or_create(key=key)
-    #     # logger.info("2 >>> %s %s" % (inchi2.id, created))
-    #
-    #     #model = InChI(**inchistring.model_dict)
-    #     #model.save()
-    #     #logger.info("M >>> %s" % model)
-    #
-    #
-    # @parameterized.expand([
-    #     ['QTXVAVXCBMYBJW-UHFFFAOYSA-N', 'QTXVAVXCBMYBJW-UHFFFAOYSA-N', (1, True)],
-    #     ['QTXVAVXCBMYBJW-UHFFFAOYSA-N', 'BSYNRYMUTXBXSQ-UHFFFAOYSA-N', (2, False)],
-    # ])
-    # @skip
-    # def test_inchi_model(self, string1, string2, expectations):
-    #     logger.info("------------- Test InChI models (%s) -------------" % string1)
-    #     expected_count, expected_status = expectations
-    #
-    #     inchi1: InChI = InChI.objects.create_inchi(key=string1)
-    #     logger.info("I1 >>> %s %s %s" % (inchi1, inchi1.pk, inchi1._state))
-    #     inchi1.save()
-    #
-    #     inchi2: InChI = InChI.objects.create_inchi(key=string2)
-    #     logger.info("I2 >>> %s %s %s" % (inchi2, inchi2.pk, inchi2._state))
-    #     fetched, created = InChI.objects.get_or_create(id=inchi2.id)
-    #
-    #     count = InChI.objects.count()
-    #
-    #     self.assertEqual(count, expected_count)
-    #     if expected_status:
-    #         self.assertEqual(inchi1, fetched)
-    #     else:
-    #         self.assertNotEqual(inchi1, fetched)
+        # name_association_count = StructureNameAssociation.objects.count()
+        # logger.info("Count --> %s", name_association_count)
+        #
+        # name_association_objects = StructureNameAssociation.objects.all()
+        # for a in name_association_objects:
+        #     logger.info("%s %s %s %s" % (a.name_type_id, a.affinity_class, a.structure, a.name))
 
 
+
+    @skip
+    def test_structure_name(self):
+
+        logger.info("--------- Structure Name ----------")
+
+        structures = Structure.objects.all()
+        for structure in structures:
+            logger.info("--------- %s ---------" % structure.id)
+            logger.info(structure.structure_file_records.all())
+            logger.info(structure.smiles)
+            try:
+                logger.info(structure.parents)
+                logger.info("P FICTS %s FICuS %s uuuuu %s" % (
+                    structure.parents.ficts_parent.id if structure.parents.ficts_parent else "-",
+                    structure.parents.ficus_parent.id if structure.parents.ficus_parent else "-",
+                    structure.parents.uuuuu_parent.id if structure.parents.uuuuu_parent else "-",
+                ))
+                logger.info("C FICTS %s FICuS %s uuuuu %s" % (
+                    structure.parents.ficts_parent.ficts_children.all() if structure.parents.ficts_parent.ficts_children else "-",
+                    structure.parents.ficus_parent.ficus_children.all() if structure.parents.ficus_parent.ficts_children else "-",
+                    structure.parents.uuuuu_parent.uuuuu_children.all() if structure.parents.uuuuu_parent.uuuuu_children else "-",
+                ))
+            except Structure.parents.RelatedObjectDoesNotExist:
+                logger.info("NO PARENT")
+
+    @skip
+    def test_query(self):
+
+        q = Structure.objects\
+            .prefetch_related('parents', 'structure_file_records', 'structure_file_records__names') \
+            .annotate(
+                ficts=F('parents__ficts_parent'),
+                ficus=F('parents__ficus_parent'),
+            )\
+            .annotate(
+                tnames=ArrayAgg('structure_file_records__structure_file_record_name_associations')
+            )
+        logger.info("QUERY %s" % q.query)
+        r = q.in_bulk([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 70, 1493])
+
+        logger.info("Q >>> %s" % r[4].ficts)
+        logger.info("N >>> %s" % r[4].tnames)
+
+        for qq in r.values():
+            logger.info("QQ >>> %s" % qq)
+            for n in qq.tnames:
+                logger.info("NN >>> %s" % type(n))
+
+    @skip
+    def test_name_association(self):
+
+        #flist = StructureFile.objects.all()
+
+        flist = [1,]
+
+        #logger.info("F %s", [f.id for f in flist])
+
+        p = StructureParentStructure.objects\
+            .select_related('structure', 'structure__structure_file_source')
+        d = defaultdict(list)
+        for f in flist:
+            r = p.filter(structure__structure_file_source__structure_file=f)
+            #l = [(s.ficts_parent_id, s.structure_id) for s in r.all() if s.ficts_parent_id]
+            for s in r.all():
+                if not s.ficts_parent_id: continue
+                d[s.ficts_parent_id].append(s.structure_id)
+
+            #logger.info("F C %s %s P %s", r.count(), len(l), l)
+
+        sid_list = []
+        for k in [*d]:
+            if k in d[k]:
+                logger.info("--> %s : %s" % (k, d[k]))
+                sid_list.extend(d[k])
+
+        sids = sorted(list(set(sid_list)))
+        logger.info("--> %s", sids)
+
+        q = Structure.objects \
+            .prefetch_related('parents', 'structure_file_records', 'structure_file_records__names')\
+            .annotate(
+                tnames=ArrayAgg('structure_file_records__structure_file_record_name_associations')
+            )
+        logger.info("QUERY %s" % q.query)
+
+        r = q.in_bulk(sids)
+        a_list = []
+        for k, s in r.items():
+            #logger.info("--- S %s %s" % (s, s.tnames))
+            for n in s.tnames:
+                if n:
+                    #logger.info("--- N %s" % n)
+                    ra = StructureFileRecordNameAssociation.objects.get(id=n)
+                    #logger.info("    N %s" % ra)
+
+                    a_list.append(StructureNameAssociation(
+                        name=ra.name,
+                        structure_id=s.id,
+                        name_type=ra.name_type,
+                        affinity_class="exact",
+                        confidence=99
+                    ))
+
+        StructureNameAssociation.objects.bulk_create(
+            a_list,
+            batch_size=100,
+            ignore_conflicts=True
+        )
+
+
+
+    def test_name_association2(self):
+
+        logger.info("COUNT0 %s" % len(connection.queries))
+
+        #flist = StructureFile.objects.all()
+
+        flist = [1,]
+
+        #logger.info("F %s", [f.id for f in flist])
+
+        query = Structure.objects\
+            .select_related('parents', 'structure_file_source')\
+            .annotate(
+                record_names=ArrayAgg('structure_file_records__structure_file_record_name_associations'),
+                ficts=F('parents__ficts_parent'),
+                ficus=F('parents__ficus_parent'),
+                uuuuu=F('parents__uuuuu_parent'),
+            )
+            #.filter(structure_file_source__structure_file=3)
+
+        structures = query.all()
+
+        a_list = []
+        for structure in structures:
+            record_names = structure.record_names
+            a_list.extend(record_names)
+
+        logger.info(print(len(a_list)))
+        sfrna = StructureFileRecordNameAssociation.objects.in_bulk(a_list, field_name='id')
+
+        logger.info("COUNTX %s" % len(connection.queries))
+
+
+        a_list = []
+        for structure in structures:
+
+            record_names = structure.record_names
+
+            for record_name in record_names:
+                if not record_name: continue
+                record_name_association = sfrna[record_name]
+                if structure.ficts:
+                    a_list.append(StructureNameAssociation(
+                        name_id=record_name_association.name_id,
+                        structure_id=structure.ficts,
+                        name_type_id=record_name_association.name_type_id,
+                        affinity_class="exact",
+                        confidence=100
+                    ))
+                if structure.ficus and not structure.ficus == structure.ficts:
+                    a_list.append(StructureNameAssociation(
+                        name_id=record_name_association.name_id,
+                        structure_id=structure.ficus,
+                        name_type_id=record_name_association.name_type_id,
+                        affinity_class="narrow",
+                        confidence=100
+                    ))
+                if structure.uuuuu and not structure.uuuuu == structure.ficus and not structure.uuuuu == structure.ficts:
+                    a_list.append(StructureNameAssociation(
+                        name_id=record_name_association.name_id,
+                        structure_id=structure.uuuuu,
+                        name_type_id=record_name_association.name_type_id,
+                        affinity_class="broad",
+                        confidence=100
+                ))
+
+        StructureNameAssociation.objects.bulk_create(
+            a_list,
+            batch_size=100,
+            ignore_conflicts=True
+        )
+
+        logger.info(len(a_list))
+        logger.info("COUNT1 %s" % len(connection.queries))
 

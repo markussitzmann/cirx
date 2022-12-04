@@ -89,7 +89,7 @@ class StructureFile(models.Model):
         db_table = 'cir_structure_file'
 
     def __str__(self):
-        return "%s (%s)" % (self.file, self.count)
+        return "[StructureFile=%s: count=%s]" % (self.file, self.count)
 
 
 class StructureFileNormalizationStatus(models.Model):
@@ -231,14 +231,17 @@ class StructureFileRecord(models.Model):
         molfile.set('record', self.number)
         return Molfile.String(molfile.read())
 
-
     def __str__(self):
-        return "%s (%s)" % (self.structure_file, self.number)
+        return "(StructureFileRecord=%s: %s)" % (self.number, self.structure_file)
 
 
 class StructureFileRecordNameAssociation(models.Model):
     name = models.ForeignKey(Name, on_delete=models.CASCADE)
-    structure_file_record = models.ForeignKey(StructureFileRecord, on_delete=models.CASCADE)
+    structure_file_record = models.ForeignKey(
+        StructureFileRecord,
+        on_delete=models.CASCADE,
+        related_name="structure_file_record_name_associations"
+    )
     name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
 
     class Meta:
@@ -248,7 +251,8 @@ class StructureFileRecordNameAssociation(models.Model):
         db_table = 'cir_structure_file_record_names'
 
     def __str__(self):
-        return "%s %s %s" % (self.name, self.structure_file_record, self.name_type)
+        return "(StructureFileRecordNameAssociation=%s: %s, %s, %s)" % \
+               (self.id, self.name_id, self.structure_file_record_id, self.name_type_id)
 
 
 class StructureFileRecordRelease(models.Model):

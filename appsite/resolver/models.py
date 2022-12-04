@@ -1,16 +1,13 @@
-import uuid
 from typing import List, Dict
 
-from pycactvs import Ens
-
-from django.db import models, IntegrityError
+from django.db import models
 from django.db.models import Index, UniqueConstraint
 from multiselectfield import MultiSelectField
-
-from resolver.defaults import http_verbs
+from pycactvs import Ens
 
 from custom.cactvs import CactvsHash, CactvsMinimol
 from custom.fields import CactvsHashField, CactvsMinimolField
+from resolver.defaults import http_verbs
 
 
 class StructureManager(models.Manager):
@@ -50,7 +47,7 @@ class Structure(models.Model):
         return self.to_ens.get("E_SMILES")
 
     def __str__(self):
-        return "%s: [%s] %s" % (self.id, self.hashisy_key.padded, self.smiles)
+        return "(Structure=%s: hashisy=%s smiles='%s')" % (self.id, self.hashisy_key.padded, self.smiles)
 
 
 class StructureHashisyManager(models.Manager):
@@ -106,6 +103,10 @@ class StructureParentStructure(models.Model):
 
     class Meta:
         db_table = 'cir_structure_parent'
+
+    def __str__(self):
+        return "(StructureParentStructure=%s: ficts=%s, ficus=%s, uuuuu=%s)" % \
+               (self.structure_id, self.ficts_parent_id, self.ficus_parent_id, self.uuuuu_parent_id)
 
 
 class InChIManager(models.Manager):
@@ -315,7 +316,7 @@ class Record(models.Model):
         db_table = 'cir_record'
 
     def __str__(self):
-        return "NCICADD:RID=%s" % self.regid
+        return "(Record=%s: regid=%s)" % (self.id, self.regid)
 
 
 class Name(models.Model):
@@ -325,7 +326,7 @@ class Name(models.Model):
         db_table = 'cir_structure_name'
 
     def __str__(self):
-        return "Name='%s'" % (self.name, )
+        return "(Name='%s')" % (self.name, )
 
     def __repr__(self):
         return self.name
@@ -340,17 +341,48 @@ class NameType(models.Model):
     class Meta:
         db_table = 'cir_name_type'
 
+    def __str__(self):
+        return "(NameType=%s)" % self.id
+
+
+class NameAffinityClass(models.Model):
+    id = models.CharField(max_length=32, primary_key=True, editable=False)
+    description = models.TextField(max_length=32768, blank=True, null=True)
+
+    class Meta:
+        db_table = 'cir_name_affinity_class'
+
 
 class StructureNameAssociation(models.Model):
     name = models.ForeignKey(Name, on_delete=models.CASCADE)
     structure = models.ForeignKey(Structure, on_delete=models.CASCADE)
-    name_type = models.ForeignKey(NameType, on_delete=models.CASCADE)
+    name_type = models.ForeignKey(NameType, on_delete=models.RESTRICT)
+    affinity_class = models.CharField(max_length=16, choices=(
+        ('exact', 'Exact'),
+        ('narrow', 'Narrow'),
+        ('broad', 'Broad'),
+        ('unknown', 'Unknown'),
+        ('unspecified', 'Unspecified'),
+        ('generic', 'Generic'),
+        ('related', 'Related'),
+    ), default='unspecified')
+    confidence = models.PositiveIntegerField(null=False, default=0)
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
+            #UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
+            UniqueConstraint(fields=['name', 'structure', 'name_type', 'affinity_class'], name='unique_structure_name_affinity'),
+            models.CheckConstraint(
+                name="structure_name_association_confidence_limits",
+                check=models.Q(confidence__range=(1, 100)),
+            ),
         ]
-        db_table = 'cir_structure_names'
+        db_table = 'cir_structure_name_associations'
+
+    def __str__(self):
+        return "(StructureNameAssociations=%s: %s, %s, %s, %s, %s)" % \
+               (self.id, self.name, self.structure, self.name_type, self.affinity_class, self.confidence)
+
 
 
 class Organization(models.Model):
@@ -393,7 +425,6 @@ class Organization(models.Model):
             ),
         ]
         db_table = 'cir_organization'
-
 
     @classmethod
     def create(cls, *args, **kwargs):
