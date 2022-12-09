@@ -72,3 +72,25 @@ def calcinchi_chunk_mapper(file_id: int, callback):
 @shared_task(name="calcinchi")
 def calculate_inchi_task(structure_ids: List[int]):
     return StructureRegistry.calculate_inchi(structure_ids)
+
+
+### Link Names
+
+@shared_task(bind=True, name="calcinchi fetch")
+def fetch_structure_file_for_linkname_task(self, file_id: int):
+    file_id = StructureRegistry.fetch_structure_file_for_calcinchi(file_id)
+    if file_id:
+        logger.info("structure file %s fetched for InChI calculation" % (file_id, ))
+        return file_id
+    return None
+
+
+@shared_task(name="calcinchi mapper")
+def linkname_chunk_mapper(file_id: int, callback):
+    logger.info("args %s %s" % (file_id, callback))
+    return StructureRegistry.calcinchi_chunk_mapper(file_id, callback)
+
+
+@shared_task(name="calcinchi")
+def link_structure_names_task(structure_ids: List[int]):
+    return StructureRegistry.calculate_inchi(structure_ids)

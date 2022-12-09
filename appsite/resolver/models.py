@@ -19,11 +19,11 @@ class StructureManager(models.Manager):
 class Structure(models.Model):
     hashisy_key = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
-    names = models.ManyToManyField(
-        'Name',
-        through='StructureNameAssociation',
-        related_name="structures"
-    )
+    # names = models.ManyToManyField(
+    #     'Name',
+    #     through='StructureNameAssociation',
+    #     related_name="structures"
+    # )
     entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
     added = models.DateTimeField(auto_now_add=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
@@ -355,7 +355,11 @@ class NameAffinityClass(models.Model):
 
 class StructureNameAssociation(models.Model):
     name = models.ForeignKey(Name, on_delete=models.CASCADE)
-    structure = models.ForeignKey(Structure, on_delete=models.CASCADE)
+    structure = models.ForeignKey(
+        Structure,
+        related_name='names',
+        on_delete=models.CASCADE
+    )
     name_type = models.ForeignKey(NameType, on_delete=models.RESTRICT)
     affinity_class = models.CharField(max_length=16, choices=(
         ('exact', 'Exact'),
@@ -382,7 +386,6 @@ class StructureNameAssociation(models.Model):
     def __str__(self):
         return "(StructureNameAssociations=%s: %s, %s, %s, %s, %s)" % \
                (self.id, self.name, self.structure, self.name_type, self.affinity_class, self.confidence)
-
 
 
 class Organization(models.Model):

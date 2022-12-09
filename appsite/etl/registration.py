@@ -1,31 +1,31 @@
 import datetime
 import glob
 import gzip
-import math
-import shutil
-from dataclasses import dataclass, field
-from pathlib import PurePath, Path
-
-import ujson as json
 import logging
+import math
 import os
+import shutil
 import time
 from collections import namedtuple, defaultdict
+from dataclasses import dataclass, field
+from pathlib import PurePath, Path
 from typing import List, Optional, Dict
 
 import pytz
+import ujson as json
 from celery import subtask, group
 from django.conf import settings
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import transaction, DatabaseError, IntegrityError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F
 from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
     ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileInChIStatus, \
-    StructureFileRecordNameAssociation, StructureFileSourceManager, StructureFileSource
+    StructureFileRecordNameAssociation, StructureFileSource, StructureFileLinkNameStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
-    Release, NameType, Name, Record, StructureHashisy, StructureParentStructure
+    Release, NameType, Name, Record, StructureHashisy, StructureParentStructure, StructureNameAssociation
 from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
@@ -502,11 +502,11 @@ class StructureRegistry(object):
         try:
             structure_file = StructureFile.objects.get(id=structure_file_id)
             records: QuerySet = StructureFileRecord.objects \
-                .select_related('structure') \
+                .select_related('structure', 'structure__parents') \
                 .values('structure__id') \
                 .filter(
                     structure_file=structure_file,
-                    structure__compound__isnull=True,
+                    structure__parents__isnull=True,
                     structure__blocked__isnull=True,
                 ).exclude(
                     structure__hashisy_key=SpecialCactvsHash.ZERO.hashisy
@@ -629,11 +629,11 @@ class StructureRegistry(object):
     def update_normalization_status(file_id):
         structure_file = StructureFile.objects.get(id=file_id)
         records: QuerySet = StructureFileRecord.objects \
-            .select_related('structure')\
+            .select_related('structure', 'structure__parents')\
             .values('structure__id')\
             .filter(
                 structure_file=structure_file,
-                structure__compound__isnull=False,
+                structure__parents__isnull=False,
             )
         structure_file_count = structure_file.count
         records_count = records.count()
@@ -814,6 +814,220 @@ class StructureRegistry(object):
         callback_args = [[r['structure__id'] for r in chunk] for chunk in chunks]
         callbacks = [callback.clone(((structure_file_id, args,),), ) for args in callback_args]
         return group(callbacks)()
+
+    #########
+
+    @staticmethod
+    def fetch_structure_file_for_linkname(structure_file_id: int) -> Optional[int]:
+        try:
+            structure_file = StructureFile.objects.get(id=structure_file_id)
+        except StructureFile.DoesNotExist:
+            return None
+        logger.info("link name structure file %s", structure_file)
+        if hasattr(structure_file, 'linkname_status'):
+            status = structure_file
+        else:
+            status = StructureFileLinkNameStatus(structure_file=structure_file)
+            status.save()
+        if status.progress > 0.98:
+            return None
+        return structure_file_id
+
+    @staticmethod
+    def linkname_chunk_mapper(structure_file_id: int, callback):
+        try:
+            structure_file = StructureFile.objects.get(id=structure_file_id)
+            structure_id_list: QuerySet = StructureFileSource.objects \
+                .select_related('structure') \
+                .values('structure__id') \
+                .filter(
+                    structure_file=structure_file,
+                    structure__blocked__isnull=True,
+                    structure__inchis__isnull=True,
+                )
+        except Exception as e:
+            logger.error("selecting structures for name linking failed")
+            raise Exception(e)
+
+        return StructureRegistry.structure_records_to_chunk_callbacks(structure_id_list, structure_file_id, callback)
+
+    @staticmethod
+    def link_structure_names(arg_tuple):
+        structure_file_id, structure_ids = arg_tuple
+        structure_file = StructureFile.objects.get(id=structure_file_id)
+
+        query = Structure.objects\
+            .select_related('parents', 'structure_file_source')\
+            .annotate(
+                record_names=ArrayAgg('structure_file_records__structure_file_record_name_associations'),
+                ficts=F('parents__ficts_parent'),
+                ficus=F('parents__ficus_parent'),
+                uuuuu=F('parents__uuuuu_parent'),
+            )
+
+        structures = query.filter(structure_file_source__structure_file=structure_file_id).all()
+
+        structure_association_list = []
+        for structure in structures:
+            record_names = structure.record_names
+            structure_association_list.extend(record_names)
+
+        file_record_associations = StructureFileRecordNameAssociation.objects.in_bulk(structure_association_list, field_name='id')
+
+        #logger.info("COUNTX %s" % len(connection.queries))
+
+        structure_association_list = []
+        #logger.info("S %s" % len(structures))
+
+        for structure in structures:
+            record_names = structure.record_names
+
+            for record_name in record_names:
+                if not record_name: continue
+                record_name_association = file_record_associations[record_name]
+                if structure.ficts:
+                    structure_association_list.append(StructureNameAssociation(
+                        name_id=record_name_association.name_id,
+                        structure_id=structure.ficts,
+                        name_type_id=record_name_association.name_type_id,
+                        affinity_class="exact",
+                        confidence=100
+                    ))
+                if structure.ficus and not structure.ficus == structure.ficts:
+                    structure_association_list.append(StructureNameAssociation(
+                        name_id=record_name_association.name_id,
+                        structure_id=structure.ficus,
+                        name_type_id=record_name_association.name_type_id,
+                        affinity_class="narrow",
+                        confidence=100
+                    ))
+                if structure.uuuuu and not structure.uuuuu == structure.ficus and not structure.uuuuu == structure.ficts:
+                    structure_association_list.append(StructureNameAssociation(
+                        name_id=record_name_association.name_id,
+                        structure_id=structure.uuuuu,
+                        name_type_id=record_name_association.name_type_id,
+                        affinity_class="broad",
+                        confidence=100
+                    ))
+
+        StructureNameAssociation.objects.bulk_create(
+            structure_association_list,
+            batch_size=1000,
+            ignore_conflicts=True
+        )
+
+        logger.info(len(structure_association_list))
+        #logger.info("COUNT1 %s" % len(connection.queries))
+
+
+
+
+
+
+        ###
+
+        # NOTE: the order matters, it has to go from broader to more specific identifier!!
+        identifiers = StructureRegistry.NCICADD_TYPES
+
+        source_structures: Dict[int, Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
+        parent_structure_relationships = []
+        source_structure_relationships = []
+
+        for structure_id, structure in source_structures.items():
+            if structure.blocked:
+                logger.info("structure %s is blocked and has been skipped" % (structure_id,))
+                continue
+            try:
+                related_hashes = {}
+                for identifier in identifiers:
+                    relationships = {}
+                    ens = structure.to_ens
+                    parent_ens = ens.get(identifier.parent_structure)
+                    hashisy_key: CactvsHash = CactvsHash(parent_ens)
+                    related_hashes[identifier.attr] = hashisy_key
+                    parent_structure: Structure = Structure(
+                        hashisy_key=hashisy_key,
+                        minimol=CactvsMinimol(parent_ens)
+                    )
+                    parent_structure_relationships \
+                        .append(StructureRelationships(parent_structure, related_hashes.copy()))
+                    relationships[identifier.attr] = hashisy_key
+                    source_structure_relationships.append(StructureRelationships(structure, relationships))
+                if not structure_id % DEFAULT_LOGGER_BLOCK:
+                    logger.info("finished normalizing structure %s" % structure_id)
+            except Exception as e:
+                structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
+                structure.save()
+                logger.error("normalizing structure %s failed : %s" % (structure_id, e))
+
+        parent_structure_hash_list = list(set([p.structure.hashisy_key for p in parent_structure_relationships]))
+        try:
+            with transaction.atomic():
+                # create parent structures in bulk
+                structures = sorted(
+                    [p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int
+                )
+                Structure.objects.bulk_create(
+                    structures,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+
+                # fetch hashisy / parent structures in bulk (by that they have an id)
+                parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
+                StructureHashisy.objects.bulk_create_from_hash_list(parent_structures.keys())
+                StructureFileSource.objects.bulk_create_from_structures(
+                    parent_structures.values(),
+                    structure_file,
+                    FileRegistry.DATABASE_ROW_BATCH_SIZE
+                )
+
+                # create compounds in bulk
+                compound_structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
+                Compound.objects.bulk_create(
+                    [Compound(structure=compound_structure) for compound_structure in compound_structures],
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+
+                source_structure_dict = {
+                    id: StructureParentStructure(structure=source_structures[id]) for id in source_structures
+                }
+                for relationship in source_structure_relationships:
+                    parent = source_structure_dict[relationship.structure.id]
+                    for attr, parent_hash in relationship.relationships.items():
+                        setattr(parent, attr, parent_structures[parent_hash])
+                sorted_source_structures = sorted(source_structure_dict.values(), key=lambda p: p.structure_id)
+                StructureParentStructure.objects.bulk_create(
+                    sorted_source_structures,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+
+                parent_structure_dict = {
+                    id: StructureParentStructure(structure=parent_structures[id]) for id in parent_structures
+                }
+                for relationship in parent_structure_relationships:
+                    parent = parent_structure_dict[relationship.structure.hashisy_key]
+                    for attr, parent_hash in relationship.relationships.items():
+                        setattr(parent, attr, parent_structures[parent_hash])
+                sorted_parent_structure = sorted(parent_structure_dict.values(), key=lambda p: p.structure_id)
+                StructureParentStructure.objects.bulk_create(
+                    sorted_parent_structure,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+
+        except DatabaseError as e:
+            logger.error(e)
+            raise (DatabaseError(e))
+        except Exception as e:
+            logger.error(e)
+            raise Exception(e)
+        StructureRegistry.update_normalization_status(structure_file_id)
+        StructureRegistry.update_calcinchi_progress(structure_file_id)
+        return True
+
 
 
 def structure_id_chunks(structure_ids):

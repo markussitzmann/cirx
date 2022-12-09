@@ -26,6 +26,7 @@ class ResolverModelTests(TestCase):
         pass
 
     def tearDown(self):
+        pass
 
         # name_association_objects = StructureNameAssociation.objects.all()
         # for a in name_association_objects:
@@ -52,18 +53,18 @@ class ResolverModelTests(TestCase):
         # logger.info("Compound %s" % compounds)
 
         ####
-        for structure in Structure.objects.all():
-            names = structure.structurenameassociation_set.all()
-            logger.info("-- Structure: %s" % (structure))
-            try:
-                logger.info("     ->: %s" % structure.parents if structure.parents else None)
-            except:
-                logger.info("     ->: None")
-            if len(names):
-                for name in names:
-                    logger.info("      affinity: %s -> name: %s | %s : %s" % (name.affinity_class, name.name_id, name.name_type_id, name.name.name))
-            else:
-                logger.info("     ->: None")
+        # for structure in Structure.objects.all():
+        #     names = structure.structurenameassociation_set.all()
+        #     logger.info("-- Structure: %s" % (structure))
+        #     try:
+        #         logger.info("     ->: %s" % structure.parents if structure.parents else None)
+        #     except:
+        #         logger.info("     ->: None")
+        #     if len(names):
+        #         for name in names:
+        #             logger.info("      affinity: %s -> name: %s | %s : %s" % (name.affinity_class, name.name_id, name.name_type_id, name.name.name))
+        #     else:
+        #         logger.info("     ->: None")
 
         # name_association_count = StructureNameAssociation.objects.count()
         # logger.info("Count --> %s", name_association_count)
@@ -207,27 +208,28 @@ class ResolverModelTests(TestCase):
 
         structures = query.all()
 
-        a_list = []
+        structure_association_list = []
         for structure in structures:
             record_names = structure.record_names
-            a_list.extend(record_names)
+            structure_association_list.extend(record_names)
 
-        logger.info(print(len(a_list)))
-        sfrna = StructureFileRecordNameAssociation.objects.in_bulk(a_list, field_name='id')
+        logger.info(print(len(structure_association_list)))
+        file_record_associations = StructureFileRecordNameAssociation.objects\
+            .in_bulk(structure_association_list, field_name='id')
 
         logger.info("COUNTX %s" % len(connection.queries))
 
+        structure_association_list = []
+        logger.info("S %s" % len(structures))
 
-        a_list = []
         for structure in structures:
-
             record_names = structure.record_names
 
             for record_name in record_names:
                 if not record_name: continue
-                record_name_association = sfrna[record_name]
+                record_name_association = file_record_associations[record_name]
                 if structure.ficts:
-                    a_list.append(StructureNameAssociation(
+                    structure_association_list.append(StructureNameAssociation(
                         name_id=record_name_association.name_id,
                         structure_id=structure.ficts,
                         name_type_id=record_name_association.name_type_id,
@@ -235,7 +237,7 @@ class ResolverModelTests(TestCase):
                         confidence=100
                     ))
                 if structure.ficus and not structure.ficus == structure.ficts:
-                    a_list.append(StructureNameAssociation(
+                    structure_association_list.append(StructureNameAssociation(
                         name_id=record_name_association.name_id,
                         structure_id=structure.ficus,
                         name_type_id=record_name_association.name_type_id,
@@ -243,20 +245,20 @@ class ResolverModelTests(TestCase):
                         confidence=100
                     ))
                 if structure.uuuuu and not structure.uuuuu == structure.ficus and not structure.uuuuu == structure.ficts:
-                    a_list.append(StructureNameAssociation(
+                    structure_association_list.append(StructureNameAssociation(
                         name_id=record_name_association.name_id,
                         structure_id=structure.uuuuu,
                         name_type_id=record_name_association.name_type_id,
                         affinity_class="broad",
                         confidence=100
-                ))
+                    ))
 
         StructureNameAssociation.objects.bulk_create(
-            a_list,
-            batch_size=100,
+            structure_association_list,
+            batch_size=1000,
             ignore_conflicts=True
         )
 
-        logger.info(len(a_list))
+        logger.info(len(structure_association_list))
         logger.info("COUNT1 %s" % len(connection.queries))
 

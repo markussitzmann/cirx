@@ -136,6 +136,28 @@ class StructureFileInChIStatus(models.Model):
         )
 
 
+class StructureFileLinkNameStatus(models.Model):
+    structure_file = models.OneToOneField(
+        'StructureFile',
+        primary_key=True,
+        blank=False,
+        null=False,
+        related_name='linkname_status',
+        on_delete=models.CASCADE,
+    )
+    updated = models.DateTimeField(auto_now=True, blank=True, null=True)
+    progress = models.FloatField(default=0.0)
+
+    class Meta:
+        db_table = 'cir_structure_file_structure_link_name_status'
+
+    def __str__(self):
+        return "link name status %s (%s)" % (
+            self.updated,
+            self.progress
+        )
+
+
 class StructureFileField(models.Model):
     field_name = models.CharField(max_length=768, null=False, blank=False, unique=True)
     structure_files = models.ManyToManyField(StructureFile, related_name="fields")
@@ -179,11 +201,6 @@ class ReleaseNameField(models.Model):
             ),
         ]
         db_table = 'cir_release_name_field'
-
-# class StructureFileRecordManager(models.Manager):
-#
-#     def all_parent_structures(self):
-#         return self.
 
 
 class StructureFileRecord(models.Model):

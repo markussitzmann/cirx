@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import QuerySet, Q
 
 # from structure.models import Structure
-from etl.models import StructureFileRecord, StructureFile
+from etl.models import StructureFile
 from etl.tasks import *
 
 logger = logging.getLogger('cirx')

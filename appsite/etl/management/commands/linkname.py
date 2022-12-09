@@ -8,14 +8,14 @@ logger = logging.getLogger('cirx')
 
 
 class Command(BaseCommand):
-    help = 'normalize structures (FICTS, FICuS, uuuuu)'
+    help = 'link structure names'
 
     def handle(self, *args, **options):
-        logger.info("normalize")
-        _normalize()
+        logger.info("linkname")
+        _linkname()
 
 
-def _normalize_structures(structure_file_id: int):
+def _link_structure_names(structure_file_id: int):
     task_list = (
         fetch_structure_file_for_normalization_task.s(structure_file_id) |
         normalize_chunk_mapper.s(normalize_structure_task.s())
@@ -24,16 +24,13 @@ def _normalize_structures(structure_file_id: int):
     return task_list.delay()
 
 
-def _normalize():
+def _linkname():
     files: QuerySet = StructureFile.objects.filter(
-       Q(normalization_status__isnull=True) | Q(normalization_status__progress__lte=0.98)
+        Q(normalization_status__isnull=True) | Q(normalization_status__progress__lte=0.98)
     ).all()
-    # files: QuerySet = StructureFile.objects.filter(
-    #     id=8
-    # ).all()
     for file in files:
-        logger.info("normalize structure file %s" % file.id)
-        _normalize_structures(file.id)
+        logger.info("normalize structure %s" % file.id)
+        _link_structure_names(file.id)
 
 
 
