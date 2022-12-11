@@ -17,8 +17,8 @@ class Command(BaseCommand):
 
 def _link_structure_names(structure_file_id: int):
     task_list = (
-        fetch_structure_file_for_normalization_task.s(structure_file_id) |
-        normalize_chunk_mapper.s(normalize_structure_task.s())
+        fetch_structure_file_for_linkname_task.s(structure_file_id) |
+        linkname_chunk_mapper.s(link_structure_names_task.s())
     )
     logger.info("submitting %s tasks", len(task_list))
     return task_list.delay()
@@ -26,7 +26,7 @@ def _link_structure_names(structure_file_id: int):
 
 def _linkname():
     files: QuerySet = StructureFile.objects.filter(
-        Q(normalization_status__isnull=True) | Q(normalization_status__progress__lte=0.98)
+        Q(linkname_status__isnull=True) | Q(linkname_status__progress__lte=0.98)
     ).all()
     for file in files:
         logger.info("normalize structure %s" % file.id)

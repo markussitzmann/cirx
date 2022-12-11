@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Tuple
 
 from celery import shared_task, Task
 
@@ -48,8 +48,8 @@ def normalize_chunk_mapper(file_id: int, callback):
 
 
 @shared_task(name="normalize")
-def normalize_structure_task(structure_ids: List[int]):
-    return StructureRegistry.normalize_structures(structure_ids)
+def normalize_structure_task(structure_id_arg_tuples: Tuple[int, List[int]]):
+    return StructureRegistry.normalize_structures(structure_id_arg_tuples)
 
 
 ### InChI
@@ -70,27 +70,27 @@ def calcinchi_chunk_mapper(file_id: int, callback):
 
 
 @shared_task(name="calcinchi")
-def calculate_inchi_task(structure_ids: List[int]):
-    return StructureRegistry.calculate_inchi(structure_ids)
+def calculate_inchi_task(structure_id_arg_tuples: Tuple[int, List[int]]):
+    return StructureRegistry.calculate_inchi(structure_id_arg_tuples)
 
 
 ### Link Names
 
-@shared_task(bind=True, name="calcinchi fetch")
+@shared_task(bind=True, name="linkname fetch")
 def fetch_structure_file_for_linkname_task(self, file_id: int):
-    file_id = StructureRegistry.fetch_structure_file_for_calcinchi(file_id)
+    file_id = StructureRegistry.fetch_structure_file_for_linkname(file_id)
     if file_id:
-        logger.info("structure file %s fetched for InChI calculation" % (file_id, ))
+        logger.info("structure file %s fetched for linking structure names" % (file_id, ))
         return file_id
     return None
 
 
-@shared_task(name="calcinchi mapper")
+@shared_task(name="linkname mapper")
 def linkname_chunk_mapper(file_id: int, callback):
     logger.info("args %s %s" % (file_id, callback))
-    return StructureRegistry.calcinchi_chunk_mapper(file_id, callback)
+    return StructureRegistry.linkname_chunk_mapper(file_id, callback)
 
 
-@shared_task(name="calcinchi")
-def link_structure_names_task(structure_ids: List[int]):
-    return StructureRegistry.calculate_inchi(structure_ids)
+@shared_task(name="linkname")
+def link_structure_names_task(structure_id_arg_tuples: Tuple[int, List[int]]):
+    return StructureRegistry.link_structure_names(structure_id_arg_tuples)
