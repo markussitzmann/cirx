@@ -1,7 +1,6 @@
 from pycactvs import Molfile
 from typing import List, Dict
 
-from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 

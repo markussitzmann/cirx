@@ -17,7 +17,7 @@ from celery import subtask, group
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import transaction, DatabaseError, IntegrityError
-from django.db.models import QuerySet, F
+from django.db.models import QuerySet, F, Q
 from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
@@ -786,11 +786,11 @@ class StructureRegistry(object):
     @staticmethod
     def update_calcinchi_progress(file_id):
         structure_file = StructureFile.objects.get(id=file_id)
-        structure_count: QuerySet = StructureFileSource.objects \
+        structure_count: int = StructureFileSource.objects \
             .filter(
                 structure_file=structure_file,
             ).distinct().count()
-        structure_count_with_inchi: QuerySet = StructureFileSource.objects \
+        structure_count_with_inchi: int = StructureFileSource.objects \
             .filter(
                 structure_file=structure_file,
                 structure__inchis__isnull=False
@@ -875,10 +875,8 @@ class StructureRegistry(object):
         file_record_associations = StructureFileRecordNameAssociation.objects\
             .in_bulk(structure_association_list, field_name='id')
 
-        #logger.info("COUNTX %s" % len(connection.queries))
-
         structure_association_list = []
-        logger.info("S %s" % len(structures))
+        #logger.info("S %s" % len(structures))
 
         for structure in structures:
             record_names = structure.record_names
@@ -920,117 +918,38 @@ class StructureRegistry(object):
         logger.info(len(structure_association_list))
         #logger.info("COUNT1 %s" % len(connection.queries))
 
-        #StructureRegistry.update_linkname_progress(structure_file_id)
+        StructureRegistry.update_linkname_progress(structure_file_id)
         logger.info("----------------- XXX")
         return True
 
+    @staticmethod
+    def update_linkname_progress(file_id):
+        structure_file = StructureFile.objects.get(id=file_id)
 
+        structure_count: int = StructureParentStructure.objects \
+            .select_related('structure__structure_file_source') \
+            .filter(structure__structure_file_source__structure_file=structure_file) \
+            .filter(
+                Q(structure_id=F('ficts_parent_id'))
+                | Q(structure_id=F('ficus_parent_id'))
+                | Q(structure_id=F('uuuuu_parent_id'))
+            ).count()
 
+        structure_count_with_name: int = StructureFileSource.objects \
+            .filter(
+                structure_file=structure_file,
+                structure__names__isnull=False,
+            ).distinct().count()
 
-        ###
-
-        # NOTE: the order matters, it has to go from broader to more specific identifier!!
-        # identifiers = StructureRegistry.NCICADD_TYPES
-        #
-        # source_structures: Dict[int, Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
-        # parent_structure_relationships = []
-        # source_structure_relationships = []
-        #
-        # for structure_id, structure in source_structures.items():
-        #     if structure.blocked:
-        #         logger.info("structure %s is blocked and has been skipped" % (structure_id,))
-        #         continue
-        #     try:
-        #         related_hashes = {}
-        #         for identifier in identifiers:
-        #             relationships = {}
-        #             ens = structure.to_ens
-        #             parent_ens = ens.get(identifier.parent_structure)
-        #             hashisy_key: CactvsHash = CactvsHash(parent_ens)
-        #             related_hashes[identifier.attr] = hashisy_key
-        #             parent_structure: Structure = Structure(
-        #                 hashisy_key=hashisy_key,
-        #                 minimol=CactvsMinimol(parent_ens)
-        #             )
-        #             parent_structure_relationships \
-        #                 .append(StructureRelationships(parent_structure, related_hashes.copy()))
-        #             relationships[identifier.attr] = hashisy_key
-        #             source_structure_relationships.append(StructureRelationships(structure, relationships))
-        #         if not structure_id % DEFAULT_LOGGER_BLOCK:
-        #             logger.info("finished normalizing structure %s" % structure_id)
-        #     except Exception as e:
-        #         structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
-        #         structure.save()
-        #         logger.error("normalizing structure %s failed : %s" % (structure_id, e))
-        #
-        # parent_structure_hash_list = list(set([p.structure.hashisy_key for p in parent_structure_relationships]))
-        # try:
-        #     with transaction.atomic():
-        #         # create parent structures in bulk
-        #         structures = sorted(
-        #             [p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int
-        #         )
-        #         Structure.objects.bulk_create(
-        #             structures,
-        #             batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-        #             ignore_conflicts=True
-        #         )
-        #
-        #         # fetch hashisy / parent structures in bulk (by that they have an id)
-        #         parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
-        #         StructureHashisy.objects.bulk_create_from_hash_list(parent_structures.keys())
-        #         StructureFileSource.objects.bulk_create_from_structures(
-        #             parent_structures.values(),
-        #             structure_file,
-        #             FileRegistry.DATABASE_ROW_BATCH_SIZE
-        #         )
-        #
-        #         # create compounds in bulk
-        #         compound_structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
-        #         Compound.objects.bulk_create(
-        #             [Compound(structure=compound_structure) for compound_structure in compound_structures],
-        #             batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-        #             ignore_conflicts=True
-        #         )
-        #
-        #         source_structure_dict = {
-        #             id: StructureParentStructure(structure=source_structures[id]) for id in source_structures
-        #         }
-        #         for relationship in source_structure_relationships:
-        #             parent = source_structure_dict[relationship.structure.id]
-        #             for attr, parent_hash in relationship.relationships.items():
-        #                 setattr(parent, attr, parent_structures[parent_hash])
-        #         sorted_source_structures = sorted(source_structure_dict.values(), key=lambda p: p.structure_id)
-        #         StructureParentStructure.objects.bulk_create(
-        #             sorted_source_structures,
-        #             batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-        #             ignore_conflicts=True
-        #         )
-        #
-        #         parent_structure_dict = {
-        #             id: StructureParentStructure(structure=parent_structures[id]) for id in parent_structures
-        #         }
-        #         for relationship in parent_structure_relationships:
-        #             parent = parent_structure_dict[relationship.structure.hashisy_key]
-        #             for attr, parent_hash in relationship.relationships.items():
-        #                 setattr(parent, attr, parent_structures[parent_hash])
-        #         sorted_parent_structure = sorted(parent_structure_dict.values(), key=lambda p: p.structure_id)
-        #         StructureParentStructure.objects.bulk_create(
-        #             sorted_parent_structure,
-        #             batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-        #             ignore_conflicts=True
-        #         )
-        #
-        # except DatabaseError as e:
-        #     logger.error(e)
-        #     raise (DatabaseError(e))
-        # except Exception as e:
-        #     logger.error(e)
-        #     raise Exception(e)
-        # StructureRegistry.update_normalization_status(structure_file_id)
-        # StructureRegistry.update_calcinchi_progress(structure_file_id)
-        # return True
-
+        logger.info("link name progress file %s: %s (%s : %s)" % (
+            structure_file.id,
+            structure_count == structure_count_with_name,
+            structure_count_with_name,
+            structure_count
+        ))
+        status, created = StructureFileLinkNameStatus.objects.get_or_create(structure_file=structure_file)
+        status.progress = structure_count_with_name / structure_count
+        status.save()
 
 
 def structure_id_chunks(structure_ids):

@@ -374,7 +374,6 @@ class StructureNameAssociation(models.Model):
 
     class Meta:
         constraints = [
-            #UniqueConstraint(fields=['name', 'structure', 'name_type'], name='unique_structure_names'),
             UniqueConstraint(fields=['name', 'structure', 'name_type', 'affinity_class'], name='unique_structure_name_affinity'),
             models.CheckConstraint(
                 name="structure_name_association_confidence_limits",
