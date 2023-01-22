@@ -151,8 +151,9 @@ class StructureFileLinkNameStatus(models.Model):
         db_table = 'cir_structure_file_structure_link_name_status'
 
     def __str__(self):
-        return "link name status %s (%s)" % (
+        return "link name status %s (%s: %s)" % (
             self.updated,
+            self.structure_file,
             self.progress
         )
 

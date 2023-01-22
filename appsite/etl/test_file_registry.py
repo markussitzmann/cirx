@@ -27,8 +27,6 @@ class FileRegistryTests(TestCase):
         for r in StructureFileRecord.objects.all():
             logger.info("NAME TYPE %s : %s :", r.id, r)
 
-
-
     def tearDown(self):
         logger.info("----- file registry tear down ----")
         logger.info("ENS COUNT: %s" % len(Ens.List()))

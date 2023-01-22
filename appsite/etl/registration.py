@@ -693,7 +693,6 @@ class StructureRegistry(object):
             Prop(inchi_type.property).setparam("options", options)
 
         structure_to_inchi_relationships = []
-
         for structure_id, structure in source_structures.items():
             if structure.blocked:
                 logger.info("structure %s is blocked and has been skipped" % (structure_id, ))
@@ -729,14 +728,17 @@ class StructureRegistry(object):
                 logger.error("calculating inchi for structure %s failed : %s" % (structure_id, e))
 
         inchi_dict = {
-            inchi_data.inchi.key: inchi_data.inchi for structure_to_inchi in structure_to_inchi_relationships
+            inchi_data.inchi.key: inchi_data.inchi
+            for structure_to_inchi in structure_to_inchi_relationships
             for inchi_data in structure_to_inchi.relationships.values()
         }
+
+        sorted_inchi_list = sorted(inchi_dict.values(), key=lambda inchi: inchi.key)
 
         try:
             with transaction.atomic():
                 InChI.objects.bulk_create(
-                    inchi_dict.values(),
+                    sorted_inchi_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
@@ -769,8 +771,9 @@ class StructureRegistry(object):
                             software_version=inchi_type.softwareversion
                         )
                         structure_inchi_associations.append(structure_inchi_association)
+                sorted_structure_inchi_associations = sorted(structure_inchi_associations, key=lambda item: (item.inchi_id, item.structure_id))
                 StructureInChIAssociation.objects.bulk_create(
-                    structure_inchi_associations,
+                    sorted_structure_inchi_associations,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
@@ -854,7 +857,7 @@ class StructureRegistry(object):
     @staticmethod
     def link_structure_names(arg_tuple):
         structure_file_id, structure_ids = arg_tuple
-        structure_file = StructureFile.objects.get(id=structure_file_id)
+        #structure_file = StructureFile.objects.get(id=structure_file_id)
 
         query = Structure.objects\
             .select_related('parents', 'structure_file_source')\
@@ -864,7 +867,6 @@ class StructureRegistry(object):
                 ficus=F('parents__ficus_parent'),
                 uuuuu=F('parents__uuuuu_parent'),
             )
-
         structures = query.filter(structure_file_source__structure_file=structure_file_id).all()
 
         structure_association_list = []
@@ -876,11 +878,8 @@ class StructureRegistry(object):
             .in_bulk(structure_association_list, field_name='id')
 
         structure_association_list = []
-        #logger.info("S %s" % len(structures))
-
         for structure in structures:
             record_names = structure.record_names
-
             for record_name in record_names:
                 if not record_name: continue
                 record_name_association = file_record_associations[record_name]
@@ -911,15 +910,12 @@ class StructureRegistry(object):
 
         StructureNameAssociation.objects.bulk_create(
             structure_association_list,
-            batch_size=1000,
+            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
             ignore_conflicts=True
         )
 
-        logger.info(len(structure_association_list))
-        #logger.info("COUNT1 %s" % len(connection.queries))
-
+        #logger.info(len(structure_association_list))
         StructureRegistry.update_linkname_progress(structure_file_id)
-        logger.info("----------------- XXX")
         return True
 
     @staticmethod

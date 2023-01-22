@@ -29,7 +29,7 @@ def _linkname():
         Q(linkname_status__isnull=True) | Q(linkname_status__progress__lte=0.98)
     ).all()
     for file in files:
-        logger.info("normalize structure %s" % file.id)
+        logger.info("link names for structure file %s" % file.id)
         _link_structure_names(file.id)
 
 
