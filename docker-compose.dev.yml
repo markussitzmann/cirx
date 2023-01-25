@@ -51,6 +51,7 @@ services:
     environment:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
+    shm_size: 8GB
 
   cirx-cache:
     image: redis:6.2-bullseye

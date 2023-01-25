@@ -289,9 +289,6 @@ class Compound(models.Model):
     def __str__(self):
         return "NCICADD:CID=%s" % self.id
 
-    #def __repr__(self):
-    #    return "NCICADD:CID=%s" % self.id
-
 
 class Record(models.Model):
     name = models.ForeignKey('Name', on_delete=models.PROTECT, blank=False, null=False)
@@ -354,7 +351,11 @@ class NameAffinityClass(models.Model):
 
 
 class StructureNameAssociation(models.Model):
-    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    name = models.ForeignKey(
+        Name,
+        related_name='structures',
+        on_delete=models.CASCADE
+    )
     structure = models.ForeignKey(
         Structure,
         related_name='names',

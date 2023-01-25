@@ -180,10 +180,11 @@ class FileRegistry(object):
     @staticmethod
     def register_structure_file_record_chunk_mapper(structure_file_id: int, callback):
         try:
+            logger.info("register structure file record chunk mapper for structure file id %s" % structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
             count = structure_file.count
         except Exception as e:
-            logger.error("structure file and count not available")
+            logger.error("structure file and count not available for file id %s" % structure_file_id)
             raise Exception(e)
         chunk_size = FileRegistry.CHUNK_SIZE
         chunk_number = math.ceil(count / chunk_size)
@@ -500,6 +501,7 @@ class StructureRegistry(object):
     @staticmethod
     def normalize_chunk_mapper(structure_file_id: int, callback):
         try:
+            logger.info("normalize chunk mapper for structure file id %s" % structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
             records: QuerySet = StructureFileRecord.objects \
                 .select_related('structure', 'structure__parents') \
@@ -666,6 +668,7 @@ class StructureRegistry(object):
     @staticmethod
     def calcinchi_chunk_mapper(structure_file_id: int, callback):
         try:
+            logger.info("calcinchi chunk mapper for structure file id %s" % structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
             structure_id_list: QuerySet = StructureFileSource.objects \
                 .select_related('structure') \
@@ -839,6 +842,7 @@ class StructureRegistry(object):
     @staticmethod
     def linkname_chunk_mapper(structure_file_id: int, callback):
         try:
+            logger.info("linkname chunk mapper for structure file id %s" % structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
             structure_id_list: QuerySet = StructureFileSource.objects \
                 .select_related('structure') \
@@ -859,62 +863,80 @@ class StructureRegistry(object):
         structure_file_id, structure_ids = arg_tuple
         #structure_file = StructureFile.objects.get(id=structure_file_id)
 
+        s = sorted(structure_ids)
+        logger.info("IN %s %s [%s, %s]" % (structure_file_id, len(structure_ids), s[0], s[-1]))
+
         query = Structure.objects\
             .select_related('parents', 'structure_file_source')\
+            .filter(structure_file_source__structure_id__in=structure_ids) \
             .annotate(
                 record_names=ArrayAgg('structure_file_records__structure_file_record_name_associations'),
                 ficts=F('parents__ficts_parent'),
                 ficus=F('parents__ficus_parent'),
                 uuuuu=F('parents__uuuuu_parent'),
             )
-        structures = query.filter(structure_file_source__structure_file=structure_file_id).all()
+        structures = query\
+            .values('id', 'record_names', 'ficts', 'ficus', 'uuuuu')\
+            .all()
+
+        logger.info("STRUCTURES %s", len(structures))
 
         structure_association_list = []
         for structure in structures:
-            record_names = structure.record_names
+            record_names = structure['record_names']
             structure_association_list.extend(record_names)
 
-        file_record_associations = StructureFileRecordNameAssociation.objects\
+        file_record_associations = StructureFileRecordNameAssociation.objects \
             .in_bulk(structure_association_list, field_name='id')
+
+        logger.info("ASSOCIATIONS %s", len(file_record_associations.keys()))
 
         structure_association_list = []
         for structure in structures:
-            record_names = structure.record_names
-            for record_name in record_names:
-                if not record_name: continue
-                record_name_association = file_record_associations[record_name]
-                if structure.ficts:
+            record_name_ids = structure['record_names']
+            for record_name_id in record_name_ids:
+                if not record_name_id:
+                    continue
+                record_name_association = file_record_associations[record_name_id]
+                if structure['ficts']:
                     structure_association_list.append(StructureNameAssociation(
                         name_id=record_name_association.name_id,
-                        structure_id=structure.ficts,
+                        structure_id=structure['ficts'],
                         name_type_id=record_name_association.name_type_id,
                         affinity_class="exact",
                         confidence=100
                     ))
-                if structure.ficus and not structure.ficus == structure.ficts:
+                if structure['ficus'] and not structure['ficus'] == structure['ficts']:
                     structure_association_list.append(StructureNameAssociation(
                         name_id=record_name_association.name_id,
-                        structure_id=structure.ficus,
+                        structure_id=structure['ficus'],
                         name_type_id=record_name_association.name_type_id,
                         affinity_class="narrow",
                         confidence=100
                     ))
-                if structure.uuuuu and not structure.uuuuu == structure.ficus and not structure.uuuuu == structure.ficts:
+                if structure['uuuuu'] and not structure['uuuuu'] == structure['ficus'] and not structure['uuuuu'] == structure['ficts']:
                     structure_association_list.append(StructureNameAssociation(
                         name_id=record_name_association.name_id,
-                        structure_id=structure.uuuuu,
+                        structure_id=structure['uuuuu'],
                         name_type_id=record_name_association.name_type_id,
                         affinity_class="broad",
                         confidence=100
                     ))
 
-        StructureNameAssociation.objects.bulk_create(
-            structure_association_list,
-            batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
-            ignore_conflicts=True
-        )
-
-        #logger.info(len(structure_association_list))
+        logger.info("BEFORE CREATE %s" % len(structure_association_list))
+        try:
+            with transaction.atomic():
+                StructureNameAssociation.objects.bulk_create(
+                    structure_association_list,
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    ignore_conflicts=True
+                )
+        except DatabaseError as e:
+            logger.error(e)
+            raise(DatabaseError(e))
+        except Exception as e:
+            logger.error(e)
+            raise Exception(e)
         StructureRegistry.update_linkname_progress(structure_file_id)
         return True
 

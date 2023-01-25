@@ -12,12 +12,15 @@ from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
-MINI = True
-INIT_PUBCHEM_COMPOUND = True
-INIT_PUBCHEM_SUBSTANCE = True
-INIT_CHEMBL = True
+MINI = False
+INIT_PUBCHEM_COMPOUND = False
+INIT_PUBCHEM_SUBSTANCE = False
+INIT_CHEMBL = False
 INIT_NCI = True
 INIT_TT = False
+
+# INIT_NCI must be True to use this option:
+INIT_NCI_10000 = False
 
 
 class Command(BaseCommand):
@@ -305,6 +308,7 @@ def init_release(
         init_pubchem_substance=INIT_PUBCHEM_SUBSTANCE,
         init_chembl=INIT_CHEMBL,
         init_nci=INIT_NCI,
+        init_nci_10000=INIT_NCI_10000,
         init_tt=INIT_TT
     ):
 
@@ -464,9 +468,13 @@ def init_release(
         open_nci_db.save()
 
         if mini:
+            if init_nci_10000:
+                fname = "MINI/nci/NCI_DTP/NCI_DTP.*.10000.sdf.gz"
+            else:
+                fname = "MINI/nci/NCI_DTP.sdf"
             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
                 release=open_nci_db,
-                file_location_pattern_string="MINI/nci/NCI_DTP.sdf"
+                file_location_pattern_string=fname
             )
             open_nci_db_collection.save()
         else:
