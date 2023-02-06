@@ -1,3 +1,4 @@
+{% load static %}
 
 <div id="editor-widget">
 	<div id="editor-widget-dialog" title="Structure Editor">
@@ -5,7 +6,7 @@
 		</div>
 		<div id="editor-message-pane" style="z-index:501;position:absolute;color:white;background-color:black;left:200px;top:200px;margin:10px;">
 			<div style="padding:10px;width:200px">
-				<div style="float:right" id="progress-wheel"><img src="/image/ajax-wheel-white.gif" /></div>
+				<div style="float:right" id="progress-wheel"><img src="{%static 'structure/assets/image/ajax-wheel-white.gif' %}" /></div>
 				<div style="padding-left:10px" id="progress-status"></div>
 			</div>
 		</div>

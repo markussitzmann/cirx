@@ -1,6 +1,7 @@
+{% load static %}
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -14,15 +15,10 @@
 	<meta name="keywords" content="{% block meta-keywords %}{% endblock %}" />
 	<meta name="description" content="{% block meta-description %}{% endblock %}" />
 	{% block link %}
-	<link rel="stylesheet" href="/style/carbon.css" type="text/css" media="screen,projection" />
-	<!--<link rel="stylesheet" href="/style/browser.css" type="text/css" media="screen,projection">-->
-        <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>-->
-        <!--<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/black-tie/jquery-ui.css">-->
-        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/black-tie/jquery-ui.css">
-	<link rel="icon" href="/image/favicon.ico"  type="image/x-icon"/>
+	    <link rel="stylesheet" href="{% static 'structure/assets/css/carbon.css' %}" type="text/css" media="screen,projection" />
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.13.0/themes/black-tie/jquery-ui.css" />
 	{% endblock %}
 	{% block script %}{% endblock %}
-	<script type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=HHS&subagency=NCI"></script>
 </head>
 
 <body>

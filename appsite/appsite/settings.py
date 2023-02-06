@@ -204,7 +204,6 @@ REST_FRAMEWORK = {
 
 JSON_API_FORMAT_FIELD_NAMES = 'camelize'
 
-
 ### LOGGING
 
 LOGGING = {
@@ -253,7 +252,7 @@ LOGGING = {
     },
 }
 
-# CELERY SETTINGS
+### CELERY SETTINGS
 
 CELERY_BROKER_URL = 'redis://cirx-cache:6379'
 

@@ -39,12 +39,14 @@ def image(request: HttpRequest, string: str = None):
         return HttpResponse(json.dumps(params), content_type='application/json')
 
 
-
 def structure(request, string=None):
-    if request.is_secure():
-        host_string = 'https://' + request.get_host()
-    else:
-        host_string = 'http://' + request.get_host()
+    #if request.is_secure():
+    #    host_string = 'https://' + request.get_host()
+    #else:
+    #    host_string = 'http://' + request.get_host()
+
+    host_string = request.scheme + "://" + request.get_host()
+    base_url = request.path_info
 
     query = request.GET.copy()
     if 'string' in query and 'representation' in query:
@@ -60,7 +62,7 @@ def structure(request, string=None):
         if form.is_valid():
             #string = form.cleaned_data['string'].replace('#', '%23')
             representation = form.cleaned_data['representation']
-            redirectedURL = '%s/%s/%s' % (settings.STRUCTURE_BASE_URL, identifier, representation)
+            redirectedURL = '%s/%s/%s' % (base_url, identifier, representation)
             return HttpResponseRedirect(redirectedURL)
     else:
         if string:
@@ -69,7 +71,7 @@ def structure(request, string=None):
             form = ChemicalResolverInput()
     return render(request, 'structure.template', {
         'form': form,
-        'base_url': settings.STRUCTURE_BASE_URL,
+        'base_url': base_url,
         'host': host_string,
     })
 
