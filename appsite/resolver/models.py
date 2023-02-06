@@ -375,7 +375,10 @@ class StructureNameAssociation(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['name', 'structure', 'name_type', 'affinity_class'], name='unique_structure_name_affinity'),
+            UniqueConstraint(
+                fields=['name', 'structure', 'name_type', 'affinity_class'],
+                name='unique_structure_name_affinity'
+            ),
             models.CheckConstraint(
                 name="structure_name_association_confidence_limits",
                 check=models.Q(confidence__range=(1, 100)),
@@ -384,8 +387,8 @@ class StructureNameAssociation(models.Model):
         db_table = 'cir_structure_name_associations'
 
     def __str__(self):
-        return "(StructureNameAssociations=%s: %s, %s, %s, %s, %s)" % \
-               (self.id, self.name, self.structure, self.name_type, self.affinity_class, self.confidence)
+        return "(StructureNameAssociations=%s: name=%s, structure=%s, name_type=%s, affinity=%s, confidence=%s)" % \
+               (self.id, self.name_id, self.structure_id, self.name_type, self.affinity_class, self.confidence)
 
 
 class Organization(models.Model):

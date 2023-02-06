@@ -86,10 +86,14 @@ class StructureViewSet(ResourceModelViewSet):
         self.name = "Structure"
         super().__init__(*args, **kwargs)
 
-    queryset = Structure.objects.filter(compound__isnull=False, blocked__isnull=True)\
-        .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent', 'compound')\
-        .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints', 'ficts_children',
-                          'ficus_children', 'uuuuu_children')
+    #queryset = Structure.objects.filter(compound__isnull=False, blocked__isnull=True)\
+    #    .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent', 'compound')\
+    #    .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints', 'ficts_children',
+    #                      'ficus_children', 'uuuuu_children')
+
+    queryset = Structure.objects.filter(blocked__isnull=True) \
+        .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints')
+
     # select_for_includes = {
     #     'ficts_parent': ['ficts_parent'],
     #     'ficus_parent': ['ficus_parent'],
@@ -107,26 +111,26 @@ class StructureViewSet(ResourceModelViewSet):
 
     filterset_fields = {
         'id': ('exact', 'in'),
-        'ficts_parent': ('exact', 'in'),
-        'ficus_parent': ('exact', 'in'),
-        'uuuuu_parent': ('exact', 'in'),
+        #'ficts_parent': ('exact', 'in'),
+        #'ficus_parent': ('exact', 'in'),
+        #'uuuuu_parent': ('exact', 'in'),
         # 'ficts_children': ('exact', 'in'),
         # 'ficus_children': ('exact', 'in'),
         # 'uuuuu_children': ('exact', 'in'),
-        'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
+        #'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
         'inchis__inchitype': ('exact', 'in'),
         'inchis__inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
         'inchis__inchi__string': ('icontains', 'iexact', 'contains', 'exact'),
     }
     search_fields = (
         'id',
-        'hashisy',
-        'ficts_parent',
-        'ficus_parent',
-        'uuuuu_parent',
-        'ficts_children',
-        'ficus_children',
-        'uuuuu_children',
+        #'hashisy',
+        #'ficts_parent',
+        #'ficus_parent',
+        #'uuuuu_parent',
+        #'ficts_children',
+        #'ficus_children',
+        #'uuuuu_children',
     )
 
 

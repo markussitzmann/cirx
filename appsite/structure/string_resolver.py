@@ -89,9 +89,10 @@ class ChemicalStructure:
        of the same chemical structure together"""
 
     def __init__(self, resolved: Structure = None, ens: Ens = None):
-        self._resolved = resolved
-        self._ens = ens
-        self._metadata = {}
+        self._resolved: Structure = resolved
+        self._ens: Ens = ens
+        self._metadata: Dict = {}
+        self.hashisy: Identifier
         if resolved and not ens:
             ens = resolved.minimol.ens
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
@@ -101,12 +102,12 @@ class ChemicalStructure:
             hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
             self.hashisy = hashisy
             try:
-                self._resolved = Structure.objects.get(hashisy=CactvsHash(hashisy))
+                self._resolved = Structure.objects.get(hashisy_key=CactvsHash(hashisy))
             except Exception as e:
                 #self.resolved = None
-                self._resolved = Structure(minimol=ens.get('E_MINIMOL'), hashisy=hashisy)
+                self._resolved = Structure(minimol=ens.get('E_MINIMOL'), hashisy_key=hashisy)
         elif ens and resolved:
-            h1 = resolved.hashisy.int
+            h1 = resolved.hashisy_key.int
             h2 = Identifier(hashcode=ens.get('E_HASHISY')).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')
@@ -808,7 +809,7 @@ class ChemicalString:
             try:
                 hashcode = Identifier(hashcode=ens.get('E_HASHISY'))
                 try:
-                    structure = Structure.objects.get(hashisy=CactvsHash(hashcode.integer))
+                    structure = Structure.objects.get(hashisy_key=CactvsHash(hashcode.integer))
                     chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
                     interpretation_object.structures.append(chemical_structure)
                 except (Structure.DoesNotExist, RuntimeError) as e1:

@@ -1,9 +1,7 @@
-import datetime
 import io
-import os
-import time
+import json
 
-import xml.dom.minidom
+from pycactvs import Ens, Prop
 
 from django.conf import settings
 from django.http import *
@@ -11,11 +9,35 @@ from django.shortcuts import render
 
 from structure.dispatcher import Dispatcher
 from structure.forms import *
-from structure.models import *
 
 
 def identifier(request, string, representation, operator=None, format='plain'):
     return resolve_to_response(request, string, representation, operator_parameter=None, output_format=format)
+
+
+def image(request: HttpRequest, string: str = None):
+    dsvg = {
+        'width': 250,
+        'height': 250,
+        'bgcolor': 'white',
+        'atomcolor': 'element',
+        # 'symbolfontsize': 32,
+        'bonds': 10,
+        'framecolor': 'transparent'
+    }
+
+    p: Prop = Prop.Ref('E_SVG_IMAGE')
+    p.datatype = 'xmlstring'
+    p.setparameter(dsvg)
+
+    if string:
+
+        image = Ens.Get(string, p)
+        return HttpResponse(image, content_type='image/svg+xml')
+    else:
+        params = {param: p.getparameter(param) for param in p.parameters}
+        return HttpResponse(json.dumps(params), content_type='application/json')
+
 
 
 def structure(request, string=None):

@@ -639,98 +639,98 @@ class Dispatcher:
     #                 index += 1
     #     return self.response_list
     #
-    # def xprop(self, string):
-    #     propname = self.parameters
-    #     base_content_type = self.base_content_type
-    #     parameters = self.url_parameters.copy()
-    #     resolver_list = parameters.get('resolver', settings.AVAILABLE_RESOLVERS)
-    #     structure_index = parameters.get('structure_index', None)
-    #     mode = parameters.get('mode', 'simple')
-    #     page = parameters.get('page', None)
-    #     columns = parameters.get('columns', None)
-    #     rows = parameters.get('rows', None)
-    #     #if resolver_list:
-    #     #    resolver_list = resolver_list.split(',')
-    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
-    #     index = 1
-    #     if not self.output_format == 'xml' and mode == 'simple':
-    #         interpretations = [interpretations[0], ]
-    #     full_ensemble_list = []
-    #     response_collector_list = []
-    #     for interpretation in interpretations:
-    #         structure: ChemicalStructure
-    #         for structure in interpretation.structures:
-    #             full_ensemble_list.append(structure.ens)
-    #             if self.output_format == 'xml':
-    #                 # if hasattr(structure, 'ens'):
-    #                 #     ens = structure._ens
-    #                 # else:
-    #                 #     ens = Ens(structure._resolved.minimol)
-    #                 # dataset is used to have the same object as below for the plain text output
-    #                 dataset = Dataset([structure.ens, ])
-    #                 if base_content_type == 'text':
-    #                     response_collector_list = dataset.get(propname, parameters=parameters)
-    #                 elif base_content_type == 'image':
-    #                     response_collector_list = dataset.get_image(parameters=parameters).hash_list
-    #                 response_collector_list = self._unique(response_collector_list)
-    #                 response = {
-    #                     'base_mime_type': self.base_content_type,
-    #                     'id': interpretation.id,
-    #                     'string': string,
-    #                     'structure': structure,
-    #                     'response': response_collector_list,
-    #                     'index': index,
-    #                 }
-    #                 self.response_list.append(response)
-    #                 index += 1
-    #             else:
-    #                 pass
-    #     if self.output_format == 'plain':
-    #         if structure_index:
-    #             i = int(structure_index)
-    #             ens_list = [full_ensemble_list[i], ]
-    #         elif len(full_ensemble_list) == 1:
-    #             ens_list = [full_ensemble_list[0], ]
-    #         else:
-    #             ens_list = full_ensemble_list
-    #         if columns and rows and page:
-    #             #user_page_num = int(page)
-    #             user_columns, columns = int(columns), int(columns)
-    #             user_rows = int(rows)
-    #             dataset_size = len(ens_list)
-    #             rows = dataset_size / user_columns
-    #             if dataset_size % user_columns:
-    #                 rows += 1
-    #             parameters.update({'rows': rows, 'columns': columns})
-    #             if not user_rows == rows:
-    #                 rows = user_rows
-    #                 if rows > 25:
-    #                     rows = 25
-    #                 parameters.update({'rows': rows, })
-    #                 page_size = rows * columns
-    #                 paginator = Paginator(ens_list, page_size)
-    #                 ens_list = paginator.page(page).object_list
-    #         dataset = Dataset(ens_list)
-    #         if base_content_type == 'text':
-    #             self.content_type = "text/plain"
-    #             response_collector_list = dataset.get(propname)
-    #             response_collector_list = self._unique(response_collector_list)
-    #         elif base_content_type == 'image':
-    #             # unique for structures that come from different resolvers:
-    #             # dataset.unique()
-    #             image = dataset.get_image(parameters=parameters, www_media_path=settings.MEDIA_ROOT + 'tmp')
-    #             f = open(image.file, 'r')
-    #             image_file = File(f)
-    #             image_file.url = image.file
-    #             image_file.image = f.read()
-    #             response_collector_list = image_file.image
-    #             self.content_type = "image/gif"
-    #         else:
-    #             pass
-    #         self.response_list = response_collector_list
-    #     else:
-    #         pass
-    #     return self.response_list
+    def xprop(self, string):
+        propname = self.parameters
+        base_content_type = self.base_content_type
+        parameters = self.url_parameters.copy()
+        resolver_list = parameters.get('resolver', settings.AVAILABLE_RESOLVERS)
+        structure_index = parameters.get('structure_index', None)
+        mode = parameters.get('mode', 'simple')
+        page = parameters.get('page', None)
+        columns = parameters.get('columns', None)
+        rows = parameters.get('rows', None)
+        #if resolver_list:
+        #    resolver_list = resolver_list.split(',')
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
+        index = 1
+        if not self.output_format == 'xml' and mode == 'simple':
+            interpretations = [interpretations[0], ]
+        full_ensemble_list = []
+        response_collector_list = []
+        for interpretation in interpretations:
+            structure: ChemicalStructure
+            for structure in interpretation.structures:
+                full_ensemble_list.append(structure.ens)
+                if self.output_format == 'xml':
+                    # if hasattr(structure, 'ens'):
+                    #     ens = structure._ens
+                    # else:
+                    #     ens = Ens(structure._resolved.minimol)
+                    # dataset is used to have the same object as below for the plain text output
+                    dataset = Dataset([structure.ens, ])
+                    if base_content_type == 'text':
+                        response_collector_list = dataset.get(propname, parameters=parameters)
+                    elif base_content_type == 'image':
+                        response_collector_list = dataset.get_image(parameters=parameters).hash_list
+                    response_collector_list = self._unique(response_collector_list)
+                    response = {
+                        'base_mime_type': self.base_content_type,
+                        'id': interpretation.id,
+                        'string': string,
+                        'structure': structure,
+                        'response': response_collector_list,
+                        'index': index,
+                    }
+                    self.response_list.append(response)
+                    index += 1
+                else:
+                    pass
+        if self.output_format == 'plain':
+            if structure_index:
+                i = int(structure_index)
+                ens_list = [full_ensemble_list[i], ]
+            elif len(full_ensemble_list) == 1:
+                ens_list = [full_ensemble_list[0], ]
+            else:
+                ens_list = full_ensemble_list
+            if columns and rows and page:
+                #user_page_num = int(page)
+                user_columns, columns = int(columns), int(columns)
+                user_rows = int(rows)
+                dataset_size = len(ens_list)
+                rows = dataset_size / user_columns
+                if dataset_size % user_columns:
+                    rows += 1
+                parameters.update({'rows': rows, 'columns': columns})
+                if not user_rows == rows:
+                    rows = user_rows
+                    if rows > 25:
+                        rows = 25
+                    parameters.update({'rows': rows, })
+                    page_size = rows * columns
+                    paginator = Paginator(ens_list, page_size)
+                    ens_list = paginator.page(page).object_list
+            dataset = Dataset(ens_list)
+            if base_content_type == 'text':
+                self.content_type = "text/plain"
+                response_collector_list = dataset.get(propname)
+                response_collector_list = self._unique(response_collector_list)
+            elif base_content_type == 'image':
+                # unique for structures that come from different resolvers:
+                # dataset.unique()
+                image = dataset.get_image(parameters=parameters, www_media_path=settings.MEDIA_ROOT + 'tmp')
+                f = open(image.file, 'r')
+                image_file = File(f)
+                image_file.url = image.file
+                image_file.image = f.read()
+                response_collector_list = image_file.image
+                self.content_type = "image/gif"
+            else:
+                pass
+            self.response_list = response_collector_list
+        else:
+            pass
+        return self.response_list
 
     def cas(self, string):
         url_parameters = self.url_parameters.copy()

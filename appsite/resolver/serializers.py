@@ -9,10 +9,10 @@ from structure.ncicadd.identifier import Identifier as NCICADDIdentifier
 from resolver import defaults
 from resolver.exceptions import ResourceExistsError
 from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
-    StructureInChIAssociation
+    StructureInChIAssociation, StructureParentStructure
 
 
-class StructureSerializer(serializers.HyperlinkedModelSerializer):
+class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
 
     ficts_parent = relations.ResourceRelatedField(
         queryset=Structure.objects,
@@ -80,6 +80,43 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         self_link_view_name='structure-relationships',
     )
 
+    included_serializers = {
+        'ficts_parent': 'resolver.serializers.StructureSerializer',
+        'ficus_parent': 'resolver.serializers.StructureSerializer',
+        'uuuuu_parent': 'resolver.serializers.StructureSerializer',
+        'ficts_children': 'resolver.serializers.StructureSerializer',
+        'ficus_children': 'resolver.serializers.StructureSerializer',
+        'uuuuu_children': 'resolver.serializers.StructureSerializer',
+        #'entrypoints': 'resolver.serializers.EntryPointSerializer',
+        #'inchis': 'resolver.serializers.StructureInChIAssociationSerializer',
+    }
+
+    #smiles = serializers.SerializerMethodField('serialize_minimol')
+    ficts = serializers.SerializerMethodField('get_ficts')
+    ficus = serializers.SerializerMethodField('get_ficus')
+    uuuuu = serializers.SerializerMethodField('get_uuuuu')
+
+    def get_ficts(self, obj: StructureParentStructure):
+        if obj.ficts_parent:
+            return NCICADDIdentifier(hashcode=obj.ficts_parent.hashisy, identifier_type='FICTS').string
+        else:
+            None
+
+    def get_ficus(self, obj: StructureParentStructure):
+        if obj.ficus_parent:
+            return NCICADDIdentifier(hashcode=obj.ficus_parent.hashisy, identifier_type='FICuS').string
+        else:
+            None
+
+    def get_uuuuu(self, obj: StructureParentStructure):
+        if obj.uuuuu_parent:
+            return NCICADDIdentifier(hashcode=obj.uuuuu_parent.hashisy, identifier_type='uuuuu').string
+        else:
+            None
+
+
+class StructureSerializer(serializers.HyperlinkedModelSerializer):
+
     entrypoints = relations.ResourceRelatedField(
         queryset=EntryPoint.objects,
         many=True,
@@ -101,64 +138,46 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     included_serializers = {
-        'ficts_parent': 'resolver.serializers.StructureSerializer',
-        'ficus_parent': 'resolver.serializers.StructureSerializer',
-        'uuuuu_parent': 'resolver.serializers.StructureSerializer',
-        'ficts_children': 'resolver.serializers.StructureSerializer',
-        'ficus_children': 'resolver.serializers.StructureSerializer',
-        'uuuuu_children': 'resolver.serializers.StructureSerializer',
+        #'ficts_parent': 'resolver.serializers.StructureSerializer',
+        #'ficus_parent': 'resolver.serializers.StructureSerializer',
+        #'uuuuu_parent': 'resolver.serializers.StructureSerializer',
+        #'ficts_children': 'resolver.serializers.StructureSerializer',
+        #'ficus_children': 'resolver.serializers.StructureSerializer',
+        #'uuuuu_children': 'resolver.serializers.StructureSerializer',
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
         'inchis': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     smiles = serializers.SerializerMethodField('serialize_minimol')
-    ficts = serializers.SerializerMethodField('get_ficts')
-    ficus = serializers.SerializerMethodField('get_ficus')
-    uuuuu = serializers.SerializerMethodField('get_uuuuu')
+    #ficts = serializers.SerializerMethodField('get_ficts')
+    #ficus = serializers.SerializerMethodField('get_ficus')
+    #uuuuu = serializers.SerializerMethodField('get_uuuuu')
 
 
     def serialize_minimol(self, obj):
         return obj.to_ens.get("E_SMILES")
 
-    def get_ficts(self, obj: Structure):
-        if obj.ficts_parent:
-            return NCICADDIdentifier(hashcode=obj.ficts_parent.hashisy, identifier_type='FICTS').string
-        else:
-            None
-
-    def get_ficus(self, obj: Structure):
-        if obj.ficus_parent:
-            return NCICADDIdentifier(hashcode=obj.ficus_parent.hashisy, identifier_type='FICuS').string
-        else:
-            None
-
-    def get_uuuuu(self, obj: Structure):
-        if obj.uuuuu_parent:
-            return NCICADDIdentifier(hashcode=obj.uuuuu_parent.hashisy, identifier_type='uuuuu').string
-        else:
-            None
-
     class Meta:
         model = Structure
         fields = (
             'url',
-            'hashisy',
+            #'hashisy',
             'smiles',
-            'ficts_parent',
-            'ficus_parent',
-            'uuuuu_parent',
-            'ficts_children',
-            'ficus_children',
-            'uuuuu_children',
+            #'ficts_parent',
+            #'ficus_parent',
+            #'uuuuu_parent',
+            #'ficts_children',
+            #'ficus_children',
+            #'uuuuu_children',
             'inchis',
             'entrypoints',
-            'ficts',
-            'ficus',
-            'uuuuu',
+            #'ficts',
+            #'ficus',
+            #'uuuuu',
             'added',
         )
-        read_only_fields = ('id', 'hashisy')
-        meta_fields = ('ficts', 'ficus', 'uuuuu', 'added')
+        read_only_fields = ('id',)
+        meta_fields = ('added',)
 
     def create(self, validated_data: Dict):
         # not implemented yet
