@@ -28,7 +28,7 @@
 
 </head>
 
-<body class="d-flex flex-column h-100">
+<body class="{% block body_class %}{% endblock %}">
     {% block content %}{%  endblock %}
     <script src="{% static 'neon/assets/js/bootstrap.bundle.js' %}"></script>
 </body>
