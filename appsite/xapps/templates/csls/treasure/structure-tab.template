@@ -1,7 +1,0 @@
-<ul id="structure-list">
-	{% for structure in file.structures %}
-		<li>{% include "browser-structure.template" %}</li>
-	{% endfor %}
-</ul>
-
-

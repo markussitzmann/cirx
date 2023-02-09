@@ -1,0 +1,35 @@
+{% load static %}
+<!doctype html>
+
+<html lang="en" class="h-100">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>CIR Neon</title>
+    <meta name="description" content="HTML5 Template">
+    <meta name="author" content="Markus Sitzmann">
+
+    <meta property="og:title" content="CIR Neon">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ host }}">
+    <meta property="og:description" content="HTML5 Template for CIR Neon">
+    <meta property="og:image" content="image.png">
+
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="{% static 'neon/assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'neon/assets/css/neon.css' %}" rel="stylesheet">
+
+</head>
+
+<body class="d-flex flex-column h-100">
+    {% block content %}{%  endblock %}
+    <script src="{% static 'neon/assets/js/bootstrap.bundle.js' %}"></script>
+</body>
+</html>

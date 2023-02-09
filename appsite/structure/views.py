@@ -11,10 +11,6 @@ from structure.dispatcher import Dispatcher
 from structure.forms import *
 
 
-def identifier(request, string, representation, operator=None, format='plain'):
-    return resolve_to_response(request, string, representation, operator_parameter=None, output_format=format)
-
-
 def image(request: HttpRequest, string: str = None):
     dsvg = {
         'width': 250,
@@ -37,6 +33,10 @@ def image(request: HttpRequest, string: str = None):
     else:
         params = {param: p.getparameter(param) for param in p.parameters}
         return HttpResponse(json.dumps(params), content_type='application/json')
+
+
+def identifier(request, string, representation, operator=None, format='plain'):
+    return resolve_to_response(request, string, representation, operator_parameter=None, output_format=format)
 
 
 def structure(request, string=None):
@@ -69,7 +69,7 @@ def structure(request, string=None):
             form = ChemicalResolverInput({'identifier': string, 'representation': 'stdinchikey'})
         else:
             form = ChemicalResolverInput()
-    return render(request, 'structure.template', {
+    return render(request, 'structure.html', {
         'form': form,
         'base_url': base_url,
         'host': host_string,

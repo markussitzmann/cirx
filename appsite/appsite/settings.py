@@ -49,12 +49,13 @@ ALLOWED_HOSTS = os.environ['APP_VIRTUAL_HOSTNAME'].split(",")
 # Application definition
 
 INSTALLED_APPS = [
-    'simple.apps.SimpleConfig',
+    #'simple.apps.SimpleConfig',
     'database.apps.DatabaseConfig',
     'structure.apps.StructureConfig',
+    'neon.apps.NeonConfig',
     'resolver.apps.ResolverConfig',
     'etl.apps.ETLConfig',
-    'machine.apps.MachineConfig',
+    #'machine.apps.MachineConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -91,6 +92,7 @@ TEMPLATES = [
             'templates',
             'structure/templates',
             'resolver/templates',
+            'neon/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
