@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from django.db import models
-from django.db.models import Index, UniqueConstraint
+from django.db.models import Index, UniqueConstraint, F
 from multiselectfield import MultiSelectField
 from pycactvs import Ens
 
@@ -15,6 +15,13 @@ class StructureManager(models.Manager):
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
+class StructureNameManager(models.Manager):
+
+    def match(self, affinity_class):
+        return super().get_queryset() \
+            .select_related('parents', 'hashisy', 'parents__ficts_parent') \
+            .filter(names__affinity_class=affinity_class) \
+            .annotate(annotated_name=F('names__name__name'))
 
 class Structure(models.Model):
     hashisy_key = CactvsHashField(unique=True)
@@ -27,6 +34,8 @@ class Structure(models.Model):
     entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
     added = models.DateTimeField(auto_now_add=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
+
+    name_objects = StructureNameManager()
 
     class JSONAPIMeta:
         resource_name = 'structures'

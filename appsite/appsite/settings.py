@@ -49,13 +49,11 @@ ALLOWED_HOSTS = os.environ['APP_VIRTUAL_HOSTNAME'].split(",")
 # Application definition
 
 INSTALLED_APPS = [
-    #'simple.apps.SimpleConfig',
     'database.apps.DatabaseConfig',
     'structure.apps.StructureConfig',
     'neon.apps.NeonConfig',
     'resolver.apps.ResolverConfig',
     'etl.apps.ETLConfig',
-    #'machine.apps.MachineConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,6 +67,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'multiselectfield',
     'dbbackup',
+    'compressor',
     'debug_toolbar',
 ]
 
@@ -169,6 +168,15 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join("/home/app", "static/")
+STATICFILES_FINDERS=(
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_PRECOMPILERS = (
+    ('text/x-scss', 'django_libsass.SassCompiler'),
+)
 
 MEDIA_ROOT = os.path.join("/home/app", "media/")
 MEDIA_URL = "/media/"

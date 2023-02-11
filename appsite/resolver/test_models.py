@@ -1,16 +1,12 @@
 import logging
-from collections import defaultdict
 from unittest import skip
 
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import F
-from django.db import connection
 from django.test import TestCase
 
-from etl.models import StructureFile, StructureFileRecordNameAssociation
-from resolver.models import InChI, Structure, StructureInChIAssociation, Name, StructureNameAssociation, \
-    Compound, StructureParentStructure
+from resolver.models import Structure
 
 logger = logging.getLogger('cirx')
 

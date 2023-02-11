@@ -1,4 +1,5 @@
 {% load static %}
+{% load compress %}
 <!doctype html>
 
 <html lang="en" class="h-100">
@@ -23,13 +24,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="{% static 'neon/assets/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'neon/assets/css/neon.css' %}" rel="stylesheet">
+    <!--<link href="{% static 'neon/assets/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">-->
+    {% compress css %}
+        <link type="text/x-scss" href="{% static 'neon/assets/neon/neon.scss' %}"     rel="stylesheet" media="screen">
+    {% endcompress %}
+
+
 
 </head>
 
 <body class="{% block body_class %}{% endblock %}">
     {% block content %}{%  endblock %}
-    <script src="{% static 'neon/assets/js/bootstrap.bundle.js' %}"></script>
+    <script src="{% static 'neon/assets/bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
 </body>
 </html>

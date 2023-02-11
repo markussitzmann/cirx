@@ -5,16 +5,16 @@
 {% block content %}
     <header>
         <!-- Fixed navbar -->
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">Fixed navbar</a>
+                <a class="navbar-brand" href="#">Chemical Identifier Resolver Neon</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                         aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link active" aria-current="page" href="#">Home</a>
                         </li>
                         <li class="nav-item">
@@ -22,7 +22,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                        </li>
+                        </li>-->
                     </ul>
                     <form class="d-flex">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -35,17 +35,27 @@
 
     <!-- Begin page content -->
     <main class="flex-shrink-0">
-        <div class="container bg-danger">
-            <h1 class="mb-5 mt-5">Sticky footer with fixed navbar</h1>
-            <p class="lead">Pin a footer to the bottom of the viewport in desktop browsers with this custom HTML and
+        <div class="container-xxl" id="main-container">
+            <h1 class="mb-5 mt-5">Chemical Structure</h1>
+            <!--<p class="lead">Pin a footer to the bottom of the viewport in desktop browsers with this custom HTML and
                 CSS. A fixed navbar has been added with <code class="small">padding-top: 60px;</code> on the <code
                         class="small">main &gt; .container</code>.</p>
             <p>Back to <a href="/docs/5.0/examples/sticky-footer/">the default sticky footer</a> minus the navbar.</p>
-        </div>
-        <div class="d-grid gap-5">
-            <div class="p-2 bg-light border">Grid item 1</div>
-            <div class="p-2 bg-light border">Grid item 2</div>
-            <div class="p-2 bg-light border">Grid item 3</div>
+            <div class="container text-center">-->
+            <div class="row align-items-start">
+                <div class="col col-lg-2 bg-light">
+                    <figure class="figure">
+                        <img src="http://indigo:8000/chemical/image/CCO" class="figure-img img-fluid rounded" alt="Test">
+                        <figcaption class="figure-caption">A caption for the above image.</figcaption>
+                    </figure>
+                </div>
+                <div class="col col-lg-8">
+                    One of three columns
+                </div>
+                <div class="col col-lg-2 bg-dark">
+                    One of three columns
+                </div>
+            </div>
         </div>
     </main>
 

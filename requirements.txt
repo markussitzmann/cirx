@@ -20,4 +20,5 @@ parameterized~=0.8.1
 redis
 hiredis
 django-dbbackup==4.0.0b0
-
+django-compressor
+django-libsass
