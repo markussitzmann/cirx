@@ -15,27 +15,26 @@ class StructureManager(models.Manager):
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
-class StructureNameManager(models.Manager):
-
-    def match(self, affinity_class):
+    def match_names(self, affinity_classes: List[str] = None):
+        if not affinity_classes:
+            affinity_classes = ['exact',]
         return super().get_queryset() \
             .select_related('parents', 'hashisy', 'parents__ficts_parent') \
-            .filter(names__affinity_class=affinity_class) \
+            .filter(names__affinity_class__in=affinity_classes) \
             .annotate(annotated_name=F('names__name__name'))
+
+
+
 
 class Structure(models.Model):
     hashisy_key = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
-    # names = models.ManyToManyField(
-    #     'Name',
-    #     through='StructureNameAssociation',
-    #     related_name="structures"
-    # )
     entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
     added = models.DateTimeField(auto_now_add=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
-    name_objects = StructureNameManager()
+    objects = StructureManager()
+
 
     class JSONAPIMeta:
         resource_name = 'structures'
@@ -44,8 +43,6 @@ class Structure(models.Model):
         db_table = 'cir_structure'
         verbose_name = "Structure"
         verbose_name_plural = "Structures"
-
-    objects = StructureManager()
 
     @property
     def to_ens(self) -> Ens:

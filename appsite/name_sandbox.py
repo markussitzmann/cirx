@@ -22,7 +22,7 @@ reset_queries()
 #prefetch = Prefetch()
 #prefetch = Prefetch('parents__ficts_parent', queryset=Structure.objects.all(), to_attr='ficts_parent_structure')
 
-query = Structure.name_objects.match('narrow').filter(id=313113)
+query = Structure.objects.match_names(['narrow',]).filter(id=313113, annotated_name="NSC271626")
 
 # NSC56362 51390-22-8 NSC280834"
 
