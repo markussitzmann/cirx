@@ -17,13 +17,11 @@ class StructureManager(models.Manager):
 
     def match_names(self, affinity_classes: List[str] = None):
         if not affinity_classes:
-            affinity_classes = ['exact',]
+            affinity_classes = ['exact', ]
         return super().get_queryset() \
             .select_related('parents', 'hashisy', 'parents__ficts_parent') \
             .filter(names__affinity_class__in=affinity_classes) \
             .annotate(annotated_name=F('names__name__name'))
-
-
 
 
 class Structure(models.Model):
@@ -296,6 +294,14 @@ class Compound(models.Model):
         return "NCICADD:CID=%s" % self.id
 
 
+class RecordManager(models.Manager):
+
+    def match(self):
+        return super().get_queryset() \
+            .select_related('structure_file_record', 'structure_file_record__structure') \
+            .annotate(annotated_structure=F('structure_file_record__structure'))
+
+
 class Record(models.Model):
     name = models.ForeignKey('Name', on_delete=models.PROTECT, blank=False, null=False)
     regid = models.TextField(max_length=1500)
@@ -311,6 +317,8 @@ class Record(models.Model):
     )
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+
+    objects = RecordManager()
 
     class Meta:
         constraints = [
