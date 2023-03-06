@@ -11,28 +11,7 @@ from structure.dispatcher import Dispatcher
 from structure.forms import *
 
 
-def image(request: HttpRequest, string: str = None):
-    dsvg = {
-        'width': 250,
-        'height': 250,
-        'bgcolor': 'white',
-        'atomcolor': 'element',
-        # 'symbolfontsize': 32,
-        'bonds': 10,
-        'framecolor': 'transparent'
-    }
 
-    p: Prop = Prop.Ref('E_SVG_IMAGE')
-    p.datatype = 'xmlstring'
-    p.setparameter(dsvg)
-
-    if string:
-
-        image = Ens.Get(string, p)
-        return HttpResponse(image, content_type='image/svg+xml')
-    else:
-        params = {param: p.getparameter(param) for param in p.parameters}
-        return HttpResponse(json.dumps(params), content_type='application/json')
 
 
 def identifier(request, string, representation, operator=None, format='plain'):

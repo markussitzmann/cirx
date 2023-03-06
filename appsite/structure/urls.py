@@ -21,8 +21,8 @@ urlpatterns = [
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)$', views.identifier),
     re_path('^structure/(?P<string>.+)$', views.structure),
     re_path('^structure$', views.structure),
-    re_path('^image/(?P<string>.+)$', views.image),
-    re_path('^image$', views.image),
+    #re_path('^image/(?P<string>.+)$', views.image),
+    #re_path('^image$', views.image),
 ]
 
 # urlpatterns = patterns('',
