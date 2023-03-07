@@ -19,7 +19,7 @@ def compounds(request, cid: int = None):
     return render(request, 'compound.html', {
         'string': int,
         'host': request.scheme + "://" + request.get_host(),
-        'compound': Compound.objects.annotated().filter(id=cid, annotated_inchi_is_standard=True).first()
+        'compound': Compound.objects.annotated().order_by('id').filter(id=cid, annotated_inchi_is_standard=True).first()
     })
 
 def images(request: HttpRequest, cid: int = None, string: str = None):

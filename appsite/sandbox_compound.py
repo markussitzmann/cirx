@@ -24,7 +24,7 @@ reset_queries()
 
 #compounds = Compound.objects.filter_by_names(["NSC-123", ]).all()
 #compounds = Compound.objects.annotated()[0:100]
-compounds = [Compound.objects.annotated().filter(id=123, annotated_inchi_is_standard=True).first(),]
+compounds = [Compound.objects.annotated().filter(id=1252).first(),]
 
 compound: Compound
 for compound in compounds:
