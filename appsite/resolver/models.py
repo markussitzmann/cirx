@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from django.db import models
 from django.db.models import Index, UniqueConstraint, F, Count, QuerySet
@@ -318,6 +318,20 @@ class CompoundManager(models.Manager):
         return self.annotated().filter(annotated_name__in=name)
 
 
+class CompoundQuerySet(models.QuerySet):
+    def by_compound_ids(self, ids: List[int]):
+        queryset = self.select_related(
+            'structure',
+            'structure__parents',
+            'structure__parents__ficts_parent',
+            'structure__parents__ficus_parent',
+            'structure__parents__uuuuu_parent'
+        ).filter(
+            id__in=ids
+        )
+        return queryset
+
+
 class Compound(models.Model):
     structure = models.OneToOneField(
         'Structure',
@@ -330,6 +344,7 @@ class Compound(models.Model):
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
     objects = CompoundManager()
+    structures=CompoundQuerySet.as_manager()
 
     class Meta:
         db_table = 'cir_compound'
@@ -413,6 +428,24 @@ class NameAffinityClass(models.Model):
         db_table = 'cir_name_affinity_class'
 
 
+class StructureNameAssociationQuerySet(models.QuerySet):
+    def by_compounds_and_affinity_classes(self, compounds: List[Union['Compound', int]], affinity_classes: int=None):
+        queryset = self.select_related(
+            'name',
+            'structure'
+        )
+        if affinity_classes:
+            return queryset.filter(
+                structure__compound__in=compounds
+            ).filter(
+                affinity_class__in=affinity_classes
+            )
+        else:
+            return queryset.filter(
+                structure__compound__in=compounds
+            )
+
+
 class StructureNameAssociation(models.Model):
     name = models.ForeignKey(
         Name,
@@ -435,6 +468,9 @@ class StructureNameAssociation(models.Model):
         ('related', 'Related'),
     ), default='unspecified')
     confidence = models.PositiveIntegerField(null=False, default=0)
+
+    objects = models.Manager()
+    names = StructureNameAssociationQuerySet.as_manager()
 
     class Meta:
         constraints = [

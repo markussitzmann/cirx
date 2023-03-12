@@ -39,7 +39,7 @@ DEFAULT_MAX_CHUNK_NUMBER = 1000
 
 Status = namedtuple('Status', 'file created')
 
-Identifier = namedtuple('Identifier', 'property parent_structure attr')
+Identifier = namedtuple('Identifier', 'property parent_structure attr public_string')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
 InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
 InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
@@ -442,9 +442,9 @@ class StructureRegistry(object):
     CHUNK_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
 
     NCICADD_TYPES = [
-        Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent'),
-        Identifier('E_FICUS_ID', 'E_FICUS_STRUCTURE', 'ficus_parent'),
-        Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent'),
+        Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent', 'uuuuu'),
+        Identifier('E_FICUS_ID', 'E_FICUS_STRUCTURE', 'ficus_parent', 'FICuS'),
+        Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent', 'FICTS'),
     ]
 
     INCHI_TYPES = [

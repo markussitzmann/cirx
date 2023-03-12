@@ -2,6 +2,7 @@ import logging
 import os
 
 from django.db.models import Prefetch
+from django.db.models.functions import Coalesce
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "appsite.settings")
 
@@ -19,48 +20,124 @@ logger = logging.getLogger("cirx")
 
 reset_queries()
 
-#prefetch = Prefetch()
-#prefetch = Prefetch('parents__ficts_parent', queryset=Structure.objects.all(), to_attr='ficts_parent_structure')
+#names = Name.objects.prefetch_related(
+#    ''
+#)
 
-affinity_classes = ['exact', 'narrow']
+#structure_ids = [690600, 209505, 686728, 706412]
 
-#query = Structure.objects.match_names(['exact', 'narrow']).filter(annotated_name__in=["Warfarin",])
+compounds = [20008, 209505]
 
-query = Structure.objects.select_related('parents', 'hashisy', 'parents__ficts_parent') \
-            .filter(names__affinity_class__in=affinity_classes) \
-            .annotate(
-                annotated_name=F('names__name__name'),
-                annotated_affinity_class=F('names__affinity_class')
-            )
+affinity_classes = ['exact', 'narrow', 'broad']
 
 
-# NSC56362 51390-22-8 NSC280834"
+# query = StructureNameAssociation.objects.select_related(
+#     'name',
+#     'structure'
+# ).filter(
+#     structure__compound__in=compounds,
+#     affinity_class__in=affinity_classes
+# )
+#
+# associations = query.all()
+#associations = StructureNameAssociation.objects.all()[:100]
+#
+# for a in associations:
+#     logger.info("N %s %s -> %s" % (a.name, a.affinity_class, a.structure))
+#
+# logger.info("C %s" % associations.count())
 
-# structure = Structure.objects.prefetch_related('names', 'names__name').get(id=690600)
-# names = structure.names.all()
-# for name in names:
-#     print(name.name)
+name_associations = StructureNameAssociation.names.by_compounds_and_affinity_classes(
+   compounds=compounds,
+   affinity_classes=affinity_classes
+).all()
 
-structures = query\
-    .filter(annotated_name__in=["NSC123", "NSC-123", "123", "10-Methylphenothiazine 5-oxide", "2234-09-5", "Phenothiazine, 5-oxide"])\
-    .all()
+for a in name_associations:
+   logger.info("N %s %s -> %s" % (a.name, a.affinity_class, a.structure))
+#
+#logger.info("C %s" % associations.count())
 
-logger.info("1 COUNT %s", len(connection.queries))
-items = structures.values("id", "annotated_name", "annotated_affinity_class", "minimol")
+# query: QuerySet = Name.objects.prefetch_related(
+#     'structures',
+#     'structures__name_type',
+#     'structures__structure'
+# #).annotate(
+# #    annotated_name_type=F('structures__name_type'),
+# #    annotated_structure=F('structures__structure'),
+# #    annotated_affinity_class=F('structures__affinity_class'),
+# #    annotated_confidence=F('structures__confidence')
+# ).filter(
+#     structures__structure__in=structure_ids,
+#     structures__affinity_class__in=affinity_classes,
+#     structures__confidence__gte=95
+# ).distinct()
 
-logger.info("2 COUNT %s", len(connection.queries))
-logger.info("--> COUNT %s", len(structures))
+#Coalesce('summary', 'headline').desc()
 
-logger.info("3 COUNT %s", len(connection.queries))
-for item in items:
-    logger.info("I %s %s ", item, item['minimol'].ens.get("E_SMILES"))
+#logger.info("N %s C %s" % (query, 0))
+#for q in query.order_by('annotated_structure').all():
+#    logger.info("Q %s %s %s : %s %s " % (
+#        q.name,
+#        q.annotated_name_type,
+#        q.annotated_structure,
+#        q.annotated_affinity_class,
+#        q.annotated_confidence
+#    ))
 
-#response = structures
+#logger.info("X %s" % query.distinct().values('structures__structure'))
 
-logger.info("3 COUNT %s", len(connection.queries))
+#for v in query.values('structures__structure', 'name', 'annotated_name_type', 'annotated_affinity_class', 'annotated_confidence').order_by('structures__structure'):
+#    logger.info("V %s" % v)
 
 
-logger.info("%s" % structures)
+# for n in query.all():
+#     logger.info("%s %s" % (n, n.structures.filter(structure__in=structure_ids).all()))
+#     #for a in n.structures.filter(structure__in=structure_ids).all():
+#     #    logger.info("A %s : %s %s : %s %s %s | %s" % (a.name.name, a.id, a.structure_id, a.name_type_id, a.affinity_class, a.confidence, a))
+
+# #prefetch = Prefetch()
+# #prefetch = Prefetch('parents__ficts_parent', queryset=Structure.objects.all(), to_attr='ficts_parent_structure')
+#
+# affinity_classes = ['exact', 'narrow']
+#
+# #query = Structure.objects.match_names(['exact', 'narrow']).filter(annotated_name__in=["Warfarin",])
+#
+# query = Structure.objects.select_related('parents', 'hashisy', 'parents__ficts_parent') \
+#             .filter(names__affinity_class__in=affinity_classes) \
+#             .annotate(
+#                 annotated_name=F('names__name__name'),
+#                 annotated_affinity_class=F('names__affinity_class')
+#             )
+#
+#
+# # NSC56362 51390-22-8 NSC280834"
+#
+# # structure = Structure.objects.prefetch_related('names', 'names__name').get(id=690600)
+# # names = structure.names.all()
+# # for name in names:
+# #     print(name.name)
+#
+# structures = query\
+#     .filter(annotated_name__in=["NSC123", "NSC-123", "123", "10-Methylphenothiazine 5-oxide", "2234-09-5", "Phenothiazine, 5-oxide"])\
+#     .all()
+#
+# logger.info("1 COUNT %s", len(connection.queries))
+# items = structures.values("id", "annotated_name", "annotated_affinity_class", "minimol")
+#
+# logger.info("2 COUNT %s", len(connection.queries))
+# logger.info("--> COUNT %s", len(structures))
+#
+# logger.info("3 COUNT %s", len(connection.queries))
+# for item in items:
+#     logger.info("I %s %s ", item, item['minimol'].ens.get("E_SMILES"))
+#
+# #response = structures
+#
+# logger.info("3 COUNT %s", len(connection.queries))
+#
+#
+#logger.info("%s" % structures)
+
 logging.info("connection count: %s" % (len(connection.queries)))
 
 #for item in structures:
@@ -71,6 +148,6 @@ logger.info("COUNT %s", len(connection.queries))
 logger.info("-----------")
 
 
-for query in connection.queries:
-    logger.info("%s" % query)
+#or query in connection.queries:
+#   logger.info("%s" % query)
 

@@ -1,7 +1,8 @@
 import logging
 import os
 
-from django.db.models import Prefetch, Count
+from django.db.models import Q
+
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "appsite.settings")
 
@@ -12,8 +13,9 @@ django.setup()
 
 from django.db import connection, reset_queries
 from resolver.models import *
-from etl.models import StructureFileRecord
+from etl.registration import StructureRegistry
 
+from ncicadd.identifier import Identifier
 
 settings.DEBUG = True
 
@@ -22,19 +24,56 @@ logger = logging.getLogger("cirx")
 
 reset_queries()
 
-#compounds = Compound.objects.filter_by_names(["NSC-123", ]).all()
-#compounds = Compound.objects.annotated()[0:100]
-compounds = [Compound.objects.annotated().filter(id=1252).first(),]
+compounds = Compound.structures.by_compound_ids([20008, 20009]).all()
 
-compound: Compound
 for compound in compounds:
-    logger.info("C %s %s %s" % (compound, compound.annotated_name, compound.ficts_children_count))
-    #logger.info("C %s %s" % (compound.get_next_by_added(), compound.get_previous_by_added()))
-    logger.info("C %s" % (compound.structure.parents, ))
-    inchi_association: StructureInChIAssociation
-    #for inchi_association in compound.structure.inchis.all():
-    logger.info("I %s %s %s" % (compound.annotated_inchitype, compound.annotated_inchikey, compound.annotated_inchi))
+    logger.info("C: %s" % compound)
 
+    parents = {}
+    for parent_type in StructureRegistry.NCICADD_TYPES:
+        parents[parent_type.public_string] = (
+            getattr(compound.structure.parents, parent_type.attr),
+            Identifier(hashcode=p.hashisy_key.padded, identifier_type=parent_type.public_string) if (p := getattr(compound.structure.parents, parent_type.attr)) else None
+        )
+
+
+    logger.info("--> %s" % parents)
+    #for parent_type, parent in parents.items():
+    #    logger.info("P %s : %s : %s" % (
+    #        parent_type.attr,
+    #        parent.hashisy_key.padded if parent else None,
+    #        Identifier(hashcode=parent.hashisy_key.padded, identifier_type=parent_type.public_string) if parent else None
+    #    )
+    #)
+
+    #ficts_compound = compound.structure.parents.ficts_parent
+    #ficus_compound = compound.structure.parents.ficus_parent
+    #uuuuu_compound = compound.structure.parents.uuuuu_parent
+
+
+    #logger.info("FICTS: %s" % ficts_compound.hashisy_key.padded if ficts_compound else None)
+    #logger.info("FICuS: %s" % ficus_compound.hashisy_key.padded if ficus_compound else None)
+    #logger.info("uuuuu: %s" % uuuuu_compound.hashisy_key.padded if uuuuu_compound else None)
+
+
+
+
+# #compounds = Compound.objects.filter_by_names(["NSC-123", ]).all()
+# #compounds = Compound.objects.annotated()[0:100]
+# query = Compound.objects.annotated().filter(id=20008).filter(Q(annotated_inchi_is_standard=True) | Q(annotated_inchi__isnull=True))
+#
+# compounds = query.all()
+#
+# compound: Compound
+# for compound in compounds:
+#     logger.info("C %s %s %s" % (compound, compound.annotated_name, compound.ficts_children_count))
+#     #logger.info("C %s %s" % (compound.get_next_by_added(), compound.get_previous_by_added()))
+#     logger.info("C %s" % (compound.structure.parents, ))
+#     inchi_association: StructureInChIAssociation
+#     #for inchi_association in compound.structure.inchis.all():
+#     logger.info("I %s %s %s" % (compound.annotated_inchitype, compound.annotated_inchikey, compound.annotated_inchi))
+#     logger.info("N %s" % (compound.annotated_name))
+#
 
 
 

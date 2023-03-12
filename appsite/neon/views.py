@@ -1,12 +1,34 @@
 import json
 
+from django.db.models import Q
 from pycactvs import Prop, Ens
 
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
-from resolver.models import Compound
+from resolver.models import Compound, StructureNameAssociation
+
+
+def _create_image(ens: Ens, svg_paramaters = None):
+
+    default_svg_paramaters = {
+        'width': 250,
+        'height': 250,
+        'bgcolor': 'white',
+        'atomcolor': 'element',
+        # 'symbolfontsize': 32,
+        'bonds': 10,
+        'framecolor': 'transparent'
+    }
+    if svg_paramaters:
+        default_svg_paramaters.update(svg_paramaters)
+
+    prop: Prop = Prop.Ref('E_SVG_IMAGE')
+    prop.datatype = 'xmlstring'
+    prop.setparameter(default_svg_paramaters)
+
+    return ens.get(prop)
 
 
 def neon(request: HttpRequest, string: str = None):
@@ -16,38 +38,34 @@ def neon(request: HttpRequest, string: str = None):
     })
 
 def compounds(request, cid: int = None):
+
+    compound: Compound = Compound.structures.by_compound_ids([cid, ]).first()
+
+    name_associations = StructureNameAssociation.names.by_compounds_and_affinity_classes(
+        compounds=[compound, ],
+    ).order_by('affinity_class', 'name__name').all()
+
     return render(request, 'compound.html', {
         'string': int,
         'host': request.scheme + "://" + request.get_host(),
-        'compound': Compound.objects.annotated().order_by('id').filter(id=cid, annotated_inchi_is_standard=True).first()
+        'compound': compound,
+        'names': name_associations
     })
 
 def images(request: HttpRequest, cid: int = None, string: str = None):
 
-    svg_paramaters = {
-        'width': 264,
-        'height': 264,
-        'bgcolor': 'white',
-        'atomcolor': 'element',
-        # 'symbolfontsize': 32,
-        'bonds': 10,
-        'framecolor': 'transparent'
-    }
-
-    prop: Prop = Prop.Ref('E_SVG_IMAGE')
-    prop.datatype = 'xmlstring'
-    prop.setparameter(svg_paramaters)
-
     if cid or string:
         if cid:
             compound: Compound = Compound.objects.annotated().filter(id=cid).first()
-            ens = compound.structure.to_ens
-            image = ens.get(prop)
+            #ens = compound.structure.to_ens
+            image = _create_image(compound.structure.to_ens)
             return HttpResponse(image, content_type='image/svg+xml')
         else:
-            image = Ens.Get(string, prop)
+            ens = Ens(string)
+            image = _create_image(ens)
             return HttpResponse(image, content_type='image/svg+xml')
     else:
+        prop: Prop = Prop.Ref('E_SVG_IMAGE')
         params = {param: prop.getparameter(param) for param in prop.parameters}
         return HttpResponse(json.dumps(params), content_type='application/json')
 
