@@ -325,7 +325,14 @@ class CompoundQuerySet(models.QuerySet):
             'structure__parents',
             'structure__parents__ficts_parent',
             'structure__parents__ficus_parent',
-            'structure__parents__uuuuu_parent'
+            'structure__parents__uuuuu_parent',
+            'structure__parents__ficts_parent__compound',
+            'structure__parents__ficus_parent__compound',
+            'structure__parents__uuuuu_parent__compound'
+        ).annotate(
+            ficts_children_count=Count('structure__ficts_children'),
+            ficus_children_count=Count('structure__ficus_children'),
+            uuuuu_children_count=Count('structure__uuuuu_children')
         ).filter(
             id__in=ids
         )

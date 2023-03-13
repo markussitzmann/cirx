@@ -5,7 +5,7 @@
 {% block content %}
     <header>
         <!-- Fixed navbar -->
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-secondary">
             <div class="container-fluid pe-5 ps-5">
                 <a class="navbar-brand" href="#">CIR Neon</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
@@ -39,26 +39,26 @@
     <main>
         <div class="container-fluid p-5" id="main-container">
             <div class="d-flex align-items-center mt-5">
-                <h1>Compound ID {{ compound.id }}</h1>
+                <h1>CID {{ compound.id }}</h1>
                 <div class="mb-2 ms-auto">
                     <div class="btn-group" role="group">
                         {% if compound.get_previous_by_added.id %}
                             <a href="{% url 'compounds' compound.get_previous_by_added.id %}"
-                               class="btn btn-sm btn-secondary" type="button">
+                               class="btn btn-sm btn-primary" type="button">
                                 <i class="bi bi-caret-left-fill"></i>
                             </a>
                         {% else %}
-                            <a href="" class="btn btn-sm btn-secondary" type="button">
+                            <a href="" class="btn btn-sm btn-primary" type="button">
                                 <i class="bi bi-caret-left-fill"></i>
                             </a>
                         {% endif %}
                         {% if compound.get_next_by_added.id %}
                             <a href="{% url 'compounds' compound.get_next_by_added.id %}"
-                               class="btn btn-sm btn-secondary" type="button">
+                               class="btn btn-sm btn-primary" type="button">
                                 <i class="bi bi-caret-right-fill"></i>
                             </a>
                         {% else %}
-                            <a href="" class="btn btn-sm btn-secondary" type="button">
+                            <a href="" class="btn btn-sm btn-primary" type="button">
                                 <i class="bi bi-caret-right-fill"></i>
                             </a>
                         {% endif %}
@@ -78,7 +78,7 @@
                             <figure class="figure">
                                 <img src="{% url 'images-cid' compound.id %}"
                                      class="figure-img img-fluid img-thumbnail rounded"
-                                     style="min-width: 260px; min-height: 260px;" alt="Test">
+                                     style="min-width: 260px; min-height: 260px;" alt="structure of CID {{ compound.id }}">
                                 <figcaption class="figure-caption">Structure of CID {{ compound.id }}</figcaption>
                             </figure>
                         {% endif %}
@@ -108,6 +108,73 @@
                         </table>
                     </section>
                     <section>
+                        <div class="card"><div class="card-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">NCI/CADD Identifier</th>
+                                <th scope="col" class="text-center">Is Parent</th>
+                                <th scope="col" class="text-center">Parent Structure (CID)</th>
+                                <th scope="col" class="text-center d-none d-md-block">Child Count</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            {% for k, v in parents.items %}
+                            <tr>
+                                <td class="col-4">
+                                    <div class="d-flex"><span class="badge bg-secondary {{ k|lower }}-label me-2">{{ k }}</span><small class="d-lg-none d-xl-block">{{ v.identifier|default_if_none:"N/A" }}</small></div>
+                                </td>
+                                <td class="col-1 text-center">
+                                    {{ v.is_parent|yesno }}
+                                </td>
+                                <td class="col-3 text-center">
+                                    {% url 'compounds' v.structure.compound.id as compound_url %}
+                                    <a class="link-primary" href="{{ compound_url }}">{{ v.structure.compound.id|default_if_none:"N/A" }}</a>
+                                </td>
+                                <td class="col-3 text-center">
+                                    {{ v.children_count|default_if_none:"N/A" }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% comment %}
+                            <tr>
+                                <td class="col-2">
+                                    <span class="badge bg-secondary ficus-label">FICuS</span><small class="ps-1"><a class="link-primary" href="{% url 'compounds' parents.FICuS.structure.compound.id %}">{{ parents.FICuS.identifier|default_if_none:"N/A" }}</a></small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-2">
+                                    <span class="badge bg-secondary uuuuu-label">uuuuu</span><small class="ps-1"><a class="link-primary" href="{% url 'compounds' parents.uuuuu.structure.compound.id %}">{{ parents.uuuuu.identifier|default_if_none:"N/A" }}</a></small>
+                                </td>
+                            </tr>
+                            {% endcomment %}
+
+                            </tbody>
+                        </table>
+                        {% comment %}
+                        <div class="d-flex justify-content-around">
+                            {% if parents.FICTS.structure.compound.id %}
+                                <div><span class="badge bg-secondary ficts-label">FICTS</span><small class="ps-1"><a
+                                        class="link-primary"
+                                        href="{% url 'compounds' parents.FICTS.structure.compound.id %}">{{ parents.FICTS.identifier }}</a></small>
+                                </div>
+                            {% endif %}
+                            {% if parents.FICuS.structure.compound.id %}
+                                <div><span class="badge bg-secondary ficus-label">FICuS</span><small class="ps-1"><a
+                                        class="link-primary"
+                                        href="{% url 'compounds' parents.FICuS.structure.compound.id %}">{{ parents.FICuS.identifier }}</a></small>
+                                </div>
+                            {% endif %}
+                            <div><span class="badge bg-secondary uuuuu-label">uuuuu</span><small class="ps-1"><a
+                                    class="link-primary"
+                                    href="{% url 'compounds' parents.uuuuu.structure.compound.id %}">{{ parents.uuuuu.identifier }}</a></small>
+                            </div>
+                        </div>
+                        {% endcomment %}
+                        </div></div>
+                    </section>
+                    <section>
 
                     </section>
                     <section>
@@ -122,17 +189,16 @@
                             </thead>
                             <tbody>
                             {% for item in names %}
-                            <tr>
-                                <td class="col-7">{{ item.name.name }}</td>
-                                <td class="col-2"><small class="text-break">{{ item.affinity_class }}</small>
-                                <td class="d-none d-md-block"><small class="text-break">{{ item.name_type.public_string }}</small>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td class="col-7">{{ item.name.name }}</td>
+                                    <td class="col-2"><small class="text-break">{{ item.affinity_class }}</small>
+                                    <td class="d-none d-md-block"><small class="text-break">{{ item.name_type.public_string }}</small>
+                                    </td>
+                                </tr>
                             {% endfor %}
                             </tbody>
                         </table>
                     </section>
-
                 </div>
             </div>
         </div>

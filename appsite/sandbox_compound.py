@@ -2,14 +2,15 @@ import logging
 import os
 
 from django.db.models import Q
-
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "appsite.settings")
 
 from django.conf import settings
 import django
 
 django.setup()
+
+from neon.views import ParentData
+
 
 from django.db import connection, reset_queries
 from resolver.models import *
@@ -31,13 +32,23 @@ for compound in compounds:
 
     parents = {}
     for parent_type in StructureRegistry.NCICADD_TYPES:
-        parents[parent_type.public_string] = (
-            getattr(compound.structure.parents, parent_type.attr),
-            Identifier(hashcode=p.hashisy_key.padded, identifier_type=parent_type.public_string) if (p := getattr(compound.structure.parents, parent_type.attr)) else None
+        parents[parent_type.key] = ParentData(
+            structure=getattr(compound.structure.parents, parent_type.attr),
+            identifier=Identifier(hashcode=p.hashisy_key.padded, identifier_type=parent_type.public_string) if (p := getattr(compound.structure.parents, parent_type.attr)) else None,
+            children_count=getattr(compound, parent_type.key + '_children_count')
         )
 
-
     logger.info("--> %s" % parents)
+
+    for k, v in parents.items():
+        if v.structure:
+            logger.info("I %s %s" % (k, v.structure.compound))
+        else:
+            logger.info("I %s" % (k, ))
+
+
+
+
     #for parent_type, parent in parents.items():
     #    logger.info("P %s : %s : %s" % (
     #        parent_type.attr,
