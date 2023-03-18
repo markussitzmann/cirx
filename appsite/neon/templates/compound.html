@@ -36,7 +36,7 @@
     </header>
 
     <!-- Begin page content -->
-    <main>
+    <main class="flex-shrink-0">
         <div class="container-fluid p-5" id="main-container">
             <div class="d-flex align-items-center mt-5">
                 <h1>CID {{ compound.id }}</h1>
@@ -102,7 +102,8 @@
                             </tr>
                             <tr>
                                 <th scope="row">Std. InChI</th>
-                                <td class="col-10"><small class="text-break">{{ compound.annotated_inchi }}</small></td>
+                                <td class="col-10"><small class="text-break">{{ compound.annotated_inchi }}</small>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
@@ -137,41 +138,29 @@
                                 </td>
                             </tr>
                             {% endfor %}
-                            {% comment %}
-                            <tr>
-                                <td class="col-2">
-                                    <span class="badge bg-secondary ficus-label">FICuS</span><small class="ps-1"><a class="link-primary" href="{% url 'compounds' parents.FICuS.structure.compound.id %}">{{ parents.FICuS.identifier|default_if_none:"N/A" }}</a></small>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="col-2">
-                                    <span class="badge bg-secondary uuuuu-label">uuuuu</span><small class="ps-1"><a class="link-primary" href="{% url 'compounds' parents.uuuuu.structure.compound.id %}">{{ parents.uuuuu.identifier|default_if_none:"N/A" }}</a></small>
-                                </td>
-                            </tr>
-                            {% endcomment %}
-
                             </tbody>
                         </table>
-                        {% comment %}
-                        <div class="d-flex justify-content-around">
-                            {% if parents.FICTS.structure.compound.id %}
-                                <div><span class="badge bg-secondary ficts-label">FICTS</span><small class="ps-1"><a
-                                        class="link-primary"
-                                        href="{% url 'compounds' parents.FICTS.structure.compound.id %}">{{ parents.FICTS.identifier }}</a></small>
-                                </div>
-                            {% endif %}
-                            {% if parents.FICuS.structure.compound.id %}
-                                <div><span class="badge bg-secondary ficus-label">FICuS</span><small class="ps-1"><a
-                                        class="link-primary"
-                                        href="{% url 'compounds' parents.FICuS.structure.compound.id %}">{{ parents.FICuS.identifier }}</a></small>
-                                </div>
-                            {% endif %}
-                            <div><span class="badge bg-secondary uuuuu-label">uuuuu</span><small class="ps-1"><a
-                                    class="link-primary"
-                                    href="{% url 'compounds' parents.uuuuu.structure.compound.id %}">{{ parents.uuuuu.identifier }}</a></small>
-                            </div>
-                        </div>
-                        {% endcomment %}
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">InChIKey</th>
+                                <th scope="col" class="text-center">Version</th>
+                                <th scope="col" class="text-center">SaveOpt</th>
+                                <th scope="col" class="text-center">Software Version</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for k, v in inchis.items %}
+                            <tr>
+                                <td class="col-4"><div class="d-flex"><span class="badge bg-secondary inchi-label me-2">{{ v.inchitype.id }}</span><small>{{ v.inchi.key }}</small></div></td>
+                                <td class="col-1 text-center"><small>{{ v.inchi.version }}</small></td>
+                                <td class="col-3 text-center"><small>{{ v.save_opt }}</small></td>
+                                <td class="col-3 text-center"><small>{{ v.software_version }}</small></td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                         </div></div>
                     </section>
                     <section>
@@ -199,6 +188,7 @@
                             </tbody>
                         </table>
                     </section>
+
                 </div>
             </div>
         </div>

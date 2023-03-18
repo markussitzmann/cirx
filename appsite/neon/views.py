@@ -1,17 +1,14 @@
 import json
 from collections import namedtuple
-from typing import NamedTuple
-
-from django.db.models import Q
-from pycactvs import Prop, Ens
 
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from pycactvs import Prop, Ens
 
+from etl.registration import StructureRegistry
+from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation
 # Create your views here.
 from structure.ncicadd.identifier import Identifier
-from etl.registration import StructureRegistry
-from resolver.models import Compound, StructureNameAssociation
 
 ParentData = namedtuple('ParentData', 'structure identifier children_count is_parent')
 
@@ -43,10 +40,10 @@ def neon(request: HttpRequest, string: str = None):
         'host': request.scheme + "://" + request.get_host(),
     })
 
+
 def compounds(request, cid: int = None):
 
     compound: Compound = Compound.structures.by_compound_ids([cid, ]).first()
-
     parents = {}
     for parent_type in StructureRegistry.NCICADD_TYPES:
         parents[parent_type.public_string] = ParentData(
@@ -60,9 +57,14 @@ def compounds(request, cid: int = None):
 
     name_associations = StructureNameAssociation.names.by_compounds_and_affinity_classes(
         compounds=[compound, ],
-    ).order_by('affinity_class', 'name__name').all()
+    ).order_by('name__name').all()
 
+    inchi_associations = {
+        a.inchitype_id: a for a in StructureInChIAssociation.inchis.by_compounds_and_inchitype(compounds=[compound, ]).all()}
+
+    name_affinities = ['exact', 'narrow', 'broad', 'generic']
     identifier_keys = ['FICTS', 'FICuS', 'uuuuu']
+    inchi_types = ['standard', 'original', 'xtauto', 'xtautox']
 
     return render(request, 'compound.html', {
         'string': int,
@@ -70,13 +72,15 @@ def compounds(request, cid: int = None):
         'compound': compound,
         'parents': {key: parents[key] for key in identifier_keys},
         'names': name_associations,
+        'inchis': {t: inchi_associations[t] for t in inchi_types}
     })
+
 
 def images(request: HttpRequest, cid: int = None, string: str = None):
 
     if cid or string:
         if cid:
-            compound: Compound = Compound.objects.annotated().filter(id=cid).first()
+            compound: Compound = Compound.objects.filter(id=cid).first()
             #ens = compound.structure.to_ens
             image = _create_image(compound.structure.to_ens)
             return HttpResponse(image, content_type='image/svg+xml')

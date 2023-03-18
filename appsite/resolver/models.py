@@ -131,6 +131,7 @@ class InChIManager(models.Manager):
 
 
 class InChI(models.Model):
+
     version = models.IntegerField(default=1, blank=False, null=False)
     block1 = models.CharField(max_length=14, blank=False, null=False)
     block2 = models.CharField(max_length=10, blank=False, null=False)
@@ -231,6 +232,27 @@ class InChIType(models.Model):
         db_table = 'cir_inchi_type'
 
 
+class StructureInChIAssociationQuerySet(models.QuerySet):
+
+    def by_compounds_and_inchitype(self, compounds: List[Union['Compound', int]], inchitypes: List[str] = None):
+        queryset = self.select_related(
+            'inchi',
+            'structure',
+            'structure__compound',
+            'inchitype'
+        )
+        if inchitypes:
+            return queryset.filter(
+                structure__compound__in=compounds
+            ).filter(
+                inchitype__in=inchitypes
+            )
+        else:
+            return queryset.filter(
+                structure__compound__in=compounds
+            )
+
+
 class StructureInChIAssociation(models.Model):
     structure = models.ForeignKey(
         Structure,
@@ -262,6 +284,9 @@ class StructureInChIAssociation(models.Model):
         fields=['inchi_key'],
         name='structure_inchi_association_index'
     )
+
+    objects = models.Manager()
+    inchis = StructureInChIAssociationQuerySet.as_manager()
 
     class JSONAPIMeta:
         resource_name = 'structureInchiAssociations'
@@ -319,6 +344,7 @@ class CompoundManager(models.Manager):
 
 
 class CompoundQuerySet(models.QuerySet):
+
     def by_compound_ids(self, ids: List[int]):
         queryset = self.select_related(
             'structure',
@@ -439,7 +465,9 @@ class StructureNameAssociationQuerySet(models.QuerySet):
     def by_compounds_and_affinity_classes(self, compounds: List[Union['Compound', int]], affinity_classes: int=None):
         queryset = self.select_related(
             'name',
-            'structure'
+            'name_type',
+            'structure',
+            'structure__compound'
         )
         if affinity_classes:
             return queryset.filter(
