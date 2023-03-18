@@ -38,28 +38,28 @@
     <!-- Begin page content -->
     <main class="flex-shrink-0">
         <div class="container-fluid p-5" id="main-container">
-            <div class="d-flex align-items-center mt-5">
+            <div class="align-items-center mt-5">
                 <h1>CID {{ compound.id }}</h1>
-                <div class="mb-2 ms-auto">
+                <div class="mb-2">
                     <div class="btn-group" role="group">
                         {% if compound.get_previous_by_added.id %}
                             <a href="{% url 'compounds' compound.get_previous_by_added.id %}"
-                               class="btn btn-sm btn-primary" type="button">
-                                <i class="bi bi-caret-left-fill"></i>
+                               class="btn btn-sm btn-light" type="button">
+                                <i class="bi bi-caret-left-fill"></i> Previous
                             </a>
-                        {% else %}
-                            <a href="" class="btn btn-sm btn-primary" type="button">
-                                <i class="bi bi-caret-left-fill"></i>
+                        {% else %}http://localhost:8000/neon/compounds/1463
+                            <a href="" class="btn btn-sm btn-light" type="button">
+                                <i class="bi bi-caret-left-fill"></i> Previous
                             </a>
                         {% endif %}
                         {% if compound.get_next_by_added.id %}
                             <a href="{% url 'compounds' compound.get_next_by_added.id %}"
-                               class="btn btn-sm btn-primary" type="button">
-                                <i class="bi bi-caret-right-fill"></i>
+                               class="btn btn-sm btn-light" type="button">
+                                Next <i class="bi bi-caret-right-fill"></i>
                             </a>
                         {% else %}
-                            <a href="" class="btn btn-sm btn-primary" type="button">
-                                <i class="bi bi-caret-right-fill"></i>
+                            <a href="" class="btn btn-sm btn-light" type="button">
+                                Next <i class="bi bi-caret-right-fill"></i>
                             </a>
                         {% endif %}
                     </div>
@@ -87,7 +87,7 @@
                 </div>
                 <div class="col col-xxl-9 col-xl-9 col-lg-8 col-md-12 col-sm-12 col-12 pt-2">
                     <section>
-                        <h2 class="mb-4">Structure Identifier</h2>
+                        <h2 class="mb-4">Structure Data</h2>
                         <table class="table">
                             <tbody>
                             <tr>
@@ -95,20 +95,31 @@
                                 <td class="col-10"><small class="text-break">{{ compound.structure.smiles }}</small>
                                 </td>
                             </tr>
+                            {% comment %}
                             <tr>
                                 <th scope="row">Std. InChIKey</th>
                                 <td class="col-10"><small class="text-break">{{ compound.annotated_inchikey }}</small>
                                 </td>
                             </tr>
+                            {% endcomment %}
                             <tr>
                                 <th scope="row">Std. InChI</th>
-                                <td class="col-10"><small class="text-break">{{ compound.annotated_inchi }}</small>
+                                <td class="col-10"><small class="text-break">{{ inchis.standard.inchi.string }}</small>
                                 </td>
+                            </tr>
+                            <tr>
+                                <th class="col-1">Formula</th>
+                                <td class="col-1"><small>{{ formula }}</small></td>
+                            </tr>
+                            <tr>
+                                <th class="col-1">Weight</th>
+                                <td class="col-1"><small>{{ weight }}</small></td>
                             </tr>
                             </tbody>
                         </table>
                     </section>
                     <section>
+                        <h2 class="mt-4 mb-4">Structure Identifier</h2>
                         <div class="card"><div class="card-body">
                         <table class="table">
                             <thead>

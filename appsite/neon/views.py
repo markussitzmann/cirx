@@ -72,7 +72,9 @@ def compounds(request, cid: int = None):
         'compound': compound,
         'parents': {key: parents[key] for key in identifier_keys},
         'names': name_associations,
-        'inchis': {t: inchi_associations[t] for t in inchi_types}
+        'inchis': {t: inchi_associations[t] for t in inchi_types},
+        'formula': compound.structure.to_ens.get('E_FORMULA'),
+        'weight': compound.structure.to_ens.get('E_WEIGHT')
     })
 
 
