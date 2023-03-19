@@ -33,7 +33,6 @@ class Structure(models.Model):
 
     objects = StructureManager()
 
-
     class JSONAPIMeta:
         resource_name = 'structures'
 
@@ -286,7 +285,7 @@ class StructureInChIAssociation(models.Model):
     )
 
     objects = models.Manager()
-    inchis = StructureInChIAssociationQuerySet.as_manager()
+    with_related_objects = StructureInChIAssociationQuerySet.as_manager()
 
     class JSONAPIMeta:
         resource_name = 'structureInchiAssociations'
@@ -301,46 +300,46 @@ class StructureInChIAssociation(models.Model):
         db_table = 'cir_structure_inchi_associations'
 
 
-class CompoundManager(models.Manager):
-
-    def annotated(self) -> QuerySet:
-        return super().get_queryset() \
-        .select_related(
-            'structure',
-            'structure__parents',
-            'structure__parents__ficts_parent',
-            'structure__parents__ficus_parent',
-            'structure__parents__uuuuu_parent'
-        ).prefetch_related(
-            'structure__names__name',
-            'structure__ficts_children__structure',
-            'structure__ficus_children__structure',
-            'structure__uuuuu_children__structure',
-            'structure__ficts_children__structure__structure_file_records',
-            'structure__ficus_children__structure__structure_file_records',
-            'structure__uuuuu_children__structure__structure_file_records',
-            'structure__ficts_children__structure__structure_file_records__records',
-            'structure__ficus_children__structure__structure_file_records__records',
-            'structure__uuuuu_children__structure__structure_file_records__records',
-            'structure__ficts_children__structure__structure_file_records__records__release',
-            'structure__ficus_children__structure__structure_file_records__records__release',
-            'structure__uuuuu_children__structure__structure_file_records__records__release',
-            'structure__inchis',
-            'structure__inchis__inchi',
-            'structure__inchis__inchitype',
-        ).annotate(
-            ficts_children_count=Count('structure__ficts_children'),
-            ficus_children_count=Count('structure__ficus_children'),
-            uuuuu_children_count=Count('structure__uuuuu_children'),
-            annotated_name=F('structure__names__name__name'),
-            annotated_inchitype=F('structure__inchis__inchitype'),
-            annotated_inchikey=F('structure__inchis__inchi__key'),
-            annotated_inchi=F('structure__inchis__inchi__string'),
-            annotated_inchi_is_standard=F('structure__inchis__inchitype__is_standard')
-        )
-
-    def filter_by_names(self, name) -> QuerySet:
-        return self.annotated().filter(annotated_name__in=name)
+# class CompoundManager(models.Manager):
+#
+#     def annotated(self) -> QuerySet:
+#         return super().get_queryset() \
+#         .select_related(
+#             'structure',
+#             'structure__parents',
+#             'structure__parents__ficts_parent',
+#             'structure__parents__ficus_parent',
+#             'structure__parents__uuuuu_parent'
+#         ).prefetch_related(
+#             'structure__names__name',
+#             'structure__ficts_children__structure',
+#             'structure__ficus_children__structure',
+#             'structure__uuuuu_children__structure',
+#             'structure__ficts_children__structure__structure_file_records',
+#             'structure__ficus_children__structure__structure_file_records',
+#             'structure__uuuuu_children__structure__structure_file_records',
+#             'structure__ficts_children__structure__structure_file_records__records',
+#             'structure__ficus_children__structure__structure_file_records__records',
+#             'structure__uuuuu_children__structure__structure_file_records__records',
+#             'structure__ficts_children__structure__structure_file_records__records__release',
+#             'structure__ficus_children__structure__structure_file_records__records__release',
+#             'structure__uuuuu_children__structure__structure_file_records__records__release',
+#             'structure__inchis',
+#             'structure__inchis__inchi',
+#             'structure__inchis__inchitype',
+#         ).annotate(
+#             ficts_children_count=Count('structure__ficts_children'),
+#             ficus_children_count=Count('structure__ficus_children'),
+#             uuuuu_children_count=Count('structure__uuuuu_children'),
+#             annotated_name=F('structure__names__name__name'),
+#             annotated_inchitype=F('structure__inchis__inchitype'),
+#             annotated_inchikey=F('structure__inchis__inchi__key'),
+#             annotated_inchi=F('structure__inchis__inchi__string'),
+#             annotated_inchi_is_standard=F('structure__inchis__inchitype__is_standard')
+#         )
+#
+#     def filter_by_names(self, name) -> QuerySet:
+#         return self.annotated().filter(annotated_name__in=name)
 
 
 class CompoundQuerySet(models.QuerySet):
@@ -376,8 +375,8 @@ class Compound(models.Model):
     modified = models.DateTimeField(auto_now=True)
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
-    objects = CompoundManager()
-    structures=CompoundQuerySet.as_manager()
+    objects = models.Manager()
+    with_related_objects = CompoundQuerySet.as_manager()
 
     class Meta:
         db_table = 'cir_compound'
@@ -386,17 +385,17 @@ class Compound(models.Model):
         return "NCICADD:CID=%s" % self.id
 
 
-class RecordManager(models.Manager):
-
-    def annotated(self):
-        return super().get_queryset() \
-            .select_related('structure_file_record', 'structure_file_record__structure','structure_file_record__structure__parents') \
-            .annotate(
-                annotated_structure=F('structure_file_record__structure'),
-                annotated_ficts_parent=F('structure_file_record__structure__parents__ficts_parent'),
-                annotated_ficus_parent=F('structure_file_record__structure__parents__ficus_parent'),
-                annotated_uuuuu_parent=F('structure_file_record__structure__parents__uuuuu_parent')
-            )
+# class RecordManager(models.Manager):
+#
+#     def annotated(self):
+#         return super().get_queryset() \
+#             .select_related('structure_file_record', 'structure_file_record__structure','structure_file_record__structure__parents') \
+#             .annotate(
+#                 annotated_structure=F('structure_file_record__structure'),
+#                 annotated_ficts_parent=F('structure_file_record__structure__parents__ficts_parent'),
+#                 annotated_ficus_parent=F('structure_file_record__structure__parents__ficus_parent'),
+#                 annotated_uuuuu_parent=F('structure_file_record__structure__parents__uuuuu_parent')
+#             )
 
 
 class Record(models.Model):
@@ -415,7 +414,7 @@ class Record(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-    objects = RecordManager()
+    objects = models.Manager()
 
     class Meta:
         constraints = [
@@ -462,6 +461,7 @@ class NameAffinityClass(models.Model):
 
 
 class StructureNameAssociationQuerySet(models.QuerySet):
+
     def by_compounds_and_affinity_classes(self, compounds: List[Union['Compound', int]], affinity_classes: int=None):
         queryset = self.select_related(
             'name',
@@ -505,7 +505,7 @@ class StructureNameAssociation(models.Model):
     confidence = models.PositiveIntegerField(null=False, default=0)
 
     objects = models.Manager()
-    names = StructureNameAssociationQuerySet.as_manager()
+    with_related_objects = StructureNameAssociationQuerySet.as_manager()
 
     class Meta:
         constraints = [

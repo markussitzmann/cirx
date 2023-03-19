@@ -26,18 +26,18 @@ reset_queries()
 
 #structure_ids = [690600, 209505, 686728, 706412]
 
-compounds = [Compound.objects.get(id=33588), ]
+compounds = range(1,700000)
 
 inchitypes = ['standard', 'xtauto']
 
 
-inchi_associations = StructureInChIAssociation.inchis.by_compounds_and_inchitype(
+inchi_associations = StructureInChIAssociation.with_related_objects.by_compounds_and_inchitype(
    compounds=compounds,
    #inchitypes=inchitypes
-).all()
+).filter(structure_count__gt=1).all()
 
 for a in inchi_associations:
-   logger.info(">> %s %s", a, a.inchitype)
+   logger.info(">> %s %s %s", a, a.inchitype, a.structure_count)
 
 #logger.info("C %s" % len(inchi_associations))
 

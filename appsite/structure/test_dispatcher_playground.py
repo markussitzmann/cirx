@@ -90,7 +90,7 @@ class DispatcherComponentTests(TestCase):
         chemical_string = ChemicalString(string=string)
 
         interpretation = chemical_string.Interpretation()
-        interpretation.structures = [ChemicalStructure(ens=ens),]
+        interpretation.with_related_objects = [ChemicalStructure(ens=ens), ]
 
         chemical_string._operator_tautomers(interpretation)
 
@@ -113,7 +113,7 @@ class DispatcherComponentTests(TestCase):
         logger.info("1: ens list: %s", Ens.List())
 
         structure_lists: List[List[ChemicalStructure]] = [
-           interpretation.structures for interpretation in ([interpretations[0]] if simple else interpretations)
+           interpretation.with_related_objects for interpretation in ([interpretations[0]] if simple else interpretations)
         ]
 
         #logger.info("2: ens list: %s", Ens.List())

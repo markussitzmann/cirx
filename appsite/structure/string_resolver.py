@@ -242,7 +242,7 @@ class ChemicalString:
                 'query_string': self.string,
                 'description': hashcode
             }
-            interpretation_object.structures.append(chemical_structure)
+            interpretation_object.with_related_objects.append(chemical_structure)
             return True
         return False
 
@@ -259,7 +259,7 @@ class ChemicalString:
                 'description': record.id,
                 'record': record
             }
-            interpretation_object.structures.append(chemical_structure)
+            interpretation_object.with_related_objects.append(chemical_structure)
             return True
         return False
 
@@ -277,7 +277,7 @@ class ChemicalString:
                 'description': compound.id,
                 'compound': compound
             }
-            interpretation_object.structures.append(chemical_structure)
+            interpretation_object.with_related_objects.append(chemical_structure)
             return True
         return False
 
@@ -296,7 +296,7 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': self.string,
                 }
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
                 return True
         return False
 
@@ -314,7 +314,7 @@ class ChemicalString:
                 'query_string': self.string,
                 'description': identifier
             }
-            interpretation_object.structures.append(chemical_structure)
+            interpretation_object.with_related_objects.append(chemical_structure)
             return True
         return False
 
@@ -329,7 +329,7 @@ class ChemicalString:
         description_list = []
         for inchikey in inchikeys:
             #structures = inchikey.structure_set.all()
-            structure_associations: List[StructureInChIAssociation] = inchikey.structures.all()
+            structure_associations: List[StructureInChIAssociation] = inchikey.with_related_objects.all()
             #full_key = InChIKey(
             #    block1=identifier.block1,
             #    block2=identifier.block2,
@@ -348,14 +348,14 @@ class ChemicalString:
                 }
                 structure_set.append(chemical_structure)
         if inchikeys:
-            interpretation_object.structures = structure_set
+            interpretation_object.with_related_objects = structure_set
             return True
         return False
 
     def _resolver_stdinchi(self, interpretation_object):
         identifier = InChI(string=self.string)
         if identifier and self._structure_representation_resolver(interpretation_object):
-            chemical_structure = interpretation_object.structures[0]
+            chemical_structure = interpretation_object.with_related_objects[0]
             chemical_structure._metadata = {
                 'query_type': 'stdinchi',
                 'query_search_string': 'Standard InChI',
@@ -384,7 +384,7 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': self.string,
                 }
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
                 return True
         return False
 
@@ -406,7 +406,7 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': self.string,
                 }
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
                 return True
         return False
 
@@ -427,7 +427,7 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': self.string,
                 }
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
                 return True
         return False
 
@@ -579,7 +579,7 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': nsc_number_string
                 }
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
                 return True
         return False
 
@@ -599,7 +599,7 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': name.name
                 }
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
                 return True
         return False
 
@@ -616,7 +616,7 @@ class ChemicalString:
                 'query_string': self.string,
                 'description': name.name
             }
-            interpretation_object.structures.append(chemical_structure)
+            interpretation_object.with_related_objects.append(chemical_structure)
             return True
         return False
 
@@ -700,7 +700,7 @@ class ChemicalString:
                 'query_string': self.string,
                 'description': name.name
             }
-            interpretation_object.structures.append(chemical_structure)
+            interpretation_object.with_related_objects.append(chemical_structure)
             return True
         return False
 
@@ -722,14 +722,14 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': structure_name['names'][0].name
                 }
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
             return True
         return False
 
     def _resolver_smiles(self, interpretation_object):
         smiles_string = SMILES(string=self.string, strict_testing=True)
         if smiles_string and self._structure_representation_resolver(interpretation_object):
-            chemical_structure = interpretation_object.structures[0]
+            chemical_structure = interpretation_object.with_related_objects[0]
             chemical_structure._metadata = {
                 'query_type': 'smiles',
                 'query_search_string': 'SMILES string',
@@ -743,7 +743,7 @@ class ChemicalString:
     def _resolver_minimol(self, interpretation_object):
         minimol = Minimol(string=self.string)
         if minimol and self._structure_representation_resolver(interpretation_object):
-            chemical_structure = interpretation_object.structures[0]
+            chemical_structure = interpretation_object.with_related_objects[0]
             chemical_structure._metadata = {
                 'query_type': 'minimol',
                 'query_search_string': 'Cactvs minimol',
@@ -757,7 +757,7 @@ class ChemicalString:
     def _resolver_packstring(self, interpretation_object):
         pack_string = PackString(string=self.string)
         if pack_string and self._structure_representation_resolver(interpretation_object):
-            chemical_structure = interpretation_object.structures[0]
+            chemical_structure = interpretation_object.with_related_objects[0]
             chemical_structure._metadata = {
                 'query_type': 'packstring',
                 'query_search_string': 'Cactvs pack string',
@@ -811,7 +811,7 @@ class ChemicalString:
                 try:
                     structure = Structure.objects.get(hashisy_key=CactvsHash(hashcode.integer))
                     chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
-                    interpretation_object.structures.append(chemical_structure)
+                    interpretation_object.with_related_objects.append(chemical_structure)
                 except (Structure.DoesNotExist, RuntimeError) as e1:
                     logger.error(e1)
                     #ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
@@ -819,15 +819,15 @@ class ChemicalString:
                     try:
                         structure = Structure.objects.get(hashisy=CactvsHash(ficts.integer))
                         chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
-                        interpretation_object.structures.append(chemical_structure)
+                        interpretation_object.with_related_objects.append(chemical_structure)
                     except (Structure.DoesNotExist, RuntimeError) as e2:
                         logger.error(e2)
                         chemical_structure = ChemicalStructure(ens=ens)
-                        interpretation_object.structures.append(chemical_structure)
+                        interpretation_object.with_related_objects.append(chemical_structure)
             except Exception as e3:
                 logger.error(e3)
                 chemical_structure = ChemicalStructure(ens=ens)
-                interpretation_object.structures.append(chemical_structure)
+                interpretation_object.with_related_objects.append(chemical_structure)
                 interpretation_object.string = self.string
         return True
 
@@ -844,7 +844,7 @@ class ChemicalString:
         index = 1
         dataset: Dataset = Dataset()
 
-        for interpretation_structure in interpretation.structures:
+        for interpretation_structure in interpretation.with_related_objects:
             interpretation_structure_ens = interpretation_structure.ens
             metadata = interpretation_structure.metadata.copy()
 
@@ -876,7 +876,7 @@ class ChemicalString:
         interpretation._reference_dataset = dataset
         interpretation.tautomers = tautomers
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     # def _operator_tautomers(self, interpretation):
@@ -915,7 +915,7 @@ class ChemicalString:
     def _operator_remove_hydrogens(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -939,13 +939,13 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.no_hydrogens = no_hydrogens
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def _operator_add_hydrogens(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -969,13 +969,13 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.hydrogens = hydrogens
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def _operator_no_stereo(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -999,13 +999,13 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.no_stereo = no_stereo
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def _operator_ficts(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -1029,7 +1029,7 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.ficts = ficts
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def _operator_parent(self, interpretation):
@@ -1041,7 +1041,7 @@ class ChemicalString:
     def _operator_ficus(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -1065,13 +1065,13 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.ficus = ficus
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def _operator_uuuuu(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -1095,13 +1095,13 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.uuuuu = uuuuu
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def _operator_stereoisomers(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -1125,13 +1125,13 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.stereoisomers = stereoisomers
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def _operator_scaffold_sequence(self, interpretation):
         enslist = []
         dataset_list = []
-        for structure in interpretation.structures:
+        for structure in interpretation.with_related_objects:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -1155,7 +1155,7 @@ class ChemicalString:
         interpretation._reference_dataset = dataset_list
         interpretation.scaffolds = scaffolds
         interpretation.description_list = description_list
-        interpretation.structures = structures
+        interpretation.with_related_objects = structures
         return interpretation
 
     def __len__(self):

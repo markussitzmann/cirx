@@ -25,7 +25,7 @@ logger = logging.getLogger("cirx")
 
 reset_queries()
 
-compounds = Compound.structures.by_compound_ids([20008, 20009]).all()
+compounds = Compound.with_related_objects.by_compound_ids([20008, 20009]).all()
 
 for compound in compounds:
     logger.info("C: %s" % compound)

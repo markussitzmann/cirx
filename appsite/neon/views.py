@@ -1,5 +1,5 @@
 import json
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -43,7 +43,7 @@ def neon(request: HttpRequest, string: str = None):
 
 def compounds(request, cid: int = None):
 
-    compound: Compound = Compound.structures.by_compound_ids([cid, ]).first()
+    compound: Compound = Compound.with_related_objects.by_compound_ids([cid, ]).first()
     parents = {}
     for parent_type in StructureRegistry.NCICADD_TYPES:
         parents[parent_type.public_string] = ParentData(
@@ -55,12 +55,16 @@ def compounds(request, cid: int = None):
                             if (p := getattr(compound.structure.parents, parent_type.attr)) else False
         )
 
-    name_associations = StructureNameAssociation.names.by_compounds_and_affinity_classes(
-        compounds=[compound, ],
-    ).order_by('name__name').all()
+    name_association_affinity_dict = defaultdict(list)
+    name_associations = {
+        n.affinity_class: name_association_affinity_dict[n.affinity_class].append(n)
+        for n in StructureNameAssociation.with_related_objects.by_compounds_and_affinity_classes(compounds=[compound, ], ).order_by('name__name').all()
+    }
 
     inchi_associations = {
-        a.inchitype_id: a for a in StructureInChIAssociation.inchis.by_compounds_and_inchitype(compounds=[compound, ]).all()}
+        a.inchitype_id: a
+        for a in StructureInChIAssociation.with_related_objects.by_compounds_and_inchitype(compounds=[compound, ]).all()
+    }
 
     name_affinities = ['exact', 'narrow', 'broad', 'generic']
     identifier_keys = ['FICTS', 'FICuS', 'uuuuu']
@@ -71,7 +75,7 @@ def compounds(request, cid: int = None):
         'host': request.scheme + "://" + request.get_host(),
         'compound': compound,
         'parents': {key: parents[key] for key in identifier_keys},
-        'names': name_associations,
+        'names': {key: name_association_affinity_dict[key] for key in name_affinities},
         'inchis': {t: inchi_associations[t] for t in inchi_types},
         'formula': compound.structure.to_ens.get('E_FORMULA'),
         'weight': compound.structure.to_ens.get('E_WEIGHT')

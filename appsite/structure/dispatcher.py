@@ -91,7 +91,7 @@ class Dispatcher:
         representation_list = []
         for interpretation in interpretations:
             response_list = []
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 try:
                     compound = structure.object.compound
                 except:
@@ -163,7 +163,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -208,7 +208,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -251,7 +251,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -295,7 +295,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -338,7 +338,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 # ens = structure.ens
                 try:
@@ -383,7 +383,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -427,7 +427,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 try:
                     response = structure.object.compound.__str__()
@@ -464,7 +464,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 response_list = []
                 response = structure.object.__str__()
                 response_list.append(response)
@@ -659,7 +659,7 @@ class Dispatcher:
         response_collector_list = []
         for interpretation in interpretations:
             structure: ChemicalStructure
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 full_ensemble_list.append(structure.ens)
                 if self.output_format == 'xml':
                     # if hasattr(structure, 'ens'):
@@ -762,7 +762,7 @@ class Dispatcher:
         representation_list = []
         names_list = []
         for interpretation in interpretations:
-            for structure in interpretation.structures:
+            for structure in interpretation.with_related_objects:
                 name_sets = NameCache(structure=structure.object)['classified_name_object_sets']
                 names = []
                 classification_strings = NameType.objects.all()

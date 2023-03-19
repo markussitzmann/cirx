@@ -188,13 +188,15 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for item in names %}
+                            {% for k, v in names.items %}
+                                {%  for name in v %}
                                 <tr>
-                                    <td class="col-7">{{ item.name.name }}</td>
-                                    <td class="col-2"><small class="text-break">{{ item.affinity_class }}</small>
-                                    <td class="d-none d-md-block"><small class="text-break">{{ item.name_type.public_string }}</small>
+                                    <td class="col-7">{{ name.name.name }}</td>
+                                    <td class="col-2"><small class="text-break">{{ k }}</small>
+                                    <td class="d-none d-md-block"><small class="text-break">{{ name.name_type.public_string }}</small>
                                     </td>
                                 </tr>
+                                {% endfor %}
                             {% endfor %}
                             </tbody>
                         </table>

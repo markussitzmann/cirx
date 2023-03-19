@@ -47,7 +47,7 @@ affinity_classes = ['exact', 'narrow', 'broad']
 #
 # logger.info("C %s" % associations.count())
 
-name_associations = StructureNameAssociation.names.by_compounds_and_affinity_classes(
+name_associations = StructureNameAssociation.with_related_objects.by_compounds_and_affinity_classes(
    compounds=compounds,
    affinity_classes=affinity_classes
 ).all()
