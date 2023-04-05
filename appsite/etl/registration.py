@@ -25,7 +25,8 @@ from etl.models import StructureFileCollection, StructureFile, StructureFileFiel
     ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileInChIStatus, \
     StructureFileRecordNameAssociation, StructureFileSource, StructureFileLinkNameStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
-    Release, NameType, Name, Record, StructureHashisy, StructureParentStructure, StructureNameAssociation
+    Release, NameType, Name, Record, StructureHashisy, StructureParentStructure, StructureNameAssociation, \
+    NameAffinityClass
 from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
@@ -333,19 +334,25 @@ class FileRegistry(object):
                         name_set.add(triplet.name)
                         name_type_set.add((triplet.name_type, triplet.parent))
 
-                parent_name_types = {name_type.id: name_type for name_type in NameType.objects.bulk_create(
-                    [NameType(id=item[1]) for item in name_type_set],
+                NameType.objects.bulk_create(
+                    [NameType(title=item[1]) for item in name_type_set],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
-                )}
+                )
+                name_type_dict = {name_type.title: name_type for name_type in NameType.objects.all()}
 
-                name_type_list = [NameType(id=item[0], parent=parent_name_types[item[1]]) for item in name_type_set]
+                name_type_list = []
+                for item in name_type_set:
+                    name_type_list.append(NameType(title=item[0], parent=name_type_dict[item[1]]))
+                #name_type_list = [NameType(title=item[0], parent=name_types[item[1]]) for item in name_type_set]
                 NameType.objects.bulk_create(
                     name_type_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                name_type_dict = {t.id: t for t in name_type_list}
+                #name_type_dict = {t.id: t for t in name_type_list}
+                name_type_dict = {name_type.title: name_type for name_type in NameType.objects.all()}
+
 
                 time0 = time.perf_counter()
                 name_list = [Name(name=name) for name in name_set]
@@ -753,7 +760,7 @@ class StructureRegistry(object):
 
                 inchi_type_objects = InChIType.objects.in_bulk(
                     [t.id for t in StructureRegistry.INCHI_TYPES],
-                    field_name='id'
+                    field_name='title'
                 )
 
                 structure_inchi_associations = []
@@ -861,7 +868,6 @@ class StructureRegistry(object):
     @staticmethod
     def link_structure_names(arg_tuple):
         structure_file_id, structure_ids = arg_tuple
-        #structure_file = StructureFile.objects.get(id=structure_file_id)
 
         s = sorted(structure_ids)
         logger.info("IN %s %s [%s, %s]" % (structure_file_id, len(structure_ids), s[0], s[-1]))
@@ -879,8 +885,6 @@ class StructureRegistry(object):
             .values('id', 'record_names', 'ficts', 'ficus', 'uuuuu')\
             .all()
 
-        logger.info("STRUCTURES %s", len(structures))
-
         structure_association_list = []
         for structure in structures:
             record_names = structure['record_names']
@@ -889,7 +893,7 @@ class StructureRegistry(object):
         file_record_associations = StructureFileRecordNameAssociation.objects \
             .in_bulk(structure_association_list, field_name='id')
 
-        logger.info("ASSOCIATIONS %s", len(file_record_associations.keys()))
+        name_association_types = {c.title: c for c in NameAffinityClass.objects.all()}
 
         structure_association_list = []
         for structure in structures:
@@ -903,7 +907,7 @@ class StructureRegistry(object):
                         name_id=record_name_association.name_id,
                         structure_id=structure['ficts'],
                         name_type_id=record_name_association.name_type_id,
-                        affinity_class="exact",
+                        affinity_class=name_association_types['exact'],
                         confidence=100
                     ))
                 if structure['ficus'] and not structure['ficus'] == structure['ficts']:
@@ -911,7 +915,7 @@ class StructureRegistry(object):
                         name_id=record_name_association.name_id,
                         structure_id=structure['ficus'],
                         name_type_id=record_name_association.name_type_id,
-                        affinity_class="narrow",
+                        affinity_class=name_association_types['narrow'],
                         confidence=100
                     ))
                 if structure['uuuuu'] and not structure['uuuuu'] == structure['ficus'] and not structure['uuuuu'] == structure['ficts']:
@@ -919,11 +923,9 @@ class StructureRegistry(object):
                         name_id=record_name_association.name_id,
                         structure_id=structure['uuuuu'],
                         name_type_id=record_name_association.name_type_id,
-                        affinity_class="broad",
+                        affinity_class=name_association_types['broad'],
                         confidence=100
                     ))
-
-        logger.info("BEFORE CREATE %s" % len(structure_association_list))
         try:
             with transaction.atomic():
                 StructureNameAssociation.objects.bulk_create(

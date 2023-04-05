@@ -31,10 +31,10 @@ class FileRegistryTests(TestCase):
         logger.info("----- file registry tear down ----")
         logger.info("ENS COUNT: %s" % len(Ens.List()))
         for n in Name.objects.all():
-            logger.info("NAME %s : %s :", n.id, n)
+            logger.info("NAME %s : %s", n.id, n)
 
         for a in StructureFileRecordNameAssociation.objects.all():
-            logger.info("ASSOCIATIONS %s : %s :", a.id, a)
+            logger.info("ASSOCIATIONS %s : %s", a.id, a)
 
     def test_file_registry(self):
         logger.info("----- file registry test ----")
@@ -62,24 +62,10 @@ class FileRegistryTests(TestCase):
         logger.info("RELEASES %s", release_count)
 
         for t in NameType.objects.all():
-            logger.info("NAME TYPE %s : %s :", t.id, t.parent)
+            logger.info("NAME TYPE %s : %s", t.id, t.parent)
 
         for r in StructureFileRecord.objects.all():
-            logger.info("NAME TYPE %s : %s :", r.id, r)
-
-        #for n in Name.objects.all():
-        #   logger.info("NAME %s ", n)
-
-        #self.assertEqual(release_count, 201)
-
-
-
-    # @skip
-    # def test_json_field(self):
-    #     for p in StructureFileCollectionPreprocessor.objects.all():
-    #         logger.info("PREPROCESSOR %s %s" % (p, p.params))
-    #         d = json.loads(p.params)
-    #         logger.info("D %s" % d["test"])
+            logger.info("NAME TYPE %s : %s", r.id, r)
 
 
 

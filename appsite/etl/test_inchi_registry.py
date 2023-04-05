@@ -14,7 +14,7 @@ logger = logging.getLogger('cirx')
 
 class InChIRegistryTests(TestCase):
 
-    fixtures = ['register.json']
+    fixtures = ['normalized.json']
 
     def setUp(self):
         logger.info("----- inchi registry set up ----")
@@ -32,7 +32,7 @@ class InChIRegistryTests(TestCase):
     def test_inchi_registry(self):
         logger.info("----- inchi registry test ----")
 
-        structure_file = StructureFile.objects.get(id=8)
+        structure_file = StructureFile.objects.get(id=2)
         structure_ids = [record.structure.id for record in structure_file.structure_file_records.all()]
 
         StructureRegistry.calculate_inchi((structure_file.id, structure_ids))

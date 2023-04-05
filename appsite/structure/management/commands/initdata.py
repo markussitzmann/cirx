@@ -7,15 +7,15 @@ from pycactvs import Ens
 
 from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor, StructureFileField
 from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, \
-    ContextTag, Dataset, Release, InChIType
+    ContextTag, Dataset, Release, InChIType, NameAffinityClass
 from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
-MINI = False
-INIT_PUBCHEM_COMPOUND = False
-INIT_PUBCHEM_SUBSTANCE = False
-INIT_CHEMBL = False
+MINI = True
+INIT_PUBCHEM_COMPOUND = True
+INIT_PUBCHEM_SUBSTANCE = True
+INIT_CHEMBL = True
 INIT_NCI = True
 INIT_TT = False
 
@@ -40,6 +40,7 @@ def _loader():
     init_dataset()
     init_release()
     init_inchi_type()
+    init_name_affinitiy_class()
     #init_structures()
 
 
@@ -125,24 +126,29 @@ def init_dataset_context_type_data():
 
 
 def init_name_type_data():
+
+    regid, _ = NameType.objects.get_or_create(title="REGID", public_string="Registration ID", parent_id=None)
+    name, _ = NameType.objects.get_or_create(title="NAME", public_string="Chemical Name or Synonym", parent_id=None)
+
     name_types = [
-        ('REGID', None, 'Registration ID'),
-        ('NAME', None, 'Chemical Name or Synonym'),
-        ('PUBCHEM_IUPAC_NAME', 'NAME', 'PubChem IUPAC NAME'),
-        ('PUBCHEM_IUPAC_OPENEYE_NAME', 'NAME', 'PubChem IUPAC OPENEYE NAME'),
-        ('PUBCHEM_IUPAC_CAS_NAME', 'NAME', 'PubChem IUPAC CAS NAME'),
-        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', 'NAME', 'PubChem IUPAC TRADITIONAL NAME'),
-        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'NAME', 'PubChem IUPAC SYSTEMATIC NAME'),
-        ('PUBCHEM_GENERIC_REGISTRY_NAME', 'NAME', 'PubChem GENERIC REGISTRY NAME'),
-        ('PUBCHEM_SUBSTANCE_SYNONYM', 'NAME', 'PubChem SUBSTANCE SYNONYM'),
-        ('NSC_NUMBER', 'REGID', 'NSC number'),
-        ('NSC_NUMBER_PREFIXED', 'REGID', 'NSC number prefixed'),
-        ('PUBCHEM_SID', 'REGID', 'PubChem SID'),
-        ('PUBCHEM_CID', 'REGID', 'PubChem CID'),
+       # ('REGID', None, 'Registration ID'),
+       # ('NAME', None, 'Chemical Name or Synonym'),
+        ('PUBCHEM_IUPAC_NAME', name, 'PubChem IUPAC NAME'),
+        ('PUBCHEM_IUPAC_OPENEYE_NAME', name, 'PubChem IUPAC OPENEYE NAME'),
+        ('PUBCHEM_IUPAC_CAS_NAME', name, 'PubChem IUPAC CAS NAME'),
+        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', name, 'PubChem IUPAC TRADITIONAL NAME'),
+        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', name, 'PubChem IUPAC SYSTEMATIC NAME'),
+        ('PUBCHEM_GENERIC_REGISTRY_NAME', name, 'PubChem GENERIC REGISTRY NAME'),
+        ('PUBCHEM_SUBSTANCE_SYNONYM', name, 'PubChem SUBSTANCE SYNONYM'),
+        ('NSC_NUMBER', regid, 'NSC number'),
+        ('NSC_NUMBER_PREFIXED', regid, 'NSC number prefixed'),
+        ('PUBCHEM_SID', regid, 'PubChem SID'),
+        ('PUBCHEM_CID', regid, 'PubChem CID'),
     ]
 
+
     for name_type in name_types:
-        NameType.objects.get_or_create(id=name_type[0], public_string=name_type[2], parent_id=name_type[1])
+        NameType.objects.get_or_create(title=name_type[0], public_string=name_type[2], parent=name_type[1])
 
 
 def init_organization_and_publisher_data():
@@ -471,7 +477,7 @@ def init_release(
             if init_nci_10000:
                 fname = "MINI/nci/NCI_DTP/NCI_DTP.*.10000.sdf.gz"
             else:
-                fname = "MINI/nci/NCI_DTP.sdf"
+                fname = "MINI/nci/NCI_DTP/NCI_DTP.sdf"
             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
                 release=open_nci_db,
                 file_location_pattern_string=fname
@@ -528,10 +534,30 @@ def init_release(
         )
         pubchem_substance_collection.save()
 
+
+def init_name_affinitiy_class():
+
+    affinitiy_classes = [
+        ('exact', 'Exact'),
+        ('narrow', 'Narrow'),
+        ('broad', 'Broad'),
+        ('unknown', 'Unknown'),
+        ('unspecified', 'Unspecified'),
+        ('generic', 'Generic'),
+        ('related', 'Related'),
+    ]
+
+    for item in affinitiy_classes:
+        c, created = NameAffinityClass.objects.get_or_create(
+            title=item[0]
+        )
+        c.description = item[1]
+        c.save()
+
 def init_inchi_type():
 
     standard_inchi_type, created = InChIType.objects.get_or_create(
-        id="standard",
+        title="standard",
     )
     standard_inchi_type.software_version = "1.06"
     standard_inchi_type.description = "Standard InChI"
@@ -540,7 +566,7 @@ def init_inchi_type():
     standard_inchi_type.save()
 
     original_inchi_type, created = InChIType.objects.get_or_create(
-        id="original",
+        title="original",
 
     )
     original_inchi_type.software_version = "1.06",
@@ -552,7 +578,7 @@ def init_inchi_type():
     original_inchi_type.save()
 
     tauto_inchi_type, created = InChIType.objects.get_or_create(
-        id="xtauto"
+        title="xtauto"
     )
     tauto_inchi_type.software_version = "1.06",
     tauto_inchi_type.description = "experimental InChI with FixedH layer, RecMet option and experimental tauto options" \
@@ -566,7 +592,7 @@ def init_inchi_type():
     tauto_inchi_type.save()
 
     tautox_inchi_type, created = InChIType.objects.get_or_create(
-        id="xtautox",
+        title="xtautox",
 
     )
     tautox_inchi_type.software_version = "1.06T",

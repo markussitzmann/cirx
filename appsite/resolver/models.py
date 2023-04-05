@@ -130,7 +130,6 @@ class InChIManager(models.Manager):
 
 
 class InChI(models.Model):
-
     version = models.IntegerField(default=1, blank=False, null=False)
     block1 = models.CharField(max_length=14, blank=False, null=False)
     block2 = models.CharField(max_length=10, blank=False, null=False)
@@ -172,7 +171,8 @@ class InChI(models.Model):
 
 
 class InChIType(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, editable=False)
+    #id = models.CharField(max_length=32, primary_key=True, editable=False)
+    title = models.CharField(max_length=32, unique=True, editable=False)
     software_version = models.CharField(max_length=16, default=None, blank=True, null=True)
     description = models.TextField(max_length=32768, blank=True, null=True)
     is_standard = models.BooleanField(default=False)
@@ -440,7 +440,8 @@ class Name(models.Model):
 
 
 class NameType(models.Model):
-    id = models.CharField(max_length=64, primary_key=True, editable=False)
+    #id = models.CharField(max_length=64, primary_key=True, editable=False)
+    title = models.CharField(max_length=64, unique=True, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
     public_string = models.TextField(max_length=64, blank=True, null=True)
     description = models.TextField(max_length=768, blank=True, null=True)
@@ -453,7 +454,7 @@ class NameType(models.Model):
 
 
 class NameAffinityClass(models.Model):
-    id = models.CharField(max_length=32, primary_key=True, editable=False)
+    title = models.CharField(max_length=32, unique=True, editable=False)
     description = models.TextField(max_length=32768, blank=True, null=True)
 
     class Meta:
@@ -493,15 +494,7 @@ class StructureNameAssociation(models.Model):
         on_delete=models.CASCADE
     )
     name_type = models.ForeignKey(NameType, on_delete=models.RESTRICT)
-    affinity_class = models.CharField(max_length=16, choices=(
-        ('exact', 'Exact'),
-        ('narrow', 'Narrow'),
-        ('broad', 'Broad'),
-        ('unknown', 'Unknown'),
-        ('unspecified', 'Unspecified'),
-        ('generic', 'Generic'),
-        ('related', 'Related'),
-    ), default='unspecified')
+    affinity_class = models.ForeignKey(NameAffinityClass, on_delete=models.RESTRICT)
     confidence = models.PositiveIntegerField(null=False, default=0)
 
     objects = models.Manager()
