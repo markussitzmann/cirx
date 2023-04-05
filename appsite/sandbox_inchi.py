@@ -1,6 +1,7 @@
 import logging
 import os
 
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import Prefetch
 from django.db.models.functions import Coalesce
 
@@ -20,36 +21,50 @@ logger = logging.getLogger("cirx")
 
 reset_queries()
 
-#names = Name.objects.prefetch_related(
-#    ''
-#)
+#query = StructureInChIAssociation.objects.select_related('structure', 'structure__compound')\
+#   .values('structure__id', count=Count('inchi_id')).filter(structure__compound__id__isnull=True)[:100]
 
-#structure_ids = [690600, 209505, 686728, 706412]
+#query = StructureInChIAssociation.objects\
+#   .values('inchi_id', 'structure_id').annotate(count=Count('structure'))[:1000]
 
-compounds = range(1,700000)
+query = InChI.objects.annotate(Count('structures'))[200000:201000]
 
-inchitypes = ['standard', 'xtauto']
+logger.info("---------------------------")
+for item in query.all():
+   logger.info("--- %s %s" % (item, item.structures__count))
+   for structure in item.structures.all():
+      logger.info(" S %s %s" % (structure.inchitype, structure.structure))
 
-
-inchi_associations = StructureInChIAssociation.with_related_objects.by_compounds_and_inchitype(
-   compounds=compounds,
-   #inchitypes=inchitypes
-).filter(structure_count__gt=1).all()
-
-for a in inchi_associations:
-   logger.info(">> %s %s %s", a, a.inchitype, a.structure_count)
-
-#logger.info("C %s" % len(inchi_associations))
-
-#standard = inchi_associations.filter(inchitype='standard')
-#xtauto = inchi_associations.filter(inchitype='xtauto')
-
-
-inchis = {a.inchitype.id: a for a in inchi_associations}
-logger.info("---> %s", inchis)
-
+# #names = Name.objects.prefetch_related(
+# #    ''
+# #)
+#
+# #structure_ids = [690600, 209505, 686728, 706412]
+#
+# compounds = range(1,700000)
+#
+# inchitypes = ['standard', 'xtauto']
+#
+#
+# inchi_associations = StructureInChIAssociation.with_related_objects.by_compounds_and_inchitype(
+#    compounds=compounds,
+#    #inchitypes=inchitypes
+# ).filter(structure_count__gt=1).all()
+#
 # for a in inchi_associations:
-#    logger.info("N %s %s -> %s" % (a.inchi, a.software_version, a))
+#    logger.info(">> %s %s %s", a, a.inchitype, a.structure_count)
+#
+# #logger.info("C %s" % len(inchi_associations))
+#
+# #standard = inchi_associations.filter(inchitype='standard')
+# #xtauto = inchi_associations.filter(inchitype='xtauto')
+#
+#
+# inchis = {a.inchitype.id: a for a in inchi_associations}
+# logger.info("---> %s", inchis)
+#
+# # for a in inchi_associations:
+# #    logger.info("N %s %s -> %s" % (a.inchi, a.software_version, a))
 
 
 #logger.info("I %s %s" % (standard, xtauto))
