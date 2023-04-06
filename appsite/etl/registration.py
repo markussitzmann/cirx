@@ -22,7 +22,7 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileInChIStatus, \
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureCalcInchiStatus, \
     StructureFileRecordNameAssociation, StructureFileSource, StructureFileLinkNameStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure, StructureNameAssociation, \
@@ -664,9 +664,9 @@ class StructureRegistry(object):
             return None
         logger.info("calc inchi structure file %s", structure_file)
         if hasattr(structure_file, 'inchi_status'):
-            status = structure_file.inchi_status
+            status = structure_file.calcinchi_status
         else:
-            status = StructureFileInChIStatus(structure_file=structure_file)
+            status = StructureCalcInchiStatus(structure_file=structure_file)
             status.save()
         if status.progress > 0.98:
             return None
@@ -814,7 +814,7 @@ class StructureRegistry(object):
             structure_count_with_inchi,
             structure_count
         ))
-        status, created = StructureFileInChIStatus.objects.get_or_create(structure_file=structure_file)
+        status, created = StructureCalcInchiStatus.objects.get_or_create(structure_file=structure_file)
         status.progress = structure_count_with_inchi / structure_count
         status.save()
 
@@ -1093,7 +1093,7 @@ class Preprocessors:
             if created:
                 regid_id_field, created = StructureFileField.objects\
                     .get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
-                name_type, created = NameType.objects.get_or_create(id="REGID")
+                name_type, created = NameType.objects.get_or_create(title="REGID")
                 release.parent = pubchem_release
                 release.description = "generic from PubChem"
                 release.status = pubchem_release_status

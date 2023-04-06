@@ -27,7 +27,7 @@ def _calculate_inchis(structure_file_id: int):
 
 def _calcinchi():
     files: QuerySet = StructureFile.objects.filter(
-        Q(inchi_status__isnull=True) | Q(inchi_status__progress__lte=0.98)
+        Q(calcinchi_status__isnull=True) | Q(calcinchi_status__progress__lte=0.98)
     ).all()
     for file in files:
         logger.info("calc inchi for structure file %s" % file.id)

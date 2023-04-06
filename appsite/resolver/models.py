@@ -105,7 +105,7 @@ class StructureParentStructure(models.Model):
         'Structure', blank=True, null=True, related_name='uuuuu_children', on_delete=models.PROTECT)
 
     class Meta:
-        db_table = 'cir_structure_parent'
+        db_table = 'cir_structure_parent_structure'
 
     def __str__(self):
         return "(StructureParentStructure=%s: ficts=%s, ficus=%s, uuuuu=%s)" % \
@@ -171,7 +171,6 @@ class InChI(models.Model):
 
 
 class InChIType(models.Model):
-    #id = models.CharField(max_length=32, primary_key=True, editable=False)
     title = models.CharField(max_length=32, unique=True, editable=False)
     software_version = models.CharField(max_length=16, default=None, blank=True, null=True)
     description = models.TextField(max_length=32768, blank=True, null=True)
@@ -440,7 +439,6 @@ class Name(models.Model):
 
 
 class NameType(models.Model):
-    #id = models.CharField(max_length=64, primary_key=True, editable=False)
     title = models.CharField(max_length=64, unique=True, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)
     public_string = models.TextField(max_length=64, blank=True, null=True)

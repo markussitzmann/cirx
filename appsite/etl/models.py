@@ -113,20 +113,20 @@ class StructureFileNormalizationStatus(models.Model):
         )
 
 
-class StructureFileInChIStatus(models.Model):
+class StructureCalcInchiStatus(models.Model):
     structure_file = models.OneToOneField(
         'StructureFile',
         primary_key=True,
         blank=False,
         null=False,
-        related_name='inchi_status',
+        related_name='calcinchi_status',
         on_delete=models.CASCADE,
     )
     updated = models.DateTimeField(auto_now=True, blank=True, null=True)
     progress = models.FloatField(default=0.0)
 
     class Meta:
-        db_table = 'cir_structure_file_inchi_status'
+        db_table = 'cir_structure_file_calcinchi_status'
 
     def __str__(self):
         return "inchi status %s (%s)" % (
@@ -148,7 +148,7 @@ class StructureFileLinkNameStatus(models.Model):
     progress = models.FloatField(default=0.0)
 
     class Meta:
-        db_table = 'cir_structure_file_structure_link_name_status'
+        db_table = 'cir_structure_file_structure_linkname_status'
 
     def __str__(self):
         return "link name status %s (%s: %s)" % (
