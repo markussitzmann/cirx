@@ -243,7 +243,7 @@ class StructureInChIAssociationQuerySet(models.QuerySet):
             return queryset.filter(
                 structure__compound__in=compounds
             ).filter(
-                inchitype__in=inchitypes
+                inchitype__title__in=inchitypes
             )
         else:
             return queryset.filter(
@@ -465,6 +465,7 @@ class StructureNameAssociationQuerySet(models.QuerySet):
         queryset = self.select_related(
             'name',
             'name_type',
+            'affinity_class',
             'structure',
             'structure__compound'
         )

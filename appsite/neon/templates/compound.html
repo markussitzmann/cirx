@@ -164,7 +164,11 @@
                             <tbody>
                             {% for k, v in inchis.items %}
                             <tr>
-                                <td class="col-4"><div class="d-flex"><span class="badge bg-secondary inchi-label me-2">{{ v.inchitype.id }}</span><small>{{ v.inchi.key }}</small></div></td>
+                                <td class="col-4">
+                                    <div class="d-flex">
+                                    <span class="badge bg-secondary inchi-label me-2">{{ v.inchitype.title }}</span><small>{{ v.inchi.key }}</small>
+                                    </div>
+                                </td>
                                 <td class="col-1 text-center"><small>{{ v.inchi.version }}</small></td>
                                 <td class="col-3 text-center"><small>{{ v.save_opt }}</small></td>
                                 <td class="col-3 text-center"><small>{{ v.software_version }}</small></td>
