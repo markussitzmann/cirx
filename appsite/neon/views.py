@@ -59,14 +59,14 @@ def compounds(request, cid: int = None):
     name_associations = {
         n.affinity_class: name_association_affinity_dict[n.affinity_class.title].append(n)
         for n in StructureNameAssociation.with_related_objects
-            .by_compounds_and_affinity_classes(compounds=[compound, ], )
+            .by_compound(compounds=[compound, ], )
             .order_by('name__name').all()
     }
 
     inchi_associations = {
-        a.inchitype.title: a
+        a.inchi_type.title: a
         for a in StructureInChIAssociation.with_related_objects
-            .by_compounds_and_inchitype(compounds=[compound, ]).all()
+            .by_compound(compounds=[compound, ]).all()
     }
 
     name_affinities = ['exact', 'narrow', 'broad', 'generic']

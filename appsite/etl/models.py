@@ -113,7 +113,7 @@ class StructureFileNormalizationStatus(models.Model):
         )
 
 
-class StructureCalcInchiStatus(models.Model):
+class StructureCalcInChIStatus(models.Model):
     structure_file = models.OneToOneField(
         'StructureFile',
         primary_key=True,

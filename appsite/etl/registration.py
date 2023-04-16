@@ -22,7 +22,7 @@ from pycactvs import Molfile, Ens, Prop
 
 from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureCalcInchiStatus, \
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureCalcInChIStatus, \
     StructureFileRecordNameAssociation, StructureFileSource, StructureFileLinkNameStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure, StructureNameAssociation, \
@@ -666,7 +666,7 @@ class StructureRegistry(object):
         if hasattr(structure_file, 'inchi_status'):
             status = structure_file.calcinchi_status
         else:
-            status = StructureCalcInchiStatus(structure_file=structure_file)
+            status = StructureCalcInChIStatus(structure_file=structure_file)
             status.save()
         if status.progress > 0.98:
             return None
@@ -776,7 +776,7 @@ class StructureRegistry(object):
                         structure_inchi_association = StructureInChIAssociation(
                             structure=structure_objects[sid],
                             inchi=inchi,
-                            inchitype=inchi_type_objects[inchi_type.id],
+                            inchi_type=inchi_type_objects[inchi_type.id],
                             save_opt=inchi_data.saveopt if inchi_data.saveopt else "",
                             software_version=inchi_type.softwareversion
                         )
@@ -814,7 +814,7 @@ class StructureRegistry(object):
             structure_count_with_inchi,
             structure_count
         ))
-        status, created = StructureCalcInchiStatus.objects.get_or_create(structure_file=structure_file)
+        status, created = StructureCalcInChIStatus.objects.get_or_create(structure_file=structure_file)
         status.progress = structure_count_with_inchi / structure_count
         status.save()
 

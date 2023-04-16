@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 
 from django.db import models
-from django.db.models import Index, UniqueConstraint, F, Count, QuerySet
+from django.db.models import Index, UniqueConstraint, F, Count, QuerySet, Q
 from multiselectfield import MultiSelectField
 from pycactvs import Ens
 
@@ -15,13 +15,36 @@ class StructureManager(models.Manager):
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
-    def match_names(self, affinity_classes: List[str] = None):
-        if not affinity_classes:
-            affinity_classes = ['exact', ]
-        return super().get_queryset() \
-            .select_related('parents', 'hashisy', 'parents__ficts_parent') \
-            .filter(names__affinity_class__in=affinity_classes) \
-            .annotate(annotated_name=F('names__name__name'))
+    #def match_names(self, affinity_classes: List[str] = None):
+    #    if not affinity_classes:
+    #        affinity_classes = ['exact', ]
+    #    return super().get_queryset() \
+    #        .select_related('parents', 'hashisy', 'parents__ficts_parent') \
+    #        .filter(names__affinity_class__in=affinity_classes) \
+    #        .annotate(annotated_name=F('names__name__name'))
+
+
+class StructureQuerySet(models.QuerySet):
+
+    def _base_queryset(self):
+        return self.select_related(
+            'compound',
+            'parents',
+            'parents__ficts_parent',
+            'parents__ficus_parent',
+            'parents__uuuuu_parent',
+            'parents__ficts_parent__hashisy',
+            'parents__ficus_parent__hashisy',
+            'parents__uuuuu_parent__hashisy',
+            'parents__ficts_parent__compound',
+            'parents__ficus_parent__compound',
+            'parents__uuuuu_parent__compound',
+            'hashisy',
+        )
+
+    def by_compound(self, compounds: List[Union['Compound', int]],):
+        queryset = self._base_queryset().filter(compound__in=compounds)
+        return queryset
 
 
 class Structure(models.Model):
@@ -32,6 +55,7 @@ class Structure(models.Model):
     blocked = models.DateTimeField(auto_now=False, blank=True, null=True)
 
     objects = StructureManager()
+    with_related_objects = StructureQuerySet.as_manager()
 
     class JSONAPIMeta:
         resource_name = 'structures'
@@ -229,26 +253,68 @@ class InChIType(models.Model):
         ]
         db_table = 'cir_inchi_type'
 
+    def __str__(self):
+        return "(InChIType=%s: %s)" % (self.id, self.title, )
+
 
 class StructureInChIAssociationQuerySet(models.QuerySet):
 
-    def by_compounds_and_inchitype(self, compounds: List[Union['Compound', int]], inchitypes: List[str] = None):
-        queryset = self.select_related(
+    def _base_queryset(self):
+        return self.select_related(
             'inchi',
             'structure',
             'structure__compound',
-            'inchitype'
+            'inchi_type'
         )
-        if inchitypes:
-            return queryset.filter(
-                structure__compound__in=compounds
-            ).filter(
-                inchitype__title__in=inchitypes
+
+    def by_compound(
+            self,
+            compounds: List[Union['Compound', int]],
+            inchi_types: List[Union['InChIType', int]] = None
+    ):
+        queryset = self._base_queryset().filter(structure__compound__in=compounds)
+        if inchi_types:
+            queryset = queryset.filter(
+                inchi_type__in=inchi_types
             )
-        else:
-            return queryset.filter(
-                structure__compound__in=compounds
+        return queryset
+
+    def by_inchikey(
+            self,
+            inchikeys: List[Union['inchikey', str]],
+            inchi_types: List[Union['InChIType', int]] = None
+    ):
+        queryset = self._base_queryset().filter(inchi__key__in=inchikeys)
+        if inchi_types:
+            queryset = queryset.filter(
+                inchi_type__in=inchi_types
             )
+        return queryset
+
+    def by_partial_inchikey(
+            self,
+            inchikeys: List[Union[str]],
+            inchi_types: List[Union['InChIType', int]] = None
+    ):
+        filter = Q()
+        for inchikey in inchikeys:
+            splitted_inchikey=inchikey.split("-")
+            number_of_elements = len(splitted_inchikey)
+            if number_of_elements == 3:
+                filter |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1], inchi__block3=splitted_inchikey[2])
+            elif number_of_elements == 2:
+                filter |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1])
+            elif number_of_elements == 1:
+                filter |= Q(inchi__block1=splitted_inchikey[0])
+            else:
+                pass
+
+        queryset = self._base_queryset().filter(filter)
+        if inchi_types:
+            queryset = queryset.filter(
+                inchi_type__in=inchi_types
+            )
+        return queryset
 
 
 class StructureInChIAssociation(models.Model):
@@ -266,7 +332,7 @@ class StructureInChIAssociation(models.Model):
         blank=False,
         null=False
     )
-    inchitype = models.ForeignKey(
+    inchi_type = models.ForeignKey(
         InChIType,
         related_name='associations',
         on_delete=models.RESTRICT,
@@ -292,7 +358,7 @@ class StructureInChIAssociation(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['structure', 'inchi', 'inchitype', 'save_opt'],
+                fields=['structure', 'inchi', 'inchi_type', 'save_opt'],
                 name='unique_structure_inchi_association'
             ),
         ]
@@ -448,7 +514,7 @@ class NameType(models.Model):
         db_table = 'cir_name_type'
 
     def __str__(self):
-        return "(NameType=%s)" % self.id
+        return "(NameType=%s: %s)" % (self.id, self.title, )
 
 
 class NameAffinityClass(models.Model):
@@ -458,27 +524,56 @@ class NameAffinityClass(models.Model):
     class Meta:
         db_table = 'cir_name_affinity_class'
 
+    def __str__(self):
+        return "(NameAffinityClass=%s: %s)" % (self.id, self.title, )
+
 
 class StructureNameAssociationQuerySet(models.QuerySet):
 
-    def by_compounds_and_affinity_classes(self, compounds: List[Union['Compound', int]], affinity_classes: int=None):
-        queryset = self.select_related(
+    def _base_queryset(self):
+        return self.select_related(
             'name',
             'name_type',
             'affinity_class',
             'structure',
             'structure__compound'
         )
+
+    def by_compound(
+            self,
+            compounds: List[Union['Compound', int]],
+            name_types: List[Union['NameType', int]] = None,
+            affinity_classes: List[Union['NameAffinityClass', int]] = None,
+            minimum_confidence: float = 100
+    ):
+        queryset = self._base_queryset().filter(structure__compound__in=compounds, confidence__gte=minimum_confidence)
         if affinity_classes:
-            return queryset.filter(
-                structure__compound__in=compounds
-            ).filter(
+            queryset = queryset.filter(
                 affinity_class__in=affinity_classes
             )
-        else:
-            return queryset.filter(
-                structure__compound__in=compounds
+        if name_types:
+            queryset = queryset.filter(
+                name_type__in=name_types
             )
+        return queryset
+
+    def by_name(
+            self,
+            names: List[Union['Name', str]],
+            name_types: List[Union['NameType', int]] = None,
+            affinity_classes: List[Union['NameAffinityClass', int]] = None,
+            minimum_confidence: float = 100
+    ):
+        queryset = self._base_queryset().filter(name__name__in=names, confidence__gte=minimum_confidence)
+        if affinity_classes:
+            queryset = queryset.filter(
+                affinity_class__in=affinity_classes
+            )
+        if name_types:
+            queryset = queryset.filter(
+                name_type__in=name_types
+            )
+        return queryset
 
 
 class StructureNameAssociation(models.Model):
