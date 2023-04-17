@@ -91,7 +91,7 @@ class Dispatcher:
         representation_list = []
         for interpretation in interpretations:
             response_list = []
-            for structure in interpretation.with_related_objects:
+            for structure in interpretation.structures:
                 try:
                     compound = structure.object.compound
                 except:
@@ -168,7 +168,8 @@ class Dispatcher:
                 try:
                     compound = structure.object.compound
                 except:
-                    compound = None
+                    pass
+                    #compound = None
                 else:
                     # database = Database.objects.get(id=9)
                     database_records = compound.get_records()['content'].values()
@@ -295,7 +296,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
+            for structure in interpretation.structures:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -338,7 +339,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
+            for structure in interpretation.structures:
                 response_list = []
                 # ens = structure.ens
                 try:
@@ -383,7 +384,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
+            for structure in interpretation.structures:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -427,7 +428,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
+            for structure in interpretation.structures:
                 response_list = []
                 try:
                     response = structure.object.compound.__str__()

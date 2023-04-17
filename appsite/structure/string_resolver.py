@@ -30,7 +30,8 @@ logger = logging.getLogger('cirx')
 
 #from database.models import Database
 #from structure.models import Record, Compound
-from resolver.models import InChI, Structure, Compound, Name, StructureNameAssociation, Dataset, StructureInChIAssociation
+from resolver.models import InChI, Structure, Compound, Name, StructureNameAssociation, Dataset, \
+    StructureInChIAssociation, InChIType
 
 
 # from sets import Set
@@ -50,38 +51,38 @@ from resolver.models import InChI, Structure, Compound, Name, StructureNameAssoc
 # import djangosphinx.apis.current as sphinxapi
 
 
-class ChemicalName:
-
-    def __init__(self, exact_string=None, pattern=None):
-
-        self.names = None
-
-        if pattern:
-            self.pattern = pattern
-            self.query_set = Name_Fulltext.search.query(string=pattern).set_options(
-                mode=sphinxapi.SPH_MATCH_EXTENDED).select_related()
-            self.metadata = self.query_set._sphinx
-            self.names = self.query_set[0:100]
-            structure_name_objects = StructureNameAssociation.objects.filter(name__in=self.names)
-            structure_names = {}
-            structure_rank = 1
-            for structure_name in structure_name_objects:
-                try:
-                    k = structure_name.structure
-                except:
-                    continue
-                if structure_names.has_key(k):
-                    structure_names[k]['names'].append(structure_name.name)
-                else:
-                    structure_names[k] = {}
-                    structure_names[k]['names'] = [structure_name.name, ]
-                    structure_names[k]['rank'] = structure_rank
-                    structure_rank += 1
-            structure_name_list = []
-            for structure, name_list in structure_names.items():
-                name_list['structure'] = structure
-                structure_name_list.append(name_list)
-            self.structure_names = structure_name_list
+# class ChemicalName:
+#
+#     def __init__(self, exact_string=None, pattern=None):
+#
+#         self.names = None
+#
+#         if pattern:
+#             self.pattern = pattern
+#             self.query_set = Name_Fulltext.search.query(string=pattern).set_options(
+#                 mode=sphinxapi.SPH_MATCH_EXTENDED).select_related()
+#             self.metadata = self.query_set._sphinx
+#             self.names = self.query_set[0:100]
+#             structure_name_objects = StructureNameAssociation.objects.filter(name__in=self.names)
+#             structure_names = {}
+#             structure_rank = 1
+#             for structure_name in structure_name_objects:
+#                 try:
+#                     k = structure_name.structure
+#                 except:
+#                     continue
+#                 if structure_names.has_key(k):
+#                     structure_names[k]['names'].append(structure_name.name)
+#                 else:
+#                     structure_names[k] = {}
+#                     structure_names[k]['names'] = [structure_name.name, ]
+#                     structure_names[k]['rank'] = structure_rank
+#                     structure_rank += 1
+#             structure_name_list = []
+#             for structure, name_list in structure_names.items():
+#                 name_list['structure'] = structure
+#                 structure_name_list.append(name_list)
+#             self.structure_names = structure_name_list
 
 
 class ChemicalStructure:
@@ -134,6 +135,8 @@ class ChemicalStructureError(Exception):
 
 
 class ChemicalString:
+
+    STANDARD_INCHI_TYPE = InChIType.objects.get(title="standard")
 
     class Interpretation:
 
@@ -195,7 +198,7 @@ class ChemicalString:
         i = 1
 
         for resolver in resolver_list:
-            if not settings.DEBUG:
+            if not settings.DEBUG_RESOLVER:
                 try:
                     resolver_method = getattr(self, '_resolver_' + resolver)
                     interpretation = self.Interpretation()
@@ -232,8 +235,9 @@ class ChemicalString:
         match = pattern.search(self.string)
         hashcode = match.group('hashcode')
         #hashcode_int = int(match.group('hashcode'), 16)
-        cactvs_hashcode = CactvsHash(hashcode)
-        chemical_structure = ChemicalStructure(resolved=Structure.objects.get(hashisy_key=cactvs_hashcode))
+        #cactvs_hashcode = CactvsHash(hashcode)
+        resolved = Structure.with_related_objects.by_hashisy(hashisy_list=[hashcode, ]).first()
+        chemical_structure = ChemicalStructure(resolved=resolved)
         if chemical_structure:
             chemical_structure._metadata = {
                 'query_type': 'hashisy',
@@ -242,7 +246,7 @@ class ChemicalString:
                 'query_string': self.string,
                 'description': hashcode
             }
-            interpretation_object.with_related_objects.append(chemical_structure)
+            interpretation_object.structures.append(chemical_structure)
             return True
         return False
 
@@ -259,25 +263,24 @@ class ChemicalString:
                 'description': record.id,
                 'record': record
             }
-            interpretation_object.with_related_objects.append(chemical_structure)
+            interpretation_object.structures.append(chemical_structure)
             return True
         return False
 
     def _resolver_ncicadd_cid(self, interpretation_object):
-        compound_id = CompoundID(string=self.string)
-        compound = Compound.objects.get(id=compound_id.cid)
-        structure = compound.get_structure()
-        chemical_structure = ChemicalStructure(resolved=structure)
+        compound = CompoundID(string=self.string)
+        resolved = Structure.with_related_objects.by_compound(compounds=[compound.cid, ]).first()
+        chemical_structure = ChemicalStructure(resolved=resolved)
         if chemical_structure:
             chemical_structure._metadata = {
                 'query_type': 'ncicadd_cid',
                 'query_search_string': 'NCI/CADD Compound ID',
-                'query_object': compound_id,
+                'query_object': compound,
                 'query_string': self.string,
-                'description': compound.id,
+                'description': compound.cid,
                 'compound': compound
             }
-            interpretation_object.with_related_objects.append(chemical_structure)
+            interpretation_object.structures.append(chemical_structure)
             return True
         return False
 
@@ -319,36 +322,42 @@ class ChemicalString:
         return False
 
     def _resolver_stdinchikey(self, interpretation_object):
-        identifier: InChIKey = InChIKey(key=self.string)
+        #identifier: InChIKey = InChIKey(key=self.string)
         #identifier = InChI.create(key=self.string)
-        if not identifier.is_standard:
-            return False
-        inchikey_query = identifier.query_dict
-        inchikeys = InChI.objects.filter(**inchikey_query)
+        #if not identifier.is_standard:
+        #    return False
+        #inchikey_query = identifier.query_dict
+        #inchikeys = InChI.objects.filter(**inchikey_query)
+        associations = StructureInChIAssociation.with_related_objects.by_partial_inchikey(
+            inchikeys=[self.string, ],
+            inchi_types=[ChemicalString.STANDARD_INCHI_TYPE, ]
+        ).all()
         structure_set = []
         description_list = []
-        for inchikey in inchikeys:
+        #for association in associations:
             #structures = inchikey.structure_set.all()
-            structure_associations: List[StructureInChIAssociation] = inchikey.with_related_objects.all()
+            #structure_associations: List[StructureInChIAssociation] = inchikey.structures.all()
             #full_key = InChIKey(
             #    block1=identifier.block1,
             #    block2=identifier.block2,
             #    block3=identifier.block3,
             #)
             #full_key = identifier
-            for association in structure_associations:
-                # ens = Ens(self.cactvs, structure.object.minimol)
-                chemical_structure = ChemicalStructure(resolved=association.structure)
-                chemical_structure._metadata = {
-                    'query_type': 'stdinchikey',
-                    'query_search_string': 'Standard InChIKey',
-                    'query_object': identifier,
-                    'query_string': self.string,
-                    'description': identifier.element['well_formatted']
-                }
-                structure_set.append(chemical_structure)
-        if inchikeys:
-            interpretation_object.with_related_objects = structure_set
+        for association in associations:
+            # ens = Ens(self.cactvs, structure.object.minimol)
+            resolved = association.structure
+            chemical_structure = ChemicalStructure(resolved=resolved)
+            identifier = InChIKey(key=association.inchi.key)
+            chemical_structure._metadata = {
+                'query_type': 'stdinchikey',
+                'query_search_string': 'Standard InChIKey',
+                'query_object': identifier,
+                'query_string': self.string,
+                'description': identifier.element['well_formatted']
+            }
+            structure_set.append(chemical_structure)
+        if len(associations):
+            interpretation_object.structures = structure_set
             return True
         return False
 
@@ -729,7 +738,7 @@ class ChemicalString:
     def _resolver_smiles(self, interpretation_object):
         smiles_string = SMILES(string=self.string, strict_testing=True)
         if smiles_string and self._structure_representation_resolver(interpretation_object):
-            chemical_structure = interpretation_object.with_related_objects[0]
+            chemical_structure = interpretation_object.structures[0]
             chemical_structure._metadata = {
                 'query_type': 'smiles',
                 'query_search_string': 'SMILES string',
@@ -811,7 +820,7 @@ class ChemicalString:
                 try:
                     structure = Structure.objects.get(hashisy_key=CactvsHash(hashcode.integer))
                     chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
-                    interpretation_object.with_related_objects.append(chemical_structure)
+                    interpretation_object.structures.append(chemical_structure)
                 except (Structure.DoesNotExist, RuntimeError) as e1:
                     logger.error(e1)
                     #ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
@@ -819,15 +828,15 @@ class ChemicalString:
                     try:
                         structure = Structure.objects.get(hashisy=CactvsHash(ficts.integer))
                         chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
-                        interpretation_object.with_related_objects.append(chemical_structure)
+                        interpretation_object.structures.append(chemical_structure)
                     except (Structure.DoesNotExist, RuntimeError) as e2:
                         logger.error(e2)
                         chemical_structure = ChemicalStructure(ens=ens)
-                        interpretation_object.with_related_objects.append(chemical_structure)
+                        interpretation_object.structures.append(chemical_structure)
             except Exception as e3:
                 logger.error(e3)
                 chemical_structure = ChemicalStructure(ens=ens)
-                interpretation_object.with_related_objects.append(chemical_structure)
+                interpretation_object.structures.append(chemical_structure)
                 interpretation_object.string = self.string
         return True
 

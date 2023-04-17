@@ -1,9 +1,11 @@
 import logging
 import os
+import sys
 
-from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Prefetch
-from django.db.models.functions import Coalesce
+# Pycactvs needs that
+sys.setdlopenflags(os.RTLD_GLOBAL|os.RTLD_NOW)
+
+from identifier import InChIKey
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "appsite.settings")
 
@@ -67,6 +69,9 @@ for a in inchi_associations.all():
     ))
 
 
+for k in partial_inchikeys:
+    io = InChIKey(key="InChIKey" + k)
+    logger.info(">>> %s", io)
 
 logger.info("-----------")
 logger.info("COUNT %s", len(connection.queries))

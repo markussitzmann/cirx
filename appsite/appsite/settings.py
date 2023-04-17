@@ -39,6 +39,7 @@ SECRET_KEY = 'django-insecure-45!c6!i^(_tq(2y4(da6w5c=%abopm1h$599$x@+*c-jwts$&u
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEBUG_RESOLVER = False
 
 # that is for development and might delete data!
 INIT_SYSTEM = True
@@ -287,18 +288,18 @@ CIR_AVAILABLE_RESOLVERS = [
     'smiles',
     'stdinchikey',
     'stdinchi',
-    'ncicadd_identifier',
+    #'ncicadd_identifier',
     'hashisy',
     #'chemspider_id',
     #'chemnavigator_sid',
     #'pubchem_sid',
     #'emolecules_vid',
-    'ncicadd_rid',
+    #'ncicadd_rid',
     'ncicadd_cid',
-    'ncicadd_sid',
-    'cas_number',
-    'nsc_number',
-    'zinc_code',
+    #'ncicadd_sid',
+    #'cas_number',
+    #'nsc_number',
+    #'zinc_code',
     #'opsin',
     #'chemspider_name',
     #'name_pattern',

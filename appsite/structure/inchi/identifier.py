@@ -17,7 +17,6 @@ class InChIKey:
             block1=None,
             block2=None,
             block3=None,
-            #save_options=None,
             version_string=None,
             software_version_string=None,
             *args,

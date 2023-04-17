@@ -15,14 +15,6 @@ class StructureManager(models.Manager):
     def get_or_create_from_ens(self, ens: Ens):
         return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
-    #def match_names(self, affinity_classes: List[str] = None):
-    #    if not affinity_classes:
-    #        affinity_classes = ['exact', ]
-    #    return super().get_queryset() \
-    #        .select_related('parents', 'hashisy', 'parents__ficts_parent') \
-    #        .filter(names__affinity_class__in=affinity_classes) \
-    #        .annotate(annotated_name=F('names__name__name'))
-
 
 class StructureQuerySet(models.QuerySet):
 
@@ -42,8 +34,13 @@ class StructureQuerySet(models.QuerySet):
             'hashisy',
         )
 
-    def by_compound(self, compounds: List[Union['Compound', int]],):
+    def by_compound(self, compounds: List[Union['Compound', int]], ):
         queryset = self._base_queryset().filter(compound__in=compounds)
+        return queryset
+
+    def by_hashisy(self, hashisy_list: List[Union['CactvsHash', int, str, hex]], ):
+        keys = [CactvsHash(h) for h in hashisy_list]
+        queryset = self._base_queryset().filter(hashisy_key__in=keys)
         return queryset
 
 
@@ -315,6 +312,23 @@ class StructureInChIAssociationQuerySet(models.QuerySet):
                 inchi_type__in=inchi_types
             )
         return queryset
+
+    def by_querydict(
+            self,
+            query_dicts: List[Dict],
+            inchi_types: List[Union['InChIType', int]] = None
+    ):
+        filter = Q()
+        for d in query_dicts:
+            filter |= d
+        #inchikeys = InChI.objects.filter(**inchikey_query)
+        queryset = self._base_queryset().filter(filter)
+        if inchi_types:
+            queryset = queryset.filter(
+                inchi_type__in=inchi_types
+            )
+        return queryset
+
 
 
 class StructureInChIAssociation(models.Model):

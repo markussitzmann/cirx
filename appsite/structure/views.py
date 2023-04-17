@@ -11,9 +11,6 @@ from structure.dispatcher import Dispatcher
 from structure.forms import *
 
 
-
-
-
 def identifier(request, string, representation, operator=None, format='plain'):
     return resolve_to_response(request, string, representation, operator_parameter=None, output_format=format)
 
