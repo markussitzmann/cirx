@@ -13,11 +13,12 @@ from structure.models import ResponseType
 logger = logging.getLogger('cirx')
 
 MINI = True
-INIT_PUBCHEM_COMPOUND = True
-INIT_PUBCHEM_SUBSTANCE = True
-INIT_CHEMBL = True
-INIT_NCI = True
+INIT_PUBCHEM_COMPOUND = False
+INIT_PUBCHEM_SUBSTANCE = False
+INIT_CHEMBL = False
+INIT_NCI = False
 INIT_TT = False
+INIT_SANDBOX = True
 
 # INIT_NCI must be True to use this option:
 INIT_NCI_10000 = False
@@ -72,7 +73,7 @@ def init_structures():
 
 
 def init_response_type_data():
-    with open('./structure/management/data/response-type.txt') as f:
+    with open('./etl/management/data/response-type.txt') as f:
         lines = f.readlines()
         response_type_dict = {}
         for line in lines:
@@ -144,6 +145,7 @@ def init_name_type_data():
         ('NSC_NUMBER_PREFIXED', regid, 'NSC number prefixed'),
         ('PUBCHEM_SID', regid, 'PubChem SID'),
         ('PUBCHEM_CID', regid, 'PubChem CID'),
+        #('MDL_NAME', regid, "MDL Name")
     ]
 
 
@@ -307,6 +309,15 @@ def init_dataset():
     ncidb.context_tags.add(ContextTag.objects.get(tag="screening"))
     ncidb.save()
 
+    sandbox, created = Dataset.objects.get_or_create(
+        name="SANDBOX",
+        publisher=Publisher.objects.get(name="Markus Sitzmann"),
+    )
+    sandbox.href = "https://sandbox.test/"
+    sandbox.description = "sandbox"
+    sandbox.context_tags.add(ContextTag.objects.get(tag="screening"))
+    sandbox.save()
+
 
 def init_release(
         mini=MINI,
@@ -315,7 +326,8 @@ def init_release(
         init_chembl=INIT_CHEMBL,
         init_nci=INIT_NCI,
         init_nci_10000=INIT_NCI_10000,
-        init_tt=INIT_TT
+        init_tt=INIT_TT,
+        init_sandbox=INIT_SANDBOX
     ):
 
     if init_chembl:
@@ -533,6 +545,98 @@ def init_release(
             pubchem_substance_preprocessor
         )
         pubchem_substance_collection.save()
+
+        if init_nci:
+            nci_db_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+                params=json.dumps({
+                    'regid': {'field': 'PUBCHEM_EXT_DATASOURCE_REGID', 'type': 'NSC_NUMBER'},
+                    'names': [
+                        {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
+                        {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
+                    ]
+                })
+            )
+
+            nci_db, created = Release.objects.get_or_create(
+                dataset=Dataset.objects.get(name="DTP/NCI"),
+                publisher=Publisher.objects.get(name="PubChem"),
+                name="DTP/NCI",
+                released=None,
+                downloaded=datetime.datetime(2022, 2, 1),
+            )
+            nci_db.description = 'NCI Database downloaded from PubChem'
+            nci_db.classification = 'public'
+            nci_db.status = 'active'
+            nci_db.description = "NCI database"
+            nci_db.save()
+
+            open_nci_db, created = Release.objects.get_or_create(
+                dataset=Dataset.objects.get(name="DTP/NCI"),
+                publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
+                released=None,
+                downloaded=datetime.datetime(2022, 2, 1),
+            )
+            open_nci_db.name = "Open NCI Database"
+            open_nci_db.classification = 'public'
+            open_nci_db.status = 'active'
+            open_nci_db.description = "NCI database"
+            open_nci_db.save()
+
+            if mini:
+                if init_nci_10000:
+                    fname = "MINI/nci/NCI_DTP/NCI_DTP.*.10000.sdf.gz"
+                else:
+                    fname = "MINI/nci/NCI_DTP/NCI_DTP.sdf"
+                open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                    release=open_nci_db,
+                    file_location_pattern_string=fname
+                )
+                open_nci_db_collection.save()
+            else:
+                open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                    release=open_nci_db,
+                    file_location_pattern_string="nci/NCI_DTP/*.sdf.gz"
+                )
+                open_nci_db_collection.save()
+
+            open_nci_db_collection.preprocessors.add(
+                nci_db_preprocessor
+            )
+            open_nci_db_collection.save()
+
+    if init_sandbox:
+        sandbox_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+            params=json.dumps({
+                'regid': {'field': 'E_MDL_NAME', 'type': 'REGID'},
+                'names': [
+                    {'field': 'NAME', 'type': 'NAME'},
+                    {'field': 'SYNONYM', 'type': 'NAME'},
+                ]
+            })
+        )
+
+        sandbox_db, created = Release.objects.get_or_create(
+            dataset=Dataset.objects.get(name="SANDBOX"),
+            publisher=Publisher.objects.get(name="Markus Sitzmann"),
+            name="Sandbox Release",
+            released=None,
+            downloaded=datetime.datetime(2023, 5, 1),
+        )
+        sandbox_db.description = 'Sandbox'
+        sandbox_db.classification = 'public'
+        sandbox_db.status = 'active'
+        sandbox_db.save()
+
+        sandbox_db_collection, created = StructureFileCollection.objects.get_or_create(
+            release=sandbox_db,
+            file_location_pattern_string="sandbox/structures.sdf"
+        )
+        sandbox_db_collection.save()
+
+        sandbox_db_collection.preprocessors.add(
+            sandbox_preprocessor
+        )
+        sandbox_db_collection.save()
 
 
 def init_name_affinitiy_class():
