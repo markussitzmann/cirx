@@ -89,7 +89,7 @@ class DispatcherComponentTests(TestCase):
 
         chemical_string = ChemicalString(string=string)
 
-        interpretation = chemical_string.Interpretation()
+        interpretation = chemical_string.Representation()
         interpretation.with_related_objects = [ChemicalStructure(ens=ens), ]
 
         chemical_string._operator_tautomers(interpretation)
@@ -108,7 +108,7 @@ class DispatcherComponentTests(TestCase):
 
         logger.info("0: ens list: %s", Ens.List())
 
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._interpretations
+        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
 
         logger.info("1: ens list: %s", Ens.List())
 

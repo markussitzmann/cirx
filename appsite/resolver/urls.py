@@ -49,10 +49,10 @@ urlpatterns = [
 
     path('inchitypes/<pk>/relationships/<related_field>',
          views.InChITypeRelationshipView.as_view(), {'source': 'relationships'},
-         name='inchitype-relationships'),
+         name='inchi_type-relationships'),
     path('inchitypes/<pk>/<related_field>',
          views.InChITypeViewSet.as_view({'get': 'retrieve_related'}), {'source': 'field'},
-         name='inchitype-related'),
+         name='inchi_type-related'),
 
     path('publishers/<pk>/relationships/<related_field>',
         views.PublisherRelationshipView.as_view(), {'source': 'relationships'},

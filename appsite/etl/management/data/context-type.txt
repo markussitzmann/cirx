@@ -1,0 +1,40 @@
+|  1 | not specified                                           | Other                                      |
+|  2 | purchasable screening samples                           | Purchasable screening samples              |
+|  3 | synthetic building blocks                               | Synthetic building block collections       |
+|  4 | toxicology/environmental compounds                      | Toxicology/environmental databases         |
+|  5 | bioactivity screening compounds                         | Bioactivity screening databases            |
+|  6 | spectroscopy/reference database                         | Spectroscopy/reference databases           |
+|  7 | biochemical/metabolite database                         | Biochemical/metabolite databases           |
+|  8 | ligands/small molecules/crystal-structures              | Ligand/binding/crystal-structure databases |
+|  9 | meta-collection                                         | Meta-collections                           |
+| 10 | imaging/contrast agents database                        | Imaging/contrast agent databases           |
+| 11 | drugs or compounds in drug development                  | Drugs or compounds in drug development     |
+| 12 | reaction database                                       | Reaction databases                         |
+| 13 | general chemicals vendor collection                     | General chemicals vendor collection        |
+| 14 | natural products                                        | Natural products                           |
+| 15 | compounds in SAR/QSAR/physicochemical property database | SAR/QSAR/physicochemical databases         |
+| 16 | compounds claimed/mentioned in patents                  | Compounds claimed/mentioned in patents     |
+| 17 | compounds in specific journals                          | Compounds in specific journals             |
+
+[
+("other",),
+("screening",),
+("building blocks",),
+("toxicology",),
+("environmental",),
+("patent",),
+("journal",),
+("literature",),
+("natural product",),
+("imaging",),
+("contrast agent",),
+("meta",),
+("vendor",),
+("drug",),
+("SAR",),
+("QSAR",),
+("physicochemical property",),
+("ligand",),
+("small molecule",),
+("crystal-structure",),
+]

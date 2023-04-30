@@ -1,12 +1,8 @@
 import json
-import uuid
 
 from django.db import models
-from django.db.models import UniqueConstraint, Index
-from pycactvs import Ens
 
-from custom.cactvs import CactvsHash, CactvsMinimol
-from custom.fields import CactvsHashField, CactvsMinimolField
+
 #from database.models import Database, Release
 
 

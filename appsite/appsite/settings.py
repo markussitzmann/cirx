@@ -50,7 +50,7 @@ ALLOWED_HOSTS = os.environ['APP_VIRTUAL_HOSTNAME'].split(",")
 # Application definition
 
 INSTALLED_APPS = [
-    'database.apps.DatabaseConfig',
+#    'database.apps.DatabaseConfig',
     'structure.apps.StructureConfig',
     'neon.apps.NeonConfig',
     'resolver.apps.ResolverConfig',
@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',#
+    'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
     'rest_framework',

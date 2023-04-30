@@ -1,24 +1,21 @@
 import logging
-import gc
 from typing import List
-from unittest import skip
 
+from django.conf import settings
 from django.test import TestCase, RequestFactory
 from parameterized import parameterized
 from pycactvs import Ens, Dataset, cactvs, Molfile
 
 from dispatcher import Dispatcher
-from django.conf import settings
-
-from structure.resolver import ChemicalString
+from structure.string_resolver import ChemicalString
 
 logger = logging.getLogger('cirx')
 
-FIXTURES = ['structure.json', 'database.json']
+FIXTURES = ['sandbox.json']
 RESOLVER_LIST = ["name", "smiles"]
 
 
-class DispatcherComponentTests(TestCase):
+class DispatcherTests(TestCase):
     fixtures = FIXTURES
 
     def setUp(self):
@@ -47,10 +44,10 @@ class DispatcherComponentTests(TestCase):
         logger.info("------------- Test Dispatcher (%s) -------------" % string)
         expected_dataset_count, expected_status = expectations
 
-        interpretations: List[ChemicalString.Interpretation] = ChemicalString(
+        interpretations: List[ChemicalString.Representation] = ChemicalString(
             string=string,
             resolver_list=resolver_list
-        ).interpretations
+        ).representations
         dataset: Dataset = Dispatcher._create_dataset(interpretations=interpretations, simple=True)
 
         for e in dataset.ens():

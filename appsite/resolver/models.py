@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 
 from django.db import models
-from django.db.models import Index, UniqueConstraint, F, Count, QuerySet, Q
+from django.db.models import Index, UniqueConstraint, Count, Q
 from multiselectfield import MultiSelectField
 from pycactvs import Ens
 
@@ -377,48 +377,6 @@ class StructureInChIAssociation(models.Model):
             ),
         ]
         db_table = 'cir_structure_inchi_associations'
-
-
-# class CompoundManager(models.Manager):
-#
-#     def annotated(self) -> QuerySet:
-#         return super().get_queryset() \
-#         .select_related(
-#             'structure',
-#             'structure__parents',
-#             'structure__parents__ficts_parent',
-#             'structure__parents__ficus_parent',
-#             'structure__parents__uuuuu_parent'
-#         ).prefetch_related(
-#             'structure__names__name',
-#             'structure__ficts_children__structure',
-#             'structure__ficus_children__structure',
-#             'structure__uuuuu_children__structure',
-#             'structure__ficts_children__structure__structure_file_records',
-#             'structure__ficus_children__structure__structure_file_records',
-#             'structure__uuuuu_children__structure__structure_file_records',
-#             'structure__ficts_children__structure__structure_file_records__records',
-#             'structure__ficus_children__structure__structure_file_records__records',
-#             'structure__uuuuu_children__structure__structure_file_records__records',
-#             'structure__ficts_children__structure__structure_file_records__records__release',
-#             'structure__ficus_children__structure__structure_file_records__records__release',
-#             'structure__uuuuu_children__structure__structure_file_records__records__release',
-#             'structure__inchis',
-#             'structure__inchis__inchi',
-#             'structure__inchis__inchitype',
-#         ).annotate(
-#             ficts_children_count=Count('structure__ficts_children'),
-#             ficus_children_count=Count('structure__ficus_children'),
-#             uuuuu_children_count=Count('structure__uuuuu_children'),
-#             annotated_name=F('structure__names__name__name'),
-#             annotated_inchitype=F('structure__inchis__inchitype'),
-#             annotated_inchikey=F('structure__inchis__inchi__key'),
-#             annotated_inchi=F('structure__inchis__inchi__string'),
-#             annotated_inchi_is_standard=F('structure__inchis__inchitype__is_standard')
-#         )
-#
-#     def filter_by_names(self, name) -> QuerySet:
-#         return self.annotated().filter(annotated_name__in=name)
 
 
 class CompoundQuerySet(models.QuerySet):

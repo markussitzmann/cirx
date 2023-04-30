@@ -1,20 +1,15 @@
 #from django.conf.urls.defaults import *
-from django.conf.urls import *
-from django.contrib import admin
-from django.urls import path, re_path
-from django.views.decorators.cache import cache_page
-
-import structure.views
-#import file.views
-#import media.views
-#import network.views
-
-#import database.csls.views
+from django.urls import re_path
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 from . import views
+
+# import file.views
+# import media.views
+# import network.views
+# import database.csls.views
 
 urlpatterns = [
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)/(?P<format>xml)', views.identifier),
