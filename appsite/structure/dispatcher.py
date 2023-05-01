@@ -163,7 +163,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
+            for structure in interpretation.structures:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -209,7 +209,7 @@ class Dispatcher:
         representation_list = []
         all_interpretation_response_list = []
         for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
+            for structure in interpretation.structures:
                 response_list = []
                 try:
                     compound = structure.object.compound
@@ -492,7 +492,7 @@ class Dispatcher:
         return Dispatcher._create_dataset(interpretations, simple, index)
 
     @staticmethod
-    def _create_dataset(interpretations: List[ChemicalString.Representation], simple: bool, structure_index: int = -1) -> Dataset:
+    def _create_dataset(interpretations: List[ChemicalString], simple: bool, structure_index: int = -1) -> Dataset:
         structure_lists: List[List[ChemicalStructure]] = [
             interpretation.structures for interpretation in ([interpretations[0]] if simple else interpretations)
         ]
@@ -536,7 +536,7 @@ class Dispatcher:
             del url_param_dict['get3d']
         return url_param_dict, structure_index
 
-    def _interpretations(self, string: str, structure_index: int = -1) -> Tuple[List[ChemicalString.Representation], bool]:
+    def _interpretations(self, string: str, structure_index: int = -1) -> Tuple[List[ChemicalString], bool]:
         url_params = self.url_parameters.copy()
         if 'resolver' in url_params:
             resolver_list = url_params.get('resolver').split(',')
@@ -553,7 +553,7 @@ class Dispatcher:
 
     def molfilestring(self, string: str) -> Any:
         url_params, structure_index = self._prepare_params(self.url_parameters.copy())
-        interpretations: List[ChemicalString.Representation]
+        interpretations: List[ChemicalString.StructureData]
         simple: bool
         interpretations, simple = self._interpretations(string)
         if not simple:
@@ -576,7 +576,7 @@ class Dispatcher:
         url_params, structure_index = self._prepare_params(self.url_parameters.copy())
         prop = self.parameters
         index: int = 1
-        interpretations: List[ChemicalString.Representation]
+        interpretations: List[ChemicalString.StructureData]
         simple: bool
         interpretations, simple = self._interpretations(string, structure_index=structure_index)
         for interpretation in interpretations:

@@ -44,7 +44,7 @@ class DispatcherTests(TestCase):
         logger.info("------------- Test Dispatcher (%s) -------------" % string)
         expected_dataset_count, expected_status = expectations
 
-        interpretations: List[ChemicalString.Representation] = ChemicalString(
+        interpretations: List[ChemicalString.StructureData] = ChemicalString(
             string=string,
             resolver_list=resolver_list
         ).representations

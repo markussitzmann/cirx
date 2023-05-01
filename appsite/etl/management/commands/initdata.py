@@ -607,10 +607,12 @@ def init_release(
     if init_sandbox:
         sandbox_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
-                'regid': {'field': 'E_MDL_NAME', 'type': 'REGID'},
+                'regid': {'field': 'E_ID', 'type': 'REGID'},
                 'names': [
-                    {'field': 'NAME', 'type': 'NAME'},
-                    {'field': 'SYNONYM', 'type': 'NAME'},
+                    {'field': 'E_NAME', 'type': 'NAME'},
+                    {'field': 'E_SYNONYM', 'type': 'NAME'},
+                    {'field': 'E_ZINC_ID', 'type': 'REGID'},
+                    {'field': 'E_NSC_NUMBER', 'type': 'NSC_NUMBER'},
                 ]
             })
         )

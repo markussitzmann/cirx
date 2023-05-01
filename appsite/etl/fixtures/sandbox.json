@@ -1,1 +1,5036 @@
-[{"model": "structure.responsetype", "pk": 1, "fields": {"parent_type": null, "url": "ficts", "method": "prop", "parameter": "E_FICTS_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 2, "fields": {"parent_type": null, "url": "ficus", "method": "prop", "parameter": "E_FICUS_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 3, "fields": {"parent_type": null, "url": "fictu", "method": "prop", "parameter": "E_FICTU_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 4, "fields": {"parent_type": null, "url": "ficuu", "method": "prop", "parameter": "E_FICUU_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 5, "fields": {"parent_type": null, "url": "uuuts", "method": "prop", "parameter": "E_UUUTS_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 6, "fields": {"parent_type": null, "url": "uuuus", "method": "prop", "parameter": "E_UUUUS_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 7, "fields": {"parent_type": null, "url": "uuutu", "method": "prop", "parameter": "E_UUUTU_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 8, "fields": {"parent_type": null, "url": "uuuuu", "method": "prop", "parameter": "E_UUUUU_ID", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 9, "fields": {"parent_type": 1, "url": "ficts_structure", "method": "prop", "parameter": "E_FICTS_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 10, "fields": {"parent_type": 2, "url": "ficus_structure", "method": "prop", "parameter": "E_FICUS_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 11, "fields": {"parent_type": 3, "url": "fictu_structure", "method": "prop", "parameter": "E_FICTU_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 12, "fields": {"parent_type": 4, "url": "ficuu_structure", "method": "prop", "parameter": "E_FICUU_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 13, "fields": {"parent_type": 5, "url": "uuuts_structure", "method": "prop", "parameter": "E_UUUTS_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 14, "fields": {"parent_type": 6, "url": "uuuus_structure", "method": "prop", "parameter": "E_UUUUS_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 15, "fields": {"parent_type": 7, "url": "uuutu_structure", "method": "prop", "parameter": "E_UUUTU_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 16, "fields": {"parent_type": 8, "url": "uuuuu_structure", "method": "prop", "parameter": "E_UUUUU_STRUCTURE", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 17, "fields": {"parent_type": null, "url": "inchi", "method": "prop", "parameter": "E_INCHI", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 18, "fields": {"parent_type": 17, "url": "inchikey", "method": "prop", "parameter": "E_INCHIKEY", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 19, "fields": {"parent_type": null, "url": "smiles", "method": "prop", "parameter": "E_SMILES", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 20, "fields": {"parent_type": null, "url": "pack", "method": "prop", "parameter": "packstring", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 21, "fields": {"parent_type": null, "url": "names", "method": "names", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 22, "fields": {"parent_type": null, "url": "cas", "method": "cas", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 23, "fields": {"parent_type": null, "url": "stdinchi", "method": "prop", "parameter": "E_STDINCHI", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 24, "fields": {"parent_type": 23, "url": "stdinchikey", "method": "prop", "parameter": "E_STDINCHIKEY", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 25, "fields": {"parent_type": null, "url": "image", "method": "prop", "parameter": "structure_image", "base_mime_type": "image"}}, {"model": "structure.responsetype", "pk": 26, "fields": {"parent_type": null, "url": "sdf", "method": "prop", "parameter": "E_MOLFILESTRING", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 27, "fields": {"parent_type": null, "url": "molfile", "method": "prop", "parameter": "E_MOLFILESTRING", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 28, "fields": {"parent_type": null, "url": "hashisy", "method": "prop", "parameter": "E_HASHISY", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 29, "fields": {"parent_type": null, "url": "gif", "method": "prop", "parameter": "structure_image", "base_mime_type": "image"}}, {"model": "structure.responsetype", "pk": 30, "fields": {"parent_type": null, "url": "iupac_name", "method": "iupac_name", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 31, "fields": {"parent_type": null, "url": "file", "method": "molfilestring", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 32, "fields": {"parent_type": null, "url": "twirl", "method": "twirl", "parameter": "E_MOLFILESTRING", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 33, "fields": {"parent_type": null, "url": "urls", "method": "urls", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 34, "fields": {"parent_type": null, "url": "3d", "method": "twirl", "parameter": "E_MOLFILESTRING", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 35, "fields": {"parent_type": null, "url": "weight", "method": "prop", "parameter": "E_WEIGHT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 36, "fields": {"parent_type": null, "url": "mw", "method": "prop", "parameter": "E_WEIGHT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 37, "fields": {"parent_type": null, "url": "formula", "method": "prop", "parameter": "E_FORMULA", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 38, "fields": {"parent_type": null, "url": "monoisotopic_mass", "method": "prop", "parameter": "E_MONOISOTOPIC_MASS", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 39, "fields": {"parent_type": null, "url": "h_bond_donor_count", "method": "prop", "parameter": "E_NHDONORS", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 40, "fields": {"parent_type": null, "url": "h_bond_acceptor_count", "method": "prop", "parameter": "E_NHACCEPTORS", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 41, "fields": {"parent_type": null, "url": "effective_rotor_count", "method": "prop", "parameter": "E_EFFECTIVE_ROTOR_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 42, "fields": {"parent_type": null, "url": "xlogp2", "method": "prop", "parameter": "E_XLOGP2", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 43, "fields": {"parent_type": null, "url": "rule_of_5_violation_count", "method": "prop", "parameter": "E_RULE_OF_5_VIOLATIONS", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 44, "fields": {"parent_type": null, "url": "h_bond_center_count", "method": "prop", "parameter": "E_HYDROGEN_BOND_CENTER_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 45, "fields": {"parent_type": null, "url": "chemspider_id", "method": "chemspider_id", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 46, "fields": {"parent_type": null, "url": "rotor_count", "method": "prop", "parameter": "E_ROTOR_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 47, "fields": {"parent_type": null, "url": "aromatic", "method": "prop", "parameter": "E_IS_AROMATIC", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 48, "fields": {"parent_type": null, "url": "macrocyclic", "method": "prop", "parameter": "E_IS_MACROCYCLIC", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 49, "fields": {"parent_type": null, "url": "is_aromatic", "method": "prop", "parameter": "E_IS_AROMATIC", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 50, "fields": {"parent_type": null, "url": "is_macrocyclic", "method": "prop", "parameter": "E_IS_MACROCYCLIC", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 51, "fields": {"parent_type": null, "url": "heteroatom_count", "method": "prop", "parameter": "E_HETERO_ATOM_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 52, "fields": {"parent_type": null, "url": "hydrogen_atom_count", "method": "prop", "parameter": "E_HYDROGEN_ATOM_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 53, "fields": {"parent_type": null, "url": "heavy_atom_count", "method": "prop", "parameter": "E_HEAVY_ATOM_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 54, "fields": {"parent_type": null, "url": "deprotonable_group_count", "method": "prop", "parameter": "E_DEPROTONABLE_GROUP_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 55, "fields": {"parent_type": null, "url": "protonable_group_count", "method": "prop", "parameter": "E_PROTONABLE_GROUP_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 56, "fields": {"parent_type": null, "url": "ring_count", "method": "prop", "parameter": "E_RING_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 57, "fields": {"parent_type": null, "url": "ringsys_count", "method": "prop", "parameter": "E_RINGSYS_COUNT", "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 58, "fields": {"parent_type": null, "url": "ncicadd_sid", "method": "ncicadd_structure_id", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 59, "fields": {"parent_type": null, "url": "ncicadd_cid", "method": "ncicadd_compound_id", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 60, "fields": {"parent_type": null, "url": "ncicadd_rid", "method": "ncicadd_record_id", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 61, "fields": {"parent_type": null, "url": "chemnavigator_sid", "method": "chemnavigator_sid", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 62, "fields": {"parent_type": null, "url": "pubchem_sid", "method": "pubchem_sid", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 63, "fields": {"parent_type": null, "url": "emolecules_vid", "method": "emolecules_vid", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 64, "fields": {"parent_type": null, "url": "emolecules_id", "method": "emolecules_vid", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 65, "fields": {"parent_type": null, "url": "zinc_id", "method": "zinc_id", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 66, "fields": {"parent_type": null, "url": "zinc_code", "method": "zinc_id", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 67, "fields": {"parent_type": null, "url": "zinc", "method": "zinc_id", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 68, "fields": {"parent_type": null, "url": "chemnavigator_id", "method": "chemnavigator_sid", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 69, "fields": {"parent_type": null, "url": "nsc_number", "method": "nsc_number", "parameter": null, "base_mime_type": "text"}}, {"model": "structure.responsetype", "pk": 70, "fields": {"parent_type": null, "url": "nsc", "method": "nsc_number", "parameter": null, "base_mime_type": "text"}}, {"model": "resolver.structure", "pk": 1, "fields": {"hashisy_key": "1AD375920BE60DAD", "minimol": "FBBABEj5HZVWC7gVBR0mFDADjgAbYI8ZISYLGu3HBaxGJ0KiKSJ0ShgBUCwSEE8T2XIHEdXVDQIbCQ4AU0wKIaHMChGWYggGUwgDDAQOSAAFBAYZ5XALDQgJQANUAHUBCBEAAA==", "added": "2023-04-30T09:14:31.683Z", "blocked": null, "entrypoints": []}}, {"model": "resolver.structure", "pk": 2, "fields": {"hashisy_key": "20A701AA27DA3574", "minimol": "EydAIsHwAy7B8AcTkQojIZQ3GjhrI5jRcFaEWWlzQBPQBiGkN1lJJhzM6BABJPgmuDsYAaSLEdBiEuWzFglZEgxcEf46DxNYcBlF+RQRXg4VFwkbAQzuIWHLBQQDEbxzIS3qCAFSFiPmNwsPGyXpHVmQHyL/cQoiBZZ1CCZJFARapwYIAQ0UDBZRCBOOARcTUAERAAA=", "added": "2023-04-30T09:14:31.683Z", "blocked": null, "entrypoints": []}}, {"model": "resolver.structure", "pk": 3, "fields": {"hashisy_key": "3DB0124A3ECF5ECE", "minimol": "EgwS0PElvmjDBia8aCQwbP0LABmNFwIRfi8EBV0wBgKrAgh1hAVU3BnlVgURAAA=", "added": "2023-04-30T09:14:31.683Z", "blocked": null, "entrypoints": []}}, {"model": "resolver.structure", "pk": 4, "fields": {"hashisy_key": "A09D4E8A1BAD8D53", "minimol": "EhRqK8ABK/UKDhusNiJtIosmLCLgoiZY4hABLXwzABoaEEQhbNUiwroAAhJpywEJTAsJswYiycwOEqSPIofVBBMASgMBBxEAAA==", "added": "2023-04-30T09:14:31.683Z", "blocked": null, "entrypoints": []}}, {"model": "resolver.structure", "pk": 5, "fields": {"hashisy_key": "E174572A915E4471", "minimol": "FAkAAh/U+B6UVhEliCP0CxNU8hNkfRnE/SE4vREAAA==", "added": "2023-04-30T09:14:31.683Z", "blocked": null, "entrypoints": []}}, {"model": "resolver.structure", "pk": 14, "fields": {"hashisy_key": "BCCDA7D0CDACF120", "minimol": "FBBABEj5HZVWC7gVAh0mFDADEspuI3sKKqoMKmhodgBJIidw4oTzHkUUDEBOBQYNDQoKDg4BWAkhWbsLEQbWBwhtigERyIkRdrQBDgEFBhlWPQoNaQENaAERAAA=", "added": "2023-04-30T09:19:33.192Z", "blocked": null, "entrypoints": []}}, {"model": "resolver.structure", "pk": 16, "fields": {"hashisy_key": "D76B88C0354759F1", "minimol": "FCdAChgBuLMowPAbSg0nNyNB2G8j3HpsVmFZCWVzQBPMBiGgN1VJJhzI6Cf0+P0AIBgBoIsRZHIhMEEhlbsVE/sWFg4SEvH8CRmtkwIR6cMACk4EDRGxfAUEAxG4cyEp6ggNURUj4DcbGekdTZAfIvNxCiIFiHUBCCYQF0UUBAQQEUv9BRQTSDoRTIGMASMcQhEAAA==", "added": "2023-04-30T09:19:33.192Z", "blocked": null, "entrypoints": []}}, {"model": "resolver.structurehashisy", "pk": 1, "fields": {"hashisy": "1AD375920BE60DAD"}}, {"model": "resolver.structurehashisy", "pk": 2, "fields": {"hashisy": "20A701AA27DA3574"}}, {"model": "resolver.structurehashisy", "pk": 3, "fields": {"hashisy": "3DB0124A3ECF5ECE"}}, {"model": "resolver.structurehashisy", "pk": 4, "fields": {"hashisy": "A09D4E8A1BAD8D53"}}, {"model": "resolver.structurehashisy", "pk": 5, "fields": {"hashisy": "E174572A915E4471"}}, {"model": "resolver.structurehashisy", "pk": 14, "fields": {"hashisy": "BCCDA7D0CDACF120"}}, {"model": "resolver.structurehashisy", "pk": 16, "fields": {"hashisy": "D76B88C0354759F1"}}, {"model": "resolver.structureparentstructure", "pk": 1, "fields": {"ficts_parent": 1, "ficus_parent": 14, "uuuuu_parent": 14}}, {"model": "resolver.structureparentstructure", "pk": 2, "fields": {"ficts_parent": 2, "ficus_parent": 16, "uuuuu_parent": 16}}, {"model": "resolver.structureparentstructure", "pk": 3, "fields": {"ficts_parent": 3, "ficus_parent": 3, "uuuuu_parent": 3}}, {"model": "resolver.structureparentstructure", "pk": 4, "fields": {"ficts_parent": 4, "ficus_parent": 4, "uuuuu_parent": 4}}, {"model": "resolver.structureparentstructure", "pk": 5, "fields": {"ficts_parent": 5, "ficus_parent": 5, "uuuuu_parent": 5}}, {"model": "resolver.structureparentstructure", "pk": 14, "fields": {"ficts_parent": null, "ficus_parent": 14, "uuuuu_parent": 14}}, {"model": "resolver.structureparentstructure", "pk": 16, "fields": {"ficts_parent": null, "ficus_parent": 16, "uuuuu_parent": 16}}, {"model": "resolver.inchi", "pk": 1, "fields": {"version": 1, "block1": "FQEPJUOLUDFINX", "block2": "UHFFFAOYNA", "block3": "N", "key": "FQEPJUOLUDFINX-UHFFFAOYNA-N", "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,17H,11H2,1H3", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 2, "fields": {"version": 1, "block1": "FQEPJUOLUDFINX", "block2": "UHFFFAOYSA", "block3": "N", "key": "FQEPJUOLUDFINX-UHFFFAOYSA-N", "string": "InChI=1S/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,17H,11H2,1H3", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 3, "fields": {"version": 1, "block1": "LFQSCWFLJHTTHZ", "block2": "UHFFFAOYNA", "block3": "N", "key": "LFQSCWFLJHTTHZ-UHFFFAOYNA-N", "string": "InChI=1/C2H6O/c1-2-3/h3H,2H2,1H3", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 4, "fields": {"version": 1, "block1": "LFQSCWFLJHTTHZ", "block2": "UHFFFAOYSA", "block3": "N", "key": "LFQSCWFLJHTTHZ-UHFFFAOYSA-N", "string": "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 5, "fields": {"version": 1, "block1": "MACJUVQCBVFIIG", "block2": "UHFFFAOYNA", "block3": "N", "key": "MACJUVQCBVFIIG-UHFFFAOYNA-N", "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h(H5,1,2,3,4,5,6,7,8,9,10,11)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 6, "fields": {"version": 1, "block1": "OTGLYQANDXSLGV", "block2": "UHFFFAOYNA", "block3": "N", "key": "OTGLYQANDXSLGV-UHFFFAOYNA-N", "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,2,6,7,8,9,10,11)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 7, "fields": {"version": 1, "block1": "QTXVAVXCBMYBJW", "block2": "UHFFFAOYNA", "block3": "N", "key": "QTXVAVXCBMYBJW-UHFFFAOYNA-N", "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 8, "fields": {"version": 1, "block1": "QTXVAVXCBMYBJW", "block2": "UHFFFAOYSA", "block3": "N", "key": "QTXVAVXCBMYBJW-UHFFFAOYSA-N", "string": "InChI=1S/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 9, "fields": {"version": 1, "block1": "QYWNQMFLWBUZSW", "block2": "UHFFFAOYNA", "block3": "N", "key": "QYWNQMFLWBUZSW-UHFFFAOYNA-N", "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15H,(H5,1,11,20)(H,17,21,22)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 10, "fields": {"version": 1, "block1": "RZVAJINKPMORJF", "block2": "BGGKNDAXNA", "block3": "N", "key": "RZVAJINKPMORJF-BGGKNDAXNA-N", "string": "InChI=1/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h2-5,11H,1H3,(H,9,10)/f/h9H", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 11, "fields": {"version": 1, "block1": "RZVAJINKPMORJF", "block2": "UHFFFAOYSA", "block3": "N", "key": "RZVAJINKPMORJF-UHFFFAOYSA-N", "string": "InChI=1S/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h2-5,11H,1H3,(H,9,10)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 12, "fields": {"version": 1, "block1": "SAYISSDYYDIVTP", "block2": "UHFFFAOYNA", "block3": "N", "key": "SAYISSDYYDIVTP-UHFFFAOYNA-N", "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15H,1H3,(H2,11,20)(H,17,21,22)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 13, "fields": {"version": 1, "block1": "UHOVQNZJYSORNB", "block2": "UHFFFAOYNA", "block3": "N", "key": "UHOVQNZJYSORNB-UHFFFAOYNA-N", "string": "InChI=1/C6H6/c1-2-4-6-5-3-1/h1-6H", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 14, "fields": {"version": 1, "block1": "UHOVQNZJYSORNB", "block2": "UHFFFAOYSA", "block3": "N", "key": "UHOVQNZJYSORNB-UHFFFAOYSA-N", "string": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 15, "fields": {"version": 1, "block1": "UYTPUPDQBNUYGX", "block2": "CQCWYMDMNA", "block3": "N", "key": "UYTPUPDQBNUYGX-CQCWYMDMNA-N", "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)/f/h7,10H,6H2", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 16, "fields": {"version": 1, "block1": "UYTPUPDQBNUYGX", "block2": "IQCGNDTDNA", "block3": "N", "key": "UYTPUPDQBNUYGX-IQCGNDTDNA-N", "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)/f/h7,11H,6H2", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 17, "fields": {"version": 1, "block1": "UYTPUPDQBNUYGX", "block2": "UHFFFAOYSA", "block3": "N", "key": "UYTPUPDQBNUYGX-UHFFFAOYSA-N", "string": "InChI=1S/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 18, "fields": {"version": 1, "block1": "WMUJEHZKXASYIC", "block2": "UHFFFAOYNA", "block3": "N", "key": "WMUJEHZKXASYIC-UHFFFAOYNA-N", "string": "InChI=1/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h2-3H,1H3,(H,9,10)(H3,4,5,11)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchi", "pk": 19, "fields": {"version": 1, "block1": "WQHNFUMGTCLQFP", "block2": "UHFFFAOYNA", "block3": "N", "key": "WQHNFUMGTCLQFP-UHFFFAOYNA-N", "string": "InChI=1/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h(H3,4,5,11)(H6,1,2,3,9,10)", "added": "2023-04-30T09:19:46.871Z", "modified": "2023-04-30T09:19:46.871Z", "entrypoints": []}}, {"model": "resolver.inchitype", "pk": 1, "fields": {"title": "standard", "software_version": "1.06", "description": "Standard InChI", "is_standard": true, "newpsoff": false, "donotaddh": true, "snon": false, "srel": false, "srac": false, "sucf": false, "suu": false, "sluud": false, "recmet": false, "fixedh": false, "ket": false, "t15": false, "pt_22_00": false, "pt_16_00": false, "pt_06_00": false, "pt_39_00": false, "pt_13_00": false, "pt_18_00": false, "added": "2023-04-30T09:13:10.464Z", "modified": "2023-04-30T09:13:10.466Z"}}, {"model": "resolver.inchitype", "pk": 2, "fields": {"title": "original", "software_version": "('1.06',)", "description": "('InChI with FixedH layer and RecMet option',)", "is_standard": false, "newpsoff": false, "donotaddh": true, "snon": false, "srel": false, "srac": false, "sucf": false, "suu": false, "sluud": false, "recmet": true, "fixedh": true, "ket": false, "t15": false, "pt_22_00": false, "pt_16_00": false, "pt_06_00": false, "pt_39_00": false, "pt_13_00": false, "pt_18_00": false, "added": "2023-04-30T09:13:10.469Z", "modified": "2023-04-30T09:13:10.470Z"}}, {"model": "resolver.inchitype", "pk": 3, "fields": {"title": "xtauto", "software_version": "('1.06',)", "description": "experimental InChI with FixedH layer, RecMet option and experimental tauto optionsKET and T15 options set", "is_standard": false, "newpsoff": false, "donotaddh": true, "snon": false, "srel": false, "srac": false, "sucf": false, "suu": false, "sluud": false, "recmet": true, "fixedh": true, "ket": true, "t15": true, "pt_22_00": false, "pt_16_00": false, "pt_06_00": false, "pt_39_00": false, "pt_13_00": false, "pt_18_00": false, "added": "2023-04-30T09:13:10.473Z", "modified": "2023-04-30T09:13:10.474Z"}}, {"model": "resolver.inchitype", "pk": 4, "fields": {"title": "xtautox", "software_version": "('1.06T',)", "description": "('experimental InChI with FixedH layer, RecMet option and experimental tauto options KET, T15 including NCI tautomer options set',)", "is_standard": false, "newpsoff": false, "donotaddh": true, "snon": false, "srel": false, "srac": false, "sucf": false, "suu": false, "sluud": false, "recmet": true, "fixedh": true, "ket": true, "t15": true, "pt_22_00": true, "pt_16_00": true, "pt_06_00": true, "pt_39_00": true, "pt_13_00": true, "pt_18_00": true, "added": "2023-04-30T09:13:10.477Z", "modified": "2023-04-30T09:13:10.479Z"}}, {"model": "resolver.structureinchiassociation", "pk": 1, "fields": {"structure": 16, "inchi": 1, "inchi_type": 2, "software_version": "1.06", "save_opt": "MA", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 2, "fields": {"structure": 16, "inchi": 2, "inchi_type": 1, "software_version": "1.06", "save_opt": "", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 3, "fields": {"structure": 5, "inchi": 3, "inchi_type": 2, "software_version": "1.06", "save_opt": "MA", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 4, "fields": {"structure": 5, "inchi": 3, "inchi_type": 3, "software_version": "1.06", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 5, "fields": {"structure": 5, "inchi": 3, "inchi_type": 4, "software_version": "1.06T", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 6, "fields": {"structure": 5, "inchi": 4, "inchi_type": 1, "software_version": "1.06", "save_opt": "", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 7, "fields": {"structure": 1, "inchi": 5, "inchi_type": 4, "software_version": "1.06T", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 8, "fields": {"structure": 14, "inchi": 5, "inchi_type": 4, "software_version": "1.06T", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 9, "fields": {"structure": 1, "inchi": 6, "inchi_type": 3, "software_version": "1.06", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 10, "fields": {"structure": 14, "inchi": 6, "inchi_type": 3, "software_version": "1.06", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 11, "fields": {"structure": 2, "inchi": 7, "inchi_type": 2, "software_version": "1.06", "save_opt": "MA", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 12, "fields": {"structure": 2, "inchi": 8, "inchi_type": 1, "software_version": "1.06", "save_opt": "", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 13, "fields": {"structure": 2, "inchi": 9, "inchi_type": 4, "software_version": "1.06T", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 14, "fields": {"structure": 16, "inchi": 9, "inchi_type": 4, "software_version": "1.06T", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 15, "fields": {"structure": 4, "inchi": 10, "inchi_type": 2, "software_version": "1.06", "save_opt": "MA", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 16, "fields": {"structure": 4, "inchi": 11, "inchi_type": 1, "software_version": "1.06", "save_opt": "", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 17, "fields": {"structure": 2, "inchi": 12, "inchi_type": 3, "software_version": "1.06", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 18, "fields": {"structure": 16, "inchi": 12, "inchi_type": 3, "software_version": "1.06", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 19, "fields": {"structure": 3, "inchi": 13, "inchi_type": 2, "software_version": "1.06", "save_opt": "MA", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 20, "fields": {"structure": 3, "inchi": 13, "inchi_type": 3, "software_version": "1.06", "save_opt": "ID", "added": "2023-04-30T09:19:46.911Z", "modified": "2023-04-30T09:19:46.911Z"}}, {"model": "resolver.structureinchiassociation", "pk": 21, "fields": {"structure": 3, "inchi": 13, "inchi_type": 4, "software_version": "1.06T", "save_opt": "ID", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.structureinchiassociation", "pk": 22, "fields": {"structure": 3, "inchi": 14, "inchi_type": 1, "software_version": "1.06", "save_opt": "", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.structureinchiassociation", "pk": 23, "fields": {"structure": 1, "inchi": 15, "inchi_type": 2, "software_version": "1.06", "save_opt": "MA", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.structureinchiassociation", "pk": 24, "fields": {"structure": 14, "inchi": 16, "inchi_type": 2, "software_version": "1.06", "save_opt": "MA", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.structureinchiassociation", "pk": 25, "fields": {"structure": 1, "inchi": 17, "inchi_type": 1, "software_version": "1.06", "save_opt": "", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.structureinchiassociation", "pk": 26, "fields": {"structure": 14, "inchi": 17, "inchi_type": 1, "software_version": "1.06", "save_opt": "", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.structureinchiassociation", "pk": 27, "fields": {"structure": 4, "inchi": 18, "inchi_type": 3, "software_version": "1.06", "save_opt": "ID", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.structureinchiassociation", "pk": 28, "fields": {"structure": 4, "inchi": 19, "inchi_type": 4, "software_version": "1.06T", "save_opt": "ID", "added": "2023-04-30T09:19:46.912Z", "modified": "2023-04-30T09:19:46.912Z"}}, {"model": "resolver.compound", "pk": 1, "fields": {"structure": 1, "added": "2023-04-30T09:19:33.218Z", "modified": "2023-04-30T09:19:33.218Z", "blocked": null}}, {"model": "resolver.compound", "pk": 2, "fields": {"structure": 2, "added": "2023-04-30T09:19:33.218Z", "modified": "2023-04-30T09:19:33.218Z", "blocked": null}}, {"model": "resolver.compound", "pk": 3, "fields": {"structure": 3, "added": "2023-04-30T09:19:33.218Z", "modified": "2023-04-30T09:19:33.218Z", "blocked": null}}, {"model": "resolver.compound", "pk": 4, "fields": {"structure": 4, "added": "2023-04-30T09:19:33.218Z", "modified": "2023-04-30T09:19:33.218Z", "blocked": null}}, {"model": "resolver.compound", "pk": 5, "fields": {"structure": 14, "added": "2023-04-30T09:19:33.218Z", "modified": "2023-04-30T09:19:33.218Z", "blocked": null}}, {"model": "resolver.compound", "pk": 6, "fields": {"structure": 16, "added": "2023-04-30T09:19:33.218Z", "modified": "2023-04-30T09:19:33.218Z", "blocked": null}}, {"model": "resolver.compound", "pk": 7, "fields": {"structure": 5, "added": "2023-04-30T09:19:33.218Z", "modified": "2023-04-30T09:19:33.218Z", "blocked": null}}, {"model": "resolver.record", "pk": 1, "fields": {"name": 2, "regid": "TEST-0", "version": 1, "release": 1, "dataset": 4, "structure_file_record": 1, "added": "2023-04-30T09:14:31.753Z", "modified": "2023-04-30T09:14:31.753Z"}}, {"model": "resolver.record", "pk": 2, "fields": {"name": 4, "regid": "TEST-1", "version": 1, "release": 1, "dataset": 4, "structure_file_record": 2, "added": "2023-04-30T09:14:31.753Z", "modified": "2023-04-30T09:14:31.753Z"}}, {"model": "resolver.record", "pk": 3, "fields": {"name": 1, "regid": "TEST-2", "version": 1, "release": 1, "dataset": 4, "structure_file_record": 3, "added": "2023-04-30T09:14:31.753Z", "modified": "2023-04-30T09:14:31.753Z"}}, {"model": "resolver.record", "pk": 4, "fields": {"name": 3, "regid": "TEST-3", "version": 1, "release": 1, "dataset": 4, "structure_file_record": 4, "added": "2023-04-30T09:14:31.753Z", "modified": "2023-04-30T09:14:31.753Z"}}, {"model": "resolver.record", "pk": 5, "fields": {"name": 5, "regid": "TEST-4", "version": 1, "release": 1, "dataset": 4, "structure_file_record": 5, "added": "2023-04-30T09:14:31.753Z", "modified": "2023-04-30T09:14:31.753Z"}}, {"model": "resolver.name", "pk": 1, "fields": {"name": "TEST-2"}}, {"model": "resolver.name", "pk": 2, "fields": {"name": "TEST-0"}}, {"model": "resolver.name", "pk": 3, "fields": {"name": "TEST-3"}}, {"model": "resolver.name", "pk": 4, "fields": {"name": "TEST-1"}}, {"model": "resolver.name", "pk": 5, "fields": {"name": "TEST-4"}}, {"model": "resolver.nametype", "pk": 1, "fields": {"title": "REGID", "parent": null, "public_string": "Registration ID", "description": null}}, {"model": "resolver.nametype", "pk": 2, "fields": {"title": "NAME", "parent": null, "public_string": "Chemical Name or Synonym", "description": null}}, {"model": "resolver.nametype", "pk": 3, "fields": {"title": "PUBCHEM_IUPAC_NAME", "parent": 2, "public_string": "PubChem IUPAC NAME", "description": null}}, {"model": "resolver.nametype", "pk": 4, "fields": {"title": "PUBCHEM_IUPAC_OPENEYE_NAME", "parent": 2, "public_string": "PubChem IUPAC OPENEYE NAME", "description": null}}, {"model": "resolver.nametype", "pk": 5, "fields": {"title": "PUBCHEM_IUPAC_CAS_NAME", "parent": 2, "public_string": "PubChem IUPAC CAS NAME", "description": null}}, {"model": "resolver.nametype", "pk": 6, "fields": {"title": "PUBCHEM_IUPAC_TRADITIONAL_NAME", "parent": 2, "public_string": "PubChem IUPAC TRADITIONAL NAME", "description": null}}, {"model": "resolver.nametype", "pk": 7, "fields": {"title": "PUBCHEM_IUPAC_SYSTEMATIC_NAME", "parent": 2, "public_string": "PubChem IUPAC SYSTEMATIC NAME", "description": null}}, {"model": "resolver.nametype", "pk": 8, "fields": {"title": "PUBCHEM_GENERIC_REGISTRY_NAME", "parent": 2, "public_string": "PubChem GENERIC REGISTRY NAME", "description": null}}, {"model": "resolver.nametype", "pk": 9, "fields": {"title": "PUBCHEM_SUBSTANCE_SYNONYM", "parent": 2, "public_string": "PubChem SUBSTANCE SYNONYM", "description": null}}, {"model": "resolver.nametype", "pk": 10, "fields": {"title": "NSC_NUMBER", "parent": 1, "public_string": "NSC number", "description": null}}, {"model": "resolver.nametype", "pk": 11, "fields": {"title": "NSC_NUMBER_PREFIXED", "parent": 1, "public_string": "NSC number prefixed", "description": null}}, {"model": "resolver.nametype", "pk": 12, "fields": {"title": "PUBCHEM_SID", "parent": 1, "public_string": "PubChem SID", "description": null}}, {"model": "resolver.nametype", "pk": 13, "fields": {"title": "PUBCHEM_CID", "parent": 1, "public_string": "PubChem CID", "description": null}}, {"model": "resolver.nameaffinityclass", "pk": 1, "fields": {"title": "exact", "description": "Exact"}}, {"model": "resolver.nameaffinityclass", "pk": 2, "fields": {"title": "narrow", "description": "Narrow"}}, {"model": "resolver.nameaffinityclass", "pk": 3, "fields": {"title": "broad", "description": "Broad"}}, {"model": "resolver.nameaffinityclass", "pk": 4, "fields": {"title": "unknown", "description": "Unknown"}}, {"model": "resolver.nameaffinityclass", "pk": 5, "fields": {"title": "unspecified", "description": "Unspecified"}}, {"model": "resolver.nameaffinityclass", "pk": 6, "fields": {"title": "generic", "description": "Generic"}}, {"model": "resolver.nameaffinityclass", "pk": 7, "fields": {"title": "related", "description": "Related"}}, {"model": "resolver.structurenameassociation", "pk": 1, "fields": {"name": 3, "structure": 1, "name_type": 1, "affinity_class": 1, "confidence": 100}}, {"model": "resolver.structurenameassociation", "pk": 2, "fields": {"name": 3, "structure": 14, "name_type": 1, "affinity_class": 2, "confidence": 100}}, {"model": "resolver.structurenameassociation", "pk": 3, "fields": {"name": 1, "structure": 2, "name_type": 1, "affinity_class": 1, "confidence": 100}}, {"model": "resolver.structurenameassociation", "pk": 4, "fields": {"name": 1, "structure": 16, "name_type": 1, "affinity_class": 2, "confidence": 100}}, {"model": "resolver.structurenameassociation", "pk": 5, "fields": {"name": 4, "structure": 3, "name_type": 1, "affinity_class": 1, "confidence": 100}}, {"model": "resolver.structurenameassociation", "pk": 6, "fields": {"name": 5, "structure": 4, "name_type": 1, "affinity_class": 1, "confidence": 100}}, {"model": "resolver.structurenameassociation", "pk": 7, "fields": {"name": 2, "structure": 5, "name_type": 1, "affinity_class": 1, "confidence": 100}}, {"model": "resolver.organization", "pk": 1, "fields": {"parent": null, "name": "U.S. National Institutes of Health", "abbreviation": "NIH", "category": "government", "href": "https://www.nih.gov", "added": "2023-04-30T09:13:10.332Z", "modified": "2023-04-30T09:13:10.334Z"}}, {"model": "resolver.organization", "pk": 2, "fields": {"parent": 1, "name": "U.S. National Cancer Institute", "abbreviation": "NCI", "category": "government", "href": "https://www.cancer.gov", "added": "2023-04-30T09:13:10.336Z", "modified": "2023-04-30T09:13:10.337Z"}}, {"model": "resolver.organization", "pk": 3, "fields": {"parent": 1, "name": "U.S. National Library of Medicine", "abbreviation": "NLM", "category": "government", "href": "https://www.nlm.nih.gov", "added": "2023-04-30T09:13:10.340Z", "modified": "2023-04-30T09:13:10.342Z"}}, {"model": "resolver.organization", "pk": 4, "fields": {"parent": 3, "name": "U.S. National Center for Biotechnology Information", "abbreviation": "NCBI", "category": "government", "href": "https://www.ncbi.nlm.nih.gov", "added": "2023-04-30T09:13:10.345Z", "modified": "2023-04-30T09:13:10.347Z"}}, {"model": "resolver.organization", "pk": 5, "fields": {"parent": null, "name": "FIZ Karlsruhe – Leibniz-Institut für Informationsinfrastruktur", "abbreviation": "FIZ Karlsruhe", "category": "public", "href": "https://www.fiz-karlsruhe.de", "added": "2023-04-30T09:13:10.350Z", "modified": "2023-04-30T09:13:10.352Z"}}, {"model": "resolver.organization", "pk": 6, "fields": {"parent": null, "name": "European Molecular Biology Laboratory", "abbreviation": "EMBL", "category": "public", "href": "https://www.embl.org/", "added": "2023-04-30T09:13:10.354Z", "modified": "2023-04-30T09:13:10.355Z"}}, {"model": "resolver.organization", "pk": 7, "fields": {"parent": 6, "name": "EMBL's European Bioinformatics Institute", "abbreviation": "EMBL-EBI", "category": "public", "href": "https://www.ebi.ac.uk/", "added": "2023-04-30T09:13:10.357Z", "modified": "2023-04-30T09:13:10.358Z"}}, {"model": "resolver.publisher", "pk": 1, "fields": {"parent": null, "category": "group", "name": "NCI Computer-Aided Drug Design (CADD) Group", "description": null, "email": null, "address": "Frederick, MD 21702-1201, USA", "href": "https://cactus.nci.nih.gov", "orcid": null, "added": "2023-04-30T09:13:10.361Z", "modified": "2023-04-30T09:13:10.365Z", "organizations": [1, 2]}}, {"model": "resolver.publisher", "pk": 2, "fields": {"parent": 1, "category": "person", "name": "Marc Nicklaus", "description": null, "email": "mn1ahelix@gmail.com", "address": "Frederick, MD 21702-1201, USA", "href": "https://ccr.cancer.gov/staff-directory/marc-c-nicklaus", "orcid": "https://orcid.org/0000-0002-4775-7030", "added": "2023-04-30T09:13:10.368Z", "modified": "2023-04-30T09:13:10.371Z", "organizations": [1, 2]}}, {"model": "resolver.publisher", "pk": 3, "fields": {"parent": null, "category": "person", "name": "Markus Sitzmann", "description": null, "email": "markus.sitzmann@gmail.com", "address": null, "href": null, "orcid": "https://orcid.org/0000-0001-5346-1298", "added": "2023-04-30T09:13:10.373Z", "modified": "2023-04-30T09:13:10.374Z", "organizations": []}}, {"model": "resolver.publisher", "pk": 4, "fields": {"parent": null, "category": "division", "name": "PubChem", "description": null, "email": "pubchem-help@ncbi.nlm.nih.gov", "address": "8600 Rockville Pike; Bethesda, MD  20894; USA", "href": "https://pubchemdocs.ncbi.nlm.nih.gov/contact", "orcid": null, "added": "2023-04-30T09:13:10.377Z", "modified": "2023-04-30T09:13:10.380Z", "organizations": [3, 4]}}, {"model": "resolver.publisher", "pk": 5, "fields": {"parent": null, "category": "group", "name": "ChEMBL Team", "description": null, "email": null, "address": null, "href": "https://chembl.gitbook.io/chembl-interface-documentation/about", "orcid": null, "added": "2023-04-30T09:13:10.383Z", "modified": "2023-04-30T09:13:10.386Z", "organizations": [6, 7]}}, {"model": "resolver.publisher", "pk": 6, "fields": {"parent": null, "category": "division", "name": "DTP/NCI", "description": null, "email": null, "address": null, "href": "https://dtp.cancer.gov/", "orcid": null, "added": "2023-04-30T09:13:10.390Z", "modified": "2023-04-30T09:13:10.393Z", "organizations": [1, 2]}}, {"model": "resolver.contexttag", "pk": 1, "fields": {"tag": "other", "description": null}}, {"model": "resolver.contexttag", "pk": 2, "fields": {"tag": "screening", "description": null}}, {"model": "resolver.contexttag", "pk": 3, "fields": {"tag": "building blocks", "description": null}}, {"model": "resolver.contexttag", "pk": 4, "fields": {"tag": "toxicology", "description": null}}, {"model": "resolver.contexttag", "pk": 5, "fields": {"tag": "environmental", "description": null}}, {"model": "resolver.contexttag", "pk": 6, "fields": {"tag": "patent", "description": null}}, {"model": "resolver.contexttag", "pk": 7, "fields": {"tag": "journal", "description": null}}, {"model": "resolver.contexttag", "pk": 8, "fields": {"tag": "literature", "description": null}}, {"model": "resolver.contexttag", "pk": 9, "fields": {"tag": "natural product", "description": null}}, {"model": "resolver.contexttag", "pk": 10, "fields": {"tag": "imaging", "description": null}}, {"model": "resolver.contexttag", "pk": 11, "fields": {"tag": "contrast agent", "description": null}}, {"model": "resolver.contexttag", "pk": 12, "fields": {"tag": "meta", "description": null}}, {"model": "resolver.contexttag", "pk": 13, "fields": {"tag": "vendor", "description": null}}, {"model": "resolver.contexttag", "pk": 14, "fields": {"tag": "drug", "description": null}}, {"model": "resolver.contexttag", "pk": 15, "fields": {"tag": "SAR", "description": null}}, {"model": "resolver.contexttag", "pk": 16, "fields": {"tag": "QSAR", "description": null}}, {"model": "resolver.contexttag", "pk": 17, "fields": {"tag": "physicochemical property", "description": null}}, {"model": "resolver.contexttag", "pk": 18, "fields": {"tag": "ligand", "description": null}}, {"model": "resolver.contexttag", "pk": 19, "fields": {"tag": "small molecule", "description": null}}, {"model": "resolver.contexttag", "pk": 20, "fields": {"tag": "crystal-structure", "description": null}}, {"model": "resolver.dataset", "pk": 1, "fields": {"name": "PubChem", "href": "https://pubchem.ncbi.nlm.nih.gov/", "description": "PubChem is an open chemistry database at the National Institutes of Health (NIH)", "publisher": 4, "added": "2023-04-30T09:13:10.398Z", "modified": "2023-04-30T09:13:10.403Z", "context_tags": [12]}}, {"model": "resolver.dataset", "pk": 2, "fields": {"name": "ChEMBL", "href": "https://www.ebi.ac.uk/chembl/", "description": "ChEMBL is a manually curated database of bioactive molecules with drug-like properties", "publisher": 5, "added": "2023-04-30T09:13:10.409Z", "modified": "2023-04-30T09:13:10.417Z", "context_tags": [14]}}, {"model": "resolver.dataset", "pk": 3, "fields": {"name": "DTP/NCI", "href": "https://dtp.cancer.gov/", "description": "NCI database", "publisher": 6, "added": "2023-04-30T09:13:10.422Z", "modified": "2023-04-30T09:13:10.426Z", "context_tags": [2]}}, {"model": "resolver.dataset", "pk": 4, "fields": {"name": "SANDBOX", "href": "https://sandbox.test/", "description": "sandbox", "publisher": 3, "added": "2023-04-30T09:13:10.432Z", "modified": "2023-04-30T09:13:10.437Z", "context_tags": [2]}}, {"model": "resolver.release", "pk": 1, "fields": {"parent": null, "dataset": 4, "publisher": 3, "name": "Sandbox Release", "description": "Sandbox", "href": null, "classification": "public", "status": "active", "version": "0", "released": null, "downloaded": "2023-05-01", "added": "2023-04-30T09:13:10.449Z", "modified": "2023-04-30T09:13:10.451Z", "record_uri_pattern": []}}, {"model": "etl.structurefilecollectionpreprocessor", "pk": 1, "fields": {"name": "pubchem_ext_datasource", "params": {}}}, {"model": "etl.structurefilecollectionpreprocessor", "pk": 2, "fields": {"name": "generic", "params": "{\"regid\": {\"field\": \"E_MDL_NAME\", \"type\": \"REGID\"}, \"names\": [{\"field\": \"NAME\", \"type\": \"NAME\"}, {\"field\": \"SYNONYM\", \"type\": \"NAME\"}]}"}}, {"model": "etl.structurefilecollection", "pk": 1, "fields": {"release": 1, "file_location_pattern_string": "sandbox/structures.sdf", "description": null, "added": "2023-04-30T09:13:10.455Z", "modified": "2023-04-30T09:13:10.460Z", "preprocessors": [2]}}, {"model": "etl.structurefile", "pk": 1, "fields": {"collection": 1, "file": "/filestore/sandbox/structures.sdf", "count": 5, "added": "2023-04-30T09:14:31.333Z", "modified": "2023-04-30T09:14:31.499Z"}}, {"model": "etl.structurefilenormalizationstatus", "pk": 1, "fields": {"updated": "2023-04-30T09:19:33.231Z", "progress": 1.0}}, {"model": "etl.structurecalcinchistatus", "pk": 1, "fields": {"updated": "2023-04-30T09:19:46.929Z", "progress": 1.0}}, {"model": "etl.structurefilelinknamestatus", "pk": 1, "fields": {"updated": "2023-04-30T09:19:58.344Z", "progress": 1.0}}, {"model": "etl.structurefilerecord", "pk": 1, "fields": {"structure_file": 1, "structure": 5, "number": 1, "added": "2023-04-30T09:14:31.724Z", "modified": "2023-04-30T09:14:31.724Z", "processed": null}}, {"model": "etl.structurefilerecord", "pk": 2, "fields": {"structure_file": 1, "structure": 3, "number": 2, "added": "2023-04-30T09:14:31.724Z", "modified": "2023-04-30T09:14:31.724Z", "processed": null}}, {"model": "etl.structurefilerecord", "pk": 3, "fields": {"structure_file": 1, "structure": 2, "number": 3, "added": "2023-04-30T09:14:31.724Z", "modified": "2023-04-30T09:14:31.724Z", "processed": null}}, {"model": "etl.structurefilerecord", "pk": 4, "fields": {"structure_file": 1, "structure": 1, "number": 4, "added": "2023-04-30T09:14:31.724Z", "modified": "2023-04-30T09:14:31.724Z", "processed": null}}, {"model": "etl.structurefilerecord", "pk": 5, "fields": {"structure_file": 1, "structure": 4, "number": 5, "added": "2023-04-30T09:14:31.724Z", "modified": "2023-04-30T09:14:31.724Z", "processed": null}}, {"model": "etl.structurefilerecordnameassociation", "pk": 1, "fields": {"name": 2, "structure_file_record": 1, "name_type": 1}}, {"model": "etl.structurefilerecordnameassociation", "pk": 2, "fields": {"name": 4, "structure_file_record": 2, "name_type": 1}}, {"model": "etl.structurefilerecordnameassociation", "pk": 3, "fields": {"name": 1, "structure_file_record": 3, "name_type": 1}}, {"model": "etl.structurefilerecordnameassociation", "pk": 4, "fields": {"name": 3, "structure_file_record": 4, "name_type": 1}}, {"model": "etl.structurefilerecordnameassociation", "pk": 5, "fields": {"name": 5, "structure_file_record": 5, "name_type": 1}}, {"model": "etl.structurefilesource", "pk": 1, "fields": {"structure_file": 1}}, {"model": "etl.structurefilesource", "pk": 2, "fields": {"structure_file": 1}}, {"model": "etl.structurefilesource", "pk": 3, "fields": {"structure_file": 1}}, {"model": "etl.structurefilesource", "pk": 4, "fields": {"structure_file": 1}}, {"model": "etl.structurefilesource", "pk": 5, "fields": {"structure_file": 1}}, {"model": "etl.structurefilesource", "pk": 14, "fields": {"structure_file": 1}}, {"model": "etl.structurefilesource", "pk": 16, "fields": {"structure_file": 1}}]
+[
+  {
+    "model": "structure.responsetype",
+    "pk": 1,
+    "fields": {
+      "parent_type": null,
+      "url": "ficts",
+      "method": "prop",
+      "parameter": "E_FICTS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 2,
+    "fields": {
+      "parent_type": null,
+      "url": "ficus",
+      "method": "prop",
+      "parameter": "E_FICUS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 3,
+    "fields": {
+      "parent_type": null,
+      "url": "fictu",
+      "method": "prop",
+      "parameter": "E_FICTU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 4,
+    "fields": {
+      "parent_type": null,
+      "url": "ficuu",
+      "method": "prop",
+      "parameter": "E_FICUU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 5,
+    "fields": {
+      "parent_type": null,
+      "url": "uuuts",
+      "method": "prop",
+      "parameter": "E_UUUTS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 6,
+    "fields": {
+      "parent_type": null,
+      "url": "uuuus",
+      "method": "prop",
+      "parameter": "E_UUUUS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 7,
+    "fields": {
+      "parent_type": null,
+      "url": "uuutu",
+      "method": "prop",
+      "parameter": "E_UUUTU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 8,
+    "fields": {
+      "parent_type": null,
+      "url": "uuuuu",
+      "method": "prop",
+      "parameter": "E_UUUUU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 9,
+    "fields": {
+      "parent_type": 1,
+      "url": "ficts_structure",
+      "method": "prop",
+      "parameter": "E_FICTS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 10,
+    "fields": {
+      "parent_type": 2,
+      "url": "ficus_structure",
+      "method": "prop",
+      "parameter": "E_FICUS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 11,
+    "fields": {
+      "parent_type": 3,
+      "url": "fictu_structure",
+      "method": "prop",
+      "parameter": "E_FICTU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 12,
+    "fields": {
+      "parent_type": 4,
+      "url": "ficuu_structure",
+      "method": "prop",
+      "parameter": "E_FICUU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 13,
+    "fields": {
+      "parent_type": 5,
+      "url": "uuuts_structure",
+      "method": "prop",
+      "parameter": "E_UUUTS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 14,
+    "fields": {
+      "parent_type": 6,
+      "url": "uuuus_structure",
+      "method": "prop",
+      "parameter": "E_UUUUS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 15,
+    "fields": {
+      "parent_type": 7,
+      "url": "uuutu_structure",
+      "method": "prop",
+      "parameter": "E_UUUTU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 16,
+    "fields": {
+      "parent_type": 8,
+      "url": "uuuuu_structure",
+      "method": "prop",
+      "parameter": "E_UUUUU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 17,
+    "fields": {
+      "parent_type": null,
+      "url": "inchi",
+      "method": "prop",
+      "parameter": "E_INCHI",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 18,
+    "fields": {
+      "parent_type": 17,
+      "url": "inchikey",
+      "method": "prop",
+      "parameter": "E_INCHIKEY",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 19,
+    "fields": {
+      "parent_type": null,
+      "url": "smiles",
+      "method": "prop",
+      "parameter": "E_SMILES",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 20,
+    "fields": {
+      "parent_type": null,
+      "url": "pack",
+      "method": "prop",
+      "parameter": "packstring",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 21,
+    "fields": {
+      "parent_type": null,
+      "url": "names",
+      "method": "names",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 22,
+    "fields": {
+      "parent_type": null,
+      "url": "cas",
+      "method": "cas",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 23,
+    "fields": {
+      "parent_type": null,
+      "url": "stdinchi",
+      "method": "prop",
+      "parameter": "E_STDINCHI",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 24,
+    "fields": {
+      "parent_type": 23,
+      "url": "stdinchikey",
+      "method": "prop",
+      "parameter": "E_STDINCHIKEY",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 25,
+    "fields": {
+      "parent_type": null,
+      "url": "image",
+      "method": "prop",
+      "parameter": "structure_image",
+      "base_mime_type": "image"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 26,
+    "fields": {
+      "parent_type": null,
+      "url": "sdf",
+      "method": "prop",
+      "parameter": "E_MOLFILESTRING",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 27,
+    "fields": {
+      "parent_type": null,
+      "url": "molfile",
+      "method": "prop",
+      "parameter": "E_MOLFILESTRING",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 28,
+    "fields": {
+      "parent_type": null,
+      "url": "hashisy",
+      "method": "prop",
+      "parameter": "E_HASHISY",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 29,
+    "fields": {
+      "parent_type": null,
+      "url": "gif",
+      "method": "prop",
+      "parameter": "structure_image",
+      "base_mime_type": "image"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 30,
+    "fields": {
+      "parent_type": null,
+      "url": "iupac_name",
+      "method": "iupac_name",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 31,
+    "fields": {
+      "parent_type": null,
+      "url": "file",
+      "method": "molfilestring",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 32,
+    "fields": {
+      "parent_type": null,
+      "url": "twirl",
+      "method": "twirl",
+      "parameter": "E_MOLFILESTRING",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 33,
+    "fields": {
+      "parent_type": null,
+      "url": "urls",
+      "method": "urls",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 34,
+    "fields": {
+      "parent_type": null,
+      "url": "3d",
+      "method": "twirl",
+      "parameter": "E_MOLFILESTRING",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 35,
+    "fields": {
+      "parent_type": null,
+      "url": "weight",
+      "method": "prop",
+      "parameter": "E_WEIGHT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 36,
+    "fields": {
+      "parent_type": null,
+      "url": "mw",
+      "method": "prop",
+      "parameter": "E_WEIGHT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 37,
+    "fields": {
+      "parent_type": null,
+      "url": "formula",
+      "method": "prop",
+      "parameter": "E_FORMULA",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 38,
+    "fields": {
+      "parent_type": null,
+      "url": "monoisotopic_mass",
+      "method": "prop",
+      "parameter": "E_MONOISOTOPIC_MASS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 39,
+    "fields": {
+      "parent_type": null,
+      "url": "h_bond_donor_count",
+      "method": "prop",
+      "parameter": "E_NHDONORS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 40,
+    "fields": {
+      "parent_type": null,
+      "url": "h_bond_acceptor_count",
+      "method": "prop",
+      "parameter": "E_NHACCEPTORS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 41,
+    "fields": {
+      "parent_type": null,
+      "url": "effective_rotor_count",
+      "method": "prop",
+      "parameter": "E_EFFECTIVE_ROTOR_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 42,
+    "fields": {
+      "parent_type": null,
+      "url": "xlogp2",
+      "method": "prop",
+      "parameter": "E_XLOGP2",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 43,
+    "fields": {
+      "parent_type": null,
+      "url": "rule_of_5_violation_count",
+      "method": "prop",
+      "parameter": "E_RULE_OF_5_VIOLATIONS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 44,
+    "fields": {
+      "parent_type": null,
+      "url": "h_bond_center_count",
+      "method": "prop",
+      "parameter": "E_HYDROGEN_BOND_CENTER_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 45,
+    "fields": {
+      "parent_type": null,
+      "url": "chemspider_id",
+      "method": "chemspider_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 46,
+    "fields": {
+      "parent_type": null,
+      "url": "rotor_count",
+      "method": "prop",
+      "parameter": "E_ROTOR_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 47,
+    "fields": {
+      "parent_type": null,
+      "url": "aromatic",
+      "method": "prop",
+      "parameter": "E_IS_AROMATIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 48,
+    "fields": {
+      "parent_type": null,
+      "url": "macrocyclic",
+      "method": "prop",
+      "parameter": "E_IS_MACROCYCLIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 49,
+    "fields": {
+      "parent_type": null,
+      "url": "is_aromatic",
+      "method": "prop",
+      "parameter": "E_IS_AROMATIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 50,
+    "fields": {
+      "parent_type": null,
+      "url": "is_macrocyclic",
+      "method": "prop",
+      "parameter": "E_IS_MACROCYCLIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 51,
+    "fields": {
+      "parent_type": null,
+      "url": "heteroatom_count",
+      "method": "prop",
+      "parameter": "E_HETERO_ATOM_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 52,
+    "fields": {
+      "parent_type": null,
+      "url": "hydrogen_atom_count",
+      "method": "prop",
+      "parameter": "E_HYDROGEN_ATOM_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 53,
+    "fields": {
+      "parent_type": null,
+      "url": "heavy_atom_count",
+      "method": "prop",
+      "parameter": "E_HEAVY_ATOM_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 54,
+    "fields": {
+      "parent_type": null,
+      "url": "deprotonable_group_count",
+      "method": "prop",
+      "parameter": "E_DEPROTONABLE_GROUP_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 55,
+    "fields": {
+      "parent_type": null,
+      "url": "protonable_group_count",
+      "method": "prop",
+      "parameter": "E_PROTONABLE_GROUP_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 56,
+    "fields": {
+      "parent_type": null,
+      "url": "ring_count",
+      "method": "prop",
+      "parameter": "E_RING_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 57,
+    "fields": {
+      "parent_type": null,
+      "url": "ringsys_count",
+      "method": "prop",
+      "parameter": "E_RINGSYS_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 58,
+    "fields": {
+      "parent_type": null,
+      "url": "ncicadd_sid",
+      "method": "ncicadd_structure_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 59,
+    "fields": {
+      "parent_type": null,
+      "url": "ncicadd_cid",
+      "method": "ncicadd_compound_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 60,
+    "fields": {
+      "parent_type": null,
+      "url": "ncicadd_rid",
+      "method": "ncicadd_record_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 61,
+    "fields": {
+      "parent_type": null,
+      "url": "chemnavigator_sid",
+      "method": "chemnavigator_sid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 62,
+    "fields": {
+      "parent_type": null,
+      "url": "pubchem_sid",
+      "method": "pubchem_sid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 63,
+    "fields": {
+      "parent_type": null,
+      "url": "emolecules_vid",
+      "method": "emolecules_vid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 64,
+    "fields": {
+      "parent_type": null,
+      "url": "emolecules_id",
+      "method": "emolecules_vid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 65,
+    "fields": {
+      "parent_type": null,
+      "url": "zinc_id",
+      "method": "zinc_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 66,
+    "fields": {
+      "parent_type": null,
+      "url": "zinc_code",
+      "method": "zinc_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 67,
+    "fields": {
+      "parent_type": null,
+      "url": "zinc",
+      "method": "zinc_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 68,
+    "fields": {
+      "parent_type": null,
+      "url": "chemnavigator_id",
+      "method": "chemnavigator_sid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 69,
+    "fields": {
+      "parent_type": null,
+      "url": "nsc_number",
+      "method": "nsc_number",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "structure.responsetype",
+    "pk": 70,
+    "fields": {
+      "parent_type": null,
+      "url": "nsc",
+      "method": "nsc_number",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 1,
+    "fields": {
+      "hashisy_key": "1AD375920BE60DAD",
+      "minimol": "FBBABEj5HZVWC7gVBR0mFDADjgAbYI8ZISYLGu3HBaxGJ0KiKSJ0ShgBUCwSEE8T2XIHEdXVDQIbCQ4AU0wKIaHMChGWYggGUwgDDAQOSAAFBAYZ5XALDQgJQANUAHUBCBEAAA==",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 2,
+    "fields": {
+      "hashisy_key": "20A701AA27DA3574",
+      "minimol": "EydAIsHwAy7B8AcTkQojIZQ3GjhrI5jRcFaEWWlzQBPQBiGkN1lJJhzM6BABJPgmuDsYAaSLEdBiEuWzFglZEgxcEf46DxNYcBlF+RQRXg4VFwkbAQzuIWHLBQQDEbxzIS3qCAFSFiPmNwsPGyXpHVmQHyL/cQoiBZZ1CCZJFARapwYIAQ0UDBZRCBOOARcTUAERAAA=",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 3,
+    "fields": {
+      "hashisy_key": "3DB0124A3ECF5ECE",
+      "minimol": "EgwS0PElvmjDBia8aCQwbP0LABmNFwIRfi8EBV0wBgKrAgh1hAVU3BnlVgURAAA=",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 4,
+    "fields": {
+      "hashisy_key": "59B33067D13A00C2",
+      "minimol": "ExjAGAG3VYMLQJgVAxgoAEBxBN0AHC08AFwAEQi6AhsSAWMJ9PYvAgAKECGpNRES7j8BEkWhAhHBJw0OegMUXVkEDBwRhAoZlGUh/b4IIsrMDwkRAAA=",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 5,
+    "fields": {
+      "hashisy_key": "893627AD7BDD6B4F",
+      "minimol": "E8QAEc5LgBokPipmwJgVAxgoBEFxBH4AAEC8APwBLhwAXQMcLV0AHDq8AL8DNgB+hwCSAN5IsAwfI94BygGWAmNjOggOCQYoCJIhBa7g5AAq+O4nEQAhJ9YrBeErbAB1AeEVUC8RmG8bxL4jkogFoRmsJl1iCCe8CEwFRAXoAChZACAkWK8ipD4fHicFwHIAoAYvAABcBC9EANwHIA8DAAkJASHptjAhuLYAODI/M0A0QTVCNkM3RDhFOUYATz1PEk8DUD9QE1A+UQRRFFECUkBSFVI8VgZWQVM6Ux5TB1dCV0NUCVQiVApVRFUjVQhYRlgLWUVZImwiEVIhBQMS2+oMAltV0T8hFNwAAA9NBRYMRwdADUgGQQYPDklNTgcXGEcZRxpIG0gcSR1JDx8gTghCOkMIIQlFCRAKRgoRC0QLSiRKJUoQSxFMJksnSyhMKUwqOytWLFctWC5ZAVwDXQReBV8MYAxhEmISYxJkDWUNZgZnDmgOaU1qB2sTbBNtE25HbxRwFHEUchVzFXQVdUh2FncWeBZ5SXoPew98Tn06fjp/F4AXgReCGIMYhBiFGYYZhxmIGokaihqLG4wbjRuOCI8JkAqRC5IckxyUHJUdlh2XHZgemR6aHpsfnB+dH54gnyCgIKFKohCjEKQRpRGmIachqCGpIqoiqyKsI60jriOvS7BMsSSyJLMktCW1JbYltya4Jrkmuie7J7wnvSi+KL8owCnBKcIpwwBAK1wqQipFWQU+VQFAWAVDVwpLUgJSLz9QDVJPEQAA",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 6,
+    "fields": {
+      "hashisy_key": "A09D4E8A1BAD8D53",
+      "minimol": "EhRqK8ABK/UKDhusNiJtIosmLCLgoiZY4hABLXwzABoaEEQhbNUiwroAAhJpywEJTAsJswYiycwOEqSPIofVBBMASgMBBxEAAA==",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 7,
+    "fields": {
+      "hashisy_key": "B755173DAE3ECEC0",
+      "minimol": "FA0AAxgBjREGuBUSjD5ISSnMUh3MGRletAIESAFYFiKQdxqJCgoaUD4RAAA=",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 8,
+    "fields": {
+      "hashisy_key": "E174572A915E4471",
+      "minimol": "FAkAAh/U+B6UVhEliCP0CxNU8hNkfRnE/SE4vREAAA==",
+      "added": "2023-05-01T16:12:05.124Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 14,
+    "fields": {
+      "hashisy_key": "3FC9522042E03718",
+      "minimol": "E8QAEc5LgBokPSpmuxU2AH6HAJIA3kqkHyMiyMcK3gHKAZ4CY2M6CA4JBiiYkCGVrODkACqI7ScRACEnZioF4StsAHUB4RXgLREobhtVvYGN+6EZPCUYBNWR4WAF6AAqCCoj5K0iMD0fqiUFwHIAoAYvAABcBC9EANwHIA8AAA4JCUUvIzokOyU8Jj0nPig/KSI8rABvQixDLUQwTztPBk8yUD1QB1A8UTNRCFExUj5SCVI6VjRWP1MuUxJTNVdAV0FUN1QWVDhVQlUXVTZYRFg5WUNZMEUwOjBaRUYyOzE8MQAxWzIBMz0zAkZNRgoARzU+AUg0PzQDAklNTjULDEcNRw5ID0gQSRFJAxMUTjZALkE2FTdDBCMDRDgFOUI5I/SvGRHQTCL0ryEd1UwZhPoAB1YgVyFYIllFXDJdM15GXwBgAGEGYgZjBmRATACqZjRnAmgCaU1qNWsHbAdtB25HbwhwCHEIcglzCXQJdUh2CncKeAp5SXoDewN8Tn0ufi5/C4ALgQuCDIMMhAyFDYYNhw2IDokOig6LD4wPjQ+ONo83kDiROZIQkxCUEJURlhGXEZgSmRKaEpsTnBOdE54UnxSgFKFKogSjBKQFpQWmFacVqBWpFqoWqxasF60XrhevS7BMsRiyGLMYtBm1GbYZtxq4Grkauhu7G7wbvRy+HL8cwB3BHcIdwzBAK1wqQipDWQU+VQFAWAVDVwpLUjFSLz1QDVJPEQAA",
+      "added": "2023-05-01T16:13:16.309Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 25,
+    "fields": {
+      "hashisy_key": "BCCDA7D0CDACF120",
+      "minimol": "FBBABEj5HZVWC7gVAh0mFDADEspuI3sKKqoMKmhodgBJIidw4oTzHkUUDEBOBQYNDQoKDg4BWAkhWbsLEQbWBwhtigERyIkRdrQBDgEFBhlWPQoNaQENaAERAAA=",
+      "added": "2023-05-01T16:13:16.309Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 27,
+    "fields": {
+      "hashisy_key": "D516C66F2758078B",
+      "minimol": "ExjAGAG2VYMLJTwqIUaAEgEZkToJ/PIwAwAQEAwR96kHDA0SqNYR1XsTIWXVDyGN/woRqP0Z+jkHAVTZEWR+Gx18BREAAA==",
+      "added": "2023-05-01T16:13:16.309Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structure",
+    "pk": 28,
+    "fields": {
+      "hashisy_key": "D76B88C0354759F1",
+      "minimol": "FCdAChgBuLMowPAbSg0nNyNB2G8j3HpsVmFZCWVzQBPMBiGgN1VJJhzI6Cf0+P0AIBgBoIsRZHIhMEEhlbsVE/sWFg4SEvH8CRmtkwIR6cMACk4EDRGxfAUEAxG4cyEp6ggNURUj4DcbGekdTZAfIvNxCiIFiHUBCCYQF0UUBAQQEUv9BRQTSDoRTIGMASMcQhEAAA==",
+      "added": "2023-05-01T16:13:16.309Z",
+      "blocked": null,
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 1,
+    "fields": {
+      "hashisy": "1AD375920BE60DAD"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 2,
+    "fields": {
+      "hashisy": "20A701AA27DA3574"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 3,
+    "fields": {
+      "hashisy": "3DB0124A3ECF5ECE"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 4,
+    "fields": {
+      "hashisy": "59B33067D13A00C2"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 5,
+    "fields": {
+      "hashisy": "893627AD7BDD6B4F"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 6,
+    "fields": {
+      "hashisy": "A09D4E8A1BAD8D53"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 7,
+    "fields": {
+      "hashisy": "B755173DAE3ECEC0"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 8,
+    "fields": {
+      "hashisy": "E174572A915E4471"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 14,
+    "fields": {
+      "hashisy": "3FC9522042E03718"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 25,
+    "fields": {
+      "hashisy": "BCCDA7D0CDACF120"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 27,
+    "fields": {
+      "hashisy": "D516C66F2758078B"
+    }
+  },
+  {
+    "model": "resolver.structurehashisy",
+    "pk": 28,
+    "fields": {
+      "hashisy": "D76B88C0354759F1"
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 1,
+    "fields": {
+      "ficts_parent": 1,
+      "ficus_parent": 25,
+      "uuuuu_parent": 25
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 2,
+    "fields": {
+      "ficts_parent": 2,
+      "ficus_parent": 28,
+      "uuuuu_parent": 28
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 3,
+    "fields": {
+      "ficts_parent": 3,
+      "ficus_parent": 3,
+      "uuuuu_parent": 3
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 4,
+    "fields": {
+      "ficts_parent": 4,
+      "ficus_parent": 4,
+      "uuuuu_parent": 27
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 5,
+    "fields": {
+      "ficts_parent": 5,
+      "ficus_parent": 5,
+      "uuuuu_parent": 14
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 6,
+    "fields": {
+      "ficts_parent": 6,
+      "ficus_parent": 6,
+      "uuuuu_parent": 6
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 7,
+    "fields": {
+      "ficts_parent": 7,
+      "ficus_parent": 7,
+      "uuuuu_parent": 7
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 8,
+    "fields": {
+      "ficts_parent": 8,
+      "ficus_parent": 8,
+      "uuuuu_parent": 8
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 14,
+    "fields": {
+      "ficts_parent": null,
+      "ficus_parent": null,
+      "uuuuu_parent": 14
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 25,
+    "fields": {
+      "ficts_parent": null,
+      "ficus_parent": 25,
+      "uuuuu_parent": 25
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 27,
+    "fields": {
+      "ficts_parent": null,
+      "ficus_parent": null,
+      "uuuuu_parent": 27
+    }
+  },
+  {
+    "model": "resolver.structureparentstructure",
+    "pk": 28,
+    "fields": {
+      "ficts_parent": null,
+      "ficus_parent": 28,
+      "uuuuu_parent": 28
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 1,
+    "fields": {
+      "version": 1,
+      "block1": "AXFMYLKXQIDCDV",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "AXFMYLKXQIDCDV-UHFFFAOYNA-N",
+      "string": "InChI=1/C6H12O6/c7-1-3(9)5(11)6(12)4(10)2-8/h(H6,1,4,5,8,9,12)(H6,2,3,6,7,10,11)",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 2,
+    "fields": {
+      "version": 1,
+      "block1": "DDPJWUQJQMKQIF",
+      "block2": "FQWWPSEDNA",
+      "block3": "N",
+      "key": "DDPJWUQJQMKQIF-FQWWPSEDNA-N",
+      "string": "InChI=1/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-48,50-52,75H,26,28-33H2,1-24H3,(H,63,77)(H,64,76)(H,65,79)(H,66,78)/f/h63-66H",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 3,
+    "fields": {
+      "version": 1,
+      "block1": "DDPJWUQJQMKQIF",
+      "block2": "JLXSSQMMNA",
+      "block3": "N",
+      "key": "DDPJWUQJQMKQIF-JLXSSQMMNA-N",
+      "string": "InChI=1/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-48,50-52,75H,26,28-33H2,1-24H3,(H,63,77)(H,64,76)(H,65,79)(H,66,78)/b27-25+/t40-,41+,42-,43+,44+,45+,46+,47+,48+,50+,51+,52-/m1/s1/f/h63-66H",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 4,
+    "fields": {
+      "version": 1,
+      "block1": "DDPJWUQJQMKQIF",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "DDPJWUQJQMKQIF-UHFFFAOYSA-N",
+      "string": "InChI=1S/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-48,50-52,75H,26,28-33H2,1-24H3,(H,63,77)(H,64,76)(H,65,79)(H,66,78)",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 5,
+    "fields": {
+      "version": 1,
+      "block1": "DDPJWUQJQMKQIF",
+      "block2": "XPNZOOHZSA",
+      "block3": "N",
+      "key": "DDPJWUQJQMKQIF-XPNZOOHZSA-N",
+      "string": "InChI=1S/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-48,50-52,75H,26,28-33H2,1-24H3,(H,63,77)(H,64,76)(H,65,79)(H,66,78)/b27-25+/t40-,41+,42-,43+,44+,45+,46+,47+,48+,50+,51+,52-/m1/s1",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 6,
+    "fields": {
+      "version": 1,
+      "block1": "DZMKKMMYQPWUME",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "DZMKKMMYQPWUME-UHFFFAOYNA-N",
+      "string": "InChI=1/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-40,52,75H,26,28-32H2,1-24H3,(H2,33,74)(H,42,80)(H,43,81)(H,46,82)(H,47,83)(H,48,84)(H,50,85)(H2,41,64,76)(H2,44,66,78)(H2,45,63,77)(H2,51,65,79)",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 7,
+    "fields": {
+      "version": 1,
+      "block1": "DZMKKMMYQPWUME",
+      "block2": "WVGKSZLINA",
+      "block3": "N",
+      "key": "DZMKKMMYQPWUME-WVGKSZLINA-N",
+      "string": "InChI=1/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-40,52,75H,26,28-32H2,1-24H3,(H2,33,74)(H,42,80)(H,43,81)(H,46,82)(H,47,83)(H,48,84)(H,50,85)(H2,41,64,76)(H2,44,66,78)(H2,45,63,77)(H2,51,65,79)/b27-25+/t40-,52-/m1/s1",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 8,
+    "fields": {
+      "version": 1,
+      "block1": "FQEPJUOLUDFINX",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "FQEPJUOLUDFINX-UHFFFAOYNA-N",
+      "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,17H,11H2,1H3",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 9,
+    "fields": {
+      "version": 1,
+      "block1": "FQEPJUOLUDFINX",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "FQEPJUOLUDFINX-UHFFFAOYSA-N",
+      "string": "InChI=1S/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,17H,11H2,1H3",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 10,
+    "fields": {
+      "version": 1,
+      "block1": "FTTMRPCIVFQEPY",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "FTTMRPCIVFQEPY-UHFFFAOYNA-N",
+      "string": "InChI=1/C4H6O3/c1-3(5)7-4(2)6/h(H3,1,5)(H3,2,6)",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 11,
+    "fields": {
+      "version": 1,
+      "block1": "GZCGUPFRVQAUEE",
+      "block2": "SLPGGIOYNA",
+      "block3": "N",
+      "key": "GZCGUPFRVQAUEE-SLPGGIOYNA-N",
+      "string": "InChI=1/C6H12O6/c7-1-3(9)5(11)6(12)4(10)2-8/h1,3-6,8-12H,2H2/t3-,4+,5+,6+/m0/s1",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 12,
+    "fields": {
+      "version": 1,
+      "block1": "GZCGUPFRVQAUEE",
+      "block2": "SLPGGIOYSA",
+      "block3": "N",
+      "key": "GZCGUPFRVQAUEE-SLPGGIOYSA-N",
+      "string": "InChI=1S/C6H12O6/c7-1-3(9)5(11)6(12)4(10)2-8/h1,3-6,8-12H,2H2/t3-,4+,5+,6+/m0/s1",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 13,
+    "fields": {
+      "version": 1,
+      "block1": "GZCGUPFRVQAUEE",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "GZCGUPFRVQAUEE-UHFFFAOYNA-N",
+      "string": "InChI=1/C6H12O6/c7-1-3(9)5(11)6(12)4(10)2-8/h1,3-6,8-12H,2H2",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 14,
+    "fields": {
+      "version": 1,
+      "block1": "GZCGUPFRVQAUEE",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "GZCGUPFRVQAUEE-UHFFFAOYSA-N",
+      "string": "InChI=1S/C6H12O6/c7-1-3(9)5(11)6(12)4(10)2-8/h1,3-6,8-12H,2H2",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 15,
+    "fields": {
+      "version": 1,
+      "block1": "LFQSCWFLJHTTHZ",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "LFQSCWFLJHTTHZ-UHFFFAOYNA-N",
+      "string": "InChI=1/C2H6O/c1-2-3/h3H,2H2,1H3",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 16,
+    "fields": {
+      "version": 1,
+      "block1": "LFQSCWFLJHTTHZ",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+      "string": "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 17,
+    "fields": {
+      "version": 1,
+      "block1": "MACJUVQCBVFIIG",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "MACJUVQCBVFIIG-UHFFFAOYNA-N",
+      "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h(H5,1,2,3,4,5,6,7,8,9,10,11)",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 18,
+    "fields": {
+      "version": 1,
+      "block1": "OTGLYQANDXSLGV",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "OTGLYQANDXSLGV-UHFFFAOYNA-N",
+      "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,2,6,7,8,9,10,11)",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 19,
+    "fields": {
+      "version": 1,
+      "block1": "QTXVAVXCBMYBJW",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "QTXVAVXCBMYBJW-UHFFFAOYNA-N",
+      "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 20,
+    "fields": {
+      "version": 1,
+      "block1": "QTXVAVXCBMYBJW",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "QTXVAVXCBMYBJW-UHFFFAOYSA-N",
+      "string": "InChI=1S/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3",
+      "added": "2023-05-01T16:17:17.083Z",
+      "modified": "2023-05-01T16:17:17.083Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 21,
+    "fields": {
+      "version": 1,
+      "block1": "QYWNQMFLWBUZSW",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "QYWNQMFLWBUZSW-UHFFFAOYNA-N",
+      "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15H,(H5,1,11,20)(H,17,21,22)",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 22,
+    "fields": {
+      "version": 1,
+      "block1": "RZVAJINKPMORJF",
+      "block2": "BGGKNDAXNA",
+      "block3": "N",
+      "key": "RZVAJINKPMORJF-BGGKNDAXNA-N",
+      "string": "InChI=1/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h2-5,11H,1H3,(H,9,10)/f/h9H",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 23,
+    "fields": {
+      "version": 1,
+      "block1": "RZVAJINKPMORJF",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "RZVAJINKPMORJF-UHFFFAOYSA-N",
+      "string": "InChI=1S/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h2-5,11H,1H3,(H,9,10)",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 24,
+    "fields": {
+      "version": 1,
+      "block1": "SAYISSDYYDIVTP",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "SAYISSDYYDIVTP-UHFFFAOYNA-N",
+      "string": "InChI=1/C19H16O4/c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15H,1H3,(H2,11,20)(H,17,21,22)",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 25,
+    "fields": {
+      "version": 1,
+      "block1": "UHOVQNZJYSORNB",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "UHOVQNZJYSORNB-UHFFFAOYNA-N",
+      "string": "InChI=1/C6H6/c1-2-4-6-5-3-1/h1-6H",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 26,
+    "fields": {
+      "version": 1,
+      "block1": "UHOVQNZJYSORNB",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "UHOVQNZJYSORNB-UHFFFAOYSA-N",
+      "string": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 27,
+    "fields": {
+      "version": 1,
+      "block1": "UYIYIMIPLDIGJV",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "UYIYIMIPLDIGJV-UHFFFAOYNA-N",
+      "string": "InChI=1/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-38,40,52,75H,28-32H2,1-15,18-24H3,(H2,33,74)(H,46,82)(H,47,83)(H,48,84)(H,43,56,81)(H,50,55,85)(H4,26,51,58,65,79)(H3,39,44,62,66,78)(H5,17,41,54,57,64,76)(H6,16,42,45,53,63,77,80)",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 28,
+    "fields": {
+      "version": 1,
+      "block1": "UYIYIMIPLDIGJV",
+      "block2": "WVGKSZLINA",
+      "block3": "N",
+      "key": "UYIYIMIPLDIGJV-WVGKSZLINA-N",
+      "string": "InChI=1/C62H111N11O12/c1-25-27-40(15)52(75)51-56(79)65-43(26-2)58(81)67(18)33-49(74)68(19)44(28-34(3)4)55(78)66-50(39(13)14)62(85)69(20)45(29-35(5)6)54(77)63-41(16)53(76)64-42(17)57(80)70(21)46(30-36(7)8)59(82)71(22)47(31-37(9)10)60(83)72(23)48(32-38(11)12)61(84)73(51)24/h25,27,34-38,40,52,75H,28-32H2,1-15,18-24H3,(H2,33,74)(H,46,82)(H,47,83)(H,48,84)(H,43,56,81)(H,50,55,85)(H4,26,51,58,65,79)(H3,39,44,62,66,78)(H5,17,41,54,57,64,76)(H6,16,42,45,53,63,77,80)/b27-25+/t40-,52-/m1/s1",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 29,
+    "fields": {
+      "version": 1,
+      "block1": "UYTPUPDQBNUYGX",
+      "block2": "CQCWYMDMNA",
+      "block3": "N",
+      "key": "UYTPUPDQBNUYGX-CQCWYMDMNA-N",
+      "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)/f/h7,10H,6H2",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 30,
+    "fields": {
+      "version": 1,
+      "block1": "UYTPUPDQBNUYGX",
+      "block2": "IQCGNDTDNA",
+      "block3": "N",
+      "key": "UYTPUPDQBNUYGX-IQCGNDTDNA-N",
+      "string": "InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)/f/h7,11H,6H2",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 31,
+    "fields": {
+      "version": 1,
+      "block1": "UYTPUPDQBNUYGX",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "UYTPUPDQBNUYGX-UHFFFAOYSA-N",
+      "string": "InChI=1S/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 32,
+    "fields": {
+      "version": 1,
+      "block1": "WFDIJRYMOXRFFG",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "WFDIJRYMOXRFFG-UHFFFAOYNA-N",
+      "string": "InChI=1/C4H6O3/c1-3(5)7-4(2)6/h1-2H3",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 33,
+    "fields": {
+      "version": 1,
+      "block1": "WFDIJRYMOXRFFG",
+      "block2": "UHFFFAOYSA",
+      "block3": "N",
+      "key": "WFDIJRYMOXRFFG-UHFFFAOYSA-N",
+      "string": "InChI=1S/C4H6O3/c1-3(5)7-4(2)6/h1-2H3",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 34,
+    "fields": {
+      "version": 1,
+      "block1": "WMUJEHZKXASYIC",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "WMUJEHZKXASYIC-UHFFFAOYNA-N",
+      "string": "InChI=1/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h2-3H,1H3,(H,9,10)(H3,4,5,11)",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchi",
+    "pk": 35,
+    "fields": {
+      "version": 1,
+      "block1": "WQHNFUMGTCLQFP",
+      "block2": "UHFFFAOYNA",
+      "block3": "N",
+      "key": "WQHNFUMGTCLQFP-UHFFFAOYNA-N",
+      "string": "InChI=1/C8H9NO2/c1-6(10)9-7-2-4-8(11)5-3-7/h(H3,4,5,11)(H6,1,2,3,9,10)",
+      "added": "2023-05-01T16:17:17.084Z",
+      "modified": "2023-05-01T16:17:17.084Z",
+      "entrypoints": []
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 1,
+    "fields": {
+      "title": "standard",
+      "software_version": "1.06",
+      "description": "Standard InChI",
+      "is_standard": true,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": false,
+      "fixedh": false,
+      "ket": false,
+      "t15": false,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2023-05-01T16:11:13.055Z",
+      "modified": "2023-05-01T16:11:13.057Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 2,
+    "fields": {
+      "title": "original",
+      "software_version": "('1.06',)",
+      "description": "('InChI with FixedH layer and RecMet option',)",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": false,
+      "t15": false,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2023-05-01T16:11:13.060Z",
+      "modified": "2023-05-01T16:11:13.061Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 3,
+    "fields": {
+      "title": "xtauto",
+      "software_version": "('1.06',)",
+      "description": "experimental InChI with FixedH layer, RecMet option and experimental tauto optionsKET and T15 options set",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": true,
+      "t15": true,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2023-05-01T16:11:13.064Z",
+      "modified": "2023-05-01T16:11:13.065Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 4,
+    "fields": {
+      "title": "xtautox",
+      "software_version": "('1.06T',)",
+      "description": "('experimental InChI with FixedH layer, RecMet option and experimental tauto options KET, T15 including NCI tautomer options set',)",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": true,
+      "t15": true,
+      "pt_22_00": true,
+      "pt_16_00": true,
+      "pt_06_00": true,
+      "pt_39_00": true,
+      "pt_13_00": true,
+      "pt_18_00": true,
+      "added": "2023-05-01T16:11:13.069Z",
+      "modified": "2023-05-01T16:11:13.071Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 1,
+    "fields": {
+      "structure": 4,
+      "inchi": 1,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.185Z",
+      "modified": "2023-05-01T16:17:17.185Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 2,
+    "fields": {
+      "structure": 4,
+      "inchi": 1,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.185Z",
+      "modified": "2023-05-01T16:17:17.185Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 3,
+    "fields": {
+      "structure": 27,
+      "inchi": 1,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.185Z",
+      "modified": "2023-05-01T16:17:17.185Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 4,
+    "fields": {
+      "structure": 27,
+      "inchi": 1,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.185Z",
+      "modified": "2023-05-01T16:17:17.185Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 5,
+    "fields": {
+      "structure": 14,
+      "inchi": 2,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.185Z",
+      "modified": "2023-05-01T16:17:17.185Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 6,
+    "fields": {
+      "structure": 5,
+      "inchi": 3,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.185Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 7,
+    "fields": {
+      "structure": 14,
+      "inchi": 4,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 8,
+    "fields": {
+      "structure": 5,
+      "inchi": 5,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 9,
+    "fields": {
+      "structure": 14,
+      "inchi": 6,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 10,
+    "fields": {
+      "structure": 5,
+      "inchi": 7,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 11,
+    "fields": {
+      "structure": 28,
+      "inchi": 8,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 12,
+    "fields": {
+      "structure": 28,
+      "inchi": 9,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 13,
+    "fields": {
+      "structure": 7,
+      "inchi": 10,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 14,
+    "fields": {
+      "structure": 4,
+      "inchi": 11,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 15,
+    "fields": {
+      "structure": 4,
+      "inchi": 12,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 16,
+    "fields": {
+      "structure": 27,
+      "inchi": 13,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 17,
+    "fields": {
+      "structure": 27,
+      "inchi": 14,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.187Z",
+      "modified": "2023-05-01T16:17:17.187Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 18,
+    "fields": {
+      "structure": 8,
+      "inchi": 15,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 19,
+    "fields": {
+      "structure": 8,
+      "inchi": 15,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 20,
+    "fields": {
+      "structure": 8,
+      "inchi": 15,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 21,
+    "fields": {
+      "structure": 8,
+      "inchi": 16,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 22,
+    "fields": {
+      "structure": 1,
+      "inchi": 17,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 23,
+    "fields": {
+      "structure": 25,
+      "inchi": 17,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 24,
+    "fields": {
+      "structure": 1,
+      "inchi": 18,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 25,
+    "fields": {
+      "structure": 25,
+      "inchi": 18,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 26,
+    "fields": {
+      "structure": 2,
+      "inchi": 19,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 27,
+    "fields": {
+      "structure": 2,
+      "inchi": 20,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 28,
+    "fields": {
+      "structure": 2,
+      "inchi": 21,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 29,
+    "fields": {
+      "structure": 28,
+      "inchi": 21,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.188Z",
+      "modified": "2023-05-01T16:17:17.188Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 30,
+    "fields": {
+      "structure": 6,
+      "inchi": 22,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 31,
+    "fields": {
+      "structure": 6,
+      "inchi": 23,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 32,
+    "fields": {
+      "structure": 2,
+      "inchi": 24,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 33,
+    "fields": {
+      "structure": 28,
+      "inchi": 24,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 34,
+    "fields": {
+      "structure": 3,
+      "inchi": 25,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 35,
+    "fields": {
+      "structure": 3,
+      "inchi": 25,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 36,
+    "fields": {
+      "structure": 3,
+      "inchi": 25,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 37,
+    "fields": {
+      "structure": 3,
+      "inchi": 26,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 38,
+    "fields": {
+      "structure": 14,
+      "inchi": 27,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 39,
+    "fields": {
+      "structure": 5,
+      "inchi": 28,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 40,
+    "fields": {
+      "structure": 1,
+      "inchi": 29,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 41,
+    "fields": {
+      "structure": 25,
+      "inchi": 30,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 42,
+    "fields": {
+      "structure": 1,
+      "inchi": 31,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 43,
+    "fields": {
+      "structure": 25,
+      "inchi": 31,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 44,
+    "fields": {
+      "structure": 7,
+      "inchi": 32,
+      "inchi_type": 2,
+      "software_version": "1.06",
+      "save_opt": "MA",
+      "added": "2023-05-01T16:17:17.190Z",
+      "modified": "2023-05-01T16:17:17.190Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 45,
+    "fields": {
+      "structure": 7,
+      "inchi": 32,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.191Z",
+      "modified": "2023-05-01T16:17:17.191Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 46,
+    "fields": {
+      "structure": 7,
+      "inchi": 33,
+      "inchi_type": 1,
+      "software_version": "1.06",
+      "save_opt": "",
+      "added": "2023-05-01T16:17:17.191Z",
+      "modified": "2023-05-01T16:17:17.191Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 47,
+    "fields": {
+      "structure": 6,
+      "inchi": 34,
+      "inchi_type": 3,
+      "software_version": "1.06",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.191Z",
+      "modified": "2023-05-01T16:17:17.191Z"
+    }
+  },
+  {
+    "model": "resolver.structureinchiassociation",
+    "pk": 48,
+    "fields": {
+      "structure": 6,
+      "inchi": 35,
+      "inchi_type": 4,
+      "software_version": "1.06T",
+      "save_opt": "ID",
+      "added": "2023-05-01T16:17:17.191Z",
+      "modified": "2023-05-01T16:17:17.191Z"
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 1,
+    "fields": {
+      "structure": 1,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 2,
+    "fields": {
+      "structure": 2,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 3,
+    "fields": {
+      "structure": 3,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 4,
+    "fields": {
+      "structure": 14,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 5,
+    "fields": {
+      "structure": 4,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 6,
+    "fields": {
+      "structure": 5,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 7,
+    "fields": {
+      "structure": 6,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 8,
+    "fields": {
+      "structure": 7,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 9,
+    "fields": {
+      "structure": 25,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 10,
+    "fields": {
+      "structure": 27,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 11,
+    "fields": {
+      "structure": 28,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.compound",
+    "pk": 12,
+    "fields": {
+      "structure": 8,
+      "added": "2023-05-01T16:13:16.349Z",
+      "modified": "2023-05-01T16:13:16.349Z",
+      "blocked": null
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 1,
+    "fields": {
+      "name": 24,
+      "regid": "TEST-0",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 1,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 2,
+    "fields": {
+      "name": 2,
+      "regid": "TEST-1",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 2,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 3,
+    "fields": {
+      "name": 33,
+      "regid": "TEST-2",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 3,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 4,
+    "fields": {
+      "name": 26,
+      "regid": "TEST-3",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 4,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 5,
+    "fields": {
+      "name": 35,
+      "regid": "TEST-4",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 5,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 6,
+    "fields": {
+      "name": 1,
+      "regid": "TEST-5",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 6,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 7,
+    "fields": {
+      "name": 8,
+      "regid": "TEST-6",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 7,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.record",
+    "pk": 8,
+    "fields": {
+      "name": 34,
+      "regid": "TEST-7",
+      "version": 1,
+      "release": 1,
+      "dataset": 4,
+      "structure_file_record": 8,
+      "added": "2023-05-01T16:12:05.168Z",
+      "modified": "2023-05-01T16:12:05.168Z"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 1,
+    "fields": {
+      "name": "TEST-5"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 2,
+    "fields": {
+      "name": "TEST-1"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 3,
+    "fields": {
+      "name": "sisatser"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 4,
+    "fields": {
+      "name": "tylenol"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 5,
+    "fields": {
+      "name": "ZINC-5"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 6,
+    "fields": {
+      "name": "acetic anhydride"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 7,
+    "fields": {
+      "name": "glucose"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 8,
+    "fields": {
+      "name": "TEST-6"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 9,
+    "fields": {
+      "name": "warfarin"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 10,
+    "fields": {
+      "name": "ZINC-6"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 11,
+    "fields": {
+      "name": "Ethanol"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 12,
+    "fields": {
+      "name": "NSC-6"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 13,
+    "fields": {
+      "name": "ZINC-1"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 14,
+    "fields": {
+      "name": "lonahte"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 15,
+    "fields": {
+      "name": "NSC-1"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 16,
+    "fields": {
+      "name": "Restasis"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 17,
+    "fields": {
+      "name": "NSC-5"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 18,
+    "fields": {
+      "name": "NSC-2"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 19,
+    "fields": {
+      "name": "eninaug"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 20,
+    "fields": {
+      "name": "Acetic anhydride"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 21,
+    "fields": {
+      "name": "Tylenol"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 22,
+    "fields": {
+      "name": "ZINC-2"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 23,
+    "fields": {
+      "name": "NSC-7"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 24,
+    "fields": {
+      "name": "TEST-0"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 25,
+    "fields": {
+      "name": "edirdyhna citeca"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 26,
+    "fields": {
+      "name": "TEST-3"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 27,
+    "fields": {
+      "name": "lonelyt"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 28,
+    "fields": {
+      "name": "ZINC-7"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 29,
+    "fields": {
+      "name": "ethanol"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 30,
+    "fields": {
+      "name": "nirafraw"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 31,
+    "fields": {
+      "name": "NSC-4"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 32,
+    "fields": {
+      "name": "guanine"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 33,
+    "fields": {
+      "name": "TEST-2"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 34,
+    "fields": {
+      "name": "TEST-7"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 35,
+    "fields": {
+      "name": "TEST-4"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 36,
+    "fields": {
+      "name": "esoculg"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 37,
+    "fields": {
+      "name": "ZINC-0"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 38,
+    "fields": {
+      "name": "Warfarin"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 39,
+    "fields": {
+      "name": "Glucose"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 40,
+    "fields": {
+      "name": "NSC-0"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 41,
+    "fields": {
+      "name": "restasis"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 42,
+    "fields": {
+      "name": "Benzene"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 43,
+    "fields": {
+      "name": "ZINC-4"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 44,
+    "fields": {
+      "name": "enezneb"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 45,
+    "fields": {
+      "name": "Guanine"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 46,
+    "fields": {
+      "name": "NSC-3"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 47,
+    "fields": {
+      "name": "benzene"
+    }
+  },
+  {
+    "model": "resolver.name",
+    "pk": 48,
+    "fields": {
+      "name": "ZINC-3"
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 1,
+    "fields": {
+      "title": "REGID",
+      "parent": null,
+      "public_string": "Registration ID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 2,
+    "fields": {
+      "title": "NAME",
+      "parent": null,
+      "public_string": "Chemical Name or Synonym",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 3,
+    "fields": {
+      "title": "PUBCHEM_IUPAC_NAME",
+      "parent": 2,
+      "public_string": "PubChem IUPAC NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 4,
+    "fields": {
+      "title": "PUBCHEM_IUPAC_OPENEYE_NAME",
+      "parent": 2,
+      "public_string": "PubChem IUPAC OPENEYE NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 5,
+    "fields": {
+      "title": "PUBCHEM_IUPAC_CAS_NAME",
+      "parent": 2,
+      "public_string": "PubChem IUPAC CAS NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 6,
+    "fields": {
+      "title": "PUBCHEM_IUPAC_TRADITIONAL_NAME",
+      "parent": 2,
+      "public_string": "PubChem IUPAC TRADITIONAL NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 7,
+    "fields": {
+      "title": "PUBCHEM_IUPAC_SYSTEMATIC_NAME",
+      "parent": 2,
+      "public_string": "PubChem IUPAC SYSTEMATIC NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 8,
+    "fields": {
+      "title": "PUBCHEM_GENERIC_REGISTRY_NAME",
+      "parent": 2,
+      "public_string": "PubChem GENERIC REGISTRY NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 9,
+    "fields": {
+      "title": "PUBCHEM_SUBSTANCE_SYNONYM",
+      "parent": 2,
+      "public_string": "PubChem SUBSTANCE SYNONYM",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 10,
+    "fields": {
+      "title": "NSC_NUMBER",
+      "parent": 1,
+      "public_string": "NSC number",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 11,
+    "fields": {
+      "title": "NSC_NUMBER_PREFIXED",
+      "parent": 1,
+      "public_string": "NSC number prefixed",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 12,
+    "fields": {
+      "title": "PUBCHEM_SID",
+      "parent": 1,
+      "public_string": "PubChem SID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 13,
+    "fields": {
+      "title": "PUBCHEM_CID",
+      "parent": 1,
+      "public_string": "PubChem CID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 1,
+    "fields": {
+      "title": "exact",
+      "description": "Exact"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 2,
+    "fields": {
+      "title": "narrow",
+      "description": "Narrow"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 3,
+    "fields": {
+      "title": "broad",
+      "description": "Broad"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 4,
+    "fields": {
+      "title": "unknown",
+      "description": "Unknown"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 5,
+    "fields": {
+      "title": "unspecified",
+      "description": "Unspecified"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 6,
+    "fields": {
+      "title": "generic",
+      "description": "Generic"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 7,
+    "fields": {
+      "title": "related",
+      "description": "Related"
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 1,
+    "fields": {
+      "name": 24,
+      "structure": 8,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 2,
+    "fields": {
+      "name": 29,
+      "structure": 8,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 3,
+    "fields": {
+      "name": 14,
+      "structure": 8,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 4,
+    "fields": {
+      "name": 11,
+      "structure": 8,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 5,
+    "fields": {
+      "name": 37,
+      "structure": 8,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 6,
+    "fields": {
+      "name": 40,
+      "structure": 8,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 7,
+    "fields": {
+      "name": 34,
+      "structure": 4,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 8,
+    "fields": {
+      "name": 34,
+      "structure": 27,
+      "name_type": 1,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 9,
+    "fields": {
+      "name": 7,
+      "structure": 4,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 10,
+    "fields": {
+      "name": 7,
+      "structure": 27,
+      "name_type": 2,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 11,
+    "fields": {
+      "name": 36,
+      "structure": 4,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 12,
+    "fields": {
+      "name": 36,
+      "structure": 27,
+      "name_type": 2,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 13,
+    "fields": {
+      "name": 39,
+      "structure": 4,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 14,
+    "fields": {
+      "name": 39,
+      "structure": 27,
+      "name_type": 2,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 15,
+    "fields": {
+      "name": 28,
+      "structure": 4,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 16,
+    "fields": {
+      "name": 28,
+      "structure": 27,
+      "name_type": 1,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 17,
+    "fields": {
+      "name": 23,
+      "structure": 4,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 18,
+    "fields": {
+      "name": 23,
+      "structure": 27,
+      "name_type": 10,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 19,
+    "fields": {
+      "name": 33,
+      "structure": 2,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 20,
+    "fields": {
+      "name": 33,
+      "structure": 28,
+      "name_type": 1,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 21,
+    "fields": {
+      "name": 9,
+      "structure": 2,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 22,
+    "fields": {
+      "name": 9,
+      "structure": 28,
+      "name_type": 2,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 23,
+    "fields": {
+      "name": 30,
+      "structure": 2,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 24,
+    "fields": {
+      "name": 30,
+      "structure": 28,
+      "name_type": 2,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 25,
+    "fields": {
+      "name": 38,
+      "structure": 2,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 26,
+    "fields": {
+      "name": 38,
+      "structure": 28,
+      "name_type": 2,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 27,
+    "fields": {
+      "name": 22,
+      "structure": 2,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 28,
+    "fields": {
+      "name": 22,
+      "structure": 28,
+      "name_type": 1,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 29,
+    "fields": {
+      "name": 18,
+      "structure": 2,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 30,
+    "fields": {
+      "name": 18,
+      "structure": 28,
+      "name_type": 10,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 31,
+    "fields": {
+      "name": 1,
+      "structure": 5,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 32,
+    "fields": {
+      "name": 1,
+      "structure": 14,
+      "name_type": 1,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 33,
+    "fields": {
+      "name": 41,
+      "structure": 5,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 34,
+    "fields": {
+      "name": 41,
+      "structure": 14,
+      "name_type": 2,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 35,
+    "fields": {
+      "name": 3,
+      "structure": 5,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 36,
+    "fields": {
+      "name": 3,
+      "structure": 14,
+      "name_type": 2,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 37,
+    "fields": {
+      "name": 16,
+      "structure": 5,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 38,
+    "fields": {
+      "name": 16,
+      "structure": 14,
+      "name_type": 2,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 39,
+    "fields": {
+      "name": 5,
+      "structure": 5,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 40,
+    "fields": {
+      "name": 5,
+      "structure": 14,
+      "name_type": 1,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 41,
+    "fields": {
+      "name": 17,
+      "structure": 5,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 42,
+    "fields": {
+      "name": 17,
+      "structure": 14,
+      "name_type": 10,
+      "affinity_class": 3,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 43,
+    "fields": {
+      "name": 2,
+      "structure": 3,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 44,
+    "fields": {
+      "name": 47,
+      "structure": 3,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 45,
+    "fields": {
+      "name": 44,
+      "structure": 3,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 46,
+    "fields": {
+      "name": 42,
+      "structure": 3,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 47,
+    "fields": {
+      "name": 13,
+      "structure": 3,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 48,
+    "fields": {
+      "name": 15,
+      "structure": 3,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 49,
+    "fields": {
+      "name": 8,
+      "structure": 7,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 50,
+    "fields": {
+      "name": 6,
+      "structure": 7,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 51,
+    "fields": {
+      "name": 25,
+      "structure": 7,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 52,
+    "fields": {
+      "name": 20,
+      "structure": 7,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 53,
+    "fields": {
+      "name": 10,
+      "structure": 7,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 54,
+    "fields": {
+      "name": 12,
+      "structure": 7,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 55,
+    "fields": {
+      "name": 35,
+      "structure": 6,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 56,
+    "fields": {
+      "name": 4,
+      "structure": 6,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 57,
+    "fields": {
+      "name": 27,
+      "structure": 6,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 58,
+    "fields": {
+      "name": 21,
+      "structure": 6,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 59,
+    "fields": {
+      "name": 43,
+      "structure": 6,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 60,
+    "fields": {
+      "name": 31,
+      "structure": 6,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 61,
+    "fields": {
+      "name": 26,
+      "structure": 1,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 62,
+    "fields": {
+      "name": 26,
+      "structure": 25,
+      "name_type": 1,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 63,
+    "fields": {
+      "name": 32,
+      "structure": 1,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 64,
+    "fields": {
+      "name": 32,
+      "structure": 25,
+      "name_type": 2,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 65,
+    "fields": {
+      "name": 19,
+      "structure": 1,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 66,
+    "fields": {
+      "name": 19,
+      "structure": 25,
+      "name_type": 2,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 67,
+    "fields": {
+      "name": 45,
+      "structure": 1,
+      "name_type": 2,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 68,
+    "fields": {
+      "name": 45,
+      "structure": 25,
+      "name_type": 2,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 69,
+    "fields": {
+      "name": 48,
+      "structure": 1,
+      "name_type": 1,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 70,
+    "fields": {
+      "name": 48,
+      "structure": 25,
+      "name_type": 1,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 71,
+    "fields": {
+      "name": 46,
+      "structure": 1,
+      "name_type": 10,
+      "affinity_class": 1,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 72,
+    "fields": {
+      "name": 46,
+      "structure": 25,
+      "name_type": 10,
+      "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 1,
+    "fields": {
+      "parent": null,
+      "name": "U.S. National Institutes of Health",
+      "abbreviation": "NIH",
+      "category": "government",
+      "href": "https://www.nih.gov",
+      "added": "2023-05-01T16:11:12.931Z",
+      "modified": "2023-05-01T16:11:12.932Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 2,
+    "fields": {
+      "parent": 1,
+      "name": "U.S. National Cancer Institute",
+      "abbreviation": "NCI",
+      "category": "government",
+      "href": "https://www.cancer.gov",
+      "added": "2023-05-01T16:11:12.936Z",
+      "modified": "2023-05-01T16:11:12.938Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 3,
+    "fields": {
+      "parent": 1,
+      "name": "U.S. National Library of Medicine",
+      "abbreviation": "NLM",
+      "category": "government",
+      "href": "https://www.nlm.nih.gov",
+      "added": "2023-05-01T16:11:12.941Z",
+      "modified": "2023-05-01T16:11:12.942Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 4,
+    "fields": {
+      "parent": 3,
+      "name": "U.S. National Center for Biotechnology Information",
+      "abbreviation": "NCBI",
+      "category": "government",
+      "href": "https://www.ncbi.nlm.nih.gov",
+      "added": "2023-05-01T16:11:12.945Z",
+      "modified": "2023-05-01T16:11:12.946Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 5,
+    "fields": {
+      "parent": null,
+      "name": "FIZ Karlsruhe – Leibniz-Institut für Informationsinfrastruktur",
+      "abbreviation": "FIZ Karlsruhe",
+      "category": "public",
+      "href": "https://www.fiz-karlsruhe.de",
+      "added": "2023-05-01T16:11:12.948Z",
+      "modified": "2023-05-01T16:11:12.949Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 6,
+    "fields": {
+      "parent": null,
+      "name": "European Molecular Biology Laboratory",
+      "abbreviation": "EMBL",
+      "category": "public",
+      "href": "https://www.embl.org/",
+      "added": "2023-05-01T16:11:12.952Z",
+      "modified": "2023-05-01T16:11:12.954Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 7,
+    "fields": {
+      "parent": 6,
+      "name": "EMBL's European Bioinformatics Institute",
+      "abbreviation": "EMBL-EBI",
+      "category": "public",
+      "href": "https://www.ebi.ac.uk/",
+      "added": "2023-05-01T16:11:12.956Z",
+      "modified": "2023-05-01T16:11:12.957Z"
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 1,
+    "fields": {
+      "parent": null,
+      "category": "group",
+      "name": "NCI Computer-Aided Drug Design (CADD) Group",
+      "description": null,
+      "email": null,
+      "address": "Frederick, MD 21702-1201, USA",
+      "href": "https://cactus.nci.nih.gov",
+      "orcid": null,
+      "added": "2023-05-01T16:11:12.960Z",
+      "modified": "2023-05-01T16:11:12.965Z",
+      "organizations": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 2,
+    "fields": {
+      "parent": 1,
+      "category": "person",
+      "name": "Marc Nicklaus",
+      "description": null,
+      "email": "mn1ahelix@gmail.com",
+      "address": "Frederick, MD 21702-1201, USA",
+      "href": "https://ccr.cancer.gov/staff-directory/marc-c-nicklaus",
+      "orcid": "https://orcid.org/0000-0002-4775-7030",
+      "added": "2023-05-01T16:11:12.969Z",
+      "modified": "2023-05-01T16:11:12.972Z",
+      "organizations": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 3,
+    "fields": {
+      "parent": null,
+      "category": "person",
+      "name": "Markus Sitzmann",
+      "description": null,
+      "email": "markus.sitzmann@gmail.com",
+      "address": null,
+      "href": null,
+      "orcid": "https://orcid.org/0000-0001-5346-1298",
+      "added": "2023-05-01T16:11:12.975Z",
+      "modified": "2023-05-01T16:11:12.976Z",
+      "organizations": []
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 4,
+    "fields": {
+      "parent": null,
+      "category": "division",
+      "name": "PubChem",
+      "description": null,
+      "email": "pubchem-help@ncbi.nlm.nih.gov",
+      "address": "8600 Rockville Pike; Bethesda, MD  20894; USA",
+      "href": "https://pubchemdocs.ncbi.nlm.nih.gov/contact",
+      "orcid": null,
+      "added": "2023-05-01T16:11:12.979Z",
+      "modified": "2023-05-01T16:11:12.982Z",
+      "organizations": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 5,
+    "fields": {
+      "parent": null,
+      "category": "group",
+      "name": "ChEMBL Team",
+      "description": null,
+      "email": null,
+      "address": null,
+      "href": "https://chembl.gitbook.io/chembl-interface-documentation/about",
+      "orcid": null,
+      "added": "2023-05-01T16:11:12.986Z",
+      "modified": "2023-05-01T16:11:12.989Z",
+      "organizations": [
+        6,
+        7
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 6,
+    "fields": {
+      "parent": null,
+      "category": "division",
+      "name": "DTP/NCI",
+      "description": null,
+      "email": null,
+      "address": null,
+      "href": "https://dtp.cancer.gov/",
+      "orcid": null,
+      "added": "2023-05-01T16:11:12.992Z",
+      "modified": "2023-05-01T16:11:12.995Z",
+      "organizations": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 1,
+    "fields": {
+      "tag": "other",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 2,
+    "fields": {
+      "tag": "screening",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 3,
+    "fields": {
+      "tag": "building blocks",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 4,
+    "fields": {
+      "tag": "toxicology",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 5,
+    "fields": {
+      "tag": "environmental",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 6,
+    "fields": {
+      "tag": "patent",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 7,
+    "fields": {
+      "tag": "journal",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 8,
+    "fields": {
+      "tag": "literature",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 9,
+    "fields": {
+      "tag": "natural product",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 10,
+    "fields": {
+      "tag": "imaging",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 11,
+    "fields": {
+      "tag": "contrast agent",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 12,
+    "fields": {
+      "tag": "meta",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 13,
+    "fields": {
+      "tag": "vendor",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 14,
+    "fields": {
+      "tag": "drug",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 15,
+    "fields": {
+      "tag": "SAR",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 16,
+    "fields": {
+      "tag": "QSAR",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 17,
+    "fields": {
+      "tag": "physicochemical property",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 18,
+    "fields": {
+      "tag": "ligand",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 19,
+    "fields": {
+      "tag": "small molecule",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 20,
+    "fields": {
+      "tag": "crystal-structure",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 1,
+    "fields": {
+      "name": "PubChem",
+      "href": "https://pubchem.ncbi.nlm.nih.gov/",
+      "description": "PubChem is an open chemistry database at the National Institutes of Health (NIH)",
+      "publisher": 4,
+      "added": "2023-05-01T16:11:12.999Z",
+      "modified": "2023-05-01T16:11:13.005Z",
+      "context_tags": [
+        12
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 2,
+    "fields": {
+      "name": "ChEMBL",
+      "href": "https://www.ebi.ac.uk/chembl/",
+      "description": "ChEMBL is a manually curated database of bioactive molecules with drug-like properties",
+      "publisher": 5,
+      "added": "2023-05-01T16:11:13.008Z",
+      "modified": "2023-05-01T16:11:13.012Z",
+      "context_tags": [
+        14
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 3,
+    "fields": {
+      "name": "DTP/NCI",
+      "href": "https://dtp.cancer.gov/",
+      "description": "NCI database",
+      "publisher": 6,
+      "added": "2023-05-01T16:11:13.015Z",
+      "modified": "2023-05-01T16:11:13.021Z",
+      "context_tags": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 4,
+    "fields": {
+      "name": "SANDBOX",
+      "href": "https://sandbox.test/",
+      "description": "sandbox",
+      "publisher": 3,
+      "added": "2023-05-01T16:11:13.024Z",
+      "modified": "2023-05-01T16:11:13.028Z",
+      "context_tags": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": 1,
+    "fields": {
+      "parent": null,
+      "dataset": 4,
+      "publisher": 3,
+      "name": "Sandbox Release",
+      "description": "Sandbox",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "version": "0",
+      "released": null,
+      "downloaded": "2023-05-01",
+      "added": "2023-05-01T16:11:13.040Z",
+      "modified": "2023-05-01T16:11:13.042Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 1,
+    "fields": {
+      "name": "pubchem_ext_datasource",
+      "params": {}
+    }
+  },
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 2,
+    "fields": {
+      "name": "generic",
+      "params": "{\"regid\": {\"field\": \"E_ID\", \"type\": \"REGID\"}, \"names\": [{\"field\": \"E_NAME\", \"type\": \"NAME\"}, {\"field\": \"E_SYNONYM\", \"type\": \"NAME\"}, {\"field\": \"E_ZINC_ID\", \"type\": \"REGID\"}, {\"field\": \"E_NSC_NUMBER\", \"type\": \"NSC_NUMBER\"}]}"
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 1,
+    "fields": {
+      "release": 1,
+      "file_location_pattern_string": "sandbox/structures.sdf",
+      "description": null,
+      "added": "2023-05-01T16:11:13.045Z",
+      "modified": "2023-05-01T16:11:13.051Z",
+      "preprocessors": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "etl.structurefile",
+    "pk": 1,
+    "fields": {
+      "collection": 1,
+      "file": "/filestore/sandbox/structures.sdf",
+      "count": 8,
+      "added": "2023-05-01T16:12:04.898Z",
+      "modified": "2023-05-01T16:12:05.021Z"
+    }
+  },
+  {
+    "model": "etl.structurefilenormalizationstatus",
+    "pk": 1,
+    "fields": {
+      "updated": "2023-05-01T16:13:16.364Z",
+      "progress": 1.0
+    }
+  },
+  {
+    "model": "etl.structurecalcinchistatus",
+    "pk": 1,
+    "fields": {
+      "updated": "2023-05-01T16:17:17.209Z",
+      "progress": 1.0
+    }
+  },
+  {
+    "model": "etl.structurefilelinknamestatus",
+    "pk": 1,
+    "fields": {
+      "updated": "2023-05-01T16:17:28.179Z",
+      "progress": 1.0
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 1,
+    "fields": {
+      "structure_file": 1,
+      "structure": 8,
+      "number": 1,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 2,
+    "fields": {
+      "structure_file": 1,
+      "structure": 3,
+      "number": 2,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 3,
+    "fields": {
+      "structure_file": 1,
+      "structure": 2,
+      "number": 3,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 4,
+    "fields": {
+      "structure_file": 1,
+      "structure": 1,
+      "number": 4,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 5,
+    "fields": {
+      "structure_file": 1,
+      "structure": 6,
+      "number": 5,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 6,
+    "fields": {
+      "structure_file": 1,
+      "structure": 5,
+      "number": 6,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 7,
+    "fields": {
+      "structure_file": 1,
+      "structure": 7,
+      "number": 7,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecord",
+    "pk": 8,
+    "fields": {
+      "structure_file": 1,
+      "structure": 4,
+      "number": 8,
+      "added": "2023-05-01T16:12:05.152Z",
+      "modified": "2023-05-01T16:12:05.152Z",
+      "processed": null
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 1,
+    "fields": {
+      "name": 24,
+      "structure_file_record": 1,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 2,
+    "fields": {
+      "name": 29,
+      "structure_file_record": 1,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 3,
+    "fields": {
+      "name": 14,
+      "structure_file_record": 1,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 4,
+    "fields": {
+      "name": 11,
+      "structure_file_record": 1,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 5,
+    "fields": {
+      "name": 37,
+      "structure_file_record": 1,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 6,
+    "fields": {
+      "name": 40,
+      "structure_file_record": 1,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 7,
+    "fields": {
+      "name": 2,
+      "structure_file_record": 2,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 8,
+    "fields": {
+      "name": 47,
+      "structure_file_record": 2,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 9,
+    "fields": {
+      "name": 44,
+      "structure_file_record": 2,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 10,
+    "fields": {
+      "name": 42,
+      "structure_file_record": 2,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 11,
+    "fields": {
+      "name": 13,
+      "structure_file_record": 2,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 12,
+    "fields": {
+      "name": 15,
+      "structure_file_record": 2,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 13,
+    "fields": {
+      "name": 33,
+      "structure_file_record": 3,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 14,
+    "fields": {
+      "name": 9,
+      "structure_file_record": 3,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 15,
+    "fields": {
+      "name": 30,
+      "structure_file_record": 3,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 16,
+    "fields": {
+      "name": 38,
+      "structure_file_record": 3,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 17,
+    "fields": {
+      "name": 22,
+      "structure_file_record": 3,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 18,
+    "fields": {
+      "name": 18,
+      "structure_file_record": 3,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 19,
+    "fields": {
+      "name": 26,
+      "structure_file_record": 4,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 20,
+    "fields": {
+      "name": 32,
+      "structure_file_record": 4,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 21,
+    "fields": {
+      "name": 19,
+      "structure_file_record": 4,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 22,
+    "fields": {
+      "name": 45,
+      "structure_file_record": 4,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 23,
+    "fields": {
+      "name": 48,
+      "structure_file_record": 4,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 24,
+    "fields": {
+      "name": 46,
+      "structure_file_record": 4,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 25,
+    "fields": {
+      "name": 35,
+      "structure_file_record": 5,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 26,
+    "fields": {
+      "name": 4,
+      "structure_file_record": 5,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 27,
+    "fields": {
+      "name": 27,
+      "structure_file_record": 5,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 28,
+    "fields": {
+      "name": 21,
+      "structure_file_record": 5,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 29,
+    "fields": {
+      "name": 43,
+      "structure_file_record": 5,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 30,
+    "fields": {
+      "name": 31,
+      "structure_file_record": 5,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 31,
+    "fields": {
+      "name": 1,
+      "structure_file_record": 6,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 32,
+    "fields": {
+      "name": 41,
+      "structure_file_record": 6,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 33,
+    "fields": {
+      "name": 3,
+      "structure_file_record": 6,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 34,
+    "fields": {
+      "name": 16,
+      "structure_file_record": 6,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 35,
+    "fields": {
+      "name": 5,
+      "structure_file_record": 6,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 36,
+    "fields": {
+      "name": 17,
+      "structure_file_record": 6,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 37,
+    "fields": {
+      "name": 8,
+      "structure_file_record": 7,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 38,
+    "fields": {
+      "name": 6,
+      "structure_file_record": 7,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 39,
+    "fields": {
+      "name": 25,
+      "structure_file_record": 7,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 40,
+    "fields": {
+      "name": 20,
+      "structure_file_record": 7,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 41,
+    "fields": {
+      "name": 10,
+      "structure_file_record": 7,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 42,
+    "fields": {
+      "name": 12,
+      "structure_file_record": 7,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 43,
+    "fields": {
+      "name": 34,
+      "structure_file_record": 8,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 44,
+    "fields": {
+      "name": 7,
+      "structure_file_record": 8,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 45,
+    "fields": {
+      "name": 36,
+      "structure_file_record": 8,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 46,
+    "fields": {
+      "name": 39,
+      "structure_file_record": 8,
+      "name_type": 2
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 47,
+    "fields": {
+      "name": 28,
+      "structure_file_record": 8,
+      "name_type": 1
+    }
+  },
+  {
+    "model": "etl.structurefilerecordnameassociation",
+    "pk": 48,
+    "fields": {
+      "name": 23,
+      "structure_file_record": 8,
+      "name_type": 10
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 1,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 2,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 3,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 4,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 5,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 6,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 7,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 8,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 14,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 25,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 27,
+    "fields": {
+      "structure_file": 1
+    }
+  },
+  {
+    "model": "etl.structurefilesource",
+    "pk": 28,
+    "fields": {
+      "structure_file": 1
+    }
+  }
+]

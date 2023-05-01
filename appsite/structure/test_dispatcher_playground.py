@@ -89,7 +89,7 @@ class DispatcherComponentTests(TestCase):
 
         chemical_string = ChemicalString(string=string)
 
-        interpretation = chemical_string.Representation()
+        interpretation = chemical_string.StructureData()
         interpretation.with_related_objects = [ChemicalStructure(ens=ens), ]
 
         chemical_string._operator_tautomers(interpretation)
