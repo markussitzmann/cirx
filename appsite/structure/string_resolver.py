@@ -93,36 +93,45 @@ class ChemicalStructure:
     """Container class to keep a CACTVS ensemble and a Structure model object of the
        of the same chemical structure together"""
 
-    def __init__(self, resolved: Structure = None, ens: Ens = None):
-        self._resolved: Structure = resolved
+    def __init__(self, structure: Structure = None, ens: Ens = None, metadata: Dict = None, *arg, **kwargs):
+        self._structure: Structure = structure
         self._ens: Ens = ens
-        self._metadata: Dict = {}
-        self.hashisy: Identifier
-        if resolved and not ens:
-            ens = resolved.minimol.ens
-            hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
+        self._metadata: Dict = metadata if metadata else {}
+        self._identifier = None
+        if structure and not ens:
+            self._ens = structure.minimol.ens
+        elif ens and not structure:
             self._ens = ens
-            self.hashisy = hashisy
-        elif ens and not resolved:
-            hashisy = Identifier(hashcode=ens.get('E_HASHISY')).integer
-            self.hashisy = hashisy
-            try:
-                self._resolved = Structure.objects.get(hashisy_key=CactvsHash(hashisy))
-            except Exception as e:
-                #self.resolved = None
-                self._resolved = Structure(minimol=ens.get('E_MINIMOL'), hashisy_key=hashisy)
-        elif ens and resolved:
-            h1 = resolved.hashisy_key.int
+        elif ens and structure:
+            h1 = structure.hashisy_key.int
             h2 = Identifier(hashcode=ens.get('E_HASHISY')).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')
+            self._ens = ens
+            self._structure = structure
+        else:
+            raise ValueError('wrong arguments')
 
     @property
     def ens(self) -> Ens:
         if self._ens:
             return self._ens
-        else:
-            return Ens(self._resolved.minimol)
+        self._ens = Ens(self._structure.minimol)
+        return self._ens
+
+    @property
+    def structure(self) -> Structure:
+        if self._structure:
+            return self._structure
+        self._structure = Structure.objects.get(hashisy_key=CactvsHash(self.ens.get('E_HASHISY')))
+        return self._structure
+
+    @property
+    def identifier(self) -> Identifier:
+        if self._identifier:
+            return self._identifier
+        self._identifier = Identifier(hashcode=self.ens.get('E_HASHISY')).integer
+        return self._identifier
 
     @property
     def metadata(self) -> dict:
@@ -246,28 +255,26 @@ class ChemicalString:
         pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
         match = pattern.search(self.string)
         hashcode = match.group('hashcode')
-        #hashcode_int = int(match.group('hashcode'), 16)
-        #cactvs_hashcode = CactvsHash(hashcode)
-        resolved = Structure.with_related_objects.by_hashisy(hashisy_list=[hashcode, ]).first()
-        chemical_structure = ChemicalStructure(resolved=resolved)
-        if chemical_structure:
-            chemical_structure._metadata = {
+        structure = Structure.with_related_objects.by_hashisy(hashisy_list=[hashcode, ]).first()
+        resolved = ChemicalStructure(
+            structure=structure,
+            metadata={
                 'query_type': 'hashisy',
                 'query_search_string': 'Cactvs HASHISY hashcode',
                 'query_object': hashcode,
                 'query_string': self.string,
                 'description': hashcode
             }
-            #representation.structures.append(chemical_structure)
-            return [chemical_structure, ]
-        return list()
+        )
+        return [resolved, ] if resolved else list()
 
     def _resolver_ncicadd_rid(self) -> List[ChemicalStructure]:
         record_id = RecordID(string=self.string)
         record = Record.objects.get(id=record_id.rid)
-        chemical_structure = ChemicalStructure(resolved=record.get_structure())
-        if chemical_structure:
-            chemical_structure._metadata = {
+        resolved = ChemicalStructure(
+            # TODO: incorrect
+            structure=record.get_structure(),
+            metadata={
                 'query_type': 'ncicadd_rid',
                 'query_search_string': 'NCI/CADD Record ID',
                 'query_object': record_id,
@@ -275,16 +282,15 @@ class ChemicalString:
                 'description': record.id,
                 'record': record
             }
-            #representation.structures.append(chemical_structure)
-            return [chemical_structure, ]
-        return list()
+        )
+        return [resolved, ] if resolved else list()
 
     def _resolver_ncicadd_cid(self) -> List[ChemicalStructure]:
         compound = CompoundID(string=self.string)
-        resolved = Structure.with_related_objects.by_compound(compounds=[compound.cid, ]).first()
-        chemical_structure = ChemicalStructure(resolved=resolved)
-        if chemical_structure:
-            chemical_structure._metadata = {
+        structure = Structure.with_related_objects.by_compound(compounds=[compound.cid, ]).first()
+        resolved = ChemicalStructure(
+            structure=structure,
+            metadata={
                 'query_type': 'ncicadd_cid',
                 'query_search_string': 'NCI/CADD Compound ID',
                 'query_object': compound,
@@ -292,34 +298,34 @@ class ChemicalString:
                 'description': compound.cid,
                 'compound': compound
             }
-            #representation.structures.append(chemical_structure)
-            return [chemical_structure, ]
-        return list()
+
+        )
+        return [resolved, ] if resolved else list()
 
     def _resolver_ncicadd_sid(self) -> List[ChemicalStructure]:
         pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
         match = pattern.search(self.string)
+        resolved = None
         if match:
             structure_id = match.group('sid')
             structure = Structure.objects.get(id=structure_id)
-            chemical_structure = ChemicalStructure(resolved=structure)
-            if chemical_structure:
-                chemical_structure._metadata = {
+            resolved = ChemicalStructure(
+                structure=structure,
+                metadata={
                     'query_type': 'ncicadd_sid',
                     'query_search_string': 'NCI/CADD Structure ID',
                     'query_object': structure.id,
                     'query_string': self.string,
                     'description': self.string,
                 }
-                #representation.structures.append(chemical_structure)
-                return [chemical_structure, ]
-        return list()
+            )
+        return [resolved, ] if resolved else list()
 
     def _resolver_ncicadd_identifier(self) -> List[ChemicalStructure]:
         identifier = Identifier(string=self.string)
         hashisy_key = CactvsHash(identifier.hashcode)
         structure = Structure.objects.get(hashisy_key=hashisy_key)
-        chemical_structure: ChemicalStructure = ChemicalStructure(resolved=structure)
+        chemical_structure: ChemicalStructure = ChemicalStructure(structure=structure)
         if chemical_structure:
             identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
             chemical_structure._metadata = {
@@ -361,7 +367,7 @@ class ChemicalString:
         for association in associations:
             # ens = Ens(self.cactvs, structure.object.minimol)
             resolved = association.structure
-            chemical_structure = ChemicalStructure(resolved=resolved)
+            chemical_structure = ChemicalStructure(structure=resolved)
             identifier = InChIKey(key=association.inchi.key)
             chemical_structure._metadata = {
                 'query_type': 'stdinchikey',
@@ -397,7 +403,7 @@ class ChemicalString:
             database = Dataset.objects.get(id=9)
             record = Record.objects.get(database_record_external_identifier=chemnavigator_id, database=database)
             structure = record.get_structure()
-            chemical_structure = ChemicalStructure(resolved=structure)
+            chemical_structure = ChemicalStructure(structure=structure)
             if chemical_structure:
                 chemical_structure._metadata = {
                     'query_type': 'chemnavigator_sid',
@@ -419,7 +425,7 @@ class ChemicalString:
             # TODO: dirty, very dirty:
             record = Record.objects.get(release_record_external_identifier=pubchem_sid)
             structure = record.get_structure()
-            chemical_structure = ChemicalStructure(resolved=structure)
+            chemical_structure = ChemicalStructure(structure=structure)
             if chemical_structure:
                 chemical_structure._metadata = {
                     'query_type': 'pubchem_sid',
@@ -464,7 +470,7 @@ class ChemicalString:
             record = Record.objects.filter(database=database, database_record_external_identifier=self.string)[0]
             if record:
                 structure = record.get_structure()
-                chemical_structure = ChemicalStructure(resolved=structure)
+                chemical_structure = ChemicalStructure(structure=structure)
                 chemical_structure._metadata = {
                     'query_type': 'nsc_number',
                     'query_search_string': 'NSC number',
@@ -484,7 +490,7 @@ class ChemicalString:
             name = Name.objects.get(name=self.string)
             if name:
                 structure_object = name.get_structure()
-                chemical_structure = ChemicalStructure(resolved=structure_object)
+                chemical_structure = ChemicalStructure(structure=structure_object)
                 chemical_structure._metadata = {
                     'query_type': 'zinc_code',
                     'query_search_string': 'ZINC code',
@@ -501,7 +507,7 @@ class ChemicalString:
         name = Name.objects.get(name=self.string)
         if name:
             structure = name.get_structure()
-            chemical_structure = ChemicalStructure(resolved=structure)
+            chemical_structure = ChemicalStructure(structure=structure)
             chemical_structure._metadata = {
                 'query_type': 'cas_number',
                 'query_search_string': 'CAS Registry Number',
@@ -592,7 +598,7 @@ class ChemicalString:
         structures = []
         for association in associations.all():
             resolved: Structure = association.structure
-            chemical_structure: ChemicalStructure = ChemicalStructure(resolved=resolved)
+            chemical_structure: ChemicalStructure = ChemicalStructure(structure=resolved)
             chemical_structure._metadata = {
                 'query_type': 'name_by_cir',
                 'query_search_string': 'chemical name (CIR)',
@@ -627,8 +633,10 @@ class ChemicalString:
 
     def _resolver_smiles(self) -> List[ChemicalStructure]:
         smiles_string = SMILES(string=self.string, strict_testing=True)
-        if smiles_string and self._structure_representation_resolver(representation):
-            chemical_structure = representation.structures[0]
+        resolved = self._structure_representation_resolver(smiles_string.string)
+        if smiles_string and len(resolved):
+            #chemical_structure = representation.structures[0]
+            chemical_structure = resolved[0]
             chemical_structure._metadata = {
                 'query_type': 'smiles',
                 'query_search_string': 'SMILES string',
@@ -636,8 +644,8 @@ class ChemicalString:
                 'query_string': self.string,
                 'description': smiles_string.string
             }
-            return True
-        return False
+            return [chemical_structure, ]
+        return list()
 
     def _resolver_minimol(self) -> List[ChemicalStructure]:
         minimol = Minimol(string=self.string)
@@ -682,7 +690,7 @@ class ChemicalString:
     #         return True
     #     return False
 
-    def _structure_representation_resolver(self, representation_string=None):
+    def _structure_representation_resolver(self, representation_string=None) -> List[ChemicalStructure]:
         # if not self.cactvs:
         #     self.cactvs = Cactvs()
         try:
@@ -696,39 +704,60 @@ class ChemicalString:
             ens = Ens(string)
         except Exception as e:
             logger.error(e)
-            return False
+            return list()
         else:
             # TODO: is_search_structure needs replacement
             #if ens.is_search_structure():
             #    return False
-            representation.type = 'structure'
-            representation.type_string = 'chemical structure string'
-            representation.query_object = ens
-            representation._ens = ens
+            chemical_structure = ChemicalStructure(ens=ens)
+            chemical_structure.type = 'structure'
+            chemical_structure.type_string = 'chemical structure string'
+            chemical_structure.query_object = ens
+            chemical_structure._ens = ens
             try:
                 hashcode = Identifier(hashcode=ens.get('E_HASHISY'))
                 try:
                     structure = Structure.objects.get(hashisy_key=CactvsHash(hashcode.integer))
-                    chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
-                    representation.structures.append(chemical_structure)
+                    chemical_structure = ChemicalStructure(structure=structure, ens=ens)
+                    chemical_structure.type = 'structure'
+                    chemical_structure.type_string = 'chemical structure string'
+                    chemical_structure.query_object = ens
+                    chemical_structure._ens = ens
+                    #chemical_structure.structures.append(chemical_structure)
+                    return [chemical_structure, ]
                 except (Structure.DoesNotExist, RuntimeError) as e1:
                     logger.error(e1)
                     #ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
                     ficts = Identifier(hashcode=ens.get('E_FICTS_ID'))
                     try:
                         structure = Structure.objects.get(hashisy=CactvsHash(ficts.integer))
-                        chemical_structure = ChemicalStructure(resolved=structure, ens=ens)
-                        representation.structures.append(chemical_structure)
+                        chemical_structure = ChemicalStructure(structure=structure, ens=ens)
+                        chemical_structure.type = 'structure'
+                        chemical_structure.type_string = 'chemical structure string'
+                        chemical_structure.query_object = ens
+                        chemical_structure._ens = ens
+                        #representation.structures.append(chemical_structure)
+                        return [chemical_structure, ]
                     except (Structure.DoesNotExist, RuntimeError) as e2:
                         logger.error(e2)
                         chemical_structure = ChemicalStructure(ens=ens)
-                        representation.structures.append(chemical_structure)
+                        chemical_structure.type = 'structure'
+                        chemical_structure.type_string = 'chemical structure string'
+                        chemical_structure.query_object = ens
+                        #representation.structures.append(chemical_structure)
+                        return [chemical_structure, ]
             except Exception as e3:
                 logger.error(e3)
+                #chemical_structure = ChemicalStructure(ens=ens)
                 chemical_structure = ChemicalStructure(ens=ens)
-                representation.structures.append(chemical_structure)
-                representation.string = self.string
-        return True
+                chemical_structure.type = 'structure'
+                chemical_structure.type_string = 'chemical structure string'
+                chemical_structure.query_object = ens
+                #representation.structures.append(chemical_structure)
+                #representation.string = self.string
+                return [chemical_structure, ]
+
+        #return list()
 
     def _operator_tautomers(self, representation):
         # ens_list = []
