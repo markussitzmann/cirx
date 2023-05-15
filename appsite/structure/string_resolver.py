@@ -19,6 +19,8 @@ from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
 from structure.packstring import PackString
 from structure.smiles import SMILES
 
+ResolverData = namedtuple("ResolverData", "resolved exception")
+
 logger = logging.getLogger('cirx')
 
 
@@ -178,7 +180,7 @@ class ChemicalString:
             debug: bool = False
     ):
         self.string = string.strip()
-        self._structure_data: List[ChemicalStructure] = []
+        self._resolver_data: Dict[str, ResolverData] = dict()
         if resolver_list:
             pass
         else:
@@ -230,26 +232,28 @@ class ChemicalString:
             #        logger.error(e)
             #        pass
             #else:
-            resolver_method = getattr(self, '_resolver_' + resolver)
-            #representation = self.StructureData()
-            data: List[ChemicalStructure] = resolver_method()
-                #representation.id = i
-            item: ChemicalStructure
-            for item in data:
-                if self.operator:
-                    operator_method = getattr(self, '_operator_' + self.operator)
-                    self._structure_data.extend(operator_method(item))
-                else:
-                    self._structure_data.append(item)
-                #self._representations.append(representation)
-                #i += 1
-            if simple and len(self._structure_data):
+            try:
+                resolver_method = getattr(self, '_resolver_' + resolver)
+                data: List[ChemicalStructure] = resolver_method()
+                    #representation.id = i
+                item: ChemicalStructure
+                for item in data:
+                    if self.operator:
+                        operator_method = getattr(self, '_operator_' + self.operator)
+                        self._resolver_data[resolver] = ResolverData(resolved=operator_method(item), exception=None)
+                    else:
+                        self._resolver_data[resolver] = ResolverData(resolved=item, exception=None)
+                    #self._representations.append(representation)
+                    #i += 1
+            except Exception as e:
+                self._resolver_data[resolver] = ResolverData(resolved=None, exception=e)
+            if simple and len(self._resolver_data):
                 break
         return
 
     @property
-    def structure_data(self) -> List[ChemicalStructure]:
-        return self._structure_data
+    def resolver_data(self) -> Dict[str, ResolverData]:
+        return self._resolver_data
 
     def _resolver_hashisy(self):
         pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
@@ -325,60 +329,41 @@ class ChemicalString:
         identifier = Identifier(string=self.string)
         hashisy_key = CactvsHash(identifier.hashcode)
         structure = Structure.objects.get(hashisy_key=hashisy_key)
-        chemical_structure: ChemicalStructure = ChemicalStructure(structure=structure)
-        if chemical_structure:
-            identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
-            chemical_structure._metadata = {
+        identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
+        resolved: ChemicalStructure = ChemicalStructure(
+            structure=structure,
+            metadata={
                 'query_type': 'ncicadd_identifier',
                 'query_search_string': identifier_search_type_string,
                 'query_object': identifier,
                 'query_string': self.string,
                 'description': identifier
             }
-            #representation.structures.append(chemical_structure)
-            return [chemical_structure, ]
-        return list()
+        )
+        return [resolved, ] if resolved else list()
 
     def _resolver_stdinchikey(self) -> List[ChemicalStructure]:
-        #identifier: InChIKey = InChIKey(key=self.string)
-        #identifier = InChI.create(key=self.string)
-        #if not identifier.is_standard:
-        #    return False
-        #inchikey_query = identifier.query_dict
-        #inchikeys = InChI.objects.filter(**inchikey_query)
-
-        STANDARD_INCHI_TYPE = InChIType.objects.get(title="standard")
-
+        inchi_type = InChIType.objects.get(title="standard")
         associations = StructureInChIAssociation.with_related_objects.by_partial_inchikey(
             inchikeys=[self.string, ],
-            inchi_types=[STANDARD_INCHI_TYPE, ]
+            inchi_types=[inchi_type, ]
         ).all()
-        structures = list()
-        #description_list = []
-        #for association in associations:
-            #structures = inchikey.structure_set.all()
-            #structure_associations: List[StructureInChIAssociation] = inchikey.structures.all()
-            #full_key = InChIKey(
-            #    block1=identifier.block1,
-            #    block2=identifier.block2,
-            #    block3=identifier.block3,
-            #)
-            #full_key = identifier
+        resolved_list = list()
         for association in associations:
-            # ens = Ens(self.cactvs, structure.object.minimol)
-            resolved = association.structure
-            chemical_structure = ChemicalStructure(structure=resolved)
+            structure = association.structure
             identifier = InChIKey(key=association.inchi.key)
-            chemical_structure._metadata = {
-                'query_type': 'stdinchikey',
-                'query_search_string': 'Standard InChIKey',
-                'query_object': identifier,
-                'query_string': self.string,
-                'description': identifier.element['well_formatted']
-            }
-            structures.append(chemical_structure)
-
-        return structures
+            resolved = ChemicalStructure(
+                structure=structure,
+                metadata={
+                    'query_type': 'stdinchikey',
+                    'query_search_string': 'Standard InChIKey',
+                    'query_object': identifier,
+                    'query_string': self.string,
+                    'description': identifier.element['well_formatted']
+                }
+            )
+            resolved_list.append(resolved)
+        return resolved_list
 
     def _resolver_stdinchi(self) -> List[ChemicalStructure]:
         identifier = InChI(string=self.string)

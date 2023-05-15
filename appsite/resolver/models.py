@@ -293,20 +293,20 @@ class StructureInChIAssociationQuerySet(models.QuerySet):
             inchikeys: List[Union[str]],
             inchi_types: List[Union['InChIType', int]] = None
     ):
-        filter = Q()
+        q = Q()
         for inchikey in inchikeys:
             splitted_inchikey=inchikey.split("-")
             number_of_elements = len(splitted_inchikey)
             if number_of_elements == 3:
-                filter |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1], inchi__block3=splitted_inchikey[2])
+                q |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1], inchi__block3=splitted_inchikey[2])
             elif number_of_elements == 2:
-                filter |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1])
+                q |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1])
             elif number_of_elements == 1:
-                filter |= Q(inchi__block1=splitted_inchikey[0])
+                q |= Q(inchi__block1=splitted_inchikey[0])
             else:
                 pass
 
-        queryset = self._base_queryset().filter(filter)
+        queryset = self._base_queryset().filter(q)
         if inchi_types:
             queryset = queryset.filter(
                 inchi_type__in=inchi_types
@@ -318,17 +318,16 @@ class StructureInChIAssociationQuerySet(models.QuerySet):
             query_dicts: List[Dict],
             inchi_types: List[Union['InChIType', int]] = None
     ):
-        filter = Q()
+        q = Q()
         for d in query_dicts:
-            filter |= d
+            q |= d
         #inchikeys = InChI.objects.filter(**inchikey_query)
-        queryset = self._base_queryset().filter(filter)
+        queryset = self._base_queryset().filter(q)
         if inchi_types:
             queryset = queryset.filter(
                 inchi_type__in=inchi_types
             )
         return queryset
-
 
 
 class StructureInChIAssociation(models.Model):
