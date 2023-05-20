@@ -62,14 +62,18 @@ class ChemicalStringTests(TestCase):
         logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
 
     @parameterized.expand([
-        #["CCO", ['smiles', ], [8, ]],
-        #["1AD375920BE60DAD", ['hashisy', ], [1, ]],
-        #["Warfarin", ['name', ], [2, ]],
-        #["NCICADD:CID=3", ['ncicadd_cid', ], [3, ]],
-        ["E174572A915E4471-FICTS-01-1A", ['ncicadd_identifier', 'smiles', ], [8, SmilesError('no valid SMILES string')]],
-        #["LFQSCWFLJHTTHZ-UHFFFAOYSA-N", ['stdinchikey', ], [8, ]],
-        #["LFQSCWFLJHTTHZ-UHFFFAOYSA", ['stdinchikey', ], [8, ]],
-        #["LFQSCWFLJHTTHZ", ['stdinchikey', ], [8, ]],
+        #["CCO", ['smiles', 'stdinchikey'], [8, ValueError()]],
+        # ["CCO", ['stdinchikey', ], [ValueError(), ]],
+        # ["1AD375920BE60DAD", ['hashisy', ], [1, ]],
+        # ["Warfarin", ['name', ], [2, ]],
+        # ["NCICADD:CID=3", ['ncicadd_cid', ], [3, ]],
+        # ["E174572A915E4471-FICTS-01-1A", ['ncicadd_identifier', 'smiles', ], [8, ValueError()]],
+        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA-N", ['stdinchikey', ], [8, ]],
+        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA", ['stdinchikey', ], [8, ]],
+        # ["LFQSCWFLJHTTHZ", ['stdinchikey', ], [8, ]],
+        # ["NCICADD:RID=4", ['ncicadd_rid', 'smiles', 'compound_cid', ], [1, ValueError(), ValueError(), ]],
+        # ["NCICADD:CID=5", ['ncicadd_cid', 'ncicadd_rid', 'smiles', ], [4, ValueError(), ValueError(), ]],
+        ["tautomers:Warfarin", ['name', ], [2, ]],
     ])
     def test(self, string, resolver_list, expectations):
         #expected_structure_id = expectations[0]
@@ -78,11 +82,11 @@ class ChemicalStringTests(TestCase):
         resolver_data = chemical_string.resolver_data
         item: ChemicalStructure
         for resolver, expectation in zip(resolver_list, expectations):
-            resolved, exception = resolver_data[resolver]
+            id, _, resolved, exception = resolver_data[resolver]
             if isinstance(expectation, Exception):
-                self.assertIsInstance(expectation, type(exception), "bla")
+                self.assertIsInstance(expectation, type(exception))
             else:
-                logger.info("representation {}".format(resolved))
+                logger.info("id {} : resolver {} : resolved {}".format(id, resolver, resolved))
                 logger.info("METADATA  {}".format(resolved.metadata))
                 logger.info("STRUCTURE {}".format(resolved.structure.id))
                 self.assertEqual(resolved.structure.id, expectation)

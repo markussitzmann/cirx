@@ -1,25 +1,20 @@
-import re
-import urllib
-
 import logging
+import re
 from collections import namedtuple
-from typing import List, Dict, Optional
+from typing import List, Dict
 
-from attr import dataclass
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned
-from django.db import NotSupportedError
 from pycactvs import Ens, Dataset
 
 from custom.cactvs import CactvsHash
 from structure.cas.number import String as CASNumber
-from structure.inchi.identifier import InChIString, InChIKey, InChIError
+from structure.inchi.identifier import InChIKey
 from structure.minimol import Minimol
 from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
 from structure.packstring import PackString
 from structure.smiles import SMILES
 
-ResolverData = namedtuple("ResolverData", "resolved exception")
+ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
 
 logger = logging.getLogger('cirx')
 
@@ -34,7 +29,7 @@ logger = logging.getLogger('cirx')
 
 #from database.models import Database
 #from structure.models import Record, Compound
-from resolver.models import InChI, Structure, Compound, Name, StructureNameAssociation, Dataset, \
+from resolver.models import InChI, Structure, Name, StructureNameAssociation, Dataset, \
     StructureInChIAssociation, InChIType, Record, NameAffinityClass
 
 
@@ -217,36 +212,38 @@ class ChemicalString:
         i = 1
 
         for resolver in resolver_list:
-            #if not settings.DEBUG_RESOLVER:
-            #    try:
-            #        resolver_method = getattr(self, '_resolver_' + resolver)
-            #        #representation = StructureData()
-            #        if resolver_method():
-            #            #representation.id = i
-            #            if self.operator:
-            #                operator_method = getattr(self, '_operator_' + self.operator)
-            #                representation = operator_method(representation)
-            #            self._representations.append(representation)
-            #            i += 1
-            #    except Exception as e:
-            #        logger.error(e)
-            #        pass
-            #else:
             try:
                 resolver_method = getattr(self, '_resolver_' + resolver)
                 data: List[ChemicalStructure] = resolver_method()
-                    #representation.id = i
                 item: ChemicalStructure
+                if not len(data):
+                    raise ValueError('string resolver came back empty')
+                i = 0
                 for item in data:
+                    i += 1
                     if self.operator:
                         operator_method = getattr(self, '_operator_' + self.operator)
-                        self._resolver_data[resolver] = ResolverData(resolved=operator_method(item), exception=None)
+                        resolved = operator_method(item)
+                        self._resolver_data[resolver] = ResolverData(
+                            id=i,
+                            resolver=resolver,
+                            resolved=resolved,
+                            exception=None
+                        )
                     else:
-                        self._resolver_data[resolver] = ResolverData(resolved=item, exception=None)
-                    #self._representations.append(representation)
-                    #i += 1
+                        self._resolver_data[resolver] = ResolverData(
+                            id=i,
+                            resolver=resolver,
+                            resolved=item,
+                            exception=None
+                        )
             except Exception as e:
-                self._resolver_data[resolver] = ResolverData(resolved=None, exception=e)
+                self._resolver_data[resolver] = ResolverData(
+                    id=None,
+                    resolver=resolver,
+                    resolved=None,
+                    exception=ValueError('string not resolvable', e)
+                )
             if simple and len(self._resolver_data):
                 break
         return
@@ -274,10 +271,11 @@ class ChemicalString:
 
     def _resolver_ncicadd_rid(self) -> List[ChemicalStructure]:
         record_id = RecordID(string=self.string)
-        record = Record.objects.get(id=record_id.rid)
+        record: Record = Record.with_related_objects.by_record_ids([record_id.rid, ]).first()
+        structure: Structure = record.structure_file_record.structure
         resolved = ChemicalStructure(
             # TODO: incorrect
-            structure=record.get_structure(),
+            structure=structure,
             metadata={
                 'query_type': 'ncicadd_rid',
                 'query_search_string': 'NCI/CADD Record ID',
@@ -580,19 +578,21 @@ class ChemicalString:
             .with_related_objects\
             .by_name(names=[self.string, ], affinity_classes=[exact, ])\
 
-        structures = []
+        resolved_list = []
         for association in associations.all():
-            resolved: Structure = association.structure
-            chemical_structure: ChemicalStructure = ChemicalStructure(structure=resolved)
-            chemical_structure._metadata = {
-                'query_type': 'name_by_cir',
-                'query_search_string': 'chemical name (CIR)',
-                'query_object': association.name,
-                'query_string': self.string,
-                'description': association.name
-            }
-            structures.append(chemical_structure)
-        return structures
+            structure: Structure = association.structure
+            resolved: ChemicalStructure = ChemicalStructure(
+                structure=structure,
+                metadata= {
+                    'query_type': 'name_by_cir',
+                    'query_search_string': 'chemical name (CIR)',
+                    'query_object': association.name,
+                    'query_string': self.string,
+                    'description': association.name
+                }
+            )
+            resolved_list.append(resolved)
+        return resolved_list
 
     # def _resolver_name_pattern(self, representation: Representation):
     #     pattern = self.string
@@ -618,18 +618,20 @@ class ChemicalString:
 
     def _resolver_smiles(self) -> List[ChemicalStructure]:
         smiles_string = SMILES(string=self.string, strict_testing=True)
-        resolved = self._structure_representation_resolver(smiles_string.string)
-        if smiles_string and len(resolved):
-            #chemical_structure = representation.structures[0]
-            chemical_structure = resolved[0]
-            chemical_structure._metadata = {
-                'query_type': 'smiles',
-                'query_search_string': 'SMILES string',
-                'query_object': smiles_string,
-                'query_string': self.string,
-                'description': smiles_string.string
-            }
-            return [chemical_structure, ]
+        data = self._structure_representation_resolver(smiles_string.string)
+        if smiles_string and len(data):
+            resolved = ChemicalStructure(
+                ens=data[0].ens,
+                structure=data[0].structure,
+                metadata={
+                    'query_type': 'smiles',
+                    'query_search_string': 'SMILES string',
+                    'query_object': smiles_string,
+                    'query_string': self.string,
+                    'description': smiles_string.string
+                }
+            )
+            return [resolved, ]
         return list()
 
     def _resolver_minimol(self) -> List[ChemicalStructure]:
@@ -744,7 +746,7 @@ class ChemicalString:
 
         #return list()
 
-    def _operator_tautomers(self, representation):
+    def _operator_tautomers(self, structure: ChemicalStructure) -> List[ChemicalStructure]:
         # ens_list = []
         # for structure in interpretation.structures:
         #     ens_list.append(structure.ens)
@@ -755,42 +757,47 @@ class ChemicalString:
         structures = []
         description_list = []
         index = 1
-        dataset: Dataset = Dataset()
+        #dataset: Dataset = Dataset()
 
-        for structure in representation.structures:
-            #interpretation_structure_ens = structure.ens
-            metadata = structure.metadata.copy()
 
-            description_string = metadata['description'] + " tautomer 1" \
-                if 'description' in metadata else "tautomer 1"
-            structure.metadata.update({'description': description_string})
-            structures.append(structure)
+        #for structure in resolved.structure:
+        #interpretation_structure_ens = structure.ens
+        metadata = structure.metadata.copy()
+
+        description_string = str(metadata['description']) + " tautomer 1" \
+            if 'description' in metadata else "tautomer 1"
+        structure.metadata.update({'description': description_string})
+        structures.append(structure)
+        description_list.append(description_string)
+        #dataset.add(structure.ens)
+
+        t_count = 1
+        tautomers = structure.ens.get("E_RESOLVER_TAUTOMERS")
+        for tautomer in tautomers.ens():
+            t_count += 1
+            chemical_structure = ChemicalStructure(ens=tautomer)
+            tautomer_string = 'tautomer %s' % t_count
+            description_string = str(metadata['description']) + " " + tautomer_string \
+                if 'description' in metadata else tautomer_string
+            chemical_structure._metadata = {
+                'description': description_string,
+                'query_type': metadata['query_type'] if 'query_type' in metadata else None,
+                'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
+            }
+            structures.append(chemical_structure)
             description_list.append(description_string)
-            dataset.add(structure.ens)
+            #dataset.add(tautomer)
+            index += 1
 
-            t_count = 1
-            tautomers = structure.ens.get("E_RESOLVER_TAUTOMERS")
-            for tautomer in tautomers.to_ens():
-                t_count += 1
-                chemical_structure = ChemicalStructure(ens=tautomer)
-                tautomer_string = 'tautomer %s' % t_count
-                description_string = metadata['description'] + " " + tautomer_string \
-                    if 'description' in metadata else tautomer_string
-                chemical_structure._metadata = {
-                    'description': description_string,
-                    'query_type': metadata['query_type'] if 'query_type' in metadata else None,
-                    'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
-                }
-                structures.append(chemical_structure)
-                description_list.append(description_string)
-                dataset.add(tautomer)
-                index += 1
+        ###
 
-        representation._reference_dataset = dataset
-        representation.tautomers = tautomers
-        representation.description_list = description_list
-        representation.with_related_objects = structures
-        return representation
+        return structures if structures else list()
+
+        #representation._reference_dataset = dataset
+        #representation.tautomers = tautomers
+        #representation.description_list = description_list
+        #representation.structures = structures
+        #return representation
 
     # def _operator_tautomers(self, interpretation):
     #     ens_list = []
@@ -828,7 +835,7 @@ class ChemicalString:
     def _operator_remove_hydrogens(self, representation):
         enslist = []
         dataset_list = []
-        for structure in representation.with_related_objects:
+        for structure in representation.structures:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -858,7 +865,7 @@ class ChemicalString:
     def _operator_add_hydrogens(self, representation):
         enslist = []
         dataset_list = []
-        for structure in representation.with_related_objects:
+        for structure in representation.structures:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))
@@ -888,7 +895,7 @@ class ChemicalString:
     def _operator_no_stereo(self, representation):
         enslist = []
         dataset_list = []
-        for structure in representation.with_related_objects:
+        for structure in representation.structures:
             enslist.append(structure._ens)
         dataset = Dataset(self.cactvs, enslist=enslist)
         dataset_list.append((dataset, structure._metadata))

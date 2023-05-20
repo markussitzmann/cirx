@@ -433,6 +433,32 @@ class Compound(models.Model):
 #                 annotated_uuuuu_parent=F('structure_file_record__structure__parents__uuuuu_parent')
 #             )
 
+class RecordQuerySet(models.QuerySet):
+
+    fetch_relations = [
+        'structure_file_record',
+        'structure_file_record__structure__parents',
+        'structure_file_record__structure__parents__ficts_parent',
+        'structure_file_record__structure__parents__ficus_parent',
+        'structure_file_record__structure__parents__uuuuu_parent',
+        'structure_file_record__structure__parents__ficts_parent__compound',
+        'structure_file_record__structure__parents__ficus_parent__compound',
+        'structure_file_record__structure__parents__uuuuu_parent__compound'
+    ]
+
+    def by_record_ids(self, ids: List[int]):
+        queryset = self.select_related(*RecordQuerySet.fetch_relations).filter(
+            id__in=ids
+        )
+        return queryset
+
+
+    def by_regid_ids(self, regids: List[str]):
+        queryset = self.select_related(*RecordQuerySet.fetch_relations).filter(
+            regid__in=regids
+        )
+        return queryset
+
 
 class Record(models.Model):
     name = models.ForeignKey('Name', on_delete=models.PROTECT, blank=False, null=False)
@@ -451,6 +477,7 @@ class Record(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     objects = models.Manager()
+    with_related_objects = RecordQuerySet.as_manager()
 
     class Meta:
         constraints = [
