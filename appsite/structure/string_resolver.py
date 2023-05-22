@@ -95,17 +95,21 @@ class ChemicalStructure:
         self._ens: Ens = ens
         self._metadata: Dict = metadata if metadata else {}
         self._identifier = None
+        self._hashisy = None
         if structure and not ens:
             self._ens = structure.minimol.ens
         elif ens and not structure:
             self._ens = ens
         elif ens and structure:
+            hashcode = ens.get('E_HASHISY')
             h1 = structure.hashisy_key.int
-            h2 = Identifier(hashcode=ens.get('E_HASHISY')).integer
+            h2 = Identifier(hashcode=hashcode).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')
             self._ens = ens
             self._structure = structure
+            self._identifier = h2
+            self._hashisy = hashcode
         else:
             raise ValueError('wrong arguments')
 
@@ -127,8 +131,15 @@ class ChemicalStructure:
     def identifier(self) -> Identifier:
         if self._identifier:
             return self._identifier
-        self._identifier = Identifier(hashcode=self.ens.get('E_HASHISY')).integer
+        self._identifier = Identifier(hashcode=self.ens.get('E_HASHISY'))
         return self._identifier
+
+    @property
+    def hashisy(self) -> str:
+        if self._hashisy:
+            return self._hashisy
+        self._hashisy = self.ens.get('E_HASHISY')
+        return self._hashisy
 
     @property
     def metadata(self) -> dict:
@@ -234,7 +245,7 @@ class ChemicalString:
                         self._resolver_data[resolver] = ResolverData(
                             id=i,
                             resolver=resolver,
-                            resolved=item,
+                            resolved=[item, ],
                             exception=None
                         )
             except Exception as e:
