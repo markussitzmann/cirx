@@ -25,7 +25,8 @@ logger = logging.getLogger('cirx')
 FIXTURES = ['sandbox.json']
 RESOLVER_LIST = ["name", "smiles", "hashisy"]
 
-ResolverTest = namedtuple("ResolverTest", "resolver expectations exception")
+ResolverTest = namedtuple("ResolverTest", "request responses")
+ResolverResponse = namedtuple("ResolverResponse", "resolver expectations exception")
 
 class ChemicalStructureTests(TestCase):
     fixtures = FIXTURES
@@ -64,7 +65,6 @@ class ChemicalStringTests(TestCase):
         logger.info("------------- Tear Down -------------")
         logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
 
-    @parameterized.expand([
         #["CCO", ['smiles', 'stdinchikey'], [8, ValueError()]],
         # ["CCO", ['stdinchikey', ], [ValueError(), ]],
         # ["1AD375920BE60DAD", ['hashisy', ], [1, ]],
@@ -77,48 +77,121 @@ class ChemicalStringTests(TestCase):
         # ["NCICADD:RID=4", ['ncicadd_rid', 'smiles', 'compound_cid', ], [1, ValueError(), ValueError(), ]],
         # ["NCICADD:CID=5", ['ncicadd_cid', 'ncicadd_rid', 'smiles', ], [4, ValueError(), ValueError(), ]],
         #["tautomers:Warfarin", ['name', ], [['20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'], ]],
-        ["CCO", [
-            ResolverTest(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
-            ResolverTest(resolver="stdinchikey", expectations=None, exception=ValueError()),
-        ]],
-        ["1AD375920BE60DAD", [
-            ResolverTest(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None),
-        ]],
-        ["NCICADD:CID=3", [
-            ResolverTest(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None),
-        ]],
-        ["LFQSCWFLJHTTHZ-UHFFFAOYSA-N", [
-            ResolverTest(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
-        ]],
-        ["LFQSCWFLJHTTHZ-UHFFFAOYSA", [
-            ResolverTest(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
-        ]],
-        ["LFQSCWFLJHTTHZ", [
-            ResolverTest(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
-        ]],
-        ["tautomers:Warfarin", [
-            ResolverTest(
-                resolver="name",
-                expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'},
-                exception=None
-            ),
-        ]]
+        # ["CCO", [
+        #     ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+        #     ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        # ]],
+        # ["1AD375920BE60DAD", [
+        #     ResolverResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None),
+        # ]],
+        # ["NCICADD:CID=3", [
+        #     ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None),
+        # ]],
+        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA-N", [
+        #     ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
+        # ]],
+        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA", [
+        #     ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
+        # ]],
+        # ["LFQSCWFLJHTTHZ", [
+        #     ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
+        # ]],
+        # ["tautomers:Warfarin", [
+        #     ResolverResponse(
+        #         resolver="name",
+        #         expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'},
+        #         exception=None
+        #     ),
+        # ]]
+
+    @parameterized.expand([
+        [ResolverTest(
+            request="CCO",
+            responses=[
+                ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+                ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+            ]
+        )],
+        [ResolverTest(
+            request="1AD375920BE60DAD",
+            responses=[
+                ResolverResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            request="NCICADD:CID=3",
+            responses=[
+                ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            request="NCICADD:RID=4",
+            responses=[
+                ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            request="NCICADD:CID=5",
+            responses=[
+                ResolverResponse(resolver="ncicadd_rid", expectations={'1AD375920BE60DAD'}, exception=None),
+                ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
+                ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError())
+            ],
+        )],
+        [ResolverTest(
+            request="LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+            responses=[
+                ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            request="LFQSCWFLJHTTHZ-UHFFFAOYSA",
+            responses=[
+                ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            request="LFQSCWFLJHTTHZ",
+            responses=[
+                ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            request="tautomers:Warfarin",
+            responses=[
+                ResolverResponse(
+                    resolver="name",
+                    expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'},
+                    exception=None
+                )
+            ],
+        )],
+        [ResolverTest(
+           request="CCO",
+           responses=[
+               ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+               ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+           ]
+        )],
     ])
-    def test(self, string: str, resolver_tests: List[ResolverTest]):
+    def test(self, resolver_test: ResolverTest):
 
-        resolver_list = [test.resolver for test in resolver_tests]
+        resolver_list = [test.resolver for test in resolver_test.responses]
 
-        chemical_string = ChemicalString(string=string, resolver_list=resolver_list)
-        resolver_data = chemical_string.resolver_data
+        chemical_string = ChemicalString(string=resolver_test.request, resolver_list=resolver_list)
+        actual_data = chemical_string.resolver_data
 
-        for test in resolver_tests:
-            resolver = test.resolver
-            if test.exception:
-                self.assertIsInstance(resolver_data[resolver].exception, type(test.exception))
+        for expected_data in resolver_test.responses:
+            resolver, expectations = expected_data.resolver, expected_data.expectations
+            logger.info("REQUEST {} RESOLVER {}".format(resolver_test.request, resolver))
+            if expected_data.exception:
+                exception = actual_data[resolver].exception
+                logger.info("exception {} received {}".format(expected_data.exception, exception))
+                self.assertIsInstance(exception, type(expected_data.exception))
             else:
-                resolved = resolver_data[resolver].resolved
-                resolver_response = set([structure.hashisy for structure in resolved])
-                self.assertEqual(test.expectations, resolver_response)
+                resolved = actual_data[resolver].resolved
+                logger.info("expected {} received {}".format(expectations, resolved))
+                self.assertEqual(set([structure.hashisy for structure in resolved]), expectations)
 
 
 
