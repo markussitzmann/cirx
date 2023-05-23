@@ -25,7 +25,7 @@ logger = logging.getLogger('cirx')
 FIXTURES = ['sandbox.json']
 RESOLVER_LIST = ["name", "smiles", "hashisy"]
 
-TestData = namedtuple("TestData", "resolver expectations exception")
+ResolverTest = namedtuple("ResolverTest", "resolver expectations exception")
 
 class ChemicalStructureTests(TestCase):
     fixtures = FIXTURES
@@ -77,62 +77,48 @@ class ChemicalStringTests(TestCase):
         # ["NCICADD:RID=4", ['ncicadd_rid', 'smiles', 'compound_cid', ], [1, ValueError(), ValueError(), ]],
         # ["NCICADD:CID=5", ['ncicadd_cid', 'ncicadd_rid', 'smiles', ], [4, ValueError(), ValueError(), ]],
         #["tautomers:Warfarin", ['name', ], [['20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'], ]],
-        [
-            "tautomers:Warfarin", [
-                TestData(
-                    resolver="name",
-                    expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'},
-                    exception=None
-                ),
-            ]
-        ]
+        ["CCO", [
+            ResolverTest(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+            ResolverTest(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        ]],
+        ["1AD375920BE60DAD", [
+            ResolverTest(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None),
+        ]],
+        ["NCICADD:CID=3", [
+            ResolverTest(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None),
+        ]],
+        ["LFQSCWFLJHTTHZ-UHFFFAOYSA-N", [
+            ResolverTest(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
+        ]],
+        ["LFQSCWFLJHTTHZ-UHFFFAOYSA", [
+            ResolverTest(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
+        ]],
+        ["LFQSCWFLJHTTHZ", [
+            ResolverTest(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
+        ]],
+        ["tautomers:Warfarin", [
+            ResolverTest(
+                resolver="name",
+                expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'},
+                exception=None
+            ),
+        ]]
     ])
-    def test(self, string: str, test_data: List[TestData]):
-        #expected_structure_id = expectations[0]
+    def test(self, string: str, resolver_tests: List[ResolverTest]):
 
-        resolver_list = [data.resolver for data in test_data]
-        #expectation_list = [data.expectation for data in test_data]
-        #logger.info("START string '{}' resolver {} expectations {}".format(string, resolver_list, expectation_list))
+        resolver_list = [test.resolver for test in resolver_tests]
 
         chemical_string = ChemicalString(string=string, resolver_list=resolver_list)
         resolver_data = chemical_string.resolver_data
-        #chemical_structure: ChemicalStructure
 
-
-        for test in test_data:
+        for test in resolver_tests:
             resolver = test.resolver
             if test.exception:
-                self.assertIsInstance(resolver_data[resolver], type(test.exception))
+                self.assertIsInstance(resolver_data[resolver].exception, type(test.exception))
             else:
-                structure: ChemicalStructure
-                h = resolver_data[resolver][0]
-                print(h)
-                resolver_response = set([s.hashisy for s in resolver_data[resolver].resolved])
+                resolved = resolver_data[resolver].resolved
+                resolver_response = set([structure.hashisy for structure in resolved])
                 self.assertEqual(test.expectations, resolver_response)
 
-            # for expectation in expectations:
-            #     id, _, resolved_list, exception = resolver_data[resolver]
-            #     if isinstance(expectation, Exception):
-            #         self.assertIsInstance(expectation, type(exception))
-            #     else:
-            #         resolved: ChemicalStructure
-            #         print([h.ens.get('E_HASHISY') for h in resolved_list])
-            #         logger.info("id {} : resolver {} : resolved {}".format(id, resolver, resolved))
-            #         logger.info("METADATA  {}".format(resolved.metadata))
-            #         logger.info("STRUCTURE {}".format(resolved.structure.id))
-            #         self.assertEqual(resolved.ens, expectation)
 
-
-        # for resolver, expectation in zip(resolver_list, expectation_list):
-        #     id, _, resolved_list, exception = resolver_data[resolver]
-        #     for resolved, expectation in zip(resolved_list, expectation_list):
-        #         if isinstance(expectation, Exception):
-        #             self.assertIsInstance(expectation, type(exception))
-        #         else:
-        #             resolved: ChemicalStructure
-        #             print([h.ens.get('E_HASHISY') for h in resolved_list])
-        #             logger.info("id {} : resolver {} : resolved {}".format(id, resolver, resolved))
-        #             logger.info("METADATA  {}".format(resolved.metadata))
-        #             logger.info("STRUCTURE {}".format(resolved.structure.id))
-        #             self.assertEqual(resolved.ens, expectation)
 
