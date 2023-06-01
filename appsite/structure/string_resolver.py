@@ -14,9 +14,12 @@ from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
 from structure.packstring import PackString
 from structure.smiles import SMILES
 
-ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
-
 logger = logging.getLogger('cirx')
+
+
+ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
+ResolverParams = namedtuple("ResolverParams", "resolver_list filter mode")
+
 
 
 

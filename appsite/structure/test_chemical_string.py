@@ -8,6 +8,7 @@ from parameterized import parameterized
 from resolver.models import Structure
 from structure.smiles import SmilesError
 from structure.string_resolver import ChemicalString, ChemicalStructure
+from structure.dispatcher import Dispatcher
 
 from pycactvs import Ens, Dataset, cactvs
 CACTVS_SETTINGS = cactvs
@@ -28,7 +29,32 @@ RESOLVER_LIST = ["name", "smiles", "hashisy"]
 ResolverTest = namedtuple("ResolverTest", "request responses")
 ResolverResponse = namedtuple("ResolverResponse", "resolver expectations exception")
 
-class ChemicalStructureTests(TestCase):
+# class ChemicalStructureTests(TestCase):
+#     fixtures = FIXTURES
+#
+#     def setUp(self):
+#         logger.info("cactvs version: %s", cactvs['version'])
+#
+#     def tearDown(self):
+#         logger.info("------------- Tear Down -------------")
+#         logger.info("dataset list {} {} ens list {} {}"
+#                     .format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
+#         logger.info("dataset list {} {} ens list {} {}"
+#                     .format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
+#
+#     @parameterized.expand([
+#         [{'ens': Ens("CCO")}, None],
+#         [{'structure': Structure.objects.get(id=8)}, None],
+#         [{'structure': Structure.objects.get(id=8), 'ens': Ens("CCO")}, None],
+#         #[{'structure': Structure.objects.get(id=7), 'ens': Ens("CCO")}, None],
+#         #[{'structure': Structure.objects.get(id=7), 'ens': Ens("CCOCC")}, None],
+#     ])
+#     def test(self, kwargs, expectation):
+#         cs = ChemicalStructure(**kwargs)
+#         logger.info("structure {} ens {} identifier {} x {}".format(cs.structure, cs.ens, cs.identifier, cs.metadata))
+
+
+class DispatcherTest(TestCase):
     fixtures = FIXTURES
 
     def setUp(self):
@@ -36,73 +62,23 @@ class ChemicalStructureTests(TestCase):
 
     def tearDown(self):
         logger.info("------------- Tear Down -------------")
-        logger.info("dataset list {} {} ens list {} {}"
-                    .format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
-        logger.info("dataset list {} {} ens list {} {}"
-                    .format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
+        logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
 
     @parameterized.expand([
-        [{'ens': Ens("CCO")}, None],
-        [{'structure': Structure.objects.get(id=8)}, None],
-        [{'structure': Structure.objects.get(id=8), 'ens': Ens("CCO")}, None],
-        #[{'structure': Structure.objects.get(id=7), 'ens': Ens("CCO")}, None],
-        #[{'structure': Structure.objects.get(id=7), 'ens': Ens("CCOCC")}, None],
     ])
-    def test(self, kwargs, expectation):
-        cs = ChemicalStructure(**kwargs)
-        logger.info("structure {} ens {} identifier {} x {}".format(cs.structure, cs.ens, cs.identifier, cs.metadata))
+    def test(self, resolver_test: ResolverTest):
+        dispatcher: Dispatcher
 
 
 class ChemicalStringTests(TestCase):
     fixtures = FIXTURES
 
     def setUp(self):
-        #self.factory = RequestFactory()
         logger.info("cactvs version: %s", cactvs['version'])
-        #logger.info("cactvs settings: %s", settings.CACTVS_SETTINGS['python_object_autodelete'])
 
     def tearDown(self):
         logger.info("------------- Tear Down -------------")
         logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
-
-        #["CCO", ['smiles', 'stdinchikey'], [8, ValueError()]],
-        # ["CCO", ['stdinchikey', ], [ValueError(), ]],
-        # ["1AD375920BE60DAD", ['hashisy', ], [1, ]],
-        # ["Warfarin", ['name', ], [2, ]],
-        # ["NCICADD:CID=3", ['ncicadd_cid', ], [3, ]],
-        # ["E174572A915E4471-FICTS-01-1A", ['ncicadd_identifier', 'smiles', ], [8, ValueError()]],
-        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA-N", ['stdinchikey', ], [8, ]],
-        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA", ['stdinchikey', ], [8, ]],
-        # ["LFQSCWFLJHTTHZ", ['stdinchikey', ], [8, ]],
-        # ["NCICADD:RID=4", ['ncicadd_rid', 'smiles', 'compound_cid', ], [1, ValueError(), ValueError(), ]],
-        # ["NCICADD:CID=5", ['ncicadd_cid', 'ncicadd_rid', 'smiles', ], [4, ValueError(), ValueError(), ]],
-        #["tautomers:Warfarin", ['name', ], [['20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'], ]],
-        # ["CCO", [
-        #     ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
-        #     ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-        # ]],
-        # ["1AD375920BE60DAD", [
-        #     ResolverResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None),
-        # ]],
-        # ["NCICADD:CID=3", [
-        #     ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None),
-        # ]],
-        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA-N", [
-        #     ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
-        # ]],
-        # ["LFQSCWFLJHTTHZ-UHFFFAOYSA", [
-        #     ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
-        # ]],
-        # ["LFQSCWFLJHTTHZ", [
-        #     ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None),
-        # ]],
-        # ["tautomers:Warfarin", [
-        #     ResolverResponse(
-        #         resolver="name",
-        #         expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'},
-        #         exception=None
-        #     ),
-        # ]]
 
     @parameterized.expand([
         [ResolverTest(
@@ -110,6 +86,13 @@ class ChemicalStringTests(TestCase):
             responses=[
                 ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
                 ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+            ]
+        )],
+        [ResolverTest(
+            request="E174572A915E4471-FICTS-01-1A",
+            responses=[
+                ResolverResponse(resolver="ncicadd_identifier", expectations={'E174572A915E4471'}, exception=None),
+                ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
             ]
         )],
         [ResolverTest(
@@ -127,13 +110,13 @@ class ChemicalStringTests(TestCase):
         [ResolverTest(
             request="NCICADD:RID=4",
             responses=[
-                ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None)
+                ResolverResponse(resolver="ncicadd_rid", expectations={'1AD375920BE60DAD'}, exception=None)
             ],
         )],
         [ResolverTest(
             request="NCICADD:CID=5",
             responses=[
-                ResolverResponse(resolver="ncicadd_rid", expectations={'1AD375920BE60DAD'}, exception=None),
+                ResolverResponse(resolver="ncicadd_cid", expectations={'59B33067D13A00C2'}, exception=None),
                 ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
                 ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError())
             ],
@@ -161,7 +144,9 @@ class ChemicalStringTests(TestCase):
             responses=[
                 ResolverResponse(
                     resolver="name",
-                    expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1', '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A', '93B460E97954E4E8'},
+                    expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1',
+                                  '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A',
+                                  '93B460E97954E4E8'},
                     exception=None
                 )
             ],

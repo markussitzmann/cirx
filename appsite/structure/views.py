@@ -1,5 +1,6 @@
 import io
 import json
+import logging
 
 from pycactvs import Ens, Prop
 
@@ -7,12 +8,14 @@ from django.conf import settings
 from django.http import *
 from django.shortcuts import render
 
-from structure.dispatcher import Dispatcher
+from structure.dispatcher import Dispatcher, DispatcherData, DispatcherResponse
 from structure.forms import *
+
+logger = logging.getLogger('cirx')
 
 
 def identifier(request, string, representation, operator=None, format='plain'):
-    return resolve_to_response(request, string, representation, operator_parameter=None, output_format=format)
+    return resolve_to_response(request, string, representation, operator=None, output_format=format)
 
 
 def structure(request, string=None):
@@ -52,15 +55,18 @@ def structure(request, string=None):
     })
 
 
-def resolve_to_response(request, string, representation, operator_parameter=None, output_format='plain'):
+def resolve_to_response(request, string: str, representation_type: str, operator=None, output_format='plain'):
     parameters = request.GET.copy()
     if 'operator' in parameters:
-        operator_parameter = parameters['operator']
-    if operator_parameter:
-        string = "%s:%s" % (operator_parameter, string)
+        operator = parameters['operator']
+    if operator:
+        string = "%s:%s" % (operator, string)
 
-    dispatcher: Dispatcher = Dispatcher(representation=representation, request=request, output_format=output_format)
-    resolved_string, representation, response, content_type = dispatcher.parse(string)
+    dispatcher: Dispatcher = Dispatcher(representation_type=representation_type, request=request, output_format=output_format)
+    #resolved_string, representation, response, content_type = dispatcher.parse(string)
+
+    dispatcher_data: DispatcherData = dispatcher.parse(string)
+
     if request.is_secure():
         host_string = 'https://' + request.get_host()
     else:
@@ -69,7 +75,7 @@ def resolve_to_response(request, string, representation, operator_parameter=None
         url_parameter_string = request.META['QUERY_STRING']
     else:
         url_parameter_string = None
-    if representation == 'twirl' or representation == 'chemdoodle':
+    if representation_type == 'twirl' or representation_type == 'chemdoodle':
         if not parameters.has_key('width'):
             parameters['width'] = 1000
         if not parameters.has_key('height'):
@@ -82,7 +88,7 @@ def resolve_to_response(request, string, representation, operator_parameter=None
             content_type = 'text/html'
         return render(
             request, '3d.template', {
-                'library': representation,
+                'library': representation_type,
                 'string': string,
                 'response': dispatcher.response_list,
                 'parameters': parameters,
@@ -91,14 +97,30 @@ def resolve_to_response(request, string, representation, operator_parameter=None
                 'host': host_string
             }, content_type=content_type)
 
-    if output_format == 'plain':
-        if not response:
+    if not dispatcher_data:
+        if output_format == "xml":
+            return render(request, 'structure.xml', {
+                'response': [],
+                'string': dispatcher_data.identifier,
+                'representation': representation_type,
+                # 'base_url': settings.STRUCTURE_BASE_URL,
+                'base_url': request.get_full_path_info(),
+                'host': host_string
+            }, content_type="text/xml")
+        else:
             raise Http404
+
+    response: DispatcherResponse = dispatcher_data.response
+    if output_format == 'plain':
+        # if not dispatcher_data:
+        #     raise Http404
         try:
-            http_response = HttpResponse(content_type=content_type)
-            http_response.write(io.BytesIO(response).getvalue())
-        except Exception:
-            http_response = HttpResponse(response, content_type=content_type)
+            http_response = HttpResponse(content_type=response.content_type)
+            http_response.write(io.BytesIO(response.simple).getvalue())
+        except:
+            #http_response = HttpResponse(response, content_type=content_type)
+            response_str = '\n'.join([str(item) for item in response.simple])
+            http_response = HttpResponse(response_str, content_type=response.content_type)
         http_response["Access-Control-Allow-Origin"] = "*"
         http_response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
         http_response["Access-Control-Max-Age"] = "1000"
@@ -106,9 +128,9 @@ def resolve_to_response(request, string, representation, operator_parameter=None
         return http_response
     elif output_format == 'xml':
         return render(request, 'structure.xml', {
-            'response': response,
-            'string': resolved_string,
-            'representation': representation,
+            'response': response.full,
+            'string': dispatcher_data.identifier,
+            'representation': representation_type,
             #'base_url': settings.STRUCTURE_BASE_URL,
             'base_url': request.get_full_path_info(),
             'host': host_string
