@@ -73,6 +73,9 @@ class Structure(models.Model):
     def __str__(self):
         return "(Structure=%s: hashisy=%s smiles='%s')" % (self.id, self.hashisy_key.padded, self.smiles)
 
+    def __repr__(self):
+        return "NCICADD:SID={}".format(self.id)
+
 
 class StructureHashisyManager(models.Manager):
 
@@ -420,6 +423,9 @@ class Compound(models.Model):
     def __str__(self):
         return "NCICADD:CID=%s" % self.id
 
+    def __repr__(self):
+        return "NCICADD:CID={}".format(self.id)
+
 
 # class RecordManager(models.Manager):
 #
@@ -452,10 +458,15 @@ class RecordQuerySet(models.QuerySet):
         )
         return queryset
 
-
     def by_regid_ids(self, regids: List[str]):
         queryset = self.select_related(*RecordQuerySet.fetch_relations).filter(
             regid__in=regids
+        )
+        return queryset
+
+    def by_structure_ids(self, structure_ids: List[int]):
+        queryset = self.select_related(*RecordQuerySet.fetch_relations).filter(
+            structure_file_record__structure__parents__ficts_parent__in=structure_ids
         )
         return queryset
 
@@ -487,6 +498,9 @@ class Record(models.Model):
 
     def __str__(self):
         return "(Record=%s: regid=%s)" % (self.id, self.regid)
+
+    def __repr__(self):
+        return "NCICADD:RID={}".format(self.id)
 
 
 class Name(models.Model):

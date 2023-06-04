@@ -68,7 +68,7 @@ class DispatcherTests(TestCase):
         logger.info("------------- Test Dispatcher (%s) -------------" % string)
         expected, expected_status = expectations
 
-        dispatcher: Dispatcher = Dispatcher("ncicadd_cid", request=None, parameters=None, output_format="plain")
+        dispatcher: Dispatcher = Dispatcher("ncicadd_cid", request=None, representation_param=None, output_format="plain")
         data: DispatcherData = dispatcher.parse(string)
 
         logger.info("DISPATCHER %s", data)

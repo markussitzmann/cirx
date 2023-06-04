@@ -14,7 +14,7 @@ from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpRequest, QueryDict
 
 from structure.models import ResponseType
-from resolver.models import NameType
+from resolver.models import NameType, Record
 from structure.string_resolver import ChemicalString, ChemicalStructure, ResolverData, ResolverParams
 
 logger = logging.getLogger('cirx')
@@ -22,12 +22,51 @@ logger = logging.getLogger('cirx')
 DispatcherData = namedtuple("DispatcherData", "identifier representation response")
 DispatcherResponse = namedtuple("DispatcherResponse", "full simple content_type")
 
+
+def dispatcher_method(func):
+    @functools.wraps(func)
+    def dispatcher_method_wrapper(self, string, *args, **kwargs):
+        params: ResolverParams = self._params()
+        chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
+        resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
+        index = 1
+        if not self.output_format == 'xml' and params.mode == 'simple':
+            resolver_data = [resolver_data[0], ]
+        representation_list = []
+        data: ResolverData
+        for data in resolver_data:
+            response_list = []
+            for resolved in data.resolved:
+                try:
+                    response = func(self, resolved, self.representation_param)
+                    response_list.append(response)
+                    representation = {
+                        'base_mime_type': self.base_content_type,
+                        'id': index,
+                        'string': string,
+                        'structure': resolved,
+                        'response': response,
+                        'index': index,
+                    }
+                    representation_list.append(representation)
+                    index += 1
+                except Exception as e:
+                    logger.warning(e)
+        return DispatcherResponse(
+            full=representation_list,
+            simple=[representation['response'] for representation in representation_list],
+            content_type="text/plain"
+        )
+    return dispatcher_method_wrapper
+
+
 class Dispatcher:
-    def __init__(self, representation_type, request, parameters=None, output_format='plain'):
+
+    def __init__(self, request, representation_type, representation_param=None, output_format='plain'):
         response_type = ResponseType.objects.get(url=representation_type)
-        self.type = response_type
+        #self.type = response_type
         self.base_content_type = response_type.base_mime_type
-        self.method = response_type.method
+        #self.method = response_type.method
         self.url_parameters: HttpRequest.GET = request.GET.copy() if request else None
         self.representation_type = representation_type
         #self.content_type = None
@@ -35,22 +74,24 @@ class Dispatcher:
         #self.response_list = []
         #self.simple_mode: bool = self._use_simple_mode()
 
-        if not parameters:
-            self.parameters = response_type.parameter
+        if not representation_param:
+            self.representation_param = response_type.parameter
         else:
-            self.parameters = parameters
+            self.representation_param = representation_param
 
-    def __repr__(self):
-        repr_string = ''
-        if not self.response_list:
-            return ''
-        if self.content_type == 'image/gif':
-            repr_string = self.response_list
-        else:
-            # response_list = self.response_list
-            for item in self.response_list:
-                repr_string = repr_string + "%s\n" % (item,)
-        return repr_string[0:-1]
+        self.method = getattr(self, response_type.method, self.representation_param)
+
+    # def __repr__(self):
+    #     repr_string = ''
+    #     if not self.response_list:
+    #         return ''
+    #     if self.content_type == 'image/gif':
+    #         repr_string = self.response_list
+    #     else:
+    #         # response_list = self.response_list
+    #         for item in self.response_list:
+    #             repr_string = repr_string + "%s\n" % (item,)
+    #     return repr_string[0:-1]
 
     # class Representation:
     #     def __init__(self):
@@ -74,28 +115,13 @@ class Dispatcher:
     #         return response
 
     def parse(self, string) -> DispatcherData:
-        method = getattr(self, self.method, self.parameters)
-        response: DispatcherResponse = method(string)
-        #content_type = self.content_type
+        response: DispatcherResponse = self.method(string)
         representation = self.representation_type
         return DispatcherData(
             identifier=string,
             representation=representation,
             response=response
         )
-
-    def _params(self) -> ResolverParams:
-        if self.url_parameters:
-            params = self.url_parameters.copy()
-            raw_resolver_str = params.get("resolver", None)
-            if raw_resolver_str:
-                resolver_list = raw_resolver_str.split(',')
-            else:
-                resolver_list = []
-            filter = params.get("filter", None)
-            mode = params.get("mode", "simple")
-            return ResolverParams(resolver_list=resolver_list, filter=filter, mode=mode)
-        return ResolverParams(resolver_list=[], filter=None, mode="simple")
 
 
     def urls(self, string):
@@ -392,122 +418,137 @@ class Dispatcher:
             self.response_list = all_interpretation_response_list
         return representation_list
 
-    def ncicadd_record_id(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        mode = parameters.get('mode', 'simple')
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        all_interpretation_response_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.structures:
-                response_list = []
-                try:
-                    compound = structure.object.compound
-                except:
-                    compound = None
-                else:
-                    database_records = compound.get_records(group_key='database')['content'].values()
-                    for records in database_records:
-                        for record in records:
-                            # database = record['database']
-                            # release = record['release']
-                            response = record['object']
-                            response_list.append(response)
-                            all_interpretation_response_list.append(response)
-                # dummy
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'response': response_list,
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = all_interpretation_response_list
-        return representation_list
+    @dispatcher_method
+    def ncicadd_compound_id(self, resolved: ChemicalStructure, *args, **kwargs):
+        return [repr(resolved.structure.compound), ]
 
-    def ncicadd_compound_id(self, string) -> DispatcherResponse:
+    @dispatcher_method
+    def ncicadd_structure_id(self, resolved: ChemicalStructure, *args, **kwargs):
+        return [repr(resolved.structure), ]
+
+    @dispatcher_method
+    def ncicadd_record_id(self, resolved: ChemicalStructure, *args, **kwargs):
+        records = Record.with_related_objects.by_structure_ids([resolved.structure.id, ])
+        return [repr(record) for record in records]
+
+    @dispatcher_method
+    def prop(self, resolved: ChemicalStructure, representation_param: str, *args, **kwargs):
         params = self._params()
-        chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
-        resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
-        index = 1
-        if not self.output_format == 'xml' and params.mode == 'simple':
-            resolver_data = [resolver_data[0], ]
-        representation_list = []
-        #all_interpretation_response_list = []
-        data: ResolverData
-        for data in resolver_data:
-            response_list = []
-            for resolved in data.resolved:
-                try:
-                    response = resolved.structure.compound.id
-                    response_list.append(response)
-                    #all_interpretation_response_list.append(response)
-                    representation = {
-                        'base_mime_type': self.base_content_type,
-                        'id': index,
-                        'string': string,
-                        'structure': resolved,
-                        'response': response,
-                        'index': index,
-                    }
-                    representation_list.append(representation)
-                    index += 1
-                except Exception as e:
-                    logger.warning(e)
-        #if self.output_format == 'plain':
-        #    self.content_type = "text/plain"
-        #    self.response_list = all_interpretation_response_list
+        prop_name = representation_param
+        prop_val = resolved.structure.to_ens.get(prop_name, parameters=params.url_params)
+        return [prop_val, ]
 
-        return DispatcherResponse(
-            full=representation_list,
-            simple=[representation['response'] for representation in representation_list],
-            content_type="text/plain"
-        )
+    # def ncicadd_record_id(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     all_interpretation_response_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.structures:
+    #             response_list = []
+    #             try:
+    #                 compound = structure.object.compound
+    #             except:
+    #                 compound = None
+    #             else:
+    #                 database_records = compound.get_records(group_key='database')['content'].values()
+    #                 for records in database_records:
+    #                     for record in records:
+    #                         # database = record['database']
+    #                         # release = record['release']
+    #                         response = record['object']
+    #                         response_list.append(response)
+    #                         all_interpretation_response_list.append(response)
+    #             # dummy
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'response': response_list,
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = all_interpretation_response_list
+    #     return representation_list
 
-    def ncicadd_structure_id(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        mode = parameters.get('mode', 'simple')
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        all_interpretation_response_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.structures:
-                response_list = []
-                response = structure.object.__str__()
-                response_list.append(response)
-                all_interpretation_response_list.append(response)
-                # dummy
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'response': [response, ],
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = all_interpretation_response_list
-        return representation_list
+
+    # def ncicadd_compound_id(self, string) -> DispatcherResponse:
+    #     params = self._params()
+    #     chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
+    #     resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
+    #     index = 1
+    #     if not self.output_format == 'xml' and params.mode == 'simple':
+    #         resolver_data = [resolver_data[0], ]
+    #     representation_list = []
+    #     data: ResolverData
+    #     for data in resolver_data:
+    #         response_list = []
+    #         for resolved in data.resolved:
+    #             try:
+    #                 response = resolved.structure.compound.id
+    #                 response_list.append(response)
+    #                 representation = {
+    #                     'base_mime_type': self.base_content_type,
+    #                     'id': index,
+    #                     'string': string,
+    #                     'structure': resolved,
+    #                     'response': response,
+    #                     'index': index,
+    #                 }
+    #                 representation_list.append(representation)
+    #                 index += 1
+    #             except Exception as e:
+    #                 logger.warning(e)
+    #     return DispatcherResponse(
+    #         full=representation_list,
+    #         simple=[representation['response'] for representation in representation_list],
+    #         content_type="text/plain"
+    #     )
+
+    # def ncicadd_structure_id(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     all_interpretation_response_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.structures:
+    #             response_list = []
+    #             response = structure.object.__str__()
+    #             response_list.append(response)
+    #             all_interpretation_response_list.append(response)
+    #             # dummy
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'response': [response, ],
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = all_interpretation_response_list
+    #     return representation_list
 
     @staticmethod
     def _create_dataset_from_resolver_string(string: str, resolver_list: List[str], simple: bool, index: int = -1) -> Dataset:
@@ -550,20 +591,68 @@ class Dispatcher:
             return False
         return True
 
-    @staticmethod
-    def _prepare_params(query_dict: QueryDict) -> Tuple[Dict, int]:
-        url_param_dict = query_dict.copy().dict()
-        structure_index: int = -1
-        if 'structure_index' in url_param_dict:
-            structure_index = int(url_param_dict.get('structure_index', -1))
-            del url_param_dict['structure_index']
-        if 'get3d' in url_param_dict:
-            writeflags = url_param_dict.get('writeflags', [])
-            if 'write3d' not in writeflags and strtobool(url_param_dict['get3d']):
-                writeflags.append('write3d')
-                url_param_dict['writeflags'] = writeflags
-            del url_param_dict['get3d']
-        return url_param_dict, structure_index
+    def _params(self) -> ResolverParams:
+        if self.url_parameters:
+            params = self.url_parameters.copy()
+            raw_resolver_str = params.get("resolver", [])
+            if raw_resolver_str:
+                resolver_list = raw_resolver_str.split(',')
+            else:
+                resolver_list = []
+
+            structure_index = -1
+            if 'structure_index' in params:
+                structure_index = int(params.get('structure_index', -1))
+                del params['structure_index']
+            if 'get3d' in params:
+                writeflags = params.get('writeflags', [])
+                if 'write3d' not in writeflags and strtobool(params['get3d']):
+                    writeflags.append('write3d')
+                    params['writeflags'] = writeflags
+                del params['get3d']
+
+            filter = params.get("filter", None)
+            mode = params.get("mode", "simple")
+            structure_index = structure_index
+            page = int(params.get('page', -1))
+            columns = int(params.get('columns', -1))
+            rows = int(params.get('rows', -1))
+
+            return ResolverParams(
+                url_params=params,
+                resolver_list=resolver_list,
+                filter=filter,
+                mode=mode,
+                structure_index=structure_index,
+                page=page,
+                columns=columns,
+                rows=rows
+            )
+        return ResolverParams(
+            url_params=None,
+            resolver_list=[],
+            filter=None,
+            mode="simple",
+            structure_index=-1,
+            page=-1,
+            columns=-1,
+            rows=-1
+        )
+
+    # @staticmethod
+    # def _prepare_params(query_dict: QueryDict) -> Tuple[Dict, int]:
+    #     url_param_dict = query_dict.copy().dict()
+    #     structure_index: int = -1
+    #     if 'structure_index' in url_param_dict:
+    #         structure_index = int(url_param_dict.get('structure_index', -1))
+    #         del url_param_dict['structure_index']
+    #     if 'get3d' in url_param_dict:
+    #         writeflags = url_param_dict.get('writeflags', [])
+    #         if 'write3d' not in writeflags and strtobool(url_param_dict['get3d']):
+    #             writeflags.append('write3d')
+    #             url_param_dict['writeflags'] = writeflags
+    #         del url_param_dict['get3d']
+    #     return url_param_dict, structure_index
 
     def _interpretations(self, string: str, structure_index: int = -1) -> Tuple[List[ChemicalString], bool]:
         url_params = self.url_parameters.copy()
@@ -601,34 +690,34 @@ class Dispatcher:
             self.response_list = [response, ]
         return response
 
-    def prop(self, string: str) -> List:
-        url_params, structure_index = self._prepare_params(self.url_parameters.copy())
-        prop = self.parameters
-        index: int = 1
-        interpretations: List[ChemicalString.StructureData]
-        simple: bool
-        interpretations, simple = self._interpretations(string, structure_index=structure_index)
-        for interpretation in interpretations:
-            structure: ChemicalStructure
-            for structure in interpretation.structures:
-                prop_val = structure.ens.get(prop, parameters=url_params)
-                if simple:
-                    structure_response = prop_val
-                else:
-                    structure_response = {
-                        'base_mime_type': self.base_content_type,
-                        'id': interpretation.id,
-                        'string': string,
-                        'structure': structure,
-                        'response': [prop_val, ],
-                        'index': index,
-                    }
-                self.response_list.append(structure_response)
-                index += 1
-        if simple:
-            return self._unique(self.response_list)
-        else:
-            return self.response_list
+    # def prop(self, string: str) -> List:
+    #     url_params, structure_index = self._prepare_params(self.url_parameters.copy())
+    #     prop = self.representation_param
+    #     index: int = 1
+    #     interpretations: List[ChemicalString.StructureData]
+    #     simple: bool
+    #     interpretations, simple = self._interpretations(string, structure_index=structure_index)
+    #     for interpretation in interpretations:
+    #         structure: ChemicalStructure
+    #         for structure in interpretation.structures:
+    #             prop_val = structure.ens.get(prop, parameters=url_params)
+    #             if simple:
+    #                 structure_response = prop_val
+    #             else:
+    #                 structure_response = {
+    #                     'base_mime_type': self.base_content_type,
+    #                     'id': interpretation.id,
+    #                     'string': string,
+    #                     'structure': structure,
+    #                     'response': [prop_val, ],
+    #                     'index': index,
+    #                 }
+    #             self.response_list.append(structure_response)
+    #             index += 1
+    #     if simple:
+    #         return self._unique(self.response_list)
+    #     else:
+    #         return self.response_list
 
     # def xxprop(self, string: str) -> List:
     #     url_params = self.url_parameters.copy()
@@ -670,7 +759,7 @@ class Dispatcher:
     #     return self.response_list
     #
     def xprop(self, string):
-        propname = self.parameters
+        propname = self.representation_param
         base_content_type = self.base_content_type
         parameters = self.url_parameters.copy()
         resolver_list = parameters.get('resolver', settings.AVAILABLE_RESOLVERS)

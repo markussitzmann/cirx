@@ -62,7 +62,11 @@ def resolve_to_response(request, string: str, representation_type: str, operator
     if operator:
         string = "%s:%s" % (operator, string)
 
-    dispatcher: Dispatcher = Dispatcher(representation_type=representation_type, request=request, output_format=output_format)
+    dispatcher: Dispatcher = Dispatcher(
+        request=request,
+        representation_type=representation_type,
+        output_format=output_format
+    )
     #resolved_string, representation, response, content_type = dispatcher.parse(string)
 
     dispatcher_data: DispatcherData = dispatcher.parse(string)
@@ -119,7 +123,7 @@ def resolve_to_response(request, string: str, representation_type: str, operator
             http_response.write(io.BytesIO(response.simple).getvalue())
         except:
             #http_response = HttpResponse(response, content_type=content_type)
-            response_str = '\n'.join([str(item) for item in response.simple])
+            response_str = '\n'.join(set([str(item) for r in response.simple for item in r]))
             http_response = HttpResponse(response_str, content_type=response.content_type)
         http_response["Access-Control-Allow-Origin"] = "*"
         http_response["Access-Control-Allow-Methods"] = "GET, OPTIONS"

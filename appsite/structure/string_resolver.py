@@ -18,7 +18,7 @@ logger = logging.getLogger('cirx')
 
 
 ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
-ResolverParams = namedtuple("ResolverParams", "resolver_list filter mode")
+ResolverParams = namedtuple("ResolverParams", "url_params, resolver_list filter mode structure_index page columns rows")
 
 
 
