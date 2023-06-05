@@ -7,7 +7,7 @@ from typing import List, Dict, Tuple, Any
 import logging
 
 from django.conf import settings
-from pycactvs import Ens, Dataset, Molfile
+from pycactvs import Ens, Dataset, Molfile, Prop
 
 from django.core.files import File
 from django.core.paginator import Paginator, EmptyPage
@@ -26,7 +26,7 @@ DispatcherResponse = namedtuple("DispatcherResponse", "full simple content_type"
 def dispatcher_method(func):
     @functools.wraps(func)
     def dispatcher_method_wrapper(self, string, *args, **kwargs):
-        params: ResolverParams = self._params()
+        params: ResolverParams = self._params
         chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
         resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
         index = 1
@@ -433,10 +433,36 @@ class Dispatcher:
 
     @dispatcher_method
     def prop(self, resolved: ChemicalStructure, representation_param: str, *args, **kwargs):
-        params = self._params()
+        params = self._params
         prop_name = representation_param
-        prop_val = resolved.structure.to_ens.get(prop_name, parameters=params.url_params)
+        prop_val = resolved.ens.get(prop_name, parameters=params.url_params)
         return [prop_val, ]
+
+    @dispatcher_method
+    def structure_image(self, resolved: ChemicalStructure, *args, **kwargs):
+
+        url_params = self._params.url_params
+
+        default_svg_paramaters = {
+            'width': 250,
+            'height': 250,
+            'bgcolor': 'white',
+            'atomcolor': 'element',
+            # 'symbolfontsize': 32,
+            'bonds': 10,
+            'framecolor': 'transparent'
+        }
+        if url_params:
+            default_svg_paramaters.update(url_params)
+
+        prop: Prop = Prop.Ref('E_SVG_IMAGE')
+        prop.datatype = 'xmlstring'
+        prop.setparameter(default_svg_paramaters)
+
+        ens = resolved.structure.to_ens
+
+        return ens.get(prop)
+
 
     # def ncicadd_record_id(self, string):
     #     parameters = self.url_parameters.copy()
@@ -591,6 +617,7 @@ class Dispatcher:
             return False
         return True
 
+    @property
     def _params(self) -> ResolverParams:
         if self.url_parameters:
             params = self.url_parameters.copy()

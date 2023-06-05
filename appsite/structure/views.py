@@ -79,6 +79,7 @@ def resolve_to_response(request, string: str, representation_type: str, operator
         url_parameter_string = request.META['QUERY_STRING']
     else:
         url_parameter_string = None
+
     if representation_type == 'twirl' or representation_type == 'chemdoodle':
         if not parameters.has_key('width'):
             parameters['width'] = 1000
@@ -101,6 +102,9 @@ def resolve_to_response(request, string: str, representation_type: str, operator
                 'host': host_string
             }, content_type=content_type)
 
+    if representation_type == "image":
+        output_format = "image"
+
     if not dispatcher_data:
         if output_format == "xml":
             return render(request, 'structure.xml', {
@@ -115,14 +119,11 @@ def resolve_to_response(request, string: str, representation_type: str, operator
             raise Http404
 
     response: DispatcherResponse = dispatcher_data.response
-    if output_format == 'plain':
-        # if not dispatcher_data:
-        #     raise Http404
+    if output_format == "plain":
         try:
             http_response = HttpResponse(content_type=response.content_type)
             http_response.write(io.BytesIO(response.simple).getvalue())
         except:
-            #http_response = HttpResponse(response, content_type=content_type)
             response_str = '\n'.join(set([str(item) for r in response.simple for item in r]))
             http_response = HttpResponse(response_str, content_type=response.content_type)
         http_response["Access-Control-Allow-Origin"] = "*"
@@ -130,12 +131,14 @@ def resolve_to_response(request, string: str, representation_type: str, operator
         http_response["Access-Control-Max-Age"] = "1000"
         http_response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
         return http_response
-    elif output_format == 'xml':
-        return render(request, 'structure.xml', {
+    elif output_format == "image":
+        http_response = HttpResponse(response.simple, content_type="image/svg+xml")
+        return http_response
+    elif output_format == "xml":
+        return render(request, "structure.xml", {
             'response': response.full,
             'string': dispatcher_data.identifier,
             'representation': representation_type,
-            #'base_url': settings.STRUCTURE_BASE_URL,
             'base_url': request.get_full_path_info(),
             'host': host_string
         }, content_type="text/xml")
