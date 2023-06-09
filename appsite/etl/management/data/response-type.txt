@@ -22,13 +22,13 @@
 | 22 |           NULL | cas                       | cas                  | NULL                           | text           |
 | 23 |           NULL | stdinchi                  | prop                 | E_STDINCHI                   | text           |
 | 24 |             23 | stdinchikey               | prop                 | E_STDINCHIKEY                | text           |
-| 25 |           NULL | image                     | prop                 | structure_image                | image          |
-| 26 |           NULL | sdf                       | prop                 | E_MOLFILESTRING                  | text           |
-| 27 |           NULL | molfile                   | prop                 | E_MOLFILESTRING                  | text           |
+| 25 |           NULL | image                     | structure_image      | NULL                         | image          |
+| 26 |           NULL | sdf                       | molfile              | NULL                  | text           |
+| 27 |           NULL | molfile                   | molfile              | NULL                  | text           |
 | 28 |           NULL | hashisy                   | prop                 | E_HASHISY                    | text           |
 | 29 |           NULL | gif                       | prop                 | structure_image                | image          |
 | 30 |           NULL | iupac_name                | iupac_name           | NULL                           | text           |
-| 31 |           NULL | file                      | molfilestring        | NULL                  | text           |
+| 31 |           NULL | file                      | molfile              | NULL                  | text           |
 | 32 |           NULL | twirl                     | twirl                | E_MOLFILESTRING                  | text           |
 | 33 |           NULL | urls                      | urls                 | NULL                           | text           |
 | 34 |           NULL | 3d                        | twirl                | E_MOLFILESTRING                  | text           |

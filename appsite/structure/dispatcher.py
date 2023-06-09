@@ -5,9 +5,12 @@ from distutils.util import strtobool
 from typing import List, Dict, Tuple, Any
 
 import logging
+from urllib.parse import quote
 
 from django.conf import settings
-from pycactvs import Ens, Dataset, Molfile, Prop
+from pycactvs import Ens, Molfile, Prop
+from pycactvs import Dataset as CsDataset
+
 
 from django.core.files import File
 from django.core.paginator import Paginator, EmptyPage
@@ -23,41 +26,66 @@ DispatcherData = namedtuple("DispatcherData", "identifier representation respons
 DispatcherResponse = namedtuple("DispatcherResponse", "full simple content_type")
 
 
-def dispatcher_method(func):
-    @functools.wraps(func)
-    def dispatcher_method_wrapper(self, string, *args, **kwargs):
-        params: ResolverParams = self._params
-        chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
-        resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
-        index = 1
-        if not self.output_format == 'xml' and params.mode == 'simple':
-            resolver_data = [resolver_data[0], ]
-        representation_list = []
-        data: ResolverData
-        for data in resolver_data:
-            response_list = []
-            for resolved in data.resolved:
-                try:
-                    response = func(self, resolved, self.representation_param)
-                    response_list.append(response)
-                    representation = {
-                        'base_mime_type': self.base_content_type,
-                        'id': index,
-                        'string': string,
-                        'structure': resolved,
-                        'response': response,
-                        'index': index,
-                    }
-                    representation_list.append(representation)
-                    index += 1
-                except Exception as e:
-                    logger.warning(e)
-        return DispatcherResponse(
-            full=representation_list,
-            simple=[representation['response'] for representation in representation_list],
-            content_type="text/plain"
-        )
-    return dispatcher_method_wrapper
+def dispatcher_method(_func=None, *, as_list=False):
+    def dispatcher_method_decorator(func):
+        @functools.wraps(func)
+        def dispatcher_method_wrapper(self, string, *args, **kwargs):
+            params: ResolverParams = self._params
+            chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
+            resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
+            index = 1
+            if not self.output_format == 'xml' and params.mode == 'simple':
+                resolver_data = [resolver_data[0], ]
+            representation_list = []
+            data: ResolverData
+            for data in resolver_data:
+                response_list = []
+                if as_list:
+                    try:
+                        response = func(self, data.resolved, self.representation_param)
+                        representation = {
+                            'base_mime_type': self.base_content_type,
+                            'id': index,
+                            'string': string,
+                            'structure': data.resolved,
+                            'response': response,
+                            'index': index,
+                        }
+                        representation_list.append(representation)
+                        index += 1
+                    except Exception as e:
+                        # ToDo: better exception handling
+                        logger.warning(e)
+                else:
+                    for resolved in data.resolved:
+                        try:
+                            response = func(self, resolved, self.representation_param)
+                            response_list.append(response)
+                            representation = {
+                                'base_mime_type': self.base_content_type,
+                                'id': index,
+                                'string': string,
+                                'structure': resolved,
+                                'response': response,
+                                'index': index,
+                            }
+                            representation_list.append(representation)
+                            index += 1
+                        except Exception as e:
+                            # ToDo: better exception handling
+                            logger.warning(e)
+            logger.info("DATASETS {} ENS {}".format(CsDataset.List(), Ens.List()))
+            return DispatcherResponse(
+                full=representation_list,
+                simple=[representation['response'] for representation in representation_list],
+                content_type="text/plain"
+            )
+        return dispatcher_method_wrapper
+
+    if _func is None:
+        return dispatcher_method_decorator
+    else:
+        return dispatcher_method_decorator(_func)
 
 
 class Dispatcher:
@@ -438,8 +466,8 @@ class Dispatcher:
         prop_val = resolved.ens.get(prop_name, parameters=params.url_params)
         return [prop_val, ]
 
-    @dispatcher_method
-    def structure_image(self, resolved: ChemicalStructure, *args, **kwargs):
+    @dispatcher_method(as_list=True)
+    def structure_image(self, resolved: List[ChemicalStructure], *args, **kwargs):
 
         url_params = self._params.url_params
 
@@ -448,20 +476,47 @@ class Dispatcher:
             'height': 250,
             'bgcolor': 'white',
             'atomcolor': 'element',
-            # 'symbolfontsize': 32,
+            #'symbolfontsize': 32,
             'bonds': 10,
-            'framecolor': 'transparent'
+            'framecolor': 'transparent',
         }
         if url_params:
-            default_svg_paramaters.update(url_params)
+            default_svg_paramaters.update({k: v[-1] for k, v in url_params.items()})
 
-        prop: Prop = Prop.Ref('E_SVG_IMAGE')
-        prop.datatype = 'xmlstring'
-        prop.setparameter(default_svg_paramaters)
+        ens_prop: Prop = Prop.Ref('E_SVG_IMAGE')
+        image_parameters = Prop.Ref('E_SVG_IMAGE').parameters
+        params = {k: (int(v) if v.isnumeric() else v) for k, v in default_svg_paramaters.items() if k in image_parameters}
+            #try:
+        ens_prop.setparameter(params)
+            #except Exception as e:
+             #   logger.warning(e)
 
-        ens = resolved.structure.to_ens
+        if len(resolved) > 1:
+            dataset_prop = Prop.Ref('D_SVG_IMAGE')
+            #for item in default_svg_paramaters.items():
+            #    try:
+            #        dataset_prop.setparameter({item[0]: item[1]})
+            #    except Exception as e:
+            #        logger.warning(e)
 
-        return ens.get(prop)
+            dataset_prop.datatype = 'xmlstring'
+            dataset: CsDataset = CsDataset([structure.ens for structure in resolved])
+            if url_params:
+                rows, columns, page = \
+                    int(url_params.get('rows', [3])[-1]), \
+                    int(url_params.get('columns', [3])[-1]), \
+                    int(url_params.get('page', [1])[-1])
+                image_dataset = Dispatcher._create_dataset_page(dataset, rows=rows, columns=columns, page=page)
+                dataset_prop.setparameter({"nrows": int(rows), "ncols": int(columns)})
+            else:
+                image_dataset = Dispatcher._create_dataset_page(dataset, rows=3, columns=3, page=1)
+                dataset_prop.setparameter({"nrows": 3, "ncols": 3})
+            image = image_dataset.get(dataset_prop)
+            del image_dataset
+        else:
+            ens_prop.datatype = 'xmlstring'
+            image = resolved[0].ens.get(ens_prop)
+        return image
 
 
     # def ncicadd_record_id(self, string):
@@ -577,12 +632,12 @@ class Dispatcher:
     #     return representation_list
 
     @staticmethod
-    def _create_dataset_from_resolver_string(string: str, resolver_list: List[str], simple: bool, index: int = -1) -> Dataset:
+    def _create_dataset_from_resolver_string(string: str, resolver_list: List[str], simple: bool, index: int = -1) -> CsDataset:
         resolver_data: Dict[str, ResolverData] = ChemicalString(string=string, resolver_list=resolver_list).resolver_data
         return Dispatcher._create_dataset(resolver_data, simple, index)
 
     @staticmethod
-    def _create_dataset(resolver_data: Dict[str, ResolverData], simple: bool, structure_index: int = -1) -> Dataset:
+    def _create_dataset(resolver_data: Dict[str, ResolverData], simple: bool, structure_index: int = -1) -> CsDataset:
         ens_list: List[Ens] = [structure.ens for data in resolver_data.values() if data.resolved for structure in data.resolved]
         # structure_list = []
         # for data in resolver_data.values():
@@ -595,21 +650,24 @@ class Dispatcher:
         # ens_list: List[Ens] = [
         #     structure.ens for structure in structure_list
         # ]
-        dataset: Dataset
+        dataset: CsDataset
         if structure_index > 0:
-            dataset = Dataset(ens_list[structure_index])
+            dataset = CsDataset(ens_list[structure_index])
         else:
-            dataset = Dataset(ens_list)
+            dataset = CsDataset(ens_list)
         return dataset
 
     @staticmethod
-    def _create_dataset_page(dataset: Dataset, rows: int, columns: int, page: int) -> Dataset:
-        try:
-            page_size: int = rows * columns
-            paginator: Paginator = Paginator(dataset.ens(), page_size)
-            return Dataset(paginator.page(page).object_list)
-        except (EmptyPage, ZeroDivisionError):
-            return Dataset()
+    def _create_dataset_page(dataset: CsDataset, rows: int, columns: int, page: int) -> CsDataset:
+        if rows and columns and page:
+            try:
+                page_size: int = rows * columns
+                paginator: Paginator = Paginator(dataset.ens(), page_size)
+                return CsDataset(paginator.page(page).object_list)
+            except (EmptyPage, ZeroDivisionError):
+                return CsDataset()
+        else:
+            return dataset.copy()
 
     @staticmethod
     def _use_simple_mode(output_format: str, simple_mode: bool) -> bool:

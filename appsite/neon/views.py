@@ -4,9 +4,10 @@ from collections import namedtuple, defaultdict
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from pycactvs import Prop, Ens
+from pycactvs import Dataset as CsDataset
 
 from etl.registration import StructureRegistry
-from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation
+from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Dataset
 # Create your views here.
 from structure.ncicadd.identifier import Identifier
 
@@ -29,9 +30,16 @@ def _create_image(ens: Ens, svg_paramaters = None):
 
     prop: Prop = Prop.Ref('E_SVG_IMAGE')
     prop.datatype = 'xmlstring'
-    prop.setparameter(default_svg_paramaters)
+    for item in default_svg_paramaters.items():
+        prop.setparameter({item[0]: item[1]})
 
-    return ens.get(prop)
+    ens2 = Ens("CCOCC")
+    dataset = CsDataset([ens, ens2])
+
+    dprop: Prop = Prop.Ref('D_SVG_IMAGE')
+    dprop.datatype = 'xmlstring'
+
+    return dataset.get(dprop)
 
 
 def neon(request: HttpRequest, string: str = None):

@@ -24,11 +24,7 @@ FUNCTYPE PF_TCLSCRIPT
 FUNCNAME get_tautomers 1
 
 proc get_tautomers {ehandle} {
-    puts "1"
 	prop set E_RESOLVER_TAUTOMERS parameters [prop get E_CIR_TAUTOMERS parameters]
-	puts "2"
 	set dataset [dataset create [dataset unique [join [ens get $ehandle E_RESOLVER_TAUTOMERS]] E_HASHISY]]
-	puts "3"
 	ens set $ehandle E_CIR_TAUTOMERS $dataset
-	puts "4"
 }

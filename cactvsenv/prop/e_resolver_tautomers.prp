@@ -70,7 +70,7 @@ proc get_tautomers {ehandle} {
 
 
 	# to trace the applied transforms: add 'setname' flag
-	set trafoflags {preservecharges checkaro setname} 
+	set trafoflags {preservecharges checkaro}
 	if {[prop getparam E_RESOLVER_TAUTOMERS preservecoordinates]} {
 		lappend trafoflags preservecoordinates
 	}
