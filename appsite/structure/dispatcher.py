@@ -25,6 +25,21 @@ logger = logging.getLogger('cirx')
 DispatcherData = namedtuple("DispatcherData", "identifier representation response")
 DispatcherResponse = namedtuple("DispatcherResponse", "full simple content_type")
 
+try:
+    ens_image_prop: Prop = Prop.Ref("E_SVG_IMAGE")
+    ens_image_parameters = ens_image_prop.parameters
+    ens_image_prop.datatype = "xmlstring"
+except Exception as e:
+    logger.warning(e)
+
+
+try:
+    dataset_image_prop: Prop = Prop.Ref("D_SVG_IMAGE")
+    dataset_image_parameters = dataset_image_prop.parameters
+    dataset_image_prop.datatype = "xmlstring"
+except Exception as e:
+    logger.warning(e)
+
 
 def dispatcher_method(_func=None, *, as_list=False):
     def dispatcher_method_decorator(func):
@@ -469,37 +484,48 @@ class Dispatcher:
     @dispatcher_method(as_list=True)
     def structure_image(self, resolved: List[ChemicalStructure], *args, **kwargs):
 
+
         url_params = self._params.url_params
 
-        default_svg_paramaters = {
-            'width': 250,
-            'height': 250,
+        preset_svg_parameters = {
+            'width': '250',
+            'height': '250',
             'bgcolor': 'white',
             'atomcolor': 'element',
             #'symbolfontsize': 32,
-            'bonds': 10,
+            'bonds': '10',
             'framecolor': 'transparent',
         }
         if url_params:
-            default_svg_paramaters.update({k: v[-1] for k, v in url_params.items()})
+            svg_parameters = {k: v for k, v in url_params.items()}
+        else:
+            svg_parameters = {}
 
-        ens_prop: Prop = Prop.Ref('E_SVG_IMAGE')
-        image_parameters = Prop.Ref('E_SVG_IMAGE').parameters
-        params = {k: (int(v) if v.isnumeric() else v) for k, v in default_svg_paramaters.items() if k in image_parameters}
+        for k, v in preset_svg_parameters.items():
+            if k not in svg_parameters:
+                svg_parameters[k] = v
+
+        #ens_image_parameters = ens_image_prop.parameters
+        ens_params = {k: (int(v) if v.isnumeric() else v) for k, v in svg_parameters.items() if
+                      k in ens_image_parameters}
+
+        #dataset_image_parameters = dataset_image_prop.parameters
+        dataset_params = {k: (int(v) if v.isnumeric() else v) for k, v in svg_parameters.items() if
+                          k in dataset_image_parameters}
+
             #try:
-        ens_prop.setparameter(params)
             #except Exception as e:
              #   logger.warning(e)
 
         if len(resolved) > 1:
             dataset_prop = Prop.Ref('D_SVG_IMAGE')
-            #for item in default_svg_paramaters.items():
+            #for item in svg_paramaters.items():
             #    try:
             #        dataset_prop.setparameter({item[0]: item[1]})
             #    except Exception as e:
             #        logger.warning(e)
 
-            dataset_prop.datatype = 'xmlstring'
+            #dataset_image_prop.datatype = 'xmlstring'
             dataset: CsDataset = CsDataset([structure.ens for structure in resolved])
             if url_params:
                 rows, columns, page = \
@@ -507,15 +533,20 @@ class Dispatcher:
                     int(url_params.get('columns', [3])[-1]), \
                     int(url_params.get('page', [1])[-1])
                 image_dataset = Dispatcher._create_dataset_page(dataset, rows=rows, columns=columns, page=page)
-                dataset_prop.setparameter({"nrows": int(rows), "ncols": int(columns)})
+                dataset_params.update({"nrows": int(rows), "ncols": int(columns)})
+                dataset_params.update(ens_params)
+                dataset_prop.setparameter(dataset_params)
             else:
                 image_dataset = Dispatcher._create_dataset_page(dataset, rows=3, columns=3, page=1)
-                dataset_prop.setparameter({"nrows": 3, "ncols": 3})
+                dataset_params.update({"nrows": 3, "ncols": 3})
+                dataset_params.update(ens_params)
+                dataset_prop.setparameter(dataset_params)
             image = image_dataset.get(dataset_prop)
             del image_dataset
         else:
-            ens_prop.datatype = 'xmlstring'
-            image = resolved[0].ens.get(ens_prop)
+            ens_image_prop.setparameter(ens_params)
+            #ens_image_prop.datatype = 'xmlstring'
+            image = resolved[0].ens.get(ens_image_prop)
         return image
 
 
