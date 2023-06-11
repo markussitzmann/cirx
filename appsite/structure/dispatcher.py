@@ -68,9 +68,8 @@ def dispatcher_method(_func=None, *, as_list=False):
                         }
                         representation_list.append(representation)
                         index += 1
-                    except Exception as e:
-                        # ToDo: better exception handling
-                        logger.warning(e)
+                    except Exception as msg:
+                        raise ValueError("data not resolvable", msg)
                 else:
                     for resolved in data.resolved:
                         try:
@@ -86,9 +85,9 @@ def dispatcher_method(_func=None, *, as_list=False):
                             }
                             representation_list.append(representation)
                             index += 1
-                        except Exception as e:
+                        except Exception as msg:
                             # ToDo: better exception handling
-                            logger.warning(e)
+                            raise ValueError("data not resolvable", msg)
             logger.info("DATASETS {} ENS {}".format(CsDataset.List(), Ens.List()))
             return DispatcherResponse(
                 full=representation_list,
@@ -484,7 +483,6 @@ class Dispatcher:
     @dispatcher_method(as_list=True)
     def structure_image(self, resolved: List[ChemicalStructure], *args, **kwargs):
 
-
         url_params = self._params.url_params
 
         preset_svg_parameters = {
@@ -492,7 +490,6 @@ class Dispatcher:
             'height': '250',
             'bgcolor': 'white',
             'atomcolor': 'element',
-            #'symbolfontsize': 32,
             'bonds': '10',
             'framecolor': 'transparent',
         }
@@ -505,48 +502,29 @@ class Dispatcher:
             if k not in svg_parameters:
                 svg_parameters[k] = v
 
-        #ens_image_parameters = ens_image_prop.parameters
         ens_params = {k: (int(v) if v.isnumeric() else v) for k, v in svg_parameters.items() if
                       k in ens_image_parameters}
-
-        #dataset_image_parameters = dataset_image_prop.parameters
         dataset_params = {k: (int(v) if v.isnumeric() else v) for k, v in svg_parameters.items() if
                           k in dataset_image_parameters}
 
-            #try:
-            #except Exception as e:
-             #   logger.warning(e)
-
         if len(resolved) > 1:
-            dataset_prop = Prop.Ref('D_SVG_IMAGE')
-            #for item in svg_paramaters.items():
-            #    try:
-            #        dataset_prop.setparameter({item[0]: item[1]})
-            #    except Exception as e:
-            #        logger.warning(e)
-
-            #dataset_image_prop.datatype = 'xmlstring'
             dataset: CsDataset = CsDataset([structure.ens for structure in resolved])
             if url_params:
                 rows, columns, page = \
-                    int(url_params.get('rows', [3])[-1]), \
-                    int(url_params.get('columns', [3])[-1]), \
-                    int(url_params.get('page', [1])[-1])
+                    int(url_params.get('rows', 3)), \
+                    int(url_params.get('columns', 3)), \
+                    int(url_params.get('page', 1))
                 image_dataset = Dispatcher._create_dataset_page(dataset, rows=rows, columns=columns, page=page)
                 dataset_params.update({"nrows": int(rows), "ncols": int(columns)})
-                dataset_params.update(ens_params)
-                dataset_prop.setparameter(dataset_params)
             else:
                 image_dataset = Dispatcher._create_dataset_page(dataset, rows=3, columns=3, page=1)
                 dataset_params.update({"nrows": 3, "ncols": 3})
-                dataset_params.update(ens_params)
-                dataset_prop.setparameter(dataset_params)
-            image = image_dataset.get(dataset_prop)
+            #TODO: this might create thread problems:
+            ens_image_prop.setparameter(ens_params)
+            image = image_dataset.get(dataset_image_prop, parameters=dataset_params)
             del image_dataset
         else:
-            ens_image_prop.setparameter(ens_params)
-            #ens_image_prop.datatype = 'xmlstring'
-            image = resolved[0].ens.get(ens_image_prop)
+            image = resolved[0].ens.get(ens_image_prop, parameters=ens_params)
         return image
 
 
@@ -695,10 +673,10 @@ class Dispatcher:
                 page_size: int = rows * columns
                 paginator: Paginator = Paginator(dataset.ens(), page_size)
                 return CsDataset(paginator.page(page).object_list)
-            except (EmptyPage, ZeroDivisionError):
-                return CsDataset()
+            except (EmptyPage, ZeroDivisionError) as msg:
+                raise ValueError("no dataset available", msg)
         else:
-            return dataset.copy()
+            raise ValueError("no valid parameters for dataset page creation")
 
     @staticmethod
     def _use_simple_mode(output_format: str, simple_mode: bool) -> bool:
