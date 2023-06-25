@@ -55,7 +55,7 @@ def dispatcher_method(_func=None, *, as_list=False):
             representation_list = []
             data: ResolverData
             for data in resolver_data:
-                response_list = []
+                #response_list = []
                 if as_list:
                     try:
                         response: DispatcherMethodResponse = func(self, data.resolved, self.representation_param)
@@ -71,12 +71,12 @@ def dispatcher_method(_func=None, *, as_list=False):
                         representation_list.append(representation)
                         index += 1
                     except Exception as msg:
-                        raise ValueError("data not resolvable", msg)
+                        pass
                 else:
                     for resolved in data.resolved:
                         try:
-                            response = func(self, resolved, self.representation_param)
-                            response_list.append(response)
+                            response: DispatcherMethodResponse = func(self, resolved, self.representation_param)
+                            #response_list.append(response)
                             representation = {
                                 'id': index,
                                 'string': string,
@@ -89,9 +89,9 @@ def dispatcher_method(_func=None, *, as_list=False):
                             representation_list.append(representation)
                             index += 1
                         except Exception as msg:
-                            # ToDo: better exception handling
-                            raise ValueError("data not resolvable", msg)
-            logger.info("DATASETS {} ENS {}".format(CsDataset.List(), Ens.List()))
+                            pass
+            if len(representation_list) == 0:
+                raise ValueError("no representation available")
             content_type = list(set([representation['content_type'] for representation in representation_list]))
             if len(content_type) != 1:
                 raise ValueError("content type not unique")
@@ -112,15 +112,11 @@ class Dispatcher:
 
     def __init__(self, request, representation_type, representation_param=None, output_format='plain'):
         response_type = ResponseType.objects.get(url=representation_type)
-        #self.type = response_type
         self.base_content_type = response_type.base_mime_type
-        #self.method = response_type.method
         self.url_parameters: HttpRequest.GET = request.GET.copy() if request else None
         self.representation_type = representation_type
-        #self.content_type = None
         self.output_format = output_format
-        #self.response_list = []
-        #self.simple_mode: bool = self._use_simple_mode()
+        #self.simple_mode: bool = self._use_simple_mode(output_format)
 
         if not representation_param:
             self.representation_param = response_type.parameter
@@ -128,39 +124,6 @@ class Dispatcher:
             self.representation_param = representation_param
 
         self.method = getattr(self, response_type.method, self.representation_param)
-
-    # def __repr__(self):
-    #     repr_string = ''
-    #     if not self.response_list:
-    #         return ''
-    #     if self.content_type == 'image/gif':
-    #         repr_string = self.response_list
-    #     else:
-    #         # response_list = self.response_list
-    #         for item in self.response_list:
-    #             repr_string = repr_string + "%s\n" % (item,)
-    #     return repr_string[0:-1]
-
-    # class Representation:
-    #     def __init__(self):
-    #         self.attributes = {}
-    #
-    #     def __getitem__(self, key):
-    #         return self.attributes[key]
-    #
-    #     def __setitem__(self, key, item):
-    #         self.attributes[key] = item
-    #         return key
-    #
-    #     def __repr__(self):
-    #         response = ""
-    #         mime_type = self['mime_type']
-    #         if mime_type == 'image/gif':
-    #             pass
-    #         else:
-    #             for item in self['response']:
-    #                 response = response + "%s\n" % (item,)
-    #         return response
 
     def parse(self, string) -> DispatcherData:
         response: DispatcherResponse = self.method(string)
@@ -170,7 +133,6 @@ class Dispatcher:
             representation=representation,
             response=response
         )
-
 
     def urls(self, string):
         parameters = self.url_parameters.copy()
@@ -553,21 +515,18 @@ class Dispatcher:
             molfile_parameters = {k: v for k, v in url_params.items()}
         else:
             molfile_parameters = {}
-        molfile_data = None
-        if len(resolved):
-            dataset: CsDataset = CsDataset([structure.ens for structure in resolved])
-            #molfile_string: bytes = Molfile.String(dataset, url_params)
-            molfile_string: bytes = Molfile.String(dataset)
-            try:
-                molfile = molfile_string.decode(encoding='utf-8')
-                content_type = "text/plain"
-            except UnicodeDecodeError:
-                molfile = io.BytesIO(molfile_string).getvalue()
-                content_type = "application/octet-stream"
-            finally:
-                molfile_data = molfile
+        dataset: CsDataset = CsDataset([structure.ens for structure in resolved])
+        molfile_string: bytes = Molfile.String(dataset, molfile_parameters)
+        try:
+            content = molfile_string.decode(encoding='utf-8')
+            content_type = "text/plain"
+        except UnicodeDecodeError:
+            content = io.BytesIO(molfile_string).getvalue()
+            content_type = "application/octet-stream"
+        except Exception as msg:
+            raise ValueError("creating molfile representation failed", msg)
         return DispatcherMethodResponse(
-            content=molfile_data,
+            content=[content, ],
             content_type=content_type
         )
 
