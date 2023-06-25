@@ -597,12 +597,12 @@ class ChemicalString:
             structure: Structure = association.structure
             resolved: ChemicalStructure = ChemicalStructure(
                 structure=structure,
-                metadata= {
+                metadata={
                     'query_type': 'name_by_cir',
                     'query_search_string': 'chemical name (CIR)',
-                    'query_object': association.name,
+                    'query_object': association.name.name,
                     'query_string': self.string,
-                    'description': association.name
+                    'description': association.name.name
                 }
             )
             resolved_list.append(resolved)

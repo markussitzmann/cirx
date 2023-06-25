@@ -67,7 +67,7 @@ def resolve_to_response(request, string: str, representation_type: str, operator
         representation_type=representation_type,
         output_format=output_format
     )
-    #resolved_string, representation, response, content_type = dispatcher.parse(string)
+    #resolved_string, representation, dispatcher_response, content_type = dispatcher.parse(string)
 
     dispatcher_data: DispatcherData = dispatcher.parse(string)
 
@@ -95,7 +95,7 @@ def resolve_to_response(request, string: str, representation_type: str, operator
             request, '3d.template', {
                 'library': representation_type,
                 'string': string,
-                'response': dispatcher.response_list,
+                'dispatcher_response': dispatcher.response_list,
                 'parameters': parameters,
                 'url_parameter_string': url_parameter_string,
                 'base_url': settings.STRUCTURE_BASE_URL,
@@ -108,7 +108,7 @@ def resolve_to_response(request, string: str, representation_type: str, operator
     if not dispatcher_data:
         if output_format == "xml":
             return render(request, 'structure.xml', {
-                'response': [],
+                'dispatcher_response': [],
                 'string': dispatcher_data.identifier,
                 'representation': representation_type,
                 # 'base_url': settings.STRUCTURE_BASE_URL,
@@ -118,25 +118,27 @@ def resolve_to_response(request, string: str, representation_type: str, operator
         else:
             raise Http404
 
-    response: DispatcherResponse = dispatcher_data.response
+    dispatcher_response: DispatcherResponse = dispatcher_data.response
+
+    response, content_type = dispatcher_response, dispatcher_response.content_type
     if output_format == "plain":
         try:
-            http_response = HttpResponse(content_type=response.content_type)
+            http_response = HttpResponse(content_type=content_type)
             http_response.write(io.BytesIO(response.simple).getvalue())
         except:
-            response_str = '\n'.join(set([str(item) for r in response.simple for item in r]))
-            http_response = HttpResponse(response_str, content_type=response.content_type)
+            response_str = '\n'.join(set([str(item) for r in response.simple for item in r.content]))
+            http_response = HttpResponse(response_str, content_type=content_type)
         http_response["Access-Control-Allow-Origin"] = "*"
         http_response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
         http_response["Access-Control-Max-Age"] = "1000"
         http_response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
         return http_response
     elif output_format == "image":
-        http_response = HttpResponse(response.simple, content_type="image/svg+xml")
+        http_response = HttpResponse(response.simple[0].content, content_type=content_type)
         return http_response
     elif output_format == "xml":
         return render(request, "structure.xml", {
-            'response': response.full,
+            'response': dispatcher_response.full,
             'string': dispatcher_data.identifier,
             'representation': representation_type,
             'base_url': request.get_full_path_info(),

@@ -4,11 +4,11 @@
 {% for r in response %}
 	{% if r.response %}
 	<data id="{{ r.index }}" resolver="{{ r.structure.metadata.query_type }}" string_class="{{ r.structure.metadata.query_search_string }}" notation="{{ r.structure.metadata.description }}">	
-		{% for item in r.response %}
-			{% if r.base_mime_type == "text" %}
+		{% for item in r.response.content %}
+			{% if r.base_content_type == "text" %}
 			<item id="{{ forloop.counter }}">{{ item }}</item>
 			{% endif %}
-			{% if r.base_mime_type == "image" %}
+			{% if r.base_content_type == "image" %}
 			{% comment %}<item id="{{ forloop.counter }}"><img src="{{ host }}{% url chemical.structure.views.identifier item,'image' %}"></img></item>{% endcomment %}
 			{% endif %}
 		{% endfor %}

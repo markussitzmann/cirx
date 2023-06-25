@@ -24,6 +24,7 @@ logger = logging.getLogger('cirx')
 
 DispatcherData = namedtuple("DispatcherData", "identifier representation response")
 DispatcherResponse = namedtuple("DispatcherResponse", "full simple content_type")
+DispatcherMethodResponse = namedtuple("DispatcherMethodResponse", "content content_type")
 
 try:
     ens_image_prop: Prop = Prop.Ref("E_SVG_IMAGE")
@@ -57,14 +58,15 @@ def dispatcher_method(_func=None, *, as_list=False):
                 response_list = []
                 if as_list:
                     try:
-                        response = func(self, data.resolved, self.representation_param)
+                        response: DispatcherMethodResponse = func(self, data.resolved, self.representation_param)
                         representation = {
-                            'base_mime_type': self.base_content_type,
                             'id': index,
                             'string': string,
                             'structure': data.resolved,
                             'response': response,
                             'index': index,
+                            'base_content_type': self.base_content_type,
+                            'content_type': response.content_type,
                         }
                         representation_list.append(representation)
                         index += 1
@@ -76,12 +78,13 @@ def dispatcher_method(_func=None, *, as_list=False):
                             response = func(self, resolved, self.representation_param)
                             response_list.append(response)
                             representation = {
-                                'base_mime_type': self.base_content_type,
                                 'id': index,
                                 'string': string,
                                 'structure': resolved,
                                 'response': response,
                                 'index': index,
+                                'base_content_type': self.base_content_type,
+                                'content_type': response.content_type,
                             }
                             representation_list.append(representation)
                             index += 1
@@ -89,10 +92,13 @@ def dispatcher_method(_func=None, *, as_list=False):
                             # ToDo: better exception handling
                             raise ValueError("data not resolvable", msg)
             logger.info("DATASETS {} ENS {}".format(CsDataset.List(), Ens.List()))
+            content_type = list(set([representation['content_type'] for representation in representation_list]))
+            if len(content_type) != 1:
+                raise ValueError("content type not unique")
             return DispatcherResponse(
                 full=representation_list,
                 simple=[representation['response'] for representation in representation_list],
-                content_type="text/plain"
+                content_type=content_type[0]
             )
         return dispatcher_method_wrapper
 
@@ -461,30 +467,40 @@ class Dispatcher:
         return representation_list
 
     @dispatcher_method
-    def ncicadd_compound_id(self, resolved: ChemicalStructure, *args, **kwargs):
-        return [repr(resolved.structure.compound), ]
+    def ncicadd_compound_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
+        return DispatcherMethodResponse(
+            content=[repr(resolved.structure.compound), ],
+            content_type="text/plain"
+        )
 
     @dispatcher_method
-    def ncicadd_structure_id(self, resolved: ChemicalStructure, *args, **kwargs):
-        return [repr(resolved.structure), ]
+    def ncicadd_structure_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
+        return DispatcherMethodResponse(
+            content=[repr(resolved.structure), ],
+            content_type="text/plain"
+        )
 
     @dispatcher_method
-    def ncicadd_record_id(self, resolved: ChemicalStructure, *args, **kwargs):
+    def ncicadd_record_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
         records = Record.with_related_objects.by_structure_ids([resolved.structure.id, ])
-        return [repr(record) for record in records]
+        return DispatcherMethodResponse(
+            content=[repr(record) for record in records],
+            content_type="text/plain"
+        )
 
     @dispatcher_method
-    def prop(self, resolved: ChemicalStructure, representation_param: str, *args, **kwargs):
+    def prop(self, resolved: ChemicalStructure, representation_param: str, *args, **kwargs) -> DispatcherMethodResponse:
         params = self._params
         prop_name = representation_param
         prop_val = resolved.ens.get(prop_name, parameters=params.url_params)
-        return [prop_val, ]
+        return DispatcherMethodResponse(
+            content=[prop_val, ],
+            content_type="text/plain"
+        )
 
     @dispatcher_method(as_list=True)
-    def structure_image(self, resolved: List[ChemicalStructure], *args, **kwargs):
-
+    def structure_image(self, resolved: List[ChemicalStructure], *args, **kwargs) -> DispatcherMethodResponse:
         url_params = self._params.url_params
-
         preset_svg_parameters = {
             'width': '250',
             'height': '250',
@@ -522,10 +538,60 @@ class Dispatcher:
             #TODO: this might create thread problems:
             ens_image_prop.setparameter(ens_params)
             image = image_dataset.get(dataset_image_prop, parameters=dataset_params)
-            del image_dataset
+            #del image_dataset
         else:
             image = resolved[0].ens.get(ens_image_prop, parameters=ens_params)
-        return image
+        return DispatcherMethodResponse(
+            content=image,
+            content_type="image/svg+xml"
+        )
+
+    @dispatcher_method(as_list=True)
+    def molfile(self, resolved: List[ChemicalStructure], *args, **kwargs) -> DispatcherMethodResponse:
+        url_params = self._params.url_params
+        if url_params:
+            molfile_parameters = {k: v for k, v in url_params.items()}
+        else:
+            molfile_parameters = {}
+        molfile_data = None
+        if len(resolved):
+            dataset: CsDataset = CsDataset([structure.ens for structure in resolved])
+            #molfile_string: bytes = Molfile.String(dataset, url_params)
+            molfile_string: bytes = Molfile.String(dataset)
+            try:
+                molfile = molfile_string.decode(encoding='utf-8')
+                content_type = "text/plain"
+            except UnicodeDecodeError:
+                molfile = io.BytesIO(molfile_string).getvalue()
+                content_type = "application/octet-stream"
+            finally:
+                molfile_data = molfile
+        return DispatcherMethodResponse(
+            content=molfile_data,
+            content_type=content_type
+        )
+
+
+    # def molfilestring(self, string: str) -> Any:
+    #     url_params, structure_index = self._prepare_params(self.url_parameters.copy())
+    #     interpretations: List[ChemicalString.StructureData]
+    #     simple: bool
+    #     interpretations, simple = self._interpretations(string)
+    #     if not simple:
+    #         raise NotImplemented
+    #     dataset: Dataset = self._create_dataset(interpretations, simple=simple, structure_index=structure_index)
+    #     molfile_string_response: bytes = Molfile.String(dataset, url_params)
+    #     response = None
+    #     # TODO: this is too trusty and needs improvements
+    #     try:
+    #         response = molfile_string_response.decode(encoding='utf-8')
+    #         self.content_type = "text/plain"
+    #     except UnicodeDecodeError:
+    #         response = io.BytesIO(molfile_string_response).getvalue()
+    #         self.content_type = "application/octet-stream"
+    #     finally:
+    #         self.response_list = [response, ]
+    #     return response
 
 
     # def ncicadd_record_id(self, string):
@@ -763,26 +829,7 @@ class Dispatcher:
             interpretations = [interpretations[structure_index], ]
         return interpretations, simple
 
-    def molfilestring(self, string: str) -> Any:
-        url_params, structure_index = self._prepare_params(self.url_parameters.copy())
-        interpretations: List[ChemicalString.StructureData]
-        simple: bool
-        interpretations, simple = self._interpretations(string)
-        if not simple:
-            raise NotImplemented
-        dataset: Dataset = self._create_dataset(interpretations, simple=simple, structure_index=structure_index)
-        molfile_string_response: bytes = Molfile.String(dataset, url_params)
-        response = None
-        # TODO: this is too trusty and needs improvements
-        try:
-            response = molfile_string_response.decode(encoding='utf-8')
-            self.content_type = "text/plain"
-        except UnicodeDecodeError:
-            response = io.BytesIO(molfile_string_response).getvalue()
-            self.content_type = "application/octet-stream"
-        finally:
-            self.response_list = [response, ]
-        return response
+
 
     # def prop(self, string: str) -> List:
     #     url_params, structure_index = self._prepare_params(self.url_parameters.copy())
