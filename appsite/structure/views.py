@@ -55,7 +55,7 @@ def structure(request, string=None):
     })
 
 
-def resolve_to_response(request, string: str, representation_type: str, operator=None, output_format='plain'):
+def resolve_to_response(request, string: str, representation_type: str, operator=None, output_format="plain"):
     parameters = request.GET.copy()
     if 'operator' in parameters:
         operator = parameters['operator']
@@ -67,8 +67,6 @@ def resolve_to_response(request, string: str, representation_type: str, operator
         representation_type=representation_type,
         output_format=output_format
     )
-    #resolved_string, representation, dispatcher_response, content_type = dispatcher.parse(string)
-
     dispatcher_data: DispatcherData = dispatcher.parse(string)
 
     if request.is_secure():
@@ -120,21 +118,21 @@ def resolve_to_response(request, string: str, representation_type: str, operator
 
     dispatcher_response: DispatcherResponse = dispatcher_data.response
 
-    response, content_type = dispatcher_response, dispatcher_response.content_type
+    content, content_type = dispatcher_response, dispatcher_response.content_type
     if output_format == "plain":
         try:
             http_response = HttpResponse(content_type=content_type)
-            http_response.write(io.BytesIO(response.simple).getvalue())
+            http_response.write(io.BytesIO(content.simple).getvalue())
         except:
-            response_str = '\n'.join(set([str(item) for r in response.simple for item in r.content]))
-            http_response = HttpResponse(response_str, content_type=content_type)
+            content_str = '\n'.join(set([str(item) for r in sorted(content.simple) for item in r.content]))
+            http_response = HttpResponse(content_str, content_type=content_type)
         http_response["Access-Control-Allow-Origin"] = "*"
         http_response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
         http_response["Access-Control-Max-Age"] = "1000"
         http_response["Access-Control-Allow-Headers"] = "X-Requested-With, Content-Type"
         return http_response
     elif output_format == "image":
-        http_response = HttpResponse(response.simple[0].content, content_type=content_type)
+        http_response = HttpResponse(content.simple[0].content, content_type=content_type)
         return http_response
     elif output_format == "xml":
         return render(request, "structure.xml", {

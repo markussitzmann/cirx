@@ -430,6 +430,8 @@ class Dispatcher:
 
     @dispatcher_method
     def ncicadd_compound_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
+        if not resolved.structure or not resolved.structure.compound:
+            raise ValueError("no compound found")
         return DispatcherMethodResponse(
             content=[repr(resolved.structure.compound), ],
             content_type="text/plain"
@@ -437,6 +439,8 @@ class Dispatcher:
 
     @dispatcher_method
     def ncicadd_structure_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
+        if not resolved.structure:
+            raise ValueError("no structure found")
         return DispatcherMethodResponse(
             content=[repr(resolved.structure), ],
             content_type="text/plain"
@@ -445,6 +449,8 @@ class Dispatcher:
     @dispatcher_method
     def ncicadd_record_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
         records = Record.with_related_objects.by_structure_ids([resolved.structure.id, ])
+        if len(records) == 0:
+            raise ValueError("no records found")
         return DispatcherMethodResponse(
             content=[repr(record) for record in records],
             content_type="text/plain"
@@ -500,7 +506,7 @@ class Dispatcher:
             #TODO: this might create thread problems:
             ens_image_prop.setparameter(ens_params)
             image = image_dataset.get(dataset_image_prop, parameters=dataset_params)
-            #del image_dataset
+            del image_dataset
         else:
             image = resolved[0].ens.get(ens_image_prop, parameters=ens_params)
         return DispatcherMethodResponse(
