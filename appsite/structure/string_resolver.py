@@ -127,7 +127,11 @@ class ChemicalStructure:
     def structure(self) -> Structure:
         if self._structure:
             return self._structure
-        self._structure = Structure.objects.get(hashisy_key=CactvsHash(self.ens.get('E_HASHISY')))
+        #TODO: needs improvements
+        try:
+            self._structure = Structure.objects.get(hashisy_key=CactvsHash(self.ens.get('E_HASHISY')))
+        except Structure.DoesNotExist:
+            self._structure = None
         return self._structure
 
     @property
