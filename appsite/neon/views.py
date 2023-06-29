@@ -1,8 +1,8 @@
 import json
 from collections import namedtuple, defaultdict
 
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect
 from pycactvs import Prop, Ens
 from pycactvs import Dataset as CsDataset
 
@@ -33,13 +33,9 @@ def _create_image(ens: Ens, svg_paramaters = None):
     for item in default_svg_paramaters.items():
         prop.setparameter({item[0]: item[1]})
 
-    ens2 = Ens("CCOCC")
-    dataset = CsDataset([ens, ens2])
+    prop.datatype = 'xmlstring'
 
-    dprop: Prop = Prop.Ref('D_SVG_IMAGE')
-    dprop.datatype = 'xmlstring'
-
-    return dataset.get(dprop)
+    return ens.get(prop)
 
 
 def neon(request: HttpRequest, string: str = None):
@@ -97,10 +93,11 @@ def images(request: HttpRequest, cid: int = None, string: str = None):
 
     if cid or string:
         if cid:
-            compound: Compound = Compound.objects.filter(id=cid).first()
+            #compound: Compound = Compound.objects.filter(id=cid).first()
             #ens = compound.structure.to_ens
-            image = _create_image(compound.structure.to_ens)
-            return HttpResponse(image, content_type='image/svg+xml')
+            #image = _create_image(compound.structure.to_ens)
+            #return HttpResponse(image, content_type='image/svg+xml')
+            return HttpResponseRedirect("/chemical/structure/NCICADD:CID=" + str(cid) + "/image")
         else:
             ens = Ens(string)
             image = _create_image(ens)

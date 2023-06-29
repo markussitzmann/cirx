@@ -14,79 +14,13 @@ from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
 from structure.packstring import PackString
 from structure.smiles import SMILES
 
-logger = logging.getLogger('cirx')
-
-
-ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
-ResolverParams = namedtuple("ResolverParams", "url_params, resolver_list filter mode structure_index page columns rows")
-
-
-
-
-#import cas.number
-#import file.sdf
-#import inchi.identifier
-#import ncicadd.identifier
-#import packstring
-#import smiles
-
-#from database.models import Database
-#from structure.models import Record, Compound
 from resolver.models import InChI, Structure, Name, StructureNameAssociation, Dataset, \
     StructureInChIAssociation, InChIType, Record, NameAffinityClass
 
+logger = logging.getLogger('cirx')
 
-
-
-# from sets import Set
-
-# try:
-#     from jpype import *
-# except:
-#     pass
-
-# _cactvs_loader = __import__(settings.CACTVS_PATH, globals(), locals(), settings.CACTVS_FROMLIST)
-# Cactvs = _cactvs_loader.Cactvs
-# Ens = _cactvs_loader.Ens
-# Dataset = _cactvs_loader.Dataset
-# Molfile = _cactvs_loader.Molfile
-# CactvsError = _cactvs_loader.CactvsError
-
-# import djangosphinx.apis.current as sphinxapi
-
-
-# class ChemicalName:
-#
-#     def __init__(self, exact_string=None, pattern=None):
-#
-#         self.names = None
-#
-#         if pattern:
-#             self.pattern = pattern
-#             self.query_set = Name_Fulltext.search.query(string=pattern).set_options(
-#                 mode=sphinxapi.SPH_MATCH_EXTENDED).select_related()
-#             self.metadata = self.query_set._sphinx
-#             self.names = self.query_set[0:100]
-#             structure_name_objects = StructureNameAssociation.objects.filter(name__in=self.names)
-#             structure_names = {}
-#             structure_rank = 1
-#             for structure_name in structure_name_objects:
-#                 try:
-#                     k = structure_name.structure
-#                 except:
-#                     continue
-#                 if structure_names.has_key(k):
-#                     structure_names[k]['names'].append(structure_name.name)
-#                 else:
-#                     structure_names[k] = {}
-#                     structure_names[k]['names'] = [structure_name.name, ]
-#                     structure_names[k]['rank'] = structure_rank
-#                     structure_rank += 1
-#             structure_name_list = []
-#             for structure, name_list in structure_names.items():
-#                 name_list['structure'] = structure
-#                 structure_name_list.append(name_list)
-#             self.structure_names = structure_name_list
+ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
+ResolverParams = namedtuple("ResolverParams", "url_params, resolver_list filter mode structure_index page columns rows")
 
 
 class ChemicalStructure:
@@ -162,26 +96,7 @@ class ChemicalStructureError(Exception):
         return repr(self.value)
 
 
-# @dataclass
-# class StructureData:
-#     id: int
-#     structures: List[ChemicalStructure] = []
-
-
 class ChemicalString:
-
-    # class StructureData():
-    #
-    #     def __init__(self):
-    #         #self.type = ""
-    #         #self.type_string = ""
-    #         self.query_object = None
-    #         self.structures = []
-    #         self.description_list = []
-    #         self.id = 0
-    #
-    #     def __repr__(self):
-    #         return "type=%s (number of structures: %s)" % (self.type, len(self.structures))
 
     def __init__(
             self,
