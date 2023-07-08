@@ -1,11 +1,11 @@
 from django import forms
 
 
-class ChemicalStringInput(forms.Form):
-    chemicalString = forms.CharField(label="", widget=forms.TextInput(attrs={'size': '80'}))
+# class ChemicalStringInput(forms.Form):
+#     chemicalString = forms.CharField(label="", widget=forms.TextInput(attrs={'size': '80'}))
 
 
-class ChemicalResolverInput(forms.Form):
+class ResolverInput(forms.Form):
     identifier = forms.CharField(label="Structure Identifier", widget=forms.TextInput(attrs={'size': '20'}))
     representation = forms.ChoiceField(
         label="Representation:",
@@ -38,9 +38,9 @@ class ChemicalResolverInput(forms.Form):
     )
 
 
-class ChemicalNameInput(forms.Form):
-    nameString = forms.CharField(label="", widget=forms.TextInput(attrs={'size': '50'}))
+# class ChemicalNameInput(forms.Form):
+#     nameString = forms.CharField(label="", widget=forms.TextInput(attrs={'size': '50'}))
 
 
-class ChemicalFileUpload(forms.Form):
-    file = forms.FileField(label="File:")
+# class ChemicalFileUpload(forms.Form):
+#     file = forms.FileField(label="File:")

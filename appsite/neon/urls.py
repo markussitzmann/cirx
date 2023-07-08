@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('resolver', views.resolver, name="resolver"),
     path('neon/<str:string>', views.neon),
     path('compounds/<int:cid>', views.compounds, name="compounds"),
     path('images/<int:cid>', views.images, name="images-cid"),

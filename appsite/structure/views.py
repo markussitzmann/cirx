@@ -37,7 +37,7 @@ def structure(request, string=None):
             format=query.get('protocol', 'plain')
         )
     if request.method == 'POST':
-        form = ChemicalResolverInput(request.POST)
+        form = ResolverInput(request.POST)
         if form.is_valid():
             #string = form.cleaned_data['string'].replace('#', '%23')
             representation = form.cleaned_data['representation']
@@ -45,9 +45,9 @@ def structure(request, string=None):
             return HttpResponseRedirect(redirectedURL)
     else:
         if string:
-            form = ChemicalResolverInput({'identifier': string, 'representation': 'stdinchikey'})
+            form = ResolverInput({'identifier': string, 'representation': 'stdinchikey'})
         else:
-            form = ChemicalResolverInput()
+            form = ResolverInput()
     return render(request, 'structure.html', {
         'form': form,
         'base_url': base_url,

@@ -2,7 +2,7 @@ ujson
 backports.zoneinfo
 psycopg2-binary
 requests
-django>=4.0
+django>=4.2
 django-extensions
 djangorestframework
 django-filter
@@ -15,10 +15,11 @@ django-multiselectfield
 django-htmlmin
 django-celery-results
 django-debug-toolbar
+django-bootstrap5
 celery[librabbitmq]
 parameterized~=0.8.1
 redis
 hiredis
-django-dbbackup==4.0.0b0
+django-dbbackup==4.0.2
 django-compressor
 django-libsass

@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'django_celery_results',
     'rest_framework',
 #    'rest_framework_json_api',
+    'django_bootstrap5',
     'django_filters',
     'crispy_forms',
     'multiselectfield',
