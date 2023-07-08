@@ -7,7 +7,7 @@ from pycactvs import Prop, Ens
 from pycactvs import Dataset as CsDataset
 
 from etl.registration import StructureRegistry
-from forms import ResolverInput
+from structure.forms import ResolverInput
 from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Dataset
 # Create your views here.
 from structure.ncicadd.identifier import Identifier
