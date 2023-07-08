@@ -26,8 +26,7 @@
                         <div id="jsme-box"></div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="getSmiles()">Close</button>
                     </div>
                 </div>
             </div>
@@ -50,18 +49,21 @@
     <script src="{% static 'neon/assets/jsme/jsme.nocache.js' %}"></script>
     <script>
         function jsmeOnLoad() {
-            jsme = new JSApplet.JSME("jsme-box", "100%", "100%", {
+            document.jsme = new JSApplet.JSME("jsme-box", "100%", "100%", {
                 //optional parameters
                 "options": "fullScreenIcon",
             });
         }
 
-        var editorModalEl = document.getElementById('exampleModal');
+        let editorModalEl = document.getElementById('exampleModal');
         editorModalEl.addEventListener('shown.bs.modal', function (event) {
-            console.log("event fired");
-            document.getElementById("jsme-box").style.display="inline";jsme.repaint();
+            document.getElementById("jsme-box").style.display="inline";document.jsme.repaint();
         });
-        console.log("done");
+
+        function getSmiles() {
+            let data = document.jsme.smiles();
+            document.getElementById("id_identifier").value = data;
+        }
 
     </script>
 {% endblock javascript %}
