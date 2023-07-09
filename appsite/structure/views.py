@@ -40,6 +40,7 @@ def structure(request, string=None):
         form = ResolverInput(request.POST)
         if form.is_valid():
             #string = form.cleaned_data['string'].replace('#', '%23')
+            identifier = form.cleaned_data['identifier']
             representation = form.cleaned_data['representation']
             redirectedURL = '%s/%s/%s' % (base_url, identifier, representation)
             return HttpResponseRedirect(redirectedURL)

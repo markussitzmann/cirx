@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'rest_framework',
 #    'rest_framework_json_api',
     'django_bootstrap5',
+    'django_bootstrap_input_group',
     'django_filters',
     'crispy_forms',
     'multiselectfield',

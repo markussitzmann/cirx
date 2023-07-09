@@ -8,7 +8,7 @@ from django import forms
 class ResolverInput(forms.Form):
     identifier = forms.CharField(label="Structure Identifier", widget=forms.TextInput(attrs={'size': '20'}))
     representation = forms.ChoiceField(
-        label="Representation:",
+        label="to representation:",
         choices=(
             ('stdinchikey', 'Standard InChIKey'),
             ('stdinchi', 'Standard InChI'),

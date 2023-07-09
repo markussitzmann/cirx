@@ -16,6 +16,7 @@ django-htmlmin
 django-celery-results
 django-debug-toolbar
 django-bootstrap5
+django-bootstrap-input-group
 celery[librabbitmq]
 parameterized~=0.8.1
 redis

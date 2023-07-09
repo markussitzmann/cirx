@@ -1,7 +1,7 @@
 {% extends "neon-base.html" %}
 {# Load the tag library #}
 {% load static %}
-{% load django_bootstrap5 %}
+{% load django_bootstrap5 django_bootstrap_input_group %}
 
 {% block body_class %}d-flex flex-column h-100{% endblock %}
 
@@ -10,16 +10,16 @@
         <div class="align-items-center mt-5">
 
 
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+       <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editorModal">
             Launch demo modal
-        </button>
+        </button>-->
 
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="editorModal" tabindex="-1" aria-labelledby="editorModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-fullscreen">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <h5 class="modal-title" id="editorModalLabel">Structure Editor</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -32,12 +32,20 @@
             </div>
         </div>
 
-        <form action="/url/to/submit/" method="post" class="form">
+        <form action="{% url 'resolver-request' %}" method="post" class="form">
             {% csrf_token %}
 
-            {% bootstrap_form form %}
-
-            {% bootstrap_button button_type="submit" content="OK" button_class="btn-primary" %}
+            <div class="mb-3"><label class="form-label" for="id_identifier">Convert from:</label>
+            <div class="input-group">
+                <input type="text" class="form-control form-control-lg" placeholder="Structure Identifier" aria-label="Input identifier string" name="identifier" required id="id_identifier">
+                <button class="btn btn-dark" type="button" onclick="alert('hallo');"><span class="bi-x"></span></button>
+                <button class="btn btn-dark" type="button" data-bs-toggle="modal" data-bs-target="#editorModal">
+                    <span class="bi-pencil-fill"></span>
+                </button>
+            </div>
+            </div>
+            {% bootstrap_field form.representation %}
+            {% bootstrap_button id="submit-button" button_type="submit" content="Submit" button_class="btn-dark" %}
         </form>
 
 
@@ -46,6 +54,7 @@
 {% endblock main %}
 
 {% block javascript %}
+    <script src="{% static 'neon/assets/jquery/jquery-3.6.4.min.js' %}"></script>
     <script src="{% static 'neon/assets/jsme/jsme.nocache.js' %}"></script>
     <script>
         function jsmeOnLoad() {
@@ -55,7 +64,7 @@
             });
         }
 
-        let editorModalEl = document.getElementById('exampleModal');
+        let editorModalEl = document.getElementById('editorModal');
         editorModalEl.addEventListener('shown.bs.modal', function (event) {
             document.getElementById("jsme-box").style.display="inline";document.jsme.repaint();
         });
