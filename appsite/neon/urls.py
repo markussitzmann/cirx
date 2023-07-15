@@ -9,4 +9,5 @@ urlpatterns = [
     path('images/<int:cid>', views.images, name="images-cid"),
     path('images/<str:string>', views.images, name="images-string"),
     path('sandbox/', views.sandbox, name="sandbox"),
+    path('', views.cover, name="cover"),
 ]

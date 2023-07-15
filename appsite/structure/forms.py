@@ -21,7 +21,7 @@ class ResolverInput(forms.Form):
             ('names', 'Names'),
             ('iupac_name', 'IUPAC Name'),
             ('cas', 'CAS Registry Number'),
-            ('chemspider_id', 'ChemSpider ID'),
+            #('chemspider_id', 'ChemSpider ID'),
             ('image', 'GIF Image'),
             ('twirl', 'TwirlyMol (3D)'),
             ('mw', 'Molecular Weight'),

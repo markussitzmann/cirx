@@ -30,6 +30,7 @@
     {% endcompress %}
     <link rel="stylesheet" href="{% static 'neon/assets/bootstrap-icons/bootstrap-icons.css' %}">
 
+    {% block style %}{% endblock style %}
 
 </head>
 
@@ -76,7 +77,7 @@
     {% block footer %}
         <footer class="footer mt-auto py-3 bg-dark">
         <div class="container-fluid pe-5 ps-5">
-            <span class="text-white">&#169 NCI/CADD, Xemisty GmbH and Markus Sitzmann 2023</span>
+            <span class="text-white">&#169 NCI/CADD, Xemisty GmbH and Markus Sitzmann 2022-{% now "Y" %}</span>
         </div>
         </footer>
     {% endblock footer %}

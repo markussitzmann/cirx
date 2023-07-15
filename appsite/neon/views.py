@@ -116,7 +116,8 @@ def images(request: HttpRequest, cid: int = None, string: str = None):
         params = {param: prop.getparameter(param) for param in prop.parameters}
         return HttpResponse(json.dumps(params), content_type='application/json')
 
-
 def sandbox(request: HttpRequest):
     return render(request, 'sandbox.html')
 
+def cover(request: HttpRequest):
+    return render(request, 'cover.html')
