@@ -1,5 +1,5 @@
 #from django.conf.urls.defaults import *
-from django.urls import re_path
+from django.urls import re_path, path
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -16,6 +16,7 @@ urlpatterns = [
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)$', views.identifier),
     re_path('^structure/(?P<string>.+)$', views.structure),
     re_path('^structure$', views.structure, name="resolver-request"),
+
     #re_path('^image/(?P<string>.+)$', views.image),
     #re_path('^image$', views.image),
 ]

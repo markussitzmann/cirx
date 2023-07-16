@@ -1,8 +1,5 @@
 import io
-import json
 import logging
-
-from pycactvs import Ens, Prop
 
 from django.conf import settings
 from django.http import *
@@ -15,14 +12,10 @@ logger = logging.getLogger('cirx')
 
 
 def identifier(request, string, representation, operator=None, format='plain'):
-    return resolve_to_response(request, string, representation, operator=None, output_format=format)
+    return resolve_to_response(request, string, representation, operator=operator, output_format=format)
 
 
 def structure(request, string=None):
-    #if request.is_secure():
-    #    host_string = 'https://' + request.get_host()
-    #else:
-    #    host_string = 'http://' + request.get_host()
 
     host_string = request.scheme + "://" + request.get_host()
     base_url = request.path_info
@@ -39,10 +32,11 @@ def structure(request, string=None):
     if request.method == 'POST':
         form = ResolverInput(request.POST)
         if form.is_valid():
-            #string = form.cleaned_data['string'].replace('#', '%23')
-            identifier = form.cleaned_data['identifier']
-            representation = form.cleaned_data['representation']
-            redirectedURL = '%s/%s/%s' % (base_url, identifier, representation)
+            redirectedURL = '%s/%s/%s' % (
+                base_url,
+                form.cleaned_data['identifier'],
+                form.cleaned_data['representation']
+            )
             return HttpResponseRedirect(redirectedURL)
     else:
         if string:
