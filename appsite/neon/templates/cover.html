@@ -2,23 +2,23 @@
 {# Load the tag library #}
 {% load django_bootstrap5 %}
 
-{% block style %}
-    <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
-    </style>
-{% endblock style %}
+{#{% block style %}#}
+{#    <style>#}
+{#      .bd-placeholder-img {#}
+{#        font-size: 1.125rem;#}
+{#        text-anchor: middle;#}
+{#        -webkit-user-select: none;#}
+{#        -moz-user-select: none;#}
+{#        user-select: none;#}
+{#      }#}
+{##}
+{#      @media (min-width: 768px) {#}
+{#        .bd-placeholder-img-lg {#}
+{#          font-size: 3.5rem;#}
+{#        }#}
+{#      }#}
+{#    </style>#}
+{#{% endblock style %}#}
 
 {% block body_class %}d-flex h-100 text-center text-white bg-secondary{% endblock %}
 {% block content %}
@@ -36,13 +36,13 @@
 
     <main class="px-3">
         <h1>Chemical Identifier Resolver NEON</h1>
-        <p class="lead">A future relaunch of the original Resolver
-            <a class="link-light link-offset-2 link-opacity-50-hover" href="https://cactus.nci.nih.gov/chemical/structure">
+        <p class="lead">The future relaunch of the original Resolver
+            <a class="link-light link-offset-2 link-opacity-50-hover d-none d-sm-block" href="https://cactus.nci.nih.gov/chemical/structure">
                 https://cactus.nci.nih.gov/chemical/structure
             </a>
         </p>
-        <p class="lead">
-            <a href="#" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Learn more</a>
+        <p class="pt-5">
+            <a href="{% url 'resolver' %}" class="btn btn-lg btn-outline-light border-white">Start</a>
         </p>
     </main>
 
