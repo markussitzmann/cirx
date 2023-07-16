@@ -33,7 +33,7 @@
 
                 <form action="{% url 'resolver-request' %}" method="post" class="form">
                     {% csrf_token %}
-                    <div class="mb-3"><label class="form-label" for="id_identifier">Convert from:</label>
+                    <div class="mb-3"><label class="form-label" for="id_identifier">Convert:</label>
                         <div class="input-group">
                             <input type="text" class="form-control form-control-lg" placeholder="Structure Identifier"
                                    aria-label="Input identifier string" name="identifier" required id="id_identifier">
