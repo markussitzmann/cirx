@@ -15,7 +15,7 @@ urlpatterns = [
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)/(?P<format>xml)', views.identifier),
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)$', views.identifier),
     re_path('^structure/(?P<string>.+)$', views.structure),
-    re_path('^structure$', views.structure, name="resolver-request"),
+    re_path('^structure/?$', views.structure, name="cir-request"),
 
     #re_path('^image/(?P<string>.+)$', views.image),
     #re_path('^image$', views.image),

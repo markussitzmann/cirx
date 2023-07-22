@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 from django.http import *
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from structure.dispatcher import Dispatcher, DispatcherData, DispatcherResponse
 from structure.forms import *
@@ -39,15 +39,16 @@ def structure(request, string=None):
             )
             return HttpResponseRedirect(redirectedURL)
     else:
-        if string:
-            form = ResolverInput({'identifier': string, 'representation': 'stdinchikey'})
-        else:
-            form = ResolverInput()
-    return render(request, 'structure.html', {
-        'form': form,
-        'base_url': base_url,
-        'host': host_string,
-    })
+        return redirect('cir', permanent=True)
+    #    if string:
+    #        form = ResolverInput({'identifier': string, 'representation': 'stdinchikey'})
+    #    else:
+    #        form = ResolverInput()
+    #return render(request, 'resolver.html', {
+    #    'form': form,
+    #    'base_url': base_url,
+    #    'host': host_string,
+    #})
 
 
 def resolve_to_response(request, string: str, representation_type: str, operator=None, output_format="plain"):

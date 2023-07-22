@@ -9,33 +9,12 @@
     <div class="container-fluid" id="main-container">
         <div class="mt-5">
             <div class="container-fluid p-5">
-
-                <div class="modal" id="editorModal" tabindex="-1" aria-labelledby="editorModalLabel"
-                     aria-hidden="true">
-                    <div class="modal-dialog modal-fullscreen">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editorModalLabel">Structure Editor</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div id="jsme-box"></div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                        onclick="insertSmiles()">Finish
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <form action="{% url 'resolver-request' %}" method="post" class="form">
+                {% include 'editor.html' %}
+                <form action="{% url 'cir-request' %}" method="post" class="form">
                     {% csrf_token %}
                     <div class="mb-3"><label class="form-label" for="id_identifier">Convert:</label>
                         <div class="input-group">
-                            <input type="text" class="form-control form-control-lg" placeholder="Structure Identifier"
+                            <input type="text" class="form-control" placeholder="Structure Identifier"
                                    aria-label="Input identifier string" name="identifier" required id="id_identifier">
                             <button class="btn btn-dark" type="button" onclick="clearInput()"><span
                                     class="bi-x"></span></button>

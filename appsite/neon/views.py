@@ -47,8 +47,8 @@ def neon(request: HttpRequest, string: str = None):
     })
 
 
-def resolver(request: HttpRequest):
-    return render(request, 'resolver.html', {
+def cir(request: HttpRequest):
+    return render(request, 'cir.html', {
         'form': ResolverInput(),
         'host': request.scheme + "://" + request.get_host(),
     })
