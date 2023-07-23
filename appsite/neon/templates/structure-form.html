@@ -1,0 +1,19 @@
+{% load django_bootstrap5 django_bootstrap_input_group %}
+
+<form action="{% url 'cir-request' %}" method="post" class="form">
+    {% csrf_token %}
+    <div class="mb-3"><label class="form-label" for="id_identifier">Convert:</label>
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Structure Identifier"
+                   aria-label="Input identifier string" name="identifier" required id="id_identifier">
+            <button class="btn btn-dark" type="button" onclick="clearInput()"><span
+                    class="bi-x"></span></button>
+            <button class="btn btn-dark" type="button" data-bs-toggle="modal" onclick="insertStructure()"
+                    data-bs-target="#editorModal">
+                <span class="bi-pencil-fill"></span>
+            </button>
+        </div>
+    </div>
+    {% bootstrap_field form.representation %}
+    {% bootstrap_button id="submit-button" button_type="submit" content="Submit" button_class="btn-dark" %}
+</form>
