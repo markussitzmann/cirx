@@ -3,4 +3,5 @@ set -e
 
 #source .env
 
+#docker-compose run --rm cirx bash -ci "gosu app bash -c 'cd /home/app/ && pip freeze -r requirements.txt > requirements.frozen.txt'"
 docker-compose -f ./docker-compose.build.yml build

@@ -16,9 +16,9 @@ MINI = True
 INIT_PUBCHEM_COMPOUND = False
 INIT_PUBCHEM_SUBSTANCE = False
 INIT_CHEMBL = False
-INIT_NCI = False
+INIT_NCI = True
 INIT_TT = False
-INIT_SANDBOX = True
+INIT_SANDBOX = False
 
 # INIT_NCI must be True to use this option:
 INIT_NCI_10000 = False
