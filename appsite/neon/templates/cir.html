@@ -6,47 +6,82 @@
 {% block body_class %}d-flex flex-column h-100{% endblock %}
 
 {% block main %}
-    <div class="container-fluid mt-5 p-5 bg-light" id="top-container">
+    <div class="container-fluid mt-5 p-5 bg-light" id="form-container">
         {% include 'editor.html' %}
         {% include 'structure-form.html' %}
     </div>
-    <div class="container-fluid p-5" id="middle-container">
-        <div class="row">
-            <div class="column col-xl-8 col-xxl-8 col-xs-12 col-sm-12 col-md-12">
-                <h1 class="display-6">Getting started.</h1>
-                <p class="lead">
-                    This service works as a resolver for different chemical structure identifiers and allows one to
-                    convert a
-                    given structure identifier into another representation or structure identifier. It can help you
-                    identify
-                    and find the chemical structure if you have an identifier such as an InChIKey. You can either use
-                    the resolver web form above or use the following simple URL API scheme:
-                </p>
 
-                <div class="bg-light border-start border-3 overflow-auto mt-3 mb-3">
-                    <p class="fs-2 p-3 pb-1">{{ host }}/chemical/structure/<strong
-                            class="text-secondary">identifier</strong>/<strong
-                            class="text-primary">representation</strong></p>
-                </div>
+{#    <div class="container-fluid mt-5 p-5 bg-light" id="form-container">#}
+{#    <div class="flex-fill d-flex flex-row overflow-auto bg-info">#}
+{#        <div class="d-flex position-relative border border-2" style="min-width: 36rem">#}
+{#            <img src="/chemical/structure/NSC-3/image" class="flex-shrink-0 me-3" height="255" width="255" alt="...">#}
+{#            <div>#}
+{#                <h5 class="mt-0">Custom component with stretched link</h5>#}
+{#                <p>This is some placeholder content for the custom component. It is intended to mimic what some#}
+{#                    real-world content would look like, and we're using it here to give the component a bit of body and#}
+{#                    size.</p>#}
+{#                <a href="#" class="stretched-link">Go somewhere</a>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="d-flex position-relative" style="min-width: 36rem">#}
+{#            <!--<img src="/chemical/structure/NSC-4/image" class="flex-shrink-0 me-3" height="255" width="255" alt="...">-->#}
+{#            <div style="min-width: 255px; min-height: 255px;">bla</div>#}
+{#            <div>#}
+{#                <h5 class="mt-0">Custom component with stretched link</h5>#}
+{#                <p>This is some placeholder content for the custom component. It is intended to mimic what some#}
+{#                    real-world content would look like, and we're using it here to give the component a bit of body and#}
+{#                    size.</p>#}
+{#                <a href="#" class="stretched-link">Go somewhere</a>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="d-flex position-relative" style="min-width: 36rem">#}
+{#            <img src="/chemical/structure/NSC-4/image" class="flex-shrink-0 me-3" height="255" width="255" alt="...">#}
+{#            <div>#}
+{#                <h5 class="mt-0">Custom component with stretched link</h5>#}
+{#                <p>This is some placeholder content for the custom component. It is intended to mimic what some#}
+{#                    real-world content would look like, and we're using it here to give the component a bit of body and#}
+{#                    size.</p>#}
+{#                <a href="#" class="stretched-link">Go somewhere</a>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    </div>#}
 
-                <p class="lead">
-                    The service returns the requested new structure representation with a corresponding MIME-Type
-                    specification
-                    (in most cases <span class="">MIME-Type: "text/plain"</span>). If a requested URL is not resolvable
-                    for
-                    the service a <span class="term">HTML 404 status</span> message is returned.
-                </p>
-                <p><small>
-                    <span class="badge bg-warning text-dark">Note:</span> Triple bonds in SMILES strings represented by
-                    '#' have to be URL-escaped as <span class="badge bg-dark-subtle text-dark">%23</span>
-                    (e.g. the
-                    SMILES string of <span class="badge bg-dark-subtle text-dark">ethyne</span> has to be specified as
-                    <span class="badge bg-dark-subtle text-dark">C%23C</span> instead of <span
-                        class="badge bg-dark-subtle text-dark">C#C</span> if
-                    encoded as part of a URL). Similarly, question marks, which can occur in InChI, need to be
-                    URL-escaped as <span class="badge bg-dark-subtle text-dark">%3F</span>.
-                </small></p>
+    </div>
+    <div class="container-fluid p-5" id="getting-started-container">
+        <div>
+            <h1 class="display-6">Getting started.</h1>
+            <p class="lead">
+                This service works as a resolver for different chemical structure identifiers and allows one to
+                convert a
+                given structure identifier into another representation or structure identifier. It can help you
+                identify
+                and find the chemical structure if you have an identifier such as an InChIKey. You can either use
+                the resolver web form above or use the following simple URL API scheme:
+            </p>
+
+            <div class="bg-light border-start border-3 overflow-auto mt-3 mb-3">
+                <p class="fs-2 p-3 pb-1">{{ host }}/chemical/structure/<strong
+                        class="text-secondary">identifier</strong>/<strong
+                        class="text-primary">representation</strong></p>
             </div>
+
+            <p class="lead">
+                The service returns the requested new structure representation with a corresponding MIME-Type
+                specification
+                (in most cases <span class="">MIME-Type: "text/plain"</span>). If a requested URL is not resolvable
+                for
+                the service a <span class="term">HTML 404 status</span> message is returned.
+            </p>
+            <p><small>
+                <span class="badge bg-warning text-dark">Note:</span> Triple bonds in SMILES strings represented by
+                '<em>#</em>' have to be URL-escaped as <span class="badge bg-dark-subtle text-dark">%23</span>
+                (e.g. the
+                SMILES string of '<em>ethyne</em>' has to be specified as
+                <span class="badge bg-dark-subtle text-dark">C%23C</span> instead of '<em>C#C</em>' if
+                encoded as part of a URL). Similarly, question marks, which can occur in InChI, need to be
+                URL-escaped as <span class="badge bg-dark-subtle text-dark">%3F</span>.
+            </small></p>
         </div>
     </div>
 {% endblock main %}
