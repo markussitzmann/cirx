@@ -12,6 +12,7 @@ from . import views
 # import database.csls.views
 
 urlpatterns = [
+ 	re_path('^structure/(?P<string>.+)/twirl_cached/(?P<dom_id>.+)$', views.twirl_cache),
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)/(?P<format>xml)', views.identifier),
     re_path('^structure/(?P<string>.+)/(?P<representation>.+)$', views.identifier),
     re_path('^structure/(?P<string>.+)$', views.structure),

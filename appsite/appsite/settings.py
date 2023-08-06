@@ -340,6 +340,10 @@ CIR_INSTORE_ROOT = os.path.join("/instore")
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': '/home/app/backup/'}
 
+#DEBUG_TOOLBAR_CONFIG = {
+#    'SHOW_TOOLBAR_CALLBACK': lambda r: False,  # disables it
+#    # '...
+#}
 
 if DEBUG:
     import os  # only if you haven't already imported this

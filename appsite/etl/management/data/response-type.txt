@@ -29,9 +29,8 @@
 | 29 |           NULL | gif                       | prop                 | structure_image                | image          |
 | 30 |           NULL | iupac_name                | iupac_name           | NULL                           | text           |
 | 31 |           NULL | file                      | molfile              | NULL                  | text           |
-| 32 |           NULL | twirl                     | twirl                | E_MOLFILESTRING                  | text           |
+| 32 |           NULL | twirl                     | molfile                | NULL                  | text           |
 | 33 |           NULL | urls                      | urls                 | NULL                           | text           |
-| 34 |           NULL | 3d                        | twirl                | E_MOLFILESTRING                  | text           |
 | 36 |           NULL | weight                    | prop                 | E_WEIGHT                     | text           |
 | 37 |           NULL | mw                        | prop                 | E_WEIGHT                     | text           |
 | 38 |           NULL | formula                   | prop                 | E_FORMULA                    | text           |

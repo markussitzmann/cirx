@@ -50,7 +50,7 @@ def dispatcher_method(_func=None, *, as_list=False):
             chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
             resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
             index = 1
-            if not self.output_format == 'xml' and params.mode == 'simple':
+            if not self.output_format == 'xml' and len(resolver_data) and params.mode == 'simple':
                 resolver_data = [resolver_data[0], ]
             representation_list = []
             data: ResolverData
@@ -91,7 +91,7 @@ def dispatcher_method(_func=None, *, as_list=False):
                         except Exception as msg:
                             pass
             if len(representation_list) == 0:
-                raise ValueError("no representation available")
+                raise ValueError("no representation available for {}".format(string))
             content_type = list(set([representation['content_type'] for representation in representation_list]))
             if len(content_type) != 1:
                 raise ValueError("content type not unique")
@@ -521,6 +521,10 @@ class Dispatcher:
             molfile_parameters = {k: v for k, v in url_params.items()}
         else:
             molfile_parameters = {}
+        #TODO: dirty hack for Twirly mol
+        if 'dom_id' in molfile_parameters:
+            del molfile_parameters['dom_id']
+            #molfile_parameters['write3d'] = True
         dataset: CsDataset = CsDataset([structure.ens for structure in resolved])
         molfile_string: bytes = Molfile.String(dataset, molfile_parameters)
         try:
@@ -535,141 +539,6 @@ class Dispatcher:
             content=[content, ],
             content_type=content_type
         )
-
-
-    # def molfilestring(self, string: str) -> Any:
-    #     url_params, structure_index = self._prepare_params(self.url_parameters.copy())
-    #     interpretations: List[ChemicalString.StructureData]
-    #     simple: bool
-    #     interpretations, simple = self._interpretations(string)
-    #     if not simple:
-    #         raise NotImplemented
-    #     dataset: Dataset = self._create_dataset(interpretations, simple=simple, structure_index=structure_index)
-    #     molfile_string_response: bytes = Molfile.String(dataset, url_params)
-    #     response = None
-    #     # TODO: this is too trusty and needs improvements
-    #     try:
-    #         response = molfile_string_response.decode(encoding='utf-8')
-    #         self.content_type = "text/plain"
-    #     except UnicodeDecodeError:
-    #         response = io.BytesIO(molfile_string_response).getvalue()
-    #         self.content_type = "application/octet-stream"
-    #     finally:
-    #         self.response_list = [response, ]
-    #     return response
-
-
-    # def ncicadd_record_id(self, string):
-    #     parameters = self.url_parameters.copy()
-    #     resolver_list = parameters.get('resolver', None)
-    #     mode = parameters.get('mode', 'simple')
-    #     if resolver_list:
-    #         resolver_list = resolver_list.split(',')
-    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-    #     index = 1
-    #     if not self.output_format == 'xml' and mode == 'simple':
-    #         interpretations = [interpretations[0], ]
-    #     representation_list = []
-    #     all_interpretation_response_list = []
-    #     for interpretation in interpretations:
-    #         for structure in interpretation.structures:
-    #             response_list = []
-    #             try:
-    #                 compound = structure.object.compound
-    #             except:
-    #                 compound = None
-    #             else:
-    #                 database_records = compound.get_records(group_key='database')['content'].values()
-    #                 for records in database_records:
-    #                     for record in records:
-    #                         # database = record['database']
-    #                         # release = record['release']
-    #                         response = record['object']
-    #                         response_list.append(response)
-    #                         all_interpretation_response_list.append(response)
-    #             # dummy
-    #             representation = {
-    #                 'base_mime_type': self.base_content_type,
-    #                 'id': interpretation.id,
-    #                 'string': string,
-    #                 'structure': structure,
-    #                 'response': response_list,
-    #                 'index': index,
-    #             }
-    #             representation_list.append(representation)
-    #             index += 1
-    #     if self.output_format == 'plain':
-    #         self.content_type = "text/plain"
-    #         self.response_list = all_interpretation_response_list
-    #     return representation_list
-
-
-    # def ncicadd_compound_id(self, string) -> DispatcherResponse:
-    #     params = self._params()
-    #     chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
-    #     resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
-    #     index = 1
-    #     if not self.output_format == 'xml' and params.mode == 'simple':
-    #         resolver_data = [resolver_data[0], ]
-    #     representation_list = []
-    #     data: ResolverData
-    #     for data in resolver_data:
-    #         response_list = []
-    #         for resolved in data.resolved:
-    #             try:
-    #                 response = resolved.structure.compound.id
-    #                 response_list.append(response)
-    #                 representation = {
-    #                     'base_mime_type': self.base_content_type,
-    #                     'id': index,
-    #                     'string': string,
-    #                     'structure': resolved,
-    #                     'response': response,
-    #                     'index': index,
-    #                 }
-    #                 representation_list.append(representation)
-    #                 index += 1
-    #             except Exception as e:
-    #                 logger.warning(e)
-    #     return DispatcherResponse(
-    #         full=representation_list,
-    #         simple=[representation['response'] for representation in representation_list],
-    #         content_type="text/plain"
-    #     )
-
-    # def ncicadd_structure_id(self, string):
-    #     parameters = self.url_parameters.copy()
-    #     resolver_list = parameters.get('resolver', None)
-    #     mode = parameters.get('mode', 'simple')
-    #     if resolver_list:
-    #         resolver_list = resolver_list.split(',')
-    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-    #     index = 1
-    #     if not self.output_format == 'xml' and mode == 'simple':
-    #         interpretations = [interpretations[0], ]
-    #     representation_list = []
-    #     all_interpretation_response_list = []
-    #     for interpretation in interpretations:
-    #         for structure in interpretation.structures:
-    #             response_list = []
-    #             response = structure.object.__str__()
-    #             response_list.append(response)
-    #             all_interpretation_response_list.append(response)
-    #             # dummy
-    #             representation = {
-    #                 'base_mime_type': self.base_content_type,
-    #                 'id': interpretation.id,
-    #                 'string': string,
-    #                 'structure': structure,
-    #                 'response': [response, ],
-    #                 'index': index,
-    #             }
-    #             representation_list.append(representation)
-    #             index += 1
-    #     if self.output_format == 'plain':
-    #         self.content_type = "text/plain"
-    #         self.response_list = all_interpretation_response_list
-    #     return representation_list
 
     @staticmethod
     def _create_dataset_from_resolver_string(string: str, resolver_list: List[str], simple: bool, index: int = -1) -> CsDataset:
@@ -726,15 +595,17 @@ class Dispatcher:
                 resolver_list = []
 
             structure_index = -1
+            writeflags = params.get('writeflags', [])
             if 'structure_index' in params:
                 structure_index = int(params.get('structure_index', -1))
                 del params['structure_index']
             if 'get3d' in params:
-                writeflags = params.get('writeflags', [])
                 if 'write3d' not in writeflags and strtobool(params['get3d']):
                     writeflags.append('write3d')
-                    params['writeflags'] = writeflags
                 del params['get3d']
+            if 'dom_id' in params and 'write3d' not in writeflags:
+                writeflags.append('write3d')
+            params['writeflags'] = writeflags
 
             filter = params.get("filter", None)
             mode = params.get("mode", "simple")
@@ -795,167 +666,6 @@ class Dispatcher:
         return interpretations, simple
 
 
-
-    # def prop(self, string: str) -> List:
-    #     url_params, structure_index = self._prepare_params(self.url_parameters.copy())
-    #     prop = self.representation_param
-    #     index: int = 1
-    #     interpretations: List[ChemicalString.StructureData]
-    #     simple: bool
-    #     interpretations, simple = self._interpretations(string, structure_index=structure_index)
-    #     for interpretation in interpretations:
-    #         structure: ChemicalStructure
-    #         for structure in interpretation.structures:
-    #             prop_val = structure.ens.get(prop, parameters=url_params)
-    #             if simple:
-    #                 structure_response = prop_val
-    #             else:
-    #                 structure_response = {
-    #                     'base_mime_type': self.base_content_type,
-    #                     'id': interpretation.id,
-    #                     'string': string,
-    #                     'structure': structure,
-    #                     'response': [prop_val, ],
-    #                     'index': index,
-    #                 }
-    #             self.response_list.append(structure_response)
-    #             index += 1
-    #     if simple:
-    #         return self._unique(self.response_list)
-    #     else:
-    #         return self.response_list
-
-    # def xxprop(self, string: str) -> List:
-    #     url_params = self.url_parameters.copy()
-    #     prop = self.parameters
-    #     if 'resolver' in url_params:
-    #         resolver_list = url_params.get('resolver').split(',')
-    #     else:
-    #         resolver_list = settings.AVAILABLE_RESOLVERS
-    #     simple: bool = self._use_simple_mode(
-    #         output_format=self.output_format,
-    #         simple_mode=('mode' in url_params and url_params == 'simple')
-    #     )
-    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list).interpretations
-    #     if simple:
-    #         dataset: Dataset = self._create_dataset(interpretations, True)
-    #         if 'rows' in url_params and 'columns' in url_params and 'page' in url_params:
-    #             rows, columns, page = url_params['rows'], min(url_params['columns'], 25), url_params['page']
-    #             dataset = self._create_dataset_page(dataset, int(rows), int(columns), int(page))
-    #         if self.base_content_type == 'text':
-    #             self.content_type = "text/plain"
-    #             self.response_list = self._unique(dataset.get(prop))
-    #     else:
-    #         index: int = 1
-    #         for interpretation in interpretations:
-    #             structure: ChemicalStructure
-    #             for structure in interpretation.structures:
-    #                 prop_val = structure.ens.get(prop, parameters=url_params)
-    #                 #response = self._unique(prop_val)
-    #                 structure_response = {
-    #                     'base_mime_type': self.base_content_type,
-    #                     'id': interpretation.id,
-    #                     'string': string,
-    #                     'structure': structure,
-    #                     'response': [prop_val, ],
-    #                     'index': index,
-    #                 }
-    #                 self.response_list.append(structure_response)
-    #                 index += 1
-    #     return self.response_list
-    #
-    def xprop(self, string):
-        propname = self.representation_param
-        base_content_type = self.base_content_type
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', settings.AVAILABLE_RESOLVERS)
-        structure_index = parameters.get('structure_index', None)
-        mode = parameters.get('mode', 'simple')
-        page = parameters.get('page', None)
-        columns = parameters.get('columns', None)
-        rows = parameters.get('rows', None)
-        #if resolver_list:
-        #    resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list).representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        full_ensemble_list = []
-        response_collector_list = []
-        for interpretation in interpretations:
-            structure: ChemicalStructure
-            for structure in interpretation.with_related_objects:
-                full_ensemble_list.append(structure.ens)
-                if self.output_format == 'xml':
-                    # if hasattr(structure, 'ens'):
-                    #     ens = structure._ens
-                    # else:
-                    #     ens = Ens(structure._resolved.minimol)
-                    # dataset is used to have the same object as below for the plain text output
-                    dataset = Dataset([structure.ens, ])
-                    if base_content_type == 'text':
-                        response_collector_list = dataset.get(propname, parameters=parameters)
-                    elif base_content_type == 'image':
-                        response_collector_list = dataset.get_image(parameters=parameters).hash_list
-                    response_collector_list = self._unique(response_collector_list)
-                    response = {
-                        'base_mime_type': self.base_content_type,
-                        'id': interpretation.id,
-                        'string': string,
-                        'structure': structure,
-                        'response': response_collector_list,
-                        'index': index,
-                    }
-                    self.response_list.append(response)
-                    index += 1
-                else:
-                    pass
-        if self.output_format == 'plain':
-            if structure_index:
-                i = int(structure_index)
-                ens_list = [full_ensemble_list[i], ]
-            elif len(full_ensemble_list) == 1:
-                ens_list = [full_ensemble_list[0], ]
-            else:
-                ens_list = full_ensemble_list
-            if columns and rows and page:
-                #user_page_num = int(page)
-                user_columns, columns = int(columns), int(columns)
-                user_rows = int(rows)
-                dataset_size = len(ens_list)
-                rows = dataset_size / user_columns
-                if dataset_size % user_columns:
-                    rows += 1
-                parameters.update({'rows': rows, 'columns': columns})
-                if not user_rows == rows:
-                    rows = user_rows
-                    if rows > 25:
-                        rows = 25
-                    parameters.update({'rows': rows, })
-                    page_size = rows * columns
-                    paginator = Paginator(ens_list, page_size)
-                    ens_list = paginator.page(page).object_list
-            dataset = Dataset(ens_list)
-            if base_content_type == 'text':
-                self.content_type = "text/plain"
-                response_collector_list = dataset.get(propname)
-                response_collector_list = self._unique(response_collector_list)
-            elif base_content_type == 'image':
-                # unique for structures that come from different resolvers:
-                # dataset.unique()
-                image = dataset.get_image(parameters=parameters, www_media_path=settings.MEDIA_ROOT + 'tmp')
-                f = open(image.file, 'r')
-                image_file = File(f)
-                image_file.url = image.file
-                image_file.image = f.read()
-                response_collector_list = image_file.image
-                self.content_type = "image/gif"
-            else:
-                pass
-            self.response_list = response_collector_list
-        else:
-            pass
-        return self.response_list
 
     def cas(self, string):
         url_parameters = self.url_parameters.copy()
