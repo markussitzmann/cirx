@@ -17,7 +17,7 @@ from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpRequest, QueryDict
 
 from structure.models import ResponseType
-from resolver.models import NameType, Record
+from resolver.models import NameType, Record, Name
 from structure.string_resolver import ChemicalString, ChemicalStructure, ResolverData, ResolverParams
 
 logger = logging.getLogger('cirx')
@@ -455,6 +455,18 @@ class Dispatcher:
             content=[repr(record) for record in records],
             content_type="text/plain"
         )
+
+    @dispatcher_method
+    def names(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
+        records = Record.with_related_objects.by_structure_ids([resolved.structure.id, ])
+        if len(records) == 0:
+            raise ValueError("no records found")
+        return DispatcherMethodResponse(
+            content=[repr(record) for record in records],
+            content_type="text/plain"
+        )
+
+
 
     @dispatcher_method
     def prop(self, resolved: ChemicalStructure, representation_param: str, *args, **kwargs) -> DispatcherMethodResponse:

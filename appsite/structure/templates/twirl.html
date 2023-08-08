@@ -1,17 +1,17 @@
+{% load static %}
 
 {% if parameters.dom_id %}
-
-{% if library == "twirl" %}
 
 // getting dojo from Google
 (function() {
 	if (document.getElementById("twirlydojo") == null) {
 		djConfig = {
-			require: ['dojox.gfx', 'dojo.touch']
+			require: ['dojox.gfx']
 		};
 		var e = document.createElement("script");
 		e.type = "text/javascript";
-		e.src= "/static/neon/assets/dojo/dojo.js";
+		//e.src= "{% static 'neon/assets/dojo/dojo.js' %}";
+        e.src="https://ajax.googleapis.com/ajax/libs/dojo/1.7.12/dojo/dojo.js"
 		e.id = "twirlydojo";
 		document.getElementsByTagName("head")[0].appendChild(e);	
 	};
@@ -378,26 +378,6 @@ function twirlyMol(elemID, atoms, bonds, elements, fog){
   dojo.connect(container, "onmousedown", tl_onMouseDown);
   dojo.connect(container, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), tl_onMouseScroll);
 }
-
-{% endif %}
-{% if library == "chemdoodle" %}
-
-// getting chemdoodle
-
-var mol = ChemDoodle.readMOL('[{{ response }}]', 1);
-var chemdoodle_object_{{ parameters.dom_id }} = new ChemDoodle.TransformCanvas3D('{{ parameters.dom_id }}', {{ parameters.width }}, {{ parameters.height }});
-chemdoodle_object_{{ parameters.dom_id }}.specs.set3DRepresentation('Ball and Stick');
-chemdoodle_object_{{ parameters.dom_id }}.specs.projectionWidthHeightRatio_3D={{ parameters.width }}/{{ parameters.height }};
-chemdoodle_object_{{ parameters.dom_id }}.specs.lightDirection_3D=[-0.1,-0.1,-1];
-chemdoodle_object_{{ parameters.dom_id }}.specs.atoms_materialShininess_3D=255;
-chemdoodle_object_{{ parameters.dom_id }}.specs.backgroundColor='black';
-chemdoodle_object_{{ parameters.dom_id }}.loadMolecule(mol);
-chemdoodle_object_{{ parameters.dom_id }}.specs.backgroundColor='red';
-//chemdoodle_object_{{ parameters.dom_id }}.specs.set3DRepresentation('Stick');
-chemdoodle_object_{{ parameters.dom_id }}.repaint();
-
-
-{% endif %}
 
 {% else %}
 <html>

@@ -67,10 +67,6 @@ def resolve_to_response(request, string: str, representation_type: str, operator
     )
     dispatcher_data: DispatcherData = dispatcher.parse(string)
 
-    # if request.is_secure():
-    #     host_string = 'https://' + request.get_host()
-    # else:
-    #     host_string = 'http://' + request.get_host()
     if 'QUERY_STRING' in request.META:
         url_parameter_string = request.META['QUERY_STRING']
     else:
