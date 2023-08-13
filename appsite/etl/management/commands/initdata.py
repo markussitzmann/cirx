@@ -644,13 +644,13 @@ def init_release(
 def init_name_affinitiy_class():
 
     affinitiy_classes = [
-        ('exact', 'Exact'),
-        ('narrow', 'Narrow'),
-        ('broad', 'Broad'),
-        ('unknown', 'Unknown'),
-        ('unspecified', 'Unspecified'),
-        ('generic', 'Generic'),
-        ('related', 'Related'),
+        ('exact', 0, 'Exact'),
+        ('narrow', 1, 'Narrow'),
+        ('broad', 2, 'Broad'),
+        ('unknown', 5, 'Unknown'),
+        ('unspecified', 4, 'Unspecified'),
+        ('generic', 3, 'Generic'),
+        ('related', 3, 'Related'),
     ]
 
     for item in affinitiy_classes:

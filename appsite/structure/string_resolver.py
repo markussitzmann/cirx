@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import namedtuple
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from django.conf import settings
 from pycactvs import Ens, Dataset
@@ -85,8 +85,16 @@ class ChemicalStructure:
     @property
     def metadata(self) -> dict:
         return self._metadata
-
-
+    
+    
+    def _parent(self, parent_type) -> Optional['ChemicalStructure']:
+        try:
+            parent_structure_ens = self.ens.get(parent_property)
+            return ChemicalStructure(ens=parent_structure_ens)
+        except Exception as e:
+            logger.error("creating parent structure failed: {}".format(e))
+        
+        
 class ChemicalStructureError(Exception):
 
     def __init__(self, value):

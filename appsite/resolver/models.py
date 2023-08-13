@@ -531,6 +531,7 @@ class NameType(models.Model):
 
 class NameAffinityClass(models.Model):
     title = models.CharField(max_length=32, unique=True, editable=False)
+    rank = models.IntegerField(default=0, blank=False, null=False)
     description = models.TextField(max_length=32768, blank=True, null=True)
 
     class Meta:

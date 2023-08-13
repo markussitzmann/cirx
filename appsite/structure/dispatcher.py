@@ -1,23 +1,18 @@
 import functools
 import io
+import logging
 from collections import namedtuple
 from distutils.util import strtobool
-from typing import List, Dict, Tuple, Any
-
-import logging
-from urllib.parse import quote
+from typing import List, Dict, Tuple
 
 from django.conf import settings
-from pycactvs import Ens, Molfile, Prop
-from pycactvs import Dataset as CsDataset
-
-
-from django.core.files import File
 from django.core.paginator import Paginator, EmptyPage
-from django.http import HttpRequest, QueryDict
+from django.http import HttpRequest
+from pycactvs import Dataset as CsDataset
+from pycactvs import Ens, Molfile, Prop
 
+from resolver.models import Record, StructureNameAssociation, NameAffinityClass
 from structure.models import ResponseType
-from resolver.models import NameType, Record, Name
 from structure.string_resolver import ChemicalString, ChemicalStructure, ResolverData, ResolverParams
 
 logger = logging.getLogger('cirx')
@@ -458,15 +453,19 @@ class Dispatcher:
 
     @dispatcher_method
     def names(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
-        records = Record.with_related_objects.by_structure_ids([resolved.structure.id, ])
-        if len(records) == 0:
-            raise ValueError("no records found")
+        name_affinity_classes = {a.title: a for a in NameAffinityClass.objects.all()}
+        associations = StructureNameAssociation.with_related_objects.by_compound(
+            [resolved.structure.compound, ],
+            affinity_classes = [name_affinity_classes['exact'], name_affinity_classes['narrow']]
+        ).filter(name_type__parent__title='NAME').all().order_by('name__name')
+        association: StructureNameAssociation
+        names = [association.name.name for association in associations]
+        if len(names) == 0:
+            raise ValueError("no names available")
         return DispatcherMethodResponse(
-            content=[repr(record) for record in records],
+            content=names,
             content_type="text/plain"
         )
-
-
 
     @dispatcher_method
     def prop(self, resolved: ChemicalStructure, representation_param: str, *args, **kwargs) -> DispatcherMethodResponse:
@@ -691,65 +690,65 @@ class Dispatcher:
         self.url_parameters = url_parameters
         return self.names(string)
 
-    def names(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        structure_index = parameters.get('structure_index', None)
-        response_index = parameters.get('index', None)
-        filter_parameter = parameters.get('filter', None)
-        if filter_parameter:
-            filter_parameter = filter_parameter.lower()
-        mode = parameters.get('mode', 'simple')
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        names_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
-                name_sets = NameCache(structure=structure.object)['classified_name_object_sets']
-                names = []
-                classification_strings = NameType.objects.all()
-                for key, value in name_sets.items():
-                    key_string = classification_strings.filter(id=key)[0].string.lower()
-                    for n in list(value):
-                        if filter_parameter and not filter_parameter == key_string.lower():
-                            continue
-                        names.append({'class': key_string, 'name': n.name})
-                names_list.append(names)
-                if self.output_format == 'xml':
-                    representation = {
-                        'base_mime_type': self.base_content_type,
-                        'id': interpretation.id,
-                        'string': string,
-                        'structure': structure,
-                        'names': names,
-                        'index': index,
-                    }
-                    representation_list.append(representation)
-                    index += 1
-                else:
-                    pass
-        if self.output_format == 'plain':
-            if structure_index:
-                i = int(structure_index)
-                names_list = [names_list[i], ]
-            response_list = []
-            for names in names_list:
-                for n in names:
-                    if filter_parameter:
-                        if not n['class'] == str(filter_parameter):
-                            continue
-                    response_list.append(str(n['name']))
-            self.content_type = "text/plain"
-            self.response_list = self._unique(response_list)
-            if response_index:
-                i = int(response_index)
-                self.response_list = [self.response_list[i], ]
-        return representation_list
+    # def names(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     structure_index = parameters.get('structure_index', None)
+    #     response_index = parameters.get('index', None)
+    #     filter_parameter = parameters.get('filter', None)
+    #     if filter_parameter:
+    #         filter_parameter = filter_parameter.lower()
+    #     mode = parameters.get('mode', 'simple')
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     names_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.with_related_objects:
+    #             name_sets = NameCache(structure=structure.object)['classified_name_object_sets']
+    #             names = []
+    #             classification_strings = NameType.objects.all()
+    #             for key, value in name_sets.items():
+    #                 key_string = classification_strings.filter(id=key)[0].string.lower()
+    #                 for n in list(value):
+    #                     if filter_parameter and not filter_parameter == key_string.lower():
+    #                         continue
+    #                     names.append({'class': key_string, 'name': n.name})
+    #             names_list.append(names)
+    #             if self.output_format == 'xml':
+    #                 representation = {
+    #                     'base_mime_type': self.base_content_type,
+    #                     'id': interpretation.id,
+    #                     'string': string,
+    #                     'structure': structure,
+    #                     'names': names,
+    #                     'index': index,
+    #                 }
+    #                 representation_list.append(representation)
+    #                 index += 1
+    #             else:
+    #                 pass
+    #     if self.output_format == 'plain':
+    #         if structure_index:
+    #             i = int(structure_index)
+    #             names_list = [names_list[i], ]
+    #         response_list = []
+    #         for names in names_list:
+    #             for n in names:
+    #                 if filter_parameter:
+    #                     if not n['class'] == str(filter_parameter):
+    #                         continue
+    #                 response_list.append(str(n['name']))
+    #         self.content_type = "text/plain"
+    #         self.response_list = self._unique(response_list)
+    #         if response_index:
+    #             i = int(response_index)
+    #             self.response_list = [self.response_list[i], ]
+    #     return representation_list
 
     def twirl(self, string):
         url_parameters = self.url_parameters.copy()

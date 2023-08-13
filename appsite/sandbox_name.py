@@ -20,8 +20,13 @@ logger = logging.getLogger("cirx")
 
 reset_queries()
 
-compounds = [200, 203]
+compounds = [12,]
 names = ["NSC810703", "NSC810731", ]
+
+af = {a.title: a for a in NameAffinityClass.objects.all()}
+logger.info(af)
+
+
 
 exact = NameAffinityClass.objects.filter(title="exact").first()
 pubchem_substance_synonym = NameType.objects.filter(title="PUBCHEM_SUBSTANCE_SYNONYM").first()
@@ -42,14 +47,13 @@ for a in name_associations.all():
         a.structure.compound.id
     ))
 
-
 compound_associations = StructureNameAssociation.with_related_objects.by_name(
    names=names,
    name_types=[pubchem_substance_synonym, ],
    affinity_classes=affinity_classes
 )
 
-for a in compound_associations.all():
+for a in compound_associations.order_by('name__name').all():
     logger.info("NAME %s %s %s -> %s : %s" % (a.name, a.affinity_class, a.name_type, a.structure, a.structure.compound.id))
 
 
