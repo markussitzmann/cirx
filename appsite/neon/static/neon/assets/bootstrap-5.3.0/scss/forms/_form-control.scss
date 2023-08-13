@@ -39,7 +39,7 @@
     @if $enable-shadows {
       @include box-shadow($input-box-shadow, $input-focus-box-shadow);
     } @else {
-      // Avoid using mixin so we can pass custom focus shadow properly
+      // Avoid using mixin so we can pass core focus shadow properly
       box-shadow: $input-focus-box-shadow;
     }
   }

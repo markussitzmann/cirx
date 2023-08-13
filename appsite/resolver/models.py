@@ -5,8 +5,8 @@ from django.db.models import Index, UniqueConstraint, Count, Q
 from multiselectfield import MultiSelectField
 from pycactvs import Ens
 
-from custom.cactvs import CactvsHash, CactvsMinimol
-from custom.fields import CactvsHashField, CactvsMinimolField
+from core.cactvs import CactvsHash, CactvsMinimol
+from core.fields import CactvsHashField, CactvsMinimolField
 from resolver.defaults import http_verbs
 
 

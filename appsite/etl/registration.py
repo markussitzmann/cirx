@@ -20,7 +20,8 @@ from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models import QuerySet, F, Q
 from pycactvs import Molfile, Ens, Prop
 
-from custom.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
+from core.common import NCICADD_TYPES, InChIAndSaveOpt, INCHI_TYPES
+from core.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
     ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureCalcInChIStatus, \
     StructureFileRecordNameAssociation, StructureFileSource, StructureFileLinkNameStatus
@@ -40,10 +41,7 @@ DEFAULT_MAX_CHUNK_NUMBER = 1000
 
 Status = namedtuple('Status', 'file created')
 
-Identifier = namedtuple('Identifier', 'property parent_structure attr public_string key')
 StructureRelationships = namedtuple('StructureRelationships', 'structure relationships')
-InChIAndSaveOpt = namedtuple('InChIAndSaveOpt', 'inchi saveopt')
-InChITypeTuple = namedtuple('InChITypes', 'id property key softwareversion software options')
 StructureFileRecordReleaseTuple = namedtuple('StructureFileRecordRelease', 'record releases')
 
 PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
@@ -448,47 +446,6 @@ class StructureRegistry(object):
 
     CHUNK_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
 
-    NCICADD_TYPES = [
-        Identifier('E_UUUUU_ID', 'E_UUUUU_STRUCTURE', 'uuuuu_parent', 'uuuuu', 'uuuuu'),
-        Identifier('E_FICUS_ID', 'E_FICUS_STRUCTURE', 'ficus_parent', 'FICuS', 'ficus'),
-        Identifier('E_FICTS_ID', 'E_FICTS_STRUCTURE', 'ficts_parent', 'FICTS', 'ficts'),
-    ]
-
-    INCHI_TYPES = [
-        InChITypeTuple(
-            'standard',
-            'E_STDINCHI',
-            'E_STDINCHIKEY',
-            Prop.Ref('E_STDINCHI').softwareversion,
-            Prop.Ref('E_STDINCHI').software,
-            ""
-        ),
-        InChITypeTuple(
-            'original',
-            'E_INCHI',
-            'E_INCHIKEY',
-            Prop.Ref('E_INCHI').softwareversion,
-            Prop.Ref('E_INCHI').software,
-            "SAVEOPT  RECMET NOWARNINGS FIXEDH"
-        ),
-        InChITypeTuple(
-            'xtauto',
-            'E_INCHI',
-            'E_INCHIKEY',
-            Prop.Ref('E_INCHI').softwareversion,
-            Prop.Ref('E_INCHI').software,
-            "SAVEOPT  RECMET NOWARNINGS KET 15T"
-        ),
-        InChITypeTuple(
-            'xtautox',
-            'E_TAUTO_INCHI',
-            'E_TAUTO_INCHIKEY',
-            Prop.Ref('E_TAUTO_INCHI').softwareversion,
-            Prop.Ref('E_TAUTO_INCHI').software,
-            "SAVEOPT DONOTADDH RECMET NOWARNINGS KET 15T PT_22_00 PT_16_00 PT_06_00 PT_39_00 PT_13_00 PT_18_00"
-        ),
-    ]
-
     @staticmethod
     def fetch_structure_file_for_normalization(structure_file_id: int) -> Optional[int]:
         try:
@@ -533,7 +490,7 @@ class StructureRegistry(object):
 
         structure_file = StructureFile.objects.get(id=structure_file_id)
         # NOTE: the order matters, it has to go from broader to more specific identifier!!
-        identifiers = StructureRegistry.NCICADD_TYPES
+        identifiers = NCICADD_TYPES
 
         source_structures: Dict[int, Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
         parent_structure_relationships = []
@@ -697,7 +654,7 @@ class StructureRegistry(object):
 
         source_structures: Dict[int, Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
 
-        for inchi_type in StructureRegistry.INCHI_TYPES:
+        for inchi_type in INCHI_TYPES:
             options = Prop(inchi_type.property).getparam("options")
             options += " SaveOpt"
             Prop(inchi_type.property).setparam("options", options)
@@ -709,7 +666,7 @@ class StructureRegistry(object):
                 continue
             try:
                 inchi_relationships = {}
-                for inchi_type in StructureRegistry.INCHI_TYPES:
+                for inchi_type in INCHI_TYPES:
                     inchi_property = Prop.Ref(inchi_type.property)
                     inchi_property.setparam("options", inchi_type.options)
                     ens = structure.to_ens
@@ -759,7 +716,7 @@ class StructureRegistry(object):
                 structure_objects = Structure.objects.in_bulk(structure_id_list, field_name='id')
 
                 inchi_type_objects = InChIType.objects.in_bulk(
-                    [t.id for t in StructureRegistry.INCHI_TYPES],
+                    [t.id for t in INCHI_TYPES],
                     field_name='title'
                 )
 

@@ -13,11 +13,11 @@ sections:
   - title: Color
     description: Learn about and customize the color systems that support the entire toolkit.
   - title: Color modes
-    description: Explore our default light mode and the new dark mode, or create custom color modes yourself.
+    description: Explore our default light mode and the new dark mode, or create core color modes yourself.
   - title: Components
     description: Learn how we build nearly all our components responsively and with base and modifier classes.
   - title: CSS variables
-    description: Use Bootstrap's CSS custom properties for fast and forward-looking design and development.
+    description: Use Bootstrap's CSS core properties for fast and forward-looking design and development.
   - title: Optimize
     description: Keep your projects lean, responsive, and maintainable so you can deliver the best experience.
 ---

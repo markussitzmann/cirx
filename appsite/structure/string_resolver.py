@@ -6,7 +6,8 @@ from typing import List, Dict, Optional
 from django.conf import settings
 from pycactvs import Ens, Dataset
 
-from custom.cactvs import CactvsHash
+from core.common import NCICADD_TYPES
+from core.cactvs import CactvsHash
 from structure.cas.number import String as CASNumber
 from structure.inchi.identifier import InChIKey
 from structure.minimol import Minimol
@@ -85,12 +86,17 @@ class ChemicalStructure:
     @property
     def metadata(self) -> dict:
         return self._metadata
-    
-    
+
     def _parent(self, parent_type) -> Optional['ChemicalStructure']:
+        parent_types = {identifier_type.key: identifier_type for identifier_type in NCICADD_TYPES}
         try:
-            parent_structure_ens = self.ens.get(parent_property)
-            return ChemicalStructure(ens=parent_structure_ens)
+            if self.structure and hasattr(self.structure.parents, parent_types[parent_type].attr):
+                parent_structure = getattr(self.structure.parents, parent_types[parent_type].attr)
+                if parent_structure:
+                    return ChemicalStructure(structure=parent_structure)
+                return None
+            parent_ens = self.ens.get(parent_types[parent_type].parent_structure)
+            return ChemicalStructure(ens=parent_ens)
         except Exception as e:
             logger.error("creating parent structure failed: {}".format(e))
         

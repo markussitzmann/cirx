@@ -1929,7 +1929,7 @@
 
     if (parent.contains(child)) {
       return true;
-    } // then fallback to custom implementation with Shadow DOM support
+    } // then fallback to core implementation with Shadow DOM support
     else if (rootNode && isShadowRoot(rootNode)) {
         var next = child;
 
@@ -3733,7 +3733,7 @@
         return PLACEMENT_BOTTOMCENTER;
       }
 
-      // We need to trim the value because custom properties can also include spaces
+      // We need to trim the value because core properties can also include spaces
       const isEnd = getComputedStyle(this._menu).getPropertyValue('--bs-position').trim() === 'end';
       if (parentDropdown.classList.contains(CLASS_NAME_DROPUP)) {
         return isEnd ? PLACEMENT_TOPEND : PLACEMENT_TOP;

@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Forms
-description: Examples and usage guidelines for form control styles, layout options, and custom components for creating a wide variety of forms.
+description: Examples and usage guidelines for form control styles, layout options, and core components for creating a wide variety of forms.
 group: forms
 toc: true
 aliases: "/docs/5.3/forms/"
@@ -9,11 +9,11 @@ sections:
   - title: Form control
     description: Style textual inputs and textareas with support for multiple states.
   - title: Select
-    description: Improve browser default select elements with a custom initial appearance.
+    description: Improve browser default select elements with a core initial appearance.
   - title: Checks & radios
-    description: Use our custom radio buttons and checkboxes in forms for selecting input options.
+    description: Use our core radio buttons and checkboxes in forms for selecting input options.
   - title: Range
-    description: Replace browser default range inputs with our custom version.
+    description: Replace browser default range inputs with our core version.
   - title: Input group
     description: Attach labels and buttons to your inputs for increased semantic value.
   - title: Floating labels
@@ -21,7 +21,7 @@ sections:
   - title: Layout
     description: Create inline, horizontal, or complex grid-based layouts with your forms.
   - title: Validation
-    description: Validate your forms with custom or native validation behaviors and styles.
+    description: Validate your forms with core or native validation behaviors and styles.
 ---
 
 ## Overview

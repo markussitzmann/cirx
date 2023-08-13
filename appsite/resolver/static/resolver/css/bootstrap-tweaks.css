@@ -29,7 +29,7 @@ a single block in the template.
   text-decoration: none;
 }
 
-/* custom navigation styles */
+/* core navigation styles */
 .navbar {
   width: 100%;
   position: fixed;
@@ -246,7 +246,7 @@ footer a:hover {
   margin: 0;
 }
 
-/* custom general page styles */
+/* core general page styles */
 .hero-unit h1, .hero-unit h2 {
   color: #10a7d8;
 }

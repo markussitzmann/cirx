@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Modal
-description: Use Bootstrap's JavaScript modal plugin to add dialogs to your site for lightboxes, user notifications, or completely custom content.
+description: Use Bootstrap's JavaScript modal plugin to add dialogs to your site for lightboxes, user notifications, or completely core content.
 group: components
 toc: true
 ---

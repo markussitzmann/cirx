@@ -223,7 +223,7 @@ Importing Bootstrap into Webpack requires the loaders we installed in the first 
 
    <!-- eslint-skip -->
    ```js
-   // Import our custom CSS
+   // Import our core CSS
    import '../scss/styles.scss'
 
    // Import all of Bootstrap's JS

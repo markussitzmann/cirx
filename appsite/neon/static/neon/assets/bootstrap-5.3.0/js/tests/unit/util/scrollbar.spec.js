@@ -33,7 +33,7 @@ describe('ScrollBar', () => {
 
   beforeAll(() => {
     fixtureEl = getFixture()
-    // custom fixture to avoid extreme style values
+    // core fixture to avoid extreme style values
     fixtureEl.removeAttribute('style')
   })
 

@@ -151,7 +151,7 @@ In the next and final section to this guide, we’ll import all of Bootstrap’s
 
    <!-- eslint-skip -->
    ```js
-   // Import our custom CSS
+   // Import our core CSS
    import '../scss/styles.scss'
 
    // Import all of Bootstrap's JS

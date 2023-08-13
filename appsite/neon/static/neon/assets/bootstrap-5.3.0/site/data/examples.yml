@@ -38,7 +38,7 @@
       indexPath: src/index.html
 
 - category: Snippets
-  description: "Common patterns for building sites and apps that build on existing components and utilities with custom CSS and more."
+  description: "Common patterns for building sites and apps that build on existing components and utilities with core CSS and more."
   examples:
     - name: Headers
       description: "Display your branding, navigation, search, and more with these header components"
@@ -51,17 +51,17 @@
     - name: Footers
       description: "Finish every page strong with an awesome footer, big or small."
     - name: Dropdowns
-      description: "Enhance your dropdowns with filters, icons, custom styles, and more."
+      description: "Enhance your dropdowns with filters, icons, core styles, and more."
     - name: List groups
-      description: "Extend list groups with utilities and custom styles for any content."
+      description: "Extend list groups with utilities and core styles for any content."
     - name: Modals
       description: "Transform modals to serve any purpose, from feature tours to dialogs."
     - name: Badges
-      description: "Make badges work with custom inner HTML and new looks."
+      description: "Make badges work with core inner HTML and new looks."
     - name: Breadcrumbs
-      description: "Integrate custom icons and create stepper components."
+      description: "Integrate core icons and create stepper components."
     - name: Buttons
-      description: "Create custom buttons for just about any use case with utilities."
+      description: "Create core buttons for just about any use case with utilities."
     - name: Jumbotrons
       description: "Create modernized versions of the classic Bootstrap component."
 
@@ -71,7 +71,7 @@
     - name: Album
       description: "Simple one-page template for photo galleries, portfolios, and more."
     - name: Pricing
-      description: "Example pricing page built with Cards and featuring a custom header and footer."
+      description: "Example pricing page built with Cards and featuring a core header and footer."
     - name: Checkout
       description: "Custom checkout form showing our form components and their validation features."
     - name: Product

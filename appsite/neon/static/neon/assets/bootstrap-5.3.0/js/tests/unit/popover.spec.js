@@ -173,7 +173,7 @@ describe('Popover', () => {
     })
 
     it('"setContent" should keep the initial template', () => {
-      fixtureEl.innerHTML = '<a href="#" title="Popover" data-bs-content="https://twitter.com/getbootstrap" data-bs-custom-class="custom-class">BS twitter</a>'
+      fixtureEl.innerHTML = '<a href="#" title="Popover" data-bs-content="https://twitter.com/getbootstrap" data-bs-core-class="core-class">BS twitter</a>'
 
       const popoverEl = fixtureEl.querySelector('a')
       const popover = new Popover(popoverEl)
@@ -222,9 +222,9 @@ describe('Popover', () => {
       })
     })
 
-    it('should show a popover with provided custom class', () => {
+    it('should show a popover with provided core class', () => {
       return new Promise(resolve => {
-        fixtureEl.innerHTML = '<a href="#" title="Popover" data-bs-content="https://twitter.com/getbootstrap" data-bs-custom-class="custom-class">BS twitter</a>'
+        fixtureEl.innerHTML = '<a href="#" title="Popover" data-bs-content="https://twitter.com/getbootstrap" data-bs-core-class="core-class">BS twitter</a>'
 
         const popoverEl = fixtureEl.querySelector('a')
         const popover = new Popover(popoverEl)
@@ -232,7 +232,7 @@ describe('Popover', () => {
         popoverEl.addEventListener('shown.bs.popover', () => {
           const tip = document.querySelector('.popover')
           expect(tip).not.toBeNull()
-          expect(tip).toHaveClass('custom-class')
+          expect(tip).toHaveClass('core-class')
           resolve()
         })
 

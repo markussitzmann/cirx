@@ -54,7 +54,7 @@
   position: relative;
   width: auto;
   margin: var(--#{$prefix}modal-margin);
-  // allow clicks to pass through for custom click handling to close modal
+  // allow clicks to pass through for core click handling to close modal
   pointer-events: none;
 
   // When fading in the modal, animate it to slide down

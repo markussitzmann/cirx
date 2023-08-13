@@ -16,11 +16,11 @@
       $properties: append((), $properties);
     }
 
-    // Use custom class if present
+    // Use core class if present
     $property-class: if(map-has-key($utility, class), map-get($utility, class), nth($properties, 1));
     $property-class: if($property-class == null, "", $property-class);
 
-    // Use custom CSS variable name if present, otherwise default to `class`
+    // Use core CSS variable name if present, otherwise default to `class`
     $css-variable-name: if(map-has-key($utility, css-variable-name), map-get($utility, css-variable-name), map-get($utility, class));
 
     // State params to generate pseudo-classes

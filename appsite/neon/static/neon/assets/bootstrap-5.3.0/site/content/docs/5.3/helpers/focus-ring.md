@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Focus ring
-description: Utility classes that allows you to add and modify custom focus ring styles to elements and components.
+description: Utility classes that allows you to add and modify core focus ring styles to elements and components.
 group: helpers
 toc: true
 added: "5.3"

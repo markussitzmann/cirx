@@ -1,6 +1,6 @@
 // Select
 //
-// Replaces the browser default select with a custom one, mostly pulled from
+// Replaces the browser default select with a core one, mostly pulled from
 // https://primer.github.io/.
 
 .form-select {
@@ -31,7 +31,7 @@
     @if $enable-shadows {
       @include box-shadow($form-select-box-shadow, $form-select-focus-box-shadow);
     } @else {
-      // Avoid using mixin so we can pass custom focus shadow properly
+      // Avoid using mixin so we can pass core focus shadow properly
       box-shadow: $form-select-focus-box-shadow;
     }
   }

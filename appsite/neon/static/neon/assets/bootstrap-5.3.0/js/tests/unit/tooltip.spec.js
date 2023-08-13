@@ -876,9 +876,9 @@ describe('Tooltip', () => {
       })
     })
 
-    it('should show a tooltip with custom class provided in data attributes', () => {
+    it('should show a tooltip with core class provided in data attributes', () => {
       return new Promise(resolve => {
-        fixtureEl.innerHTML = '<a href="#" rel="tooltip" title="Another tooltip" data-bs-custom-class="custom-class"></a>'
+        fixtureEl.innerHTML = '<a href="#" rel="tooltip" title="Another tooltip" data-bs-core-class="core-class"></a>'
 
         const tooltipEl = fixtureEl.querySelector('a')
         const tooltip = new Tooltip(tooltipEl)
@@ -886,7 +886,7 @@ describe('Tooltip', () => {
         tooltipEl.addEventListener('shown.bs.tooltip', () => {
           const tip = document.querySelector('.tooltip')
           expect(tip).not.toBeNull()
-          expect(tip).toHaveClass('custom-class')
+          expect(tip).toHaveClass('core-class')
           resolve()
         })
 
@@ -894,20 +894,20 @@ describe('Tooltip', () => {
       })
     })
 
-    it('should show a tooltip with custom class provided as a string in config', () => {
+    it('should show a tooltip with core class provided as a string in config', () => {
       return new Promise(resolve => {
         fixtureEl.innerHTML = '<a href="#" rel="tooltip" title="Another tooltip"></a>'
 
         const tooltipEl = fixtureEl.querySelector('a')
         const tooltip = new Tooltip(tooltipEl, {
-          customClass: 'custom-class custom-class-2'
+          customClass: 'core-class core-class-2'
         })
 
         tooltipEl.addEventListener('shown.bs.tooltip', () => {
           const tip = document.querySelector('.tooltip')
           expect(tip).not.toBeNull()
-          expect(tip).toHaveClass('custom-class')
-          expect(tip).toHaveClass('custom-class-2')
+          expect(tip).toHaveClass('core-class')
+          expect(tip).toHaveClass('core-class-2')
           resolve()
         })
 
@@ -915,11 +915,11 @@ describe('Tooltip', () => {
       })
     })
 
-    it('should show a tooltip with custom class provided as a function in config', () => {
+    it('should show a tooltip with core class provided as a function in config', () => {
       return new Promise(resolve => {
         fixtureEl.innerHTML = '<a href="#" rel="tooltip" title="Another tooltip"></a>'
 
-        const spy = jasmine.createSpy('customClass').and.returnValue('custom-class')
+        const spy = jasmine.createSpy('customClass').and.returnValue('core-class')
         const tooltipEl = fixtureEl.querySelector('a')
         const tooltip = new Tooltip(tooltipEl, {
           customClass: spy
@@ -929,7 +929,7 @@ describe('Tooltip', () => {
           const tip = document.querySelector('.tooltip')
           expect(tip).not.toBeNull()
           expect(spy).toHaveBeenCalled()
-          expect(tip).toHaveClass('custom-class')
+          expect(tip).toHaveClass('core-class')
           resolve()
         })
 

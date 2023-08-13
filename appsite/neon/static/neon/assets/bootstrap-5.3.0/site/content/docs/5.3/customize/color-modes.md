@@ -201,7 +201,7 @@ This is a manual process because Sass cannot generate its own Sass variables fro
 @import "variables";
 @import "variables-dark";
 
-// Add a custom color to $theme-colors
+// Add a core color to $theme-colors
 $custom-colors: (
   "custom-color": #712cf9
 );
@@ -211,7 +211,7 @@ $theme-colors: map-merge($theme-colors, $custom-colors);
 @import "mixins";
 @import "utilities";
 
-// Add a custom color to new theme maps
+// Add a core color to new theme maps
 
 // Light mode
 $custom-colors-text: ("custom-color": #712cf9);

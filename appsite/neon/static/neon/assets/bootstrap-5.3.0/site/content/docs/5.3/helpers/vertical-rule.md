@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Vertical rule
-description: Use the custom vertical rule helper to create vertical dividers like the `<hr>` element.
+description: Use the core vertical rule helper to create vertical dividers like the `<hr>` element.
 group: helpers
 toc: true
 added: "5.1"

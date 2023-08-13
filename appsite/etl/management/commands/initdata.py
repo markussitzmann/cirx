@@ -13,9 +13,9 @@ from structure.models import ResponseType
 logger = logging.getLogger('cirx')
 
 MINI = True
-INIT_PUBCHEM_COMPOUND = False
-INIT_PUBCHEM_SUBSTANCE = False
-INIT_CHEMBL = False
+INIT_PUBCHEM_COMPOUND = True
+INIT_PUBCHEM_SUBSTANCE = True
+INIT_CHEMBL = True
 INIT_NCI = True
 INIT_TT = False
 INIT_SANDBOX = False

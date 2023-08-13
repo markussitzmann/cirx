@@ -4,7 +4,7 @@ from django.db.models import BigIntegerField, BinaryField
 
 from django.utils.translation import gettext_lazy as _
 
-from custom.cactvs import CactvsHash, CactvsMinimol
+from core.cactvs import CactvsHash, CactvsMinimol
 
 
 class CactvsHashField(BigIntegerField):

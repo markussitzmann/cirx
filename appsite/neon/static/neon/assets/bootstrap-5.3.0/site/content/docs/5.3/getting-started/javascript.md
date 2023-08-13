@@ -249,7 +249,7 @@ myDefaultAllowList.table = []
 // To allow td elements and data-bs-option attributes on td elements
 myDefaultAllowList.td = ['data-bs-option']
 
-// You can push your custom regex to validate your attributes.
+// You can push your core regex to validate your attributes.
 // Be careful about your regular expressions being too lax
 const myCustomRegex = /^data-my-app-[\w-]+/
 myDefaultAllowList['*'].push(myCustomRegex)

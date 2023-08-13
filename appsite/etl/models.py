@@ -7,7 +7,7 @@ from django.db.models import UniqueConstraint
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
-from custom.cactvs import CactvsHash
+from core.cactvs import CactvsHash
 from resolver.models import Structure, Release, Name, NameType
 
 fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)

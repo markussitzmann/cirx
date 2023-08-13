@@ -131,7 +131,7 @@ describe('Sanitizer', () => {
       expect(result).not.toContain('<script>')
     })
 
-    it('should not use native api to sanitize if a custom function passed', () => {
+    it('should not use native api to sanitize if a core function passed', () => {
       const template = [
         '<div>',
         '  <span>Some content</span>',
