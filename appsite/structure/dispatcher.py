@@ -453,10 +453,19 @@ class Dispatcher:
 
     @dispatcher_method
     def names(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
-        name_affinity_classes = {a.title: a for a in NameAffinityClass.objects.all()}
+        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+
+        compounds = []
+        ficts_parent = resolved.ficts_parent(only_lookup=False)
+        if ficts_parent and ficts_parent.structure:
+            compounds.append(ficts_parent.structure.compound)
+        ficus_parent = resolved.ficus_parent(only_lookup=False)
+        if not len(compounds) and ficus_parent and ficus_parent.structure:
+            compounds.append(ficus_parent.structure.compound)
+
         associations = StructureNameAssociation.with_related_objects.by_compound(
-            [resolved.structure.compound, ],
-            affinity_classes = [name_affinity_classes['exact'], name_affinity_classes['narrow']]
+            compounds,
+            affinity_classes = [affinity['exact'], affinity['narrow']]
         ).filter(name_type__parent__title='NAME').all().order_by('name__name')
         association: StructureNameAssociation
         names = [association.name.name for association in associations]

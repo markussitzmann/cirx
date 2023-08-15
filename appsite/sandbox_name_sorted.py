@@ -64,11 +64,15 @@ for smiles in warfarin_smiles:
             affinity_classes=[affinity['exact'], affinity['narrow'], ]
         ).filter(name_type__parent__title='NAME')
 
+
         associations = name_associations.order_by('affinity_class__rank', 'name__name', '-name_type__parent').all()
         logger.info("--> {}".format(len(associations)))
+
         for a in associations:
             logger.info("R {} P {} T {} AF {} NAME {}"
                         .format(a.affinity_class.rank, a.name_type.id, a.name_type.title, a.affinity_class.title, a.name.name))
+
+
 
 #pubchem_substance_synonym = NameType.objects.filter(title="PUBCHEM_SUBSTANCE_SYNONYM").first()
 
@@ -100,7 +104,5 @@ for smiles in warfarin_smiles:
 logger.info("-----------")
 logger.info("COUNT %s", len(connection.queries))
 logger.info("-----------")
-for q in connection.queries:
-    logger.info(q)
 
 
