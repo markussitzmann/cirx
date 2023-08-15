@@ -38,14 +38,16 @@ warfarin_smiles = [
 
 for smiles in warfarin_smiles:
     structure = ChemicalStructure(ens=Ens(smiles))
-    ficts_parent = structure._parent('ficts')
+    ficts_parent = structure.ficts_parent(only_lookup=False)
     t0 = time.perf_counter()
-    ficus_parent = structure._parent('ficus')
+    ficus_parent = structure.ficus_parent(only_lookup=False)
     t1 = time.perf_counter()
-    ficus = ficus_parent.ens.get('E_FICUS_ID')
+    # if ficus_parent:
+    #     ficus = ficus_parent.ens.get('E_FICUS_ID')
+
     t2 = time.perf_counter()
 
-    logger.info("FICTS {} FICuS {} : {} T {}".format( ficts_parent.hashisy if ficts_parent else "---", ficus_parent.hashisy if ficus_parent else "---", ficus, t1 - t0, t2 - t1))
+    logger.info("FICTS {} FICuS {} : T {}".format( ficts_parent.hashisy if ficts_parent else "---", ficus_parent.hashisy if ficus_parent else "---", t1 - t0, t2 - t1))
 
 
 

@@ -4,6 +4,7 @@ from collections import namedtuple
 from typing import List, Dict, Optional
 
 from django.conf import settings
+from django.db import connection
 from pycactvs import Ens, Dataset
 
 from core.common import NCICADD_TYPES
@@ -34,6 +35,9 @@ class ChemicalStructure:
         self._metadata: Dict = metadata if metadata else {}
         self._identifier = None
         self._hashisy = None
+        self._ficts_parent = None
+        self._ficus_parent = None
+        self._uuuuu_parent = None
         if structure and not ens:
             self._ens = structure.minimol.ens
         elif ens and not structure:
@@ -64,8 +68,10 @@ class ChemicalStructure:
             return self._structure
         #TODO: needs improvements
         try:
-            self._structure = Structure.objects.get(hashisy_key=CactvsHash(self.ens.get('E_HASHISY')))
-        except Structure.DoesNotExist:
+            #self._structure = Structure.objects.get(hashisy_key=CactvsHash(self.ens.get('E_HASHISY')))
+            self._structure = Structure.with_related_objects.by_hashisy([self.hashisy]).first()
+        except Exception as e:
+            logger.warning("structure lookup with error:", e)
             self._structure = None
         return self._structure
 
@@ -87,7 +93,25 @@ class ChemicalStructure:
     def metadata(self) -> dict:
         return self._metadata
 
-    def _parent(self, parent_type) -> Optional['ChemicalStructure']:
+    def ficts_parent(self, only_lookup: bool = False):
+        if self._ficts_parent:
+            return self._ficts_parent
+        self._ficts_parent = self._parent('ficts', only_lookup)
+        return self._ficts_parent
+
+    def ficus_parent(self, only_lookup: bool = True):
+        if self._ficus_parent:
+            return self._ficus_parent
+        self._ficus_parent = self._parent('ficus', only_lookup)
+        return self._ficus_parent
+
+    def uuuuu_parent(self, only_lookup: bool = True):
+        if self._uuuuu_parent:
+            return self._uuuuu_parent
+        self._uuuuu_parent = self._parent('uuuuu', only_lookup)
+        return self._uuuuu_parent
+
+    def _parent(self, parent_type: str, only_lookup: bool = False) -> Optional['ChemicalStructure']:
         parent_types = {identifier_type.key: identifier_type for identifier_type in NCICADD_TYPES}
         try:
             if self.structure and hasattr(self.structure.parents, parent_types[parent_type].attr):
@@ -95,8 +119,11 @@ class ChemicalStructure:
                 if parent_structure:
                     return ChemicalStructure(structure=parent_structure)
                 return None
-            parent_ens = self.ens.get(parent_types[parent_type].parent_structure)
-            return ChemicalStructure(ens=parent_ens)
+            if not only_lookup:
+                parent = self.ens.get(parent_types[parent_type].parent_structure)
+                return ChemicalStructure(ens=parent)
+            else:
+                return None
         except Exception as e:
             logger.error("creating parent structure failed: {}".format(e))
         
