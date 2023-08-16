@@ -22,7 +22,7 @@ from resolver.models import InChI, Structure, Name, StructureNameAssociation, Da
 logger = logging.getLogger('cirx')
 
 ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
-ResolverParams = namedtuple("ResolverParams", "url_params, resolver_list filter mode structure_index page columns rows")
+ResolverParams = namedtuple("ResolverParams", "url_params resolver_list filter mode structure_index page columns rows")
 
 
 class ChemicalStructure:
@@ -547,10 +547,10 @@ class ChemicalString:
             pass
         #name = Name.objects.get(name=self.string)
 
-        exact = NameAffinityClass.objects.get(title='exact')
+        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
         associations = StructureNameAssociation\
             .with_related_objects\
-            .by_name(names=[self.string, ], affinity_classes=[exact, ])\
+            .by_name(names=[self.string, ], affinity_classes=[affinity['exact'], affinity['narrow']])
 
         resolved_list = []
         for association in associations.all():

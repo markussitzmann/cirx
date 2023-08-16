@@ -44,20 +44,27 @@ def dispatcher_method(_func=None, *, as_list=False):
             params: ResolverParams = self._params
             chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
             resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
-            index = 1
+
             if not self.output_format == 'xml' and len(resolver_data) and params.mode == 'simple':
                 resolver_data = [resolver_data[0], ]
+
             representation_list = []
+            index = 1
             data: ResolverData
             for data in resolver_data:
                 #response_list = []
+                if params.structure_index > -1:
+                    resolved_items = [data.resolved[params.structure_index], ]
+                else:
+                    resolved_items = data.resolved
+
                 if as_list:
                     try:
-                        response: DispatcherMethodResponse = func(self, data.resolved, self.representation_param)
+                        response: DispatcherMethodResponse = func(self, resolved_items, self.representation_param)
                         representation = {
                             'id': index,
                             'string': string,
-                            'structure': data.resolved,
+                            'structure': resolved_items,
                             'response': response,
                             'index': index,
                             'base_content_type': self.base_content_type,
@@ -68,14 +75,14 @@ def dispatcher_method(_func=None, *, as_list=False):
                     except Exception as msg:
                         pass
                 else:
-                    for resolved in data.resolved:
+                    for item in resolved_items:
                         try:
-                            response: DispatcherMethodResponse = func(self, resolved, self.representation_param)
+                            response: DispatcherMethodResponse = func(self, item, self.representation_param)
                             #response_list.append(response)
                             representation = {
                                 'id': index,
                                 'string': string,
-                                'structure': resolved,
+                                'structure': item,
                                 'response': response,
                                 'index': index,
                                 'base_content_type': self.base_content_type,
@@ -129,299 +136,7 @@ class Dispatcher:
             response=response
         )
 
-    def urls(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = self._get_resolver_list()
-        filter = parameters.get('filter', None)
-        mode = parameters.get('mode', 'simple')
-        # if resolver_list:
-        #     resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        for interpretation in interpretations:
-            response_list = []
-            for structure in interpretation.structures:
-                try:
-                    compound = structure.object.compound
-                except:
-                    compound = None
-                else:
-                    database_records = compound.get_records(group_key='database')['content'].values()
-                    for records in database_records:
-                        for record in records:
-                            database = record['database']
-                            release = record['release']
-                            if database.has_key('record_url_scheme') and record['database_record_external_identifier']:
-                                r = record.copy()
-                                r['url_scheme'] = database['record_url_scheme']
-                                r['external_id'] = r['database_record_external_identifier']
-                                r['database_name'] = database['name']
-                                r['publisher'] = database['publisher']['name']
-                                r['classification'] = 'none'
-                                if compound.id == r['uuuuu_compound']:
-                                    r['classification'] = 'parent'
-                                if compound.id == r['ficus_compound']:
-                                    r['classification'] = 'parent'
-                                if compound.id == r['ficts_compound']:
-                                    r['classification'] = 'exact'
-                                if not filter or filter == r['classification']:
-                                    response_list.append(r)
-                                    self.response_list.append(str(r['url_scheme']['string'] + r['external_id']))
-                            if release.has_key('record_url_scheme') and record['release_record_external_identifier']:
-                                r = record.copy()
-                                r['url_scheme'] = release['record_url_scheme']
-                                r['external_id'] = r['release_record_external_identifier']
-                                r['database_name'] = database['name']
-                                r['publisher'] = release['publisher']['name']
-                                r['classification'] = 'none'
-                                if compound.id == r['uuuuu_compound']:
-                                    r['classification'] = 'parent'
-                                if compound.id == r['ficus_compound']:
-                                    r['classification'] = 'parent'
-                                if compound.id == r['ficts_compound']:
-                                    r['classification'] = 'exact'
-                                if not filter or filter == r['classification']:
-                                    response_list.append(r)
-                                    self.response_list.append(str(r['url_scheme']['string'] + r['external_id']))
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'compound': compound,
-                    'url_records': response_list,
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = self._unique(self.response_list)
-        return self.representation_list
 
-    def pubchem_sid(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = self._get_resolver_list()
-        mode = parameters.get('mode', 'simple')
-        # if resolver_list:
-        #     resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        all_interpretation_response_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.structures:
-                response_list = []
-                try:
-                    compound = structure.object.compound
-                except:
-                    pass
-                    #compound = None
-                else:
-                    # database = Database.objects.get(id=9)
-                    database_records = compound.get_records()['content'].values()
-                    for records in database_records:
-                        for record in records:
-                            # database = record['database']
-                            # release = record['release']
-                            if record['release_record_external_identifier'] and compound.id == record['ficus_compound']:
-                                response = str(record['release_record_external_identifier'])
-                                response_list.append(response)
-                                all_interpretation_response_list.append(response)
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'response': response_list,
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = all_interpretation_response_list
-        return representation_list
-
-    def emolecules_vid(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        mode = parameters.get('mode', 'simple')
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        all_interpretation_response_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.structures:
-                response_list = []
-                try:
-                    compound = structure.object.compound
-                except:
-                    compound = None
-                else:
-                    database = Database.objects.get(id=120)
-                    database_records = compound.get_records(database=database)['content'].values()
-                    for records in database_records:
-                        for record in records:
-                            if compound.id == record['ficus_compound']:
-                                response = str(record['database_record_external_identifier'])
-                                response_list.append(response)
-                                all_interpretation_response_list.append(response)
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'response': response_list,
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = all_interpretation_response_list
-        return representation_list
-
-    def zinc_id(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        mode = parameters.get('mode', 'simple')
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        all_interpretation_response_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.with_related_objects:
-                response_list = []
-                try:
-                    compound = structure.object.compound
-                except:
-                    compound = None
-                else:
-                    database = Database.objects.get(id=100)
-                    database_records = compound.get_records(database=database)['content'].values()
-                    for records in database_records:
-                        for record in records:
-                            if compound.id == record['ficus_compound']:
-                                response = str(record['database_record_external_identifier'])
-                                response_list.append(response)
-                                all_interpretation_response_list.append(response)
-                # dummy
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'response': response_list,
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = all_interpretation_response_list
-        return representation_list
-
-    def nsc_number(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        mode = parameters.get('mode', 'simple')
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        all_interpretation_response_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.structures:
-                response_list = []
-                try:
-                    compound = structure.object.compound
-                except:
-                    pass
-                else:
-                    database = Database.objects.get(id=64)
-                    database_records = compound.get_records(database=database)['content'].values()
-                    for records in database_records:
-                        for record in records:
-                            if compound.id == record['ficus_compound']:
-                                response = 'NSC%s' % str(record['database_record_external_identifier'])
-                                response_list.append(response)
-                                all_interpretation_response_list.append(response)
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'response': self._unique(response_list),
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = self._unique(all_interpretation_response_list)
-        return representation_list
-
-    def chemnavigator_sid(self, string):
-        parameters = self.url_parameters.copy()
-        resolver_list = parameters.get('resolver', None)
-        mode = parameters.get('mode', 'simple')
-        if resolver_list:
-            resolver_list = resolver_list.split(',')
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
-        index = 1
-        if not self.output_format == 'xml' and mode == 'simple':
-            interpretations = [interpretations[0], ]
-        representation_list = []
-        all_interpretation_response_list = []
-        for interpretation in interpretations:
-            for structure in interpretation.structures:
-                response_list = []
-                # ens = structure.ens
-                try:
-                    compound = structure.object.compound
-                except:
-                    compound = None
-                else:
-                    database = Database.objects.get(id=9)
-                    database_records = compound.get_records(database=database)['content'].values()
-                    for records in database_records:
-                        for record in records:
-                            if compound.id == record['ficus_compound']:
-                                response = str(record['database_record_external_identifier'])
-                                response_list.append(response)
-                                all_interpretation_response_list.append(response)
-                # dummy
-                representation = {
-                    'base_mime_type': self.base_content_type,
-                    'id': interpretation.id,
-                    'string': string,
-                    'structure': structure,
-                    'response': response_list,
-                    'index': index,
-                }
-                representation_list.append(representation)
-                index += 1
-        if self.output_format == 'plain':
-            self.content_type = "text/plain"
-            self.response_list = all_interpretation_response_list
-        return representation_list
 
     @dispatcher_method
     def ncicadd_compound_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
@@ -454,6 +169,7 @@ class Dispatcher:
     @dispatcher_method
     def names(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
         affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+        url_params = self._params.url_params
 
         compounds = []
         ficts_parent = resolved.ficts_parent(only_lookup=False)
@@ -625,7 +341,8 @@ class Dispatcher:
                 del params['get3d']
             if 'dom_id' in params and 'write3d' not in writeflags:
                 writeflags.append('write3d')
-            params['writeflags'] = writeflags
+            if writeflags:
+                params['writeflags'] = writeflags
 
             filter = params.get("filter", None)
             mode = params.get("mode", "simple")
@@ -670,20 +387,20 @@ class Dispatcher:
     #         del url_param_dict['get3d']
     #     return url_param_dict, structure_index
 
-    def _interpretations(self, string: str, structure_index: int = -1) -> Tuple[List[ChemicalString], bool]:
-        url_params = self.url_parameters.copy()
-        if 'resolver' in url_params:
-            resolver_list = url_params.get('resolver').split(',')
-        else:
-            resolver_list = settings.CIR_AVAILABLE_RESOLVERS
-        simple: bool = self._use_simple_mode(
-            output_format=self.output_format,
-            simple_mode=('mode' in url_params and url_params == 'simple')
-        )
-        interpretations = ChemicalString(string=string, resolver_list=resolver_list, simple=simple).representations
-        if structure_index > 0:
-            interpretations = [interpretations[structure_index], ]
-        return interpretations, simple
+    # def _interpretations(self, string: str, structure_index: int = -1) -> Tuple[List[ChemicalString], bool]:
+    #     url_params = self.url_parameters.copy()
+    #     if 'resolver' in url_params:
+    #         resolver_list = url_params.get('resolver').split(',')
+    #     else:
+    #         resolver_list = settings.CIR_AVAILABLE_RESOLVERS
+    #     simple: bool = self._use_simple_mode(
+    #         output_format=self.output_format,
+    #         simple_mode=('mode' in url_params and url_params == 'simple')
+    #     )
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list, simple=simple).representations
+    #     if structure_index > 0:
+    #         interpretations = [interpretations[structure_index], ]
+    #     return interpretations, simple
 
 
 
@@ -759,39 +476,317 @@ class Dispatcher:
     #             self.response_list = [self.response_list[i], ]
     #     return representation_list
 
-    def twirl(self, string):
-        url_parameters = self.url_parameters.copy()
-        url_parameters.__setitem__('get3d', 1)
-        self.url_parameters = url_parameters
-        self.prop(string)
-        return self
+    # def twirl(self, string):
+    #     url_parameters = self.url_parameters.copy()
+    #     url_parameters.__setitem__('get3d', 1)
+    #     self.url_parameters = url_parameters
+    #     self.prop(string)
+    #     return self
 
-    def chemdoodle(self, string):
-        url_parameters = self.url_parameters.copy()
-        url_parameters.__setitem__('get3d', 1)
-        self.url_parameters = url_parameters
-        self.prop(string)
-        return self
+    # def chemdoodle(self, string):
+    #     url_parameters = self.url_parameters.copy()
+    #     url_parameters.__setitem__('get3d', 1)
+    #     self.url_parameters = url_parameters
+    #     self.prop(string)
+    #     return self
 
-    @staticmethod
-    def _unique(input_list):
-        # creates a unique list without changing the order of the remaining list elements
-        unique_set = {}
-        return [unique_set.setdefault(element, element) for element in input_list if element not in unique_set]
-
-
-# class Resolver(object):
-#     def __init__(self):
-#         self.identifier = None
-#         self.representation = None
-#         # dirty, but a fake request is needed to get use the resolver without http
-#         request = HttpRequest()
-#         request.GET = QueryDict('')
-#         self.request = request
-#
-#     def resolve(self, identifier, representation):
-#         url_method = Dispatcher(representation, self.request)
-#         url_method.parse(identifier)
-#         return url_method.response_list
+    #@staticmethod
+    # def _unique(input_list):
+    #     # creates a unique list without changing the order of the remaining list elements
+    #     unique_set = {}
+    #     return [unique_set.setdefault(element, element) for element in input_list if element not in unique_set]
 
 
+    # def urls(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = self._get_resolver_list()
+    #     filter = parameters.get('filter', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     # if resolver_list:
+    #     #     resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     for interpretation in interpretations:
+    #         response_list = []
+    #         for structure in interpretation.structures:
+    #             try:
+    #                 compound = structure.object.compound
+    #             except:
+    #                 compound = None
+    #             else:
+    #                 database_records = compound.get_records(group_key='database')['content'].values()
+    #                 for records in database_records:
+    #                     for record in records:
+    #                         database = record['database']
+    #                         release = record['release']
+    #                         if database.has_key('record_url_scheme') and record['database_record_external_identifier']:
+    #                             r = record.copy()
+    #                             r['url_scheme'] = database['record_url_scheme']
+    #                             r['external_id'] = r['database_record_external_identifier']
+    #                             r['database_name'] = database['name']
+    #                             r['publisher'] = database['publisher']['name']
+    #                             r['classification'] = 'none'
+    #                             if compound.id == r['uuuuu_compound']:
+    #                                 r['classification'] = 'parent'
+    #                             if compound.id == r['ficus_compound']:
+    #                                 r['classification'] = 'parent'
+    #                             if compound.id == r['ficts_compound']:
+    #                                 r['classification'] = 'exact'
+    #                             if not filter or filter == r['classification']:
+    #                                 response_list.append(r)
+    #                                 self.response_list.append(str(r['url_scheme']['string'] + r['external_id']))
+    #                         if release.has_key('record_url_scheme') and record['release_record_external_identifier']:
+    #                             r = record.copy()
+    #                             r['url_scheme'] = release['record_url_scheme']
+    #                             r['external_id'] = r['release_record_external_identifier']
+    #                             r['database_name'] = database['name']
+    #                             r['publisher'] = release['publisher']['name']
+    #                             r['classification'] = 'none'
+    #                             if compound.id == r['uuuuu_compound']:
+    #                                 r['classification'] = 'parent'
+    #                             if compound.id == r['ficus_compound']:
+    #                                 r['classification'] = 'parent'
+    #                             if compound.id == r['ficts_compound']:
+    #                                 r['classification'] = 'exact'
+    #                             if not filter or filter == r['classification']:
+    #                                 response_list.append(r)
+    #                                 self.response_list.append(str(r['url_scheme']['string'] + r['external_id']))
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'compound': compound,
+    #                 'url_records': response_list,
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = self._unique(self.response_list)
+    #     return self.representation_list
+    #
+    # def pubchem_sid(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = self._get_resolver_list()
+    #     mode = parameters.get('mode', 'simple')
+    #     # if resolver_list:
+    #     #     resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     all_interpretation_response_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.structures:
+    #             response_list = []
+    #             try:
+    #                 compound = structure.object.compound
+    #             except:
+    #                 pass
+    #                 #compound = None
+    #             else:
+    #                 # database = Database.objects.get(id=9)
+    #                 database_records = compound.get_records()['content'].values()
+    #                 for records in database_records:
+    #                     for record in records:
+    #                         # database = record['database']
+    #                         # release = record['release']
+    #                         if record['release_record_external_identifier'] and compound.id == record['ficus_compound']:
+    #                             response = str(record['release_record_external_identifier'])
+    #                             response_list.append(response)
+    #                             all_interpretation_response_list.append(response)
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'response': response_list,
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = all_interpretation_response_list
+    #     return representation_list
+    #
+    # def emolecules_vid(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     all_interpretation_response_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.structures:
+    #             response_list = []
+    #             try:
+    #                 compound = structure.object.compound
+    #             except:
+    #                 compound = None
+    #             else:
+    #                 database = Database.objects.get(id=120)
+    #                 database_records = compound.get_records(database=database)['content'].values()
+    #                 for records in database_records:
+    #                     for record in records:
+    #                         if compound.id == record['ficus_compound']:
+    #                             response = str(record['database_record_external_identifier'])
+    #                             response_list.append(response)
+    #                             all_interpretation_response_list.append(response)
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'response': response_list,
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = all_interpretation_response_list
+    #     return representation_list
+    #
+    # def zinc_id(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     all_interpretation_response_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.with_related_objects:
+    #             response_list = []
+    #             try:
+    #                 compound = structure.object.compound
+    #             except:
+    #                 compound = None
+    #             else:
+    #                 database = Database.objects.get(id=100)
+    #                 database_records = compound.get_records(database=database)['content'].values()
+    #                 for records in database_records:
+    #                     for record in records:
+    #                         if compound.id == record['ficus_compound']:
+    #                             response = str(record['database_record_external_identifier'])
+    #                             response_list.append(response)
+    #                             all_interpretation_response_list.append(response)
+    #             # dummy
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'response': response_list,
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = all_interpretation_response_list
+    #     return representation_list
+    #
+    # def nsc_number(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     all_interpretation_response_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.structures:
+    #             response_list = []
+    #             try:
+    #                 compound = structure.object.compound
+    #             except:
+    #                 pass
+    #             else:
+    #                 database = Database.objects.get(id=64)
+    #                 database_records = compound.get_records(database=database)['content'].values()
+    #                 for records in database_records:
+    #                     for record in records:
+    #                         if compound.id == record['ficus_compound']:
+    #                             response = 'NSC%s' % str(record['database_record_external_identifier'])
+    #                             response_list.append(response)
+    #                             all_interpretation_response_list.append(response)
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'response': self._unique(response_list),
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = self._unique(all_interpretation_response_list)
+    #     return representation_list
+    #
+    # def chemnavigator_sid(self, string):
+    #     parameters = self.url_parameters.copy()
+    #     resolver_list = parameters.get('resolver', None)
+    #     mode = parameters.get('mode', 'simple')
+    #     if resolver_list:
+    #         resolver_list = resolver_list.split(',')
+    #     interpretations = ChemicalString(string=string, resolver_list=resolver_list)._representations
+    #     index = 1
+    #     if not self.output_format == 'xml' and mode == 'simple':
+    #         interpretations = [interpretations[0], ]
+    #     representation_list = []
+    #     all_interpretation_response_list = []
+    #     for interpretation in interpretations:
+    #         for structure in interpretation.structures:
+    #             response_list = []
+    #             # ens = structure.ens
+    #             try:
+    #                 compound = structure.object.compound
+    #             except:
+    #                 compound = None
+    #             else:
+    #                 database = Database.objects.get(id=9)
+    #                 database_records = compound.get_records(database=database)['content'].values()
+    #                 for records in database_records:
+    #                     for record in records:
+    #                         if compound.id == record['ficus_compound']:
+    #                             response = str(record['database_record_external_identifier'])
+    #                             response_list.append(response)
+    #                             all_interpretation_response_list.append(response)
+    #             # dummy
+    #             representation = {
+    #                 'base_mime_type': self.base_content_type,
+    #                 'id': interpretation.id,
+    #                 'string': string,
+    #                 'structure': structure,
+    #                 'response': response_list,
+    #                 'index': index,
+    #             }
+    #             representation_list.append(representation)
+    #             index += 1
+    #     if self.output_format == 'plain':
+    #         self.content_type = "text/plain"
+    #         self.response_list = all_interpretation_response_list
+    #     return representation_list

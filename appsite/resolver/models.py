@@ -1,3 +1,5 @@
+import operator
+from functools import reduce
 from typing import List, Dict, Union
 
 from django.db import models
@@ -427,18 +429,6 @@ class Compound(models.Model):
         return "NCICADD:CID={}".format(self.id)
 
 
-# class RecordManager(models.Manager):
-#
-#     def annotated(self):
-#         return super().get_queryset() \
-#             .select_related('structure_file_record', 'structure_file_record__structure','structure_file_record__structure__parents') \
-#             .annotate(
-#                 annotated_structure=F('structure_file_record__structure'),
-#                 annotated_ficts_parent=F('structure_file_record__structure__parents__ficts_parent'),
-#                 annotated_ficus_parent=F('structure_file_record__structure__parents__ficus_parent'),
-#                 annotated_uuuuu_parent=F('structure_file_record__structure__parents__uuuuu_parent')
-#             )
-
 class RecordQuerySet(models.QuerySet):
 
     fetch_relations = [
@@ -577,7 +567,9 @@ class StructureNameAssociationQuerySet(models.QuerySet):
             affinity_classes: List[Union['NameAffinityClass', int]] = None,
             minimum_confidence: float = 100
     ):
-        queryset = self._base_queryset().filter(name__name__in=names, confidence__gte=minimum_confidence)
+        name_filter = reduce(operator.or_, (Q(name__name__iexact=n) for n in names))
+        queryset = self._base_queryset().filter(name_filter).filter(confidence__gte=minimum_confidence)
+
         if affinity_classes:
             queryset = queryset.filter(
                 affinity_class__in=affinity_classes

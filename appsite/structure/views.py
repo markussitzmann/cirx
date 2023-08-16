@@ -119,7 +119,8 @@ def resolve_to_response(request, string: str, representation_type: str, operator
             http_response = HttpResponse(content_type=content_type)
             http_response.write(io.BytesIO(content.simple).getvalue())
         except:
-            content_str = '\n'.join(set([str(item) for r in sorted(content.simple) for item in r.content]))
+            #content_str = '\n'.join(set([str(item) for r in sorted(content.simple) for item in r.content]))
+            content_str = '\n'.join(sorted(set([str(item) for r in content.simple for item in r.content])))
             http_response = HttpResponse(content_str, content_type=content_type)
         http_response["Access-Control-Allow-Origin"] = "*"
         http_response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
