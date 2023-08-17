@@ -289,6 +289,12 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 10000000}
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_ROUTES = {
+    'etl.tasks.add_file_task': {'queue': 'register'},
+    'etl.tasks.count_and_save_file_task': {'queue': 'register'},
+    'etl.tasks.register_file_record_chunk_mapper': {'queue': 'register'},
+    'etl.tasks.register_file_record_chunk_task': {'queue': 'register'},
+}
 
 #CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
