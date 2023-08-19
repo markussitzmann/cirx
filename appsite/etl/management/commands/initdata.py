@@ -12,7 +12,7 @@ from structure.models import ResponseType
 
 logger = logging.getLogger('cirx')
 
-MINI = True
+MINI = False
 INIT_PUBCHEM_COMPOUND = True
 INIT_PUBCHEM_SUBSTANCE = True
 INIT_CHEMBL = True

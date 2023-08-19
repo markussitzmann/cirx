@@ -14,6 +14,8 @@ import os
 import sys
 from pathlib import Path
 
+from kombu import Queue, Exchange
+
 # Pycactvs needs that
 sys.setdlopenflags(os.RTLD_GLOBAL|os.RTLD_NOW)
 
@@ -289,18 +291,20 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 10000000}
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_ROUTES = {
-    'etl.tasks.add_file_task': {'queue': 'register'},
-    'etl.tasks.count_and_save_file_task': {'queue': 'register'},
-    'etl.tasks.register_file_record_chunk_mapper': {'queue': 'register'},
-    'etl.tasks.register_file_record_chunk_task': {'queue': 'register'},
-}
+
 
 #CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
 CELERY_RESULT_BACKEND = 'django-cache'
 CELERY_TIMEZONE = "Europe/Berlin"
 CELERY_MAX_TASKS_PER_CHILD = 1
+
+CELERY_QUEUES = (
+    Queue('register', Exchange('register'), routing_key='register'),
+    Queue('normalize', Exchange('normalize'), routing_key='normalize'),
+    Queue('calcinchi', Exchange('calcinchi'), routing_key='calcinchi'),
+    Queue('linkname', Exchange('linkname'), routing_key='linkname'),
+)
 
 CELERYD_HIJACK_ROOT_LOGGER = False
 #CELERYD_MAX_TASKS_PER_CHILD = 1
