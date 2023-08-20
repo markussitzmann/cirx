@@ -12,7 +12,7 @@ class StructureFormula(models.Model):
 
 class ResponseType(models.Model):
     parent_type = models.ForeignKey('ResponseType', null=True, blank=True, on_delete=models.CASCADE)
-    url = models.CharField(max_length=128)
+    url = models.CharField(max_length=128, unique=True)
     method = models.CharField(max_length=255, null=True, blank=True)
     parameter = models.CharField(max_length=1024, null=True, blank=True)
     base_mime_type = models.CharField(max_length=255)

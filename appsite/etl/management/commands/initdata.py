@@ -84,13 +84,13 @@ def init_response_type_data():
                 parent_type = response_type_dict[parent_type_id]
             else:
                 parent_type = None
-            response_type = ResponseType(
-                parent_type=parent_type,
+            response_type, created = ResponseType.objects.get_or_create(
                 url=url,
-                method=method,
-                parameter=parameter,
-                base_mime_type=base_mime_type
             )
+            response_type.parent_type = parent_type
+            response_type.method = method
+            response_type.parameter = parameter
+            response_type.base_mime_type=base_mime_type
             response_type.save()
             response_type_dict[id] = response_type
 
