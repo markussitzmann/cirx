@@ -10,7 +10,6 @@ class Minimol:
         self.string = string
 
     def _test_minimol(self, string):
-
         expression = re.compile('^[A-Z0-9]+0000$')
         if expression.match(string):
             return True

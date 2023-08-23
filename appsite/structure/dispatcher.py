@@ -1,3 +1,4 @@
+import base64
 import functools
 import io
 import logging
@@ -201,6 +202,15 @@ class Dispatcher:
             content=[prop_val, ],
             content_type="text/plain"
         )
+
+    @dispatcher_method
+    def packstring(self, resolved: ChemicalStructure, representation_param: str, *args, **kwargs) -> DispatcherMethodResponse:
+        prop_val = base64.b64encode(resolved.ens.get('E_MINIMOL')).decode('utf8')
+        return DispatcherMethodResponse(
+            content=[prop_val, ],
+            content_type="text/plain"
+        )
+
 
     @dispatcher_method(as_list=True)
     def structure_image(self, resolved: List[ChemicalStructure], *args, **kwargs) -> DispatcherMethodResponse:

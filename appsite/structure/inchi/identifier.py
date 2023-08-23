@@ -196,6 +196,14 @@ class InChIString:
             #'software_version': self.element['software_version_string']
         }
 
+    @property
+    def string(self):
+        return self.element['well_formatted']
+
+    @property
+    def key(self):
+        return self.element['key']
+
     def __eq__(self, other):
         selfh = self.element['well_formatted']
         otherh = self.element['well_formatted']
