@@ -335,6 +335,7 @@ CIR_AVAILABLE_RESOLVERS = [
     #'SDFile',
     #'minimol',
     #'packstring',
+    'structure_representation'
 ]
 
 CIR_FILESTORE_ROOT = os.path.join("/filestore")

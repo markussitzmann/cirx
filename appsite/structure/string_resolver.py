@@ -4,20 +4,16 @@ from collections import namedtuple
 from typing import List, Dict, Optional
 
 from django.conf import settings
-from django.db import connection
 from pycactvs import Ens, Dataset
 
-from core.common import NCICADD_TYPES
 from core.cactvs import CactvsHash
+from core.common import NCICADD_TYPES
+from resolver.models import Structure, Name, StructureNameAssociation, Dataset, \
+    StructureInChIAssociation, InChIType, Record, NameAffinityClass
 from structure.cas.number import String as CASNumber
 from structure.inchi.identifier import InChIKey, InChIString
-from structure.minimol import Minimol
 from structure.ncicadd.identifier import Identifier, RecordID, CompoundID
-from structure.packstring import PackString
 from structure.smiles import SMILES
-
-from resolver.models import InChI, Structure, Name, StructureNameAssociation, Dataset, \
-    StructureInChIAssociation, InChIType, Record, NameAffinityClass
 
 logger = logging.getLogger('cirx')
 
@@ -26,8 +22,7 @@ ResolverParams = namedtuple("ResolverParams", "url_params resolver_list filter m
 
 
 class ChemicalStructure:
-    """Container class to keep a CACTVS ensemble and a Structure model object of the
-       of the same chemical structure together"""
+    """Container class to keep a CACTVS ensemble and a Structure model object of the same chemical structure together"""
 
     def __init__(self, structure: Structure = None, ens: Ens = None, metadata: Dict = None, *arg, **kwargs):
         self._structure: Structure = structure
@@ -118,10 +113,12 @@ class ChemicalStructure:
                 parent_structure = getattr(self.structure.parents, attr)
                 if parent_structure:
                     return ChemicalStructure(structure=parent_structure, ens=parent_structure.ens, metadata=self.metadata)
-                return None
+                if only_lookup:
+                    return None
             if not only_lookup:
                 parent = self.ens.get(parent_types[parent_type].parent_structure)
-                return ChemicalStructure(ens=parent, metadata=self.metadata)
+                cs = ChemicalStructure(ens=parent, metadata=self.metadata)
+                return cs
             else:
                 return None
         except Exception as e:
@@ -180,15 +177,15 @@ class ChemicalString:
             try:
                 resolver_method = getattr(self, '_resolver_' + resolver)
                 data: List[ChemicalStructure] = resolver_method()
-                item: ChemicalStructure
+                chemical_structure: ChemicalStructure
                 if not len(data):
                     raise ValueError('string resolver came back empty')
                 i = 0
-                for item in data:
+                for chemical_structure in data:
                     i += 1
                     if self.operator:
                         operator_method = getattr(self, '_operator_' + self.operator)
-                        resolved = operator_method(item)
+                        resolved = operator_method(chemical_structure)
                         self._resolver_data[resolver] = ResolverData(
                             id=i,
                             resolver=resolver,
@@ -199,7 +196,7 @@ class ChemicalString:
                         self._resolver_data[resolver] = ResolverData(
                             id=i,
                             resolver=resolver,
-                            resolved=[item, ],
+                            resolved=[chemical_structure, ],
                             exception=None
                         )
             except Exception as e:
@@ -360,7 +357,7 @@ class ChemicalString:
             return [resolved, ]
         return list()
 
-    def _structure_representation_resolver(self) -> List[ChemicalStructure]:
+    def _resolver_structure_representation(self) -> List[ChemicalStructure]:
         resolved = ChemicalStructure(
             ens=Ens(self.string),
             metadata={
@@ -387,19 +384,19 @@ class ChemicalString:
     #         return True
     #     return False
 
-    def _resolver_packstring(self) -> List[ChemicalStructure]:
-        pack_string = PackString(string=self.string)
-        if pack_string and self._structure_representation_resolver(representation):
-            chemical_structure = representation.structures[0]
-            chemical_structure._metadata = {
-                'query_type': 'packstring',
-                'query_search_string': 'Cactvs pack string',
-                'query_object': pack_string,
-                'query_string': self.string,
-                'description': pack_string.string
-            }
-            return True
-        return False
+    # def _resolver_packstring(self) -> List[ChemicalStructure]:
+    #     pack_string = PackString(string=self.string)
+    #     if pack_string and self._structure_representation_resolver(representation):
+    #         chemical_structure = representation.structures[0]
+    #         chemical_structure._metadata = {
+    #             'query_type': 'packstring',
+    #             'query_search_string': 'Cactvs pack string',
+    #             'query_object': pack_string,
+    #             'query_string': self.string,
+    #             'description': pack_string.string
+    #         }
+    #         return True
+    #     return False
 
     def _resolver_chemnavigator_sid(self) -> List[ChemicalStructure]:
         pattern = re.compile('^ChemNavigator(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
@@ -548,159 +545,26 @@ class ChemicalString:
             resolved_list.append(resolved)
         return resolved_list
 
-    # def _resolver_name_pattern(self, representation: Representation):
-    #     pattern = self.string
-    #     resolved_name_list = ChemicalName(pattern=pattern)
-    #     structure_names = resolved_name_list.structure_names
-    #     #metadata = resolved_name_list.metadata
-    #     if structure_names:
-    #         structure_names = sorted(structure_names, key=lambda k: k['rank'])
-    #
-    #         for structure_name in structure_names:
-    #             structure = structure_name['structure']
-    #             chemical_structure = ChemicalStructure(resolved=structure)
-    #             chemical_structure._metadata = {
-    #                 'query_type': 'name_pattern',
-    #                 'query_search_string': 'chemical name pattern',
-    #                 'query_object': self.string,
-    #                 'query_string': self.string,
-    #                 'description': structure_name['names'][0].name
-    #             }
-    #             representation.structures.append(chemical_structure)
-    #         return True
-    #     return False
 
-
-
-    # def _resolver_SDFile(self, interpretation_object):
-    #     f = file.sdf.SDFile(string=self.string)
-    #     if f and self._structure_representation_resolver(interpretation_object):
-    #         structure = interpretation_object.structures[0]
-    #         structure.metadata = {
-    #             'query_type': 'sdfile',
-    #             'query_search_string': 'SD file string',
-    #             'query_object': f,
-    #             'query_string': self.string,
-    #             'description': self.string,
-    #             'unescaped_string': f.unescaped_string
-    #         }
-    #         return True
-    #     return False
-
-    # def _structure_representation_resolver(self, representation_string=None) -> List[ChemicalStructure]:
-    #     try:
-    #         if not representation_string:
-    #             string = self.string
-    #         else:
-    #             string = representation_string
-    #         string = string.replace("\\n", '\n')
-    #         # TODO: hadd is missing
-    #         #ens = Ens(string, mode='hadd')
-    #         ens = Ens(string)
-    #         ens.hadd()
-    #     except Exception as e:
-    #         logger.error(e)
-    #         return list()
-    #     else:
-    #         # TODO: is_search_structure needs replacement
-    #         #if ens.is_search_structure():
-    #         #    return False
-    #         chemical_structure = ChemicalStructure(
-    #             ens=ens,
-    #             metadata={
-    #                 'query_type': 'structure representation',
-    #                 'query_search_string': 'CACTVS-resolvable structure represention',
-    #                 'query_object': string,
-    #                 'query_string': string,
-    #                 'description': string
-    #             }
-    #         )
-    #         if chemical_structure.structure:
-    #             return [chemical_structure, ]
-    #         if chemical_structure.ficts_parent():
-    #             return [chemical_structure.ficts_parent(), ]
-    #         return [chemical_structure,]
-    #
-    #         # chemical_structure.type = 'structure'
-    #         # chemical_structure.type_string = 'chemical structure string'
-    #         # chemical_structure.query_object = ens
-    #         # chemical_structure._ens = ens
-    #         # try:
-    #         #     hashcode = Identifier(hashcode=ens.get('E_HASHISY'))
-    #         #     try:
-    #         #         structure = Structure.objects.get(hashisy_key=CactvsHash(hashcode.integer))
-    #         #         chemical_structure = ChemicalStructure(structure=structure, ens=ens)
-    #         #         chemical_structure.type = 'structure'
-    #         #         chemical_structure.type_string = 'chemical structure string'
-    #         #         chemical_structure.query_object = ens
-    #         #         chemical_structure._ens = ens
-    #         #         #chemical_structure.structures.append(chemical_structure)
-    #         #         return [chemical_structure, ]
-    #         #     except (Structure.DoesNotExist, RuntimeError) as e1:
-    #         #         logger.error(e1)
-    #         #         #ficts = Identifier(hashcode=ens.getForceTimeout('ficts_id', 5000, 'hashisy', new=True))
-    #         #         ficts = Identifier(hashcode=ens.get('E_FICTS_ID'))
-    #         #         try:
-    #         #             structure = Structure.objects.get(hashisy=CactvsHash(ficts.integer))
-    #         #             chemical_structure = ChemicalStructure(structure=structure, ens=ens)
-    #         #             chemical_structure.type = 'structure'
-    #         #             chemical_structure.type_string = 'chemical structure string'
-    #         #             chemical_structure.query_object = ens
-    #         #             chemical_structure._ens = ens
-    #         #             #representation.structures.append(chemical_structure)
-    #         #             return [chemical_structure, ]
-    #         #         except (Structure.DoesNotExist, RuntimeError) as e2:
-    #         #             logger.error(e2)
-    #         #             chemical_structure = ChemicalStructure(ens=ens)
-    #         #             chemical_structure.type = 'structure'
-    #         #             chemical_structure.type_string = 'chemical structure string'
-    #         #             chemical_structure.query_object = ens
-    #         #             #representation.structures.append(chemical_structure)
-    #         #             return [chemical_structure, ]
-    #         # except Exception as e3:
-    #         #     logger.error(e3)
-    #         #     #chemical_structure = ChemicalStructure(ens=ens)
-    #         #     chemical_structure = ChemicalStructure(ens=ens)
-    #         #     chemical_structure.type = 'structure'
-    #         #     chemical_structure.type_string = 'chemical structure string'
-    #         #     chemical_structure.query_object = ens
-    #         #     #representation.structures.append(chemical_structure)
-    #         #     #representation.string = self.string
-    #         #     return [chemical_structure, ]
-    #
-    #     return list()
+    #### OPERATORS ####
 
     def _operator_tautomers(self, structure: ChemicalStructure) -> List[ChemicalStructure]:
-        # ens_list = []
-        # for structure in interpretation.structures:
-        #     ens_list.append(structure.ens)
-        # dataset = Dataset(ens_list)
-        # # TODO: This is fishy - found during refactoring:
-        # metadata = structure.metadata
-
+        
         structures = []
         description_list = []
-        index = 1
-        #dataset: Dataset = Dataset()
-
-
-        #for structure in resolved.structure:
-        #interpretation_structure_ens = structure.ens
         metadata = structure.metadata.copy()
 
-        description_string = str(metadata['description']) + " tautomer 1" \
-            if 'description' in metadata else "tautomer 1"
+        description_string = str(metadata['description']) + " tautomer 1" if 'description' in metadata else "tautomer 1"
         structure.metadata.update({'description': description_string})
         structures.append(structure)
         description_list.append(description_string)
-        #dataset.add(structure.ens)
 
-        t_count = 1
+        tautomer_index = 1
         tautomers = structure.ens.get("E_RESOLVER_TAUTOMERS")
         for tautomer in tautomers.ens():
-            t_count += 1
+            tautomer_index += 1
             chemical_structure = ChemicalStructure(ens=tautomer)
-            tautomer_string = 'tautomer %s' % t_count
+            tautomer_string = 'tautomer %s' % tautomer_index
             description_string = str(metadata['description']) + " " + tautomer_string \
                 if 'description' in metadata else tautomer_string
             chemical_structure._metadata = {
@@ -710,51 +574,48 @@ class ChemicalString:
             }
             structures.append(chemical_structure)
             description_list.append(description_string)
-            #dataset.add(tautomer)
-            index += 1
-
-        ###
 
         return structures if structures else list()
 
-        #representation._reference_dataset = dataset
-        #representation.tautomers = tautomers
-        #representation.description_list = description_list
-        #representation.structures = structures
-        #return representation
+    def _operator_stereoisomers(self, structure: ChemicalStructure) -> List[ChemicalStructure]:
 
-    # def _operator_tautomers(self, interpretation):
-    #     ens_list = []
-    #     for structure in interpretation.structures:
-    #         ens_list.append(structure.ens)
-    #     dataset = Dataset(ens_list)
-    #     # TODO: This is fishy - found during refactoring:
-    #     metadata = structure.metadata
-    #
-    #     structures = []
-    #     description_list = []
-    #     index = 1
-    #
-    #     t_count = 1
-    #     for ens in dataset.ens():
-    #         tautomers = ens.get("E_RESOLVER_TAUTOMERS")
-    #         for tautomer in tautomers.ens():
-    #             structure = ChemicalStructure(ens=tautomer)
-    #             description_string = 'tautomer %s' % t_count
-    #             structure.metadata = {
-    #                 'description': description_string,
-    #                 'query_type': metadata['query_type'] if 'query_type' in metadata else None,
-    #                 'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
-    #             }
-    #             structures.append(structure)
-    #             index += 1
-    #             t_count += 1
-    #
-    #     interpretation._reference_dataset = dataset
-    #     interpretation.tautomers = tautomers
-    #     interpretation.description_list = description_list
-    #     interpretation.structures = structures
-    #     return interpretation
+        structures = []
+        description_list = []
+        metadata = structure.metadata.copy()
+
+        description_string = str(metadata['description']) + " stereoisomer 1" if 'description' in metadata else "stereoisomer 1"
+        structure.metadata.update({'description': description_string})
+        structures.append(structure)
+        description_list.append(description_string)
+
+        stereoisomer_index = 1
+        stereoisomers = structure.ens.get("E_STEREOISOMERS")
+        for stereoisomer in stereoisomers.ens():
+            stereoisomer_index += 1
+            chemical_structure = ChemicalStructure(ens=stereoisomer)
+            stereoisomer_string = 'stereoisomer %s' % stereoisomer_index
+            description_string = str(metadata['description']) + " " + stereoisomer_string \
+                if 'description' in metadata else stereoisomer_string
+            chemical_structure._metadata = {
+                'description': description_string,
+                'query_type': metadata['query_type'] if 'query_type' in metadata else None,
+                'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
+            }
+            structures.append(chemical_structure)
+            description_list.append(description_string)
+
+        return structures if structures else list()
+
+    def _operator_ficts(self, structure: ChemicalStructure) -> List[ChemicalStructure]:
+        ficts_parent = structure.ficts_parent(only_lookup=False)
+        ficts_parent._metadata.update({
+            'description': "FICTS parent of " + structure.metadata['description']
+        })
+        return [ficts_parent,]
+
+
+
+
 
     def _operator_remove_hydrogens(self, representation):
         enslist = []
@@ -827,7 +688,7 @@ class ChemicalString:
         description_list = []
         index = 1
         for dataset, metadata in dataset_list:
-            no_stereo = dataset.get_no_stereo()
+            #no_stereo = dataset.get_no_stereo()
             count = 1
             for ens in no_stereo.get_enslist():
                 structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
@@ -846,35 +707,35 @@ class ChemicalString:
         representation.with_related_objects = structures
         return representation
 
-    def _operator_ficts(self, representation):
-        enslist = []
-        dataset_list = []
-        for structure in representation.structures:
-            enslist.append(structure._ens)
-        dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure._metadata))
-        structures = []
-        description_list = []
-        index = 1
-        for dataset, metadata in dataset_list:
-            ficts = dataset.get_ficts_parent_structure()
-            count = 1
-            for ens in ficts.get_enslist():
-                structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-                description_string = 'ficts %s' % count
-                structure._metadata = {
-                    'description': description_string,
-                    'query_type': metadata['query_type'],
-                    'query_search_string': metadata['query_search_string']
-                }
-                structures.append(structure)
-                index += 1
-                count += 1
-        representation._reference_dataset = dataset_list
-        representation.ficts = ficts
-        representation.description_list = description_list
-        representation.with_related_objects = structures
-        return representation
+    # def _operator_ficts(self, representation):
+    #     enslist = []
+    #     dataset_list = []
+    #     for structure in representation.structures:
+    #         enslist.append(structure._ens)
+    #     dataset = Dataset(self.cactvs, enslist=enslist)
+    #     dataset_list.append((dataset, structure._metadata))
+    #     structures = []
+    #     description_list = []
+    #     index = 1
+    #     for dataset, metadata in dataset_list:
+    #         ficts = dataset.get_ficts_parent_structure()
+    #         count = 1
+    #         for ens in ficts.get_enslist():
+    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
+    #             description_string = 'ficts %s' % count
+    #             structure._metadata = {
+    #                 'description': description_string,
+    #                 'query_type': metadata['query_type'],
+    #                 'query_search_string': metadata['query_search_string']
+    #             }
+    #             structures.append(structure)
+    #             index += 1
+    #             count += 1
+    #     representation._reference_dataset = dataset_list
+    #     representation.ficts = ficts
+    #     representation.description_list = description_list
+    #     representation.with_related_objects = structures
+    #     return representation
 
     def _operator_parent(self, interpretation):
         return self._operator_ficus(interpretation)
@@ -942,35 +803,35 @@ class ChemicalString:
         representation.with_related_objects = structures
         return representation
 
-    def _operator_stereoisomers(self, representation):
-        enslist = []
-        dataset_list = []
-        for structure in representation.with_related_objects:
-            enslist.append(structure._ens)
-        dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure._metadata))
-        structures = []
-        description_list = []
-        index = 1
-        for dataset, metadata in dataset_list:
-            stereoisomers = dataset.get_stereoisomers()
-            count = 1
-            for ens in stereoisomers.get_enslist():
-                structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-                description_string = 'stereoisomer %s' % count
-                structure._metadata = {
-                    'description': description_string,
-                    'query_type': metadata['query_type'],
-                    'query_search_string': metadata['query_search_string']
-                }
-                structures.append(structure)
-                index += 1
-                count += 1
-        representation._reference_dataset = dataset_list
-        representation.stereoisomers = stereoisomers
-        representation.description_list = description_list
-        representation.with_related_objects = structures
-        return representation
+    # def _operator_stereoisomers(self, representation):
+    #     enslist = []
+    #     dataset_list = []
+    #     for structure in representation.with_related_objects:
+    #         enslist.append(structure._ens)
+    #     dataset = Dataset(self.cactvs, enslist=enslist)
+    #     dataset_list.append((dataset, structure._metadata))
+    #     structures = []
+    #     description_list = []
+    #     index = 1
+    #     for dataset, metadata in dataset_list:
+    #         #stereoisomers = dataset.get_stereoisomers()
+    #         count = 1
+    #         for ens in stereoisomers.get_enslist():
+    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
+    #             description_string = 'stereoisomer %s' % count
+    #             structure._metadata = {
+    #                 'description': description_string,
+    #                 'query_type': metadata['query_type'],
+    #                 'query_search_string': metadata['query_search_string']
+    #             }
+    #             structures.append(structure)
+    #             index += 1
+    #             count += 1
+    #     representation._reference_dataset = dataset_list
+    #     representation.stereoisomers = stereoisomers
+    #     representation.description_list = description_list
+    #     representation.with_related_objects = structures
+    #     return representation
 
     def _operator_scaffold_sequence(self, representation):
         enslist = []

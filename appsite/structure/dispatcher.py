@@ -211,7 +211,6 @@ class Dispatcher:
             content_type="text/plain"
         )
 
-
     @dispatcher_method(as_list=True)
     def structure_image(self, resolved: List[ChemicalStructure], *args, **kwargs) -> DispatcherMethodResponse:
         url_params = self._params.url_params
