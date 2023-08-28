@@ -92,6 +92,7 @@ def dispatcher_method(_func=None, *, as_list=False):
                             representation_list.append(representation)
                             index += 1
                         except Exception as msg:
+                            logger.error(msg)
                             pass
             if len(representation_list) == 0:
                 raise ValueError("no representation available for {}".format(string))
@@ -137,8 +138,6 @@ class Dispatcher:
             response=response
         )
 
-
-
     @dispatcher_method
     def ncicadd_compound_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
         if not resolved.structure or not resolved.structure.compound:
@@ -170,7 +169,7 @@ class Dispatcher:
     @dispatcher_method
     def names(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
         affinity = {a.title: a for a in NameAffinityClass.objects.all()}
-        url_params = self._params.url_params
+        #url_params = self._params.url_params
 
         compounds = []
         ficts_parent = resolved.ficts_parent(only_lookup=False)
@@ -182,7 +181,7 @@ class Dispatcher:
 
         associations = StructureNameAssociation.with_related_objects.by_compound(
             compounds,
-            affinity_classes = [affinity['exact'], affinity['narrow']]
+            affinity_classes = [affinity['exact'],]
         ).filter(name_type__parent__title='NAME').all().order_by('name__name')
         association: StructureNameAssociation
         names = [association.name.name for association in associations]
@@ -254,6 +253,7 @@ class Dispatcher:
             del image_dataset
         else:
             image = resolved[0].ens.get(ens_image_prop, parameters=ens_params)
+        del resolved
         return DispatcherMethodResponse(
             content=image,
             content_type="image/svg+xml"

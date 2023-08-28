@@ -6,9 +6,10 @@ from django.shortcuts import render, redirect
 from pycactvs import Prop, Ens
 from pycactvs import Dataset as CsDataset
 
+from common import NCICADD_TYPES
 from etl.registration import StructureRegistry
 from structure.forms import ResolverInput
-from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Dataset
+from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Dataset, Record
 # Create your views here.
 from structure.ncicadd.identifier import Identifier
 
@@ -53,12 +54,20 @@ def cir(request: HttpRequest):
         'host': request.scheme + "://" + request.get_host(),
     })
 
+def records(request, rid: int = None):
+    record: Record = Record.with_related_objects.by_record_ids([rid, ]).first()
+    return render(request, 'record.html', {
+        'id': int,
+        'host': request.scheme + "://" + request.get_host(),
+        'record': record,
+        'source': record.structure_file_record.source.decode("UTF-8")
+    })
+
 
 def compounds(request, cid: int = None):
-
     compound: Compound = Compound.with_related_objects.by_compound_ids([cid, ]).first()
     parents = {}
-    for parent_type in StructureRegistry.NCICADD_TYPES:
+    for parent_type in NCICADD_TYPES:
         parents[parent_type.public_string] = ParentData(
             structure=getattr(compound.structure.parents, parent_type.attr),
             identifier=Identifier(hashcode=p.hashisy_key.padded, identifier_type=parent_type.public_string)
@@ -69,7 +78,7 @@ def compounds(request, cid: int = None):
         )
 
     name_association_affinity_dict = defaultdict(list)
-    name_associations = {
+    _ = {
         n.affinity_class: name_association_affinity_dict[n.affinity_class.title].append(n)
         for n in StructureNameAssociation.with_related_objects
             .by_compound(compounds=[compound, ], )
@@ -78,8 +87,7 @@ def compounds(request, cid: int = None):
 
     inchi_associations = {
         a.inchi_type.title: a
-        for a in StructureInChIAssociation.with_related_objects
-            .by_compound(compounds=[compound, ]).all()
+        for a in StructureInChIAssociation.with_related_objects.by_compound(compounds=[compound, ]).all()
     }
 
     name_affinities = ['exact', 'narrow', 'broad', 'generic']
@@ -87,7 +95,7 @@ def compounds(request, cid: int = None):
     inchi_types = ['standard', 'original', 'xtauto', 'xtautox']
 
     return render(request, 'compound.html', {
-        'string': int,
+        'id': int,
         'host': request.scheme + "://" + request.get_host(),
         'compound': compound,
         'parents': {key: parents[key] for key in identifier_keys},
@@ -98,15 +106,23 @@ def compounds(request, cid: int = None):
     })
 
 
-def images(request: HttpRequest, cid: int = None, string: str = None):
-
+def compound_images(request: HttpRequest, cid: int = None, string: str = None):
     if cid or string:
         if cid:
-            #compound: Compound = Compound.objects.filter(id=cid).first()
-            #ens = compound.structure.to_ens
-            #image = _create_image(compound.structure.to_ens)
-            #return HttpResponse(image, content_type='image/svg+xml')
             return HttpResponseRedirect("/chemical/structure/NCICADD:CID=" + str(cid) + "/image")
+        else:
+            ens = Ens(string)
+            image = _create_image(ens)
+            return HttpResponse(image, content_type='image/svg+xml')
+    else:
+        prop: Prop = Prop.Ref('E_SVG_IMAGE')
+        params = {param: prop.getparameter(param) for param in prop.parameters}
+        return HttpResponse(json.dumps(params), content_type='application/json')
+
+def record_images(request: HttpRequest, rid: int = None, string: str = None):
+    if rid or string:
+        if rid:
+            return HttpResponseRedirect("/chemical/structure/NCICADD:RID=" + str(rid) + "/image")
         else:
             ens = Ens(string)
             image = _create_image(ens)

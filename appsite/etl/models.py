@@ -1,5 +1,5 @@
 from pycactvs import Molfile
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -242,11 +242,26 @@ class StructureFileRecord(models.Model):
         db_table = 'cir_structure_file_record'
 
     @property
-    def molfile(self):
-        fname = self.structure_file.file.name
-        molfile: Molfile = Molfile.Open(fname)
-        molfile.set('record', self.number)
-        return Molfile.String(molfile.read())
+    def molfile(self) -> Optional[bytes]:
+        try:
+            fname = self.structure_file.file.name
+            molfile: Molfile = Molfile.Open(fname)
+            molfile.set('record', self.number)
+            return Molfile.String(molfile.read())
+        except:
+            return None
+
+    @property
+    def source(self) -> Optional[bytes]:
+        try:
+            fname = self.structure_file.file.name
+            molfile: Molfile = Molfile.Open(fname)
+            molfile.set('record', self.number)
+            molfile_string = molfile.copy()
+            molfile.close()
+            return molfile_string
+        except:
+            return None
 
     def __str__(self):
         return "(StructureFileRecord=%s: %s)" % (self.number, self.structure_file)

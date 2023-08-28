@@ -1,0 +1,123 @@
+122577
+  -OEChem-01272213172D
+
+  3  2  0     0  0  0  0  0  0999 V2000
+   -1.0245   -0.2745    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.5245   -0.2745    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -3.2745    1.0245    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  1  0  0  0  0
+M  END
+> <PUBCHEM_COMPOUND_ID_TYPE>
+0
+
+> <PUBCHEM_TOTAL_CHARGE>
+0
+
+> <PUBCHEM_SUBSTANCE_ID>
+122577
+
+> <PUBCHEM_SUBSTANCE_VERSION>
+3
+
+> <PUBCHEM_EXT_DATASOURCE_NAME>
+DTP/NCI
+
+> <PUBCHEM_EXT_DATASOURCE_REGID>
+85228
+
+> <PUBCHEM_SUBSTANCE_COMMENT>
+DTP/NCI DIS cdk 1.4.4.  Release-October 2011.
+Structure Evaluation:Consistent with Molecular Formula.
+Deposition record created from database Chemistry on host DrZZLaptop on Oct 30, 2011
+
+> <PUBCHEM_SUBSTANCE_SYNONYM>
+64-17-5
+Absolute ethanol
+Aethanol
+Aethylalkohol
+Alcohol
+Alcohol, anhydrous
+Alcohol, dehydrated
+Alcohol, diluted
+Alcohols
+Alcool ethylique
+Alcool etilico
+Algrain
+Alkohol
+Anhydrol
+Cologne spirit
+Cologne spirits
+Denatured alcohol CD-10
+Denatured alcohol CD-5
+Denatured alcohol CD-5a
+Denatured alcohol SD-1
+Denatured alcohol SD-13a
+Denatured alcohol SD-17
+Denatured alcohol SD-23a
+Denatured alcohol SD-28
+Denatured alcohol SD-30
+Denatured alcohol SD-39b
+Denatured alcohol SD-39c
+Denatured alcohol SD-3a
+Denatured alcohol SD-40m
+Denatured ethanol
+ETHANOL
+EtOH
+Etanolo
+Ethanol 200 proof
+Ethyl alc
+Ethyl alcohol
+Ethyl alcohol & water, 10%
+Ethyl alcohol & water, 20%
+Ethyl alcohol & water, 30%
+Ethyl alcohol & water, 40%
+Ethyl alcohol & water, 5%
+Ethyl alcohol & water, 50%
+Ethyl alcohol & water, 60%
+Ethyl alcohol & water, 70%
+Ethyl alcohol & water, 80%
+Ethyl alcohol & water, 95%
+Ethyl alcohol & water, 96%
+Ethyl alcohol, anhydrous
+Ethyl hydrate
+Ethyl hydroxide
+Ethylalcohol
+Etylowy alkohol
+Fermentation alcohol
+Grain alcohol
+Jaysol
+Jaysol S
+Methylcarbinol
+Molasses alcohol
+NCI-C03134
+NSC-85228
+NSC85228
+Potato alcohol
+SD Alchol 23-hydrogen
+Spirits of wine
+Spirt
+Tecsol
+Thanol
+WLN: Q2
+
+> <PUBCHEM_GENERIC_REGISTRY_NAME>
+64-17-5
+
+> <PUBCHEM_XREF_EXT_ID>
+85228
+
+> <PUBCHEM_EXT_DATASOURCE_URL>
+http://dtp.nci.nih.gov/
+
+> <PUBCHEM_EXT_SUBSTANCE_URL>
+http://dtp.nci.nih.gov/dtpstandard/servlet/dwindex?searchtype=NSC&outputformat=html&searchlist=85228
+
+> <PUBCHEM_CID_ASSOCIATIONS>
+702  1
+
+> <PUBCHEM_COORDINATE_TYPE>
+1
+3
+
+$$$$

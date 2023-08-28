@@ -322,20 +322,19 @@ CIR_AVAILABLE_RESOLVERS = [
     #'chemnavigator_sid',
     #'pubchem_sid',
     #'emolecules_vid',
-    #'ncicadd_rid',
+    'ncicadd_rid',
     'ncicadd_cid',
-    #'ncicadd_sid',
+    'ncicadd_sid',
     #'cas_number',
     #'nsc_number',
     #'zinc_code',
     #'opsin',
-    #'chemspider_name',
     #'name_pattern',
     'name',
     #'SDFile',
     #'minimol',
-    #'packstring',
-    'structure_representation'
+    'packstring',
+    #'structure_representation'
 ]
 
 CIR_FILESTORE_ROOT = os.path.join("/filestore")

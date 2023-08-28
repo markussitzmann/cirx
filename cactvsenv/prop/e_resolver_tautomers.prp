@@ -24,9 +24,6 @@ FUNCTYPE PF_TCLSCRIPT
 FUNCNAME get_tautomers 1
 
 proc get_tautomers {ehandle} {
-
-    puts "IN  >>> D: [dataset list] E: [ens list]"
-
 	if {[prop getparam E_RESOLVER_TAUTOMERS addh]} {
 		ens hadd $ehandle
 	}

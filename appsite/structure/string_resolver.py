@@ -21,6 +21,7 @@ ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
 ResolverParams = namedtuple("ResolverParams", "url_params resolver_list filter mode structure_index page columns rows")
 
 
+
 class ChemicalStructure:
     """Container class to keep a CACTVS ensemble and a Structure model object of the same chemical structure together"""
 
@@ -110,20 +111,35 @@ class ChemicalStructure:
         try:
             attr = parent_types[parent_type].attr
             if self.structure and hasattr(self.structure.parents, attr):
-                parent_structure = getattr(self.structure.parents, attr)
+                parent_structure: Structure = getattr(self.structure.parents, attr)
                 if parent_structure:
-                    return ChemicalStructure(structure=parent_structure, ens=parent_structure.ens, metadata=self.metadata)
+                    return ChemicalStructure(structure=parent_structure, ens=parent_structure.to_ens, metadata=self.metadata)
                 if only_lookup:
+                    #return self
                     return None
             if not only_lookup:
-                parent = self.ens.get(parent_types[parent_type].parent_structure)
-                cs = ChemicalStructure(ens=parent, metadata=self.metadata)
+                parent: Ens = self.ens.get(parent_types[parent_type].parent_structure)
+                ens = Ens(parent.get("E_MINIMOL"))
+                cs = ChemicalStructure(ens=ens, metadata=self.metadata)
                 return cs
             else:
+                #return self
                 return None
         except Exception as e:
             logger.error("creating parent structure failed: {}".format(e))
 
+
+    def __del__(self):
+        self._structure: Structure = None
+        self._ens: Ens = None
+        self._metadata: Dict = {}
+        self._identifier = None
+        self._hashisy = None
+        self._ficts_parent = None
+        self._ficus_parent = None
+        self._uuuuu_parent = None
+        del self._ens
+        #logger.info("DELETE WAS CALLED")
 
 class ChemicalString:
 
@@ -171,8 +187,8 @@ class ChemicalString:
                     break
         else:
             self.operator = operator
-        i = 1
 
+        i = 0
         for resolver in resolver_list:
             try:
                 resolver_method = getattr(self, '_resolver_' + resolver)
@@ -180,7 +196,6 @@ class ChemicalString:
                 chemical_structure: ChemicalStructure
                 if not len(data):
                     raise ValueError('string resolver came back empty')
-                i = 0
                 for chemical_structure in data:
                     i += 1
                     if self.operator:
@@ -358,6 +373,12 @@ class ChemicalString:
         return list()
 
     def _resolver_structure_representation(self) -> List[ChemicalStructure]:
+        """
+            this is a special resolver, it only attempts to resolver if there hasn't been found anything by other
+            resolver modules
+        """
+        if len(self._resolver_data):
+            return list()
         resolved = ChemicalStructure(
             ens=Ens(self.string),
             metadata={
@@ -548,7 +569,8 @@ class ChemicalString:
 
     #### OPERATORS ####
 
-    def _operator_tautomers(self, structure: ChemicalStructure) -> List[ChemicalStructure]:
+    @staticmethod
+    def _operator_tautomers(structure: ChemicalStructure) -> List[ChemicalStructure]:
         
         structures = []
         description_list = []
@@ -577,7 +599,8 @@ class ChemicalString:
 
         return structures if structures else list()
 
-    def _operator_stereoisomers(self, structure: ChemicalStructure) -> List[ChemicalStructure]:
+    @staticmethod
+    def _operator_stereoisomers(structure: ChemicalStructure) -> List[ChemicalStructure]:
 
         structures = []
         description_list = []
@@ -590,7 +613,7 @@ class ChemicalString:
 
         stereoisomer_index = 1
         stereoisomers = structure.ens.get("E_STEREOISOMERS")
-        for stereoisomer in stereoisomers.ens():
+        for stereoisomer in stereoisomers.ens()[1:]:
             stereoisomer_index += 1
             chemical_structure = ChemicalStructure(ens=stereoisomer)
             stereoisomer_string = 'stereoisomer %s' % stereoisomer_index
@@ -606,15 +629,37 @@ class ChemicalString:
 
         return structures if structures else list()
 
-    def _operator_ficts(self, structure: ChemicalStructure) -> List[ChemicalStructure]:
+    @staticmethod
+    def _operator_ficts(structure: ChemicalStructure) -> List[ChemicalStructure]:
         ficts_parent = structure.ficts_parent(only_lookup=False)
         ficts_parent._metadata.update({
             'description': "FICTS parent of " + structure.metadata['description']
         })
         return [ficts_parent,]
 
+    @staticmethod
+    def _operator_ficus(structure: ChemicalStructure) -> List[ChemicalStructure]:
+        ficus_parent = structure.ficus_parent(only_lookup=False)
+        ficus_parent._metadata.update({
+            'description': "FICuS parent of " + structure.metadata['description']
+        })
+        return [ficus_parent,]
 
+    @staticmethod
+    def _operator_uuuuu(structure: ChemicalStructure) -> List[ChemicalStructure]:
+        uuuuu_parent = structure.uuuuu_parent(only_lookup=False)
+        uuuuu_parent._metadata.update({
+            'description': "uuuuu parent of " + structure.metadata['description']
+        })
+        return [uuuuu_parent,]
 
+    @staticmethod
+    def _operator_parent(structure: ChemicalStructure) -> List[ChemicalStructure]:
+        return ChemicalString._operator_ficts(structure)
+
+    @staticmethod
+    def _operator_normalize(structure: ChemicalStructure) -> List[ChemicalStructure]:
+        return ChemicalString._operator_ficus(structure)
 
 
     def _operator_remove_hydrogens(self, representation):
@@ -737,71 +782,67 @@ class ChemicalString:
     #     representation.with_related_objects = structures
     #     return representation
 
-    def _operator_parent(self, interpretation):
-        return self._operator_ficus(interpretation)
 
-    def _operator_normalize(self, interpretation):
-        return self._operator_ficus(interpretation)
 
-    def _operator_ficus(self, representation):
-        enslist = []
-        dataset_list = []
-        for structure in representation.structures:
-            enslist.append(structure._ens)
-        dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure._metadata))
-        structures = []
-        description_list = []
-        index = 1
-        for dataset, metadata in dataset_list:
-            ficus = dataset.get_ficus_parent_structure()
-            count = 1
-            for ens in ficus.get_enslist():
-                structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-                description_string = 'ficus %s' % count
-                structure._metadata = {
-                    'description': description_string,
-                    'query_type': metadata['query_type'],
-                    'query_search_string': metadata['query_search_string']
-                }
-                structures.append(structure)
-                index += 1
-                count += 1
-        representation._reference_dataset = dataset_list
-        representation.ficus = ficus
-        representation.description_list = description_list
-        representation.with_related_objects = structures
-        return representation
-
-    def _operator_uuuuu(self, representation):
-        enslist = []
-        dataset_list = []
-        for structure in representation.with_related_objects:
-            enslist.append(structure._ens)
-        dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure._metadata))
-        structures = []
-        description_list = []
-        index = 1
-        for dataset, metadata in dataset_list:
-            uuuuu = dataset.get_uuuuu_parent_structure()
-            count = 1
-            for ens in uuuuu.get_enslist():
-                structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-                description_string = 'uuuuu %s' % count
-                structure._metadata = {
-                    'description': description_string,
-                    'query_type': metadata['query_type'],
-                    'query_search_string': metadata['query_search_string']
-                }
-                structures.append(structure)
-                index += 1
-                count += 1
-        representation._reference_dataset = dataset_list
-        representation.uuuuu = uuuuu
-        representation.description_list = description_list
-        representation.with_related_objects = structures
-        return representation
+    # def _operator_ficus(self, representation):
+    #     enslist = []
+    #     dataset_list = []
+    #     for structure in representation.structures:
+    #         enslist.append(structure._ens)
+    #     dataset = Dataset(self.cactvs, enslist=enslist)
+    #     dataset_list.append((dataset, structure._metadata))
+    #     structures = []
+    #     description_list = []
+    #     index = 1
+    #     for dataset, metadata in dataset_list:
+    #         ficus = dataset.get_ficus_parent_structure()
+    #         count = 1
+    #         for ens in ficus.get_enslist():
+    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
+    #             description_string = 'ficus %s' % count
+    #             structure._metadata = {
+    #                 'description': description_string,
+    #                 'query_type': metadata['query_type'],
+    #                 'query_search_string': metadata['query_search_string']
+    #             }
+    #             structures.append(structure)
+    #             index += 1
+    #             count += 1
+    #     representation._reference_dataset = dataset_list
+    #     representation.ficus = ficus
+    #     representation.description_list = description_list
+    #     representation.with_related_objects = structures
+    #     return representation
+    #
+    # def _operator_uuuuu(self, representation):
+    #     enslist = []
+    #     dataset_list = []
+    #     for structure in representation.with_related_objects:
+    #         enslist.append(structure._ens)
+    #     dataset = Dataset(self.cactvs, enslist=enslist)
+    #     dataset_list.append((dataset, structure._metadata))
+    #     structures = []
+    #     description_list = []
+    #     index = 1
+    #     for dataset, metadata in dataset_list:
+    #         uuuuu = dataset.get_uuuuu_parent_structure()
+    #         count = 1
+    #         for ens in uuuuu.get_enslist():
+    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
+    #             description_string = 'uuuuu %s' % count
+    #             structure._metadata = {
+    #                 'description': description_string,
+    #                 'query_type': metadata['query_type'],
+    #                 'query_search_string': metadata['query_search_string']
+    #             }
+    #             structures.append(structure)
+    #             index += 1
+    #             count += 1
+    #     representation._reference_dataset = dataset_list
+    #     representation.uuuuu = uuuuu
+    #     representation.description_list = description_list
+    #     representation.with_related_objects = structures
+    #     return representation
 
     # def _operator_stereoisomers(self, representation):
     #     enslist = []

@@ -1,0 +1,179 @@
+{% extends "neon-base.html" %}
+
+{% block body_class %}d-flex flex-column h-100{% endblock %}
+
+{% block main %}
+<main class="flex-shrink-0">
+    <div class="container-fluid p-5" id="main-container">
+        <div class="align-items-center mt-5">
+            <h1>RID {{ record.id }}</h1>
+            <div class="mb-2">
+                <div class="btn-group" role="group">
+                    {% if record.get_previous_by_added.id %}
+                        <a href="{% url 'records' record.get_previous_by_added.id %}"
+                           class="btn btn-sm btn-light" type="button">
+                            <i class="bi bi-caret-left-fill"></i> Previous
+                        </a>
+                    {% else %}
+                        <a href="" class="btn btn-sm btn-light" type="button">
+                            <i class="bi bi-caret-left-fill"></i> Previous
+                        </a>
+                    {% endif %}
+                    {% if record.get_next_by_added.id %}
+                        <a href="{% url 'records' record.get_next_by_added.id %}"
+                           class="btn btn-sm btn-light" type="button">Next <i class="bi bi-caret-right-fill"></i>
+                        </a>
+                    {% else %}
+                        <a href="" class="btn btn-sm btn-light" type="button">Next <i class="bi bi-caret-right-fill"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <hr class="bg-secondary mb-4">
+
+        <div class="row align-items-start">
+
+            <div class="col col-xxl-3 col-xl-3 col-lg-4 col-md-12 col-sm-12 col-12">
+                <div class="row">
+                    {% if record.id %}
+                        <figure class="figure">
+                            <img src="{% url 'record-images' record.id %}"
+                                 class="figure-img img-fluid img-thumbnail rounded"
+                                 style="min-width: 260px; min-height: 260px;" alt="structure of RID {{ record.id }}">
+                            <figcaption class="figure-caption">Structure of NCICADD:RID {{ record.id }}</figcaption>
+                        </figure>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col col-xxl-9 col-xl-9 col-lg-8 col-md-12 col-sm-12 col-12 pt-2">
+                <section>
+                    <h2 class="mb-4">Structure File Record</h2>
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <th scope="row">Regid</th>
+                            <td><small class="text-break">{{ record.regid }}</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Dataset</th>
+                            <td><small class="text-break">{{ record.dataset }}</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Release</th>
+                            <td><small class="text-break">{{ record.release }}</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Structure File</th>
+                            <td><small class="text-break">{{ record.structure_file_record.structure_file.file.name }} (Record {{ record.structure_file_record.number }} of {{ record.structure_file_record.structure_file.count }})</small>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </section>
+                <section>
+                    <h2>Source File Record</h2>
+                    <textarea rows="20" class="form-control">{{ source }}</textarea>
+                </section>
+{#                <section>#}
+{#                    <h2 class="mt-4 mb-4">Structure Identifier</h2>#}
+{#                    <div class="card"><div class="card-body">#}
+{#                    <table class="table">#}
+{#                        <thead>#}
+{#                        <tr>#}
+{#                            <th scope="col">NCI/CADD Identifier</th>#}
+{#                            <th scope="col" class="text-center">Is Parent</th>#}
+{#                            <th scope="col" class="text-center">Parent Structure (CID)</th>#}
+{#                            <th scope="col" class="text-center d-none d-md-block">Child Count</th>#}
+{#                        </tr>#}
+{#                        </thead>#}
+{#                        <tbody>#}
+{##}
+{#                        {% for k, v in parents.items %}#}
+{#                        <tr>#}
+{#                            <td class="col-4">#}
+{#                                <div class="d-flex"><span class="badge bg-secondary {{ k|lower }}-label me-2">{{ k }}</span><small class="d-lg-none d-xl-block">{{ v.identifier|default_if_none:"N/A" }}</small></div>#}
+{#                            </td>#}
+{#                            <td class="col-1 text-center">#}
+{#                                {{ v.is_parent|yesno }}#}
+{#                            </td>#}
+{#                            <td class="col-3 text-center">#}
+{#                                {% url 'compounds' v.structure.compound.id as compound_url %}#}
+{#                                <a class="link-primary" href="{{ compound_url }}">{{ v.structure.compound.id|default_if_none:"N/A" }}</a>#}
+{#                            </td>#}
+{#                            <td class="col-3 text-center">#}
+{#                                {{ v.children_count|default_if_none:"N/A" }}#}
+{#                            </td>#}
+{#                        </tr>#}
+{#                        {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
+{#                    <table class="table">#}
+{#                        <thead>#}
+{#                        <tr>#}
+{#                            <th scope="col">InChIKey</th>#}
+{#                            <th scope="col" class="text-center">Version</th>#}
+{#                            <th scope="col" class="text-center">SaveOpt</th>#}
+{#                            <th scope="col" class="text-center">Software Version</th>#}
+{##}
+{#                        </tr>#}
+{#                        </thead>#}
+{#                        <tbody>#}
+{#                        {% for k, v in inchis.items %}#}
+{#                        <tr>#}
+{#                            <td class="col-4">#}
+{#                                <div class="d-flex">#}
+{#                                <span class="badge bg-secondary inchi-label me-2">{{ v.inchi_type.title }}</span><small>{{ v.inchi.key }}</small>#}
+{#                                </div>#}
+{#                            </td>#}
+{#                            <td class="col-1 text-center"><small>{{ v.inchi.version }}</small></td>#}
+{#                            <td class="col-3 text-center"><small>{{ v.save_opt }}</small></td>#}
+{#                            <td class="col-3 text-center"><small>{{ v.software_version }}</small></td>#}
+{#                        </tr>#}
+{#                        {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
+{#                    </div></div>#}
+{#                </section>#}
+{#                <section>#}
+{##}
+{#                </section>#}
+{#                <section>#}
+{#                    <h2 class="mb-4 mt-4">Names</h2>#}
+{#                    <table class="table table-striped">#}
+{#                        <thead>#}
+{#                        <tr>#}
+{#                            <th scope="col">Name</th>#}
+{#                            <th scope="col">Affinity</th>#}
+{#                            <th scope="col" class="d-none d-md-block">Type</th>#}
+{#                        </tr>#}
+{#                        </thead>#}
+{#                        <tbody>#}
+{#                        {% for k, v in names.items %}#}
+{#                            {%  for name in v %}#}
+{#                            <tr>#}
+{#                                <td class="col-7">{{ name.name.name }}</td>#}
+{#                                <td class="col-2"><small class="text-break">{{ k }}</small>#}
+{#                                <td class="d-none d-md-block"><small class="text-break">{{ name.name_type.public_string }}</small>#}
+{#                                </td>#}
+{#                            </tr>#}
+{#                            {% endfor %}#}
+{#                        {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
+{#                </section>#}
+            </div>
+
+        </div>
+
+    </div>
+</main>
+{% endblock main %}
+
+
+

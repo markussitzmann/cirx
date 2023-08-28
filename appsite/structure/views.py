@@ -1,5 +1,6 @@
 import io
 import logging
+from pycactvs import Ens, Dataset
 
 from django.conf import settings
 from django.http import *
@@ -54,7 +55,7 @@ def structure(request, string=None):
 def resolve_to_response(request, string: str, representation_type: str, operator=None, output_format="plain"):
     parameters = request.GET.copy()
     host_string = request.scheme + "://" + request.get_host()
-
+    logger.info("ENS {} COUNT {}".format(Ens.List(), Dataset.List()))
     if 'operator' in parameters:
         operator = parameters['operator']
     if operator:
