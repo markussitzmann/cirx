@@ -2,14 +2,12 @@ import json
 from collections import namedtuple, defaultdict
 
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from pycactvs import Prop, Ens
-from pycactvs import Dataset as CsDataset
 
-from common import NCICADD_TYPES
-from etl.registration import StructureRegistry
+from core.common import NCICADD_TYPES
+from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Record
 from structure.forms import ResolverInput
-from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Dataset, Record
 # Create your views here.
 from structure.ncicadd.identifier import Identifier
 
@@ -100,7 +98,7 @@ def compounds(request, cid: int = None):
         'compound': compound,
         'parents': {key: parents[key] for key in identifier_keys},
         'names': {key: name_association_affinity_dict[key] for key in name_affinities},
-        'inchis': {t: inchi_associations[t] for t in inchi_types},
+        'inchis': {t: inchi_associations[t] for t in inchi_types if t in inchi_associations},
         'formula': compound.structure.to_ens.get('E_FORMULA'),
         'weight': compound.structure.to_ens.get('E_WEIGHT')
     })

@@ -1,6 +1,7 @@
 import logging
 import os
 
+from django.core.files import File
 from django.db.models import Prefetch, OuterRef, Subquery
 from django.db.models.functions import JSONObject
 
@@ -22,85 +23,89 @@ logger = logging.getLogger("cirx")
 
 reset_queries()
 
-s = Structure.objects.filter(id=OuterRef('annotated_ficts_parent'))
-#>>> Post.objects.annotate(newest_commenter_email=Subquery(newest.values('email')[:1]))
+# record: Record = Record.objects.filter(structure_file_record=213541).first()
+# logger.info("R {}".format(record))
+#
+# structure: Structure = record.structure_file_record.structure
+# ens: Ens = structure.to_ens
+# #
+# # molfile: str = record.structure_file_record.source.decode('UTF-8')
+# file: StructureFile = record.structure_file_record.structure_file
+# number = record.structure_file_record.number
+# #
+# #
+# logger.info("E0 {}".format(ens.get("E_SMILES")))
+# # #logger.info("M {}".format(molfile))
+# # logger.info("F {} :: {}".format(file, number))
+#
+# m = Molfile.Open("/home/app/error.1.sdf")
+# #m.set('record', number)
+# e = m.read()
+#
+# #logger.info("E {}".format(e.get("E_SMILES")))
+#
+#
+# #minimol = e.get("E_MINIMOL")
+# #e2 = Ens(minimol)
+# minimol = CactvsMinimol(e)
+# e2 = minimol.ens
+# parent = e2.get("E_FICTS_STRUCTURE")
+#
+#
+# logger.info("E {}".format(e.get("E_SMILES")))
+# logger.info("E2 {}".format(e2.get("E_SMILES")))
+# logger.info("P {}".format(parent.get("E_SMILES")))
 
-# Brand.objects.annotate(
-#     log__last__code=Subquery(
-#         Log.objects.filter(
-#             content_type__model=Brand._meta.model_name,
-#             object_id=OuterRef('pk')
-#         ).order_by('-created_at').values('code')[:1]
-#     )
-# )
+m = Molfile.Open("/home/app/error.2.sdf")
+ens = m.read()
 
-# MainModel.objects.annotate(
-#     last_object=RelatedModel.objects.filter(mainmodel=OuterRef("pk"))
-#     .order_by("-date_created")
-#     .values(
-#         data=JSONObject(
-#             id="id", body="body", date_created="date_created"
-#         )
-#     )[:1]
-# )
+hashisy_key = CactvsHash(ens)
+structure = Structure(
+    hashisy_key=hashisy_key,
+    minimol=CactvsMinimol(ens)
+)
 
-# records = Record.objects\
-#     .select_related(
-#         'structure_file_record',
-#         'structure_file_record__structure',
-#         'structure_file_record__structure__parents'
-#     ).annotate(
-#         annotated_structure=F('structure_file_record__structure'),
-#         annotated_ficts_parent=F('structure_file_record__structure__parents__ficts_parent'),
-#         annotated_ficus_parent=F('structure_file_record__structure__parents__ficus_parent'),
-#         annotated_uuuuu_parent=F('structure_file_record__structure__parents__uuuuu_parent')
-#     ).annotate(
-#         ficts_structure=Structure.objects.filter(id=OuterRef("annotated_ficts_parent")).values(
-#             data=JSONObject(id="id", minimol="minimol", names="names")
-#         )[:1],
-#         ficts_structure_names=F('structure_file_record__structure__parents__ficts_parent__names')
-#     ).filter(
-#         annotated_structure=97333
-#     )
+structures = Structure.objects.filter(hashisy_key=hashisy_key).all()
 
-records = Record.objects\
-    .select_related(
-        'structure_file_record',
-        'structure_file_record__structure',
-        'structure_file_record__structure__parents'
-    ).prefetch_related(
-        'structure_file_record__structure__parents__ficts_parent__names',
-    ).annotate(
-        annotated_structure=F('structure_file_record__structure'),
-        annotated_ficts_parent=F('structure_file_record__structure__parents__ficts_parent'),
-        annotated_ficts_compound=F('structure_file_record__structure__parents__ficts_parent__compound'),
-        annotated_ficus_parent=F('structure_file_record__structure__parents__ficus_parent'),
-        annotated_uuuuu_parent=F('structure_file_record__structure__parents__uuuuu_parent')
-    ).annotate(
-        ficts_structure=Structure.objects.filter(id=OuterRef("annotated_ficts_parent")).values(
-            data=JSONObject(id="id", minimol="minimol", names="names")
-        )[:1]
-    ).filter(
-        annotated_structure=97333
-    )
+logger.info("// {}".format(structures))
 
+structure = structures[0]
 
-print("DDONE")
-#sfr = StructureFileRecord.objects.select_related('structure')
-#print(sfr)
+ficts_parent = structure.parents.ficts_parent.to_ens
 
-r: Record = records.first()
-logger.info(r)
-logger.info("S %s" % type(r.annotated_structure))
-logger.info("FICTS %s %s" % (r.annotated_ficts_parent, r.ficts_structure))
-logger.info("FICUS %s" % r.annotated_ficus_parent)
-logger.info("uuuuu %s" % r.annotated_uuuuu_parent)
-logger.info("----> %s" % r.annotated_ficts_compound)
+e = structure.to_ens
+
+#e = minimol.ens
+
+logger.info("E2.0 https://cirx.chemicalcreatures.com/chemical/structure/{}/image".format(e.get("E_SMILES")))
+
+e.hadd()
+
+logger.info("E2.1 https://cirx.chemicalcreatures.com/chemical/structure/{}/image".format(e.get("E_SMILES")))
+
+logger.info("E2.1 https://cirx.chemicalcreatures.com/chemical/structure/{}/image".format(ficts_parent.get("E_SMILES")))
 
 
-#print(str(r.structure_file_record.molfile))
+#structure_object, created = Structure.objects.get_or_create(structure)
 
-for q in connection.queries:
-    logger.info(q)
-logger.info(len(connection.queries))
+#logger.info("--> {}", structure_object)
+
+# minimol = CactvsMinimol(e)
+# e2 = minimol.ens
+#
+# logger.info("E2.0 https://cirx.chemicalcreatures.com/chemical/structure/{}/image".format(e2.get("E_SMILES")))
+#
+# e2.hadd()
+#
+# logger.info("E2.1 https://cirx.chemicalcreatures.com/chemical/structure/{}/image".format(e2.get("E_SMILES")))
+
+
+
+
+
+
+
+
+
+
 
