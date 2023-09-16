@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework_json_api.views import RelationshipView, ModelViewSet
 
 from resolver.models import InChI, Structure, Organization, Publisher, EntryPoint, EndPoint, MediaType, InChIType, \
-    StructureInChIAssociation
+    StructureInChIAssociation, StructureParentStructure
 from resolver.serializers import (
     InChISerializer,
     OrganizationSerializer,
@@ -16,7 +16,8 @@ from resolver.serializers import (
     MediaTypeSerializer,
     StructureSerializer,
     InChITypeSerializer,
-    StructureInChIAssociationSerializer
+    StructureInChIAssociationSerializer,
+    StructureParentStructureSerializer
 )
 
 
@@ -92,7 +93,7 @@ class StructureViewSet(ResourceModelViewSet):
     #                      'ficus_children', 'uuuuu_children')
 
     queryset = Structure.objects.filter(blocked__isnull=True) \
-        .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints')
+        .prefetch_related('inchis', 'inchis__inchi_type', 'inchis__inchi', 'entrypoints')
 
     # select_for_includes = {
     #     'ficts_parent': ['ficts_parent'],
@@ -118,7 +119,7 @@ class StructureViewSet(ResourceModelViewSet):
         # 'ficus_children': ('exact', 'in'),
         # 'uuuuu_children': ('exact', 'in'),
         #'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
-        'inchis__inchitype': ('exact', 'in'),
+        'inchis__inchi_type': ('exact', 'in'),
         'inchis__inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
         'inchis__inchi__string': ('icontains', 'iexact', 'contains', 'exact'),
     }
@@ -141,8 +142,92 @@ class StructureRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = Structure.objects
-    self_link_view_name = 'structure-relationships'
+    self_link_view_name = 'structures-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+### STRUCTURE PARENTS ###
+
+class StructureParentStructureViewSet(ResourceModelViewSet):
+    """
+        The **Stucture resource** of the Chemical Identifier Resolver X2 API
+    """
+    def __init__(self, *args, **kwargs):
+        self.name = "StructureParentStructure"
+        super().__init__(*args, **kwargs)
+
+    #queryset = Structure.objects.filter(compound__isnull=False, blocked__isnull=True)\
+    #    .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent', 'compound')\
+    #    .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints', 'ficts_children',
+    #                      'ficus_children', 'uuuuu_children')
+
+    queryset = StructureParentStructure.objects
+    #    .prefetch_related('inchis', 'inchis__inchi_type', 'inchis__inchi', 'entrypoints')
+
+    # select_for_includes = {
+    #     'ficts_parent': ['ficts_parent'],
+    #     'ficus_parent': ['ficus_parent'],
+    #     'uuuuu_parent': ['uuuuu_parent'],
+    # }
+    # prefetch_for_includes = {
+    #     '__all__': [],
+    #     'inchis': ['inchis__structure', 'inchis__inchi'],
+    #     #'all_parents': [Prefetch('all_parents', queryset=Structure.objects
+    #     #                         .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent'))],
+    #     #'category.section': ['category']
+    # }
+    serializer_class = StructureParentStructureSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    filterset_fields = {
+        'id': ('exact', 'in'),
+        #'ficts_parent': ('exact', 'in'),
+        #'ficus_parent': ('exact', 'in'),
+        #'uuuuu_parent': ('exact', 'in'),
+        # 'ficts_children': ('exact', 'in'),
+        # 'ficus_children': ('exact', 'in'),
+        # 'uuuuu_children': ('exact', 'in'),
+        #'hashisy': ('icontains', 'iexact', 'contains', 'exact'),
+        #'inchis__inchi_type': ('exact', 'in'),
+        #'inchis__inchi__key': ('icontains', 'iexact', 'contains', 'exact'),
+        #'inchis__inchi__string': ('icontains', 'iexact', 'contains', 'exact'),
+    }
+    search_fields = (
+        'id',
+        #'hashisy',
+        #'ficts_parent',
+        #'ficus_parent',
+        #'uuuuu_parent',
+        #'ficts_children',
+        #'ficus_children',
+        #'uuuuu_children',
+    )
+
+
+class StructureParentStructureRelationshipView(ResourceRelationshipView):
+
+    def __init__(self, *args, **kwargs):
+        self.name = "StructureParentStructure"
+        super().__init__(*args, **kwargs)
+
+    queryset = Structure.objects
+    self_link_view_name = 'structures-relationships'
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### INCHI ###
@@ -176,7 +261,7 @@ class InChIRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = InChI.objects.all()
-    self_link_view_name = 'inchi-relationships'
+    self_link_view_name = 'inchis-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
@@ -210,7 +295,7 @@ class StructureInChIAssociationRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = StructureInChIAssociation.objects.all()
-    self_link_view_name = 'structureinchiassociation-relationships'
+    self_link_view_name = 'structureinchiassociations-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
@@ -239,7 +324,7 @@ class InChITypeRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = InChIType.objects.all()
-    self_link_view_name = 'inchitype-relationships'
+    self_link_view_name = 'inchitypes-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
@@ -285,7 +370,7 @@ class OrganizationRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = Organization.objects.all()
-    self_link_view_name = 'organization-relationships'
+    self_link_view_name = 'organizations-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
@@ -338,7 +423,7 @@ class PublisherRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = Publisher.objects.all()
-    self_link_view_name = 'publisher-relationships'
+    self_link_view_name = 'publishers-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
@@ -389,7 +474,7 @@ class EntryPointRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = EntryPoint.objects.all()
-    self_link_view_name = 'entrypoint-relationships'
+    self_link_view_name = 'entrypoints-relationships'
 
 
 ### ENDPOINT ###
@@ -433,7 +518,7 @@ class EndPointRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = EndPoint.objects.all()
-    self_link_view_name = 'endpoint-relationships'
+    self_link_view_name = 'endpoints-relationships'
 
 
 ### MEDIA  TYPE ###
@@ -468,5 +553,5 @@ class MediaTypeRelationshipView(ResourceRelationshipView):
         super().__init__(*args, **kwargs)
 
     queryset = MediaType.objects.all()
-    self_link_view_name = 'mediatype-relationships'
+    self_link_view_name = 'mediatypes-relationships'
 

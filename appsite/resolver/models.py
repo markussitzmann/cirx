@@ -130,6 +130,10 @@ class StructureParentStructure(models.Model):
     uuuuu_parent = models.ForeignKey(
         'Structure', blank=True, null=True, related_name='uuuuu_children', on_delete=models.PROTECT)
 
+    class JSONAPIMeta:
+        resource_name = 'structureparents'
+    
+    
     class Meta:
         db_table = 'cir_structure_parent_structure'
 
@@ -371,7 +375,7 @@ class StructureInChIAssociation(models.Model):
     with_related_objects = StructureInChIAssociationQuerySet.as_manager()
 
     class JSONAPIMeta:
-        resource_name = 'structureInchiAssociations'
+        resource_name = 'structureinchiassociations'
 
     class Meta:
         constraints = [

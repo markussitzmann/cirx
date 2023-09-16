@@ -14,6 +14,7 @@ import os
 import sys
 from pathlib import Path
 
+from corsheaders.defaults import default_methods, default_headers
 from kombu import Queue, Exchange
 
 # Pycactvs needs that
@@ -66,6 +67,7 @@ INSTALLED_APPS = [
     'django_celery_results',
     'rest_framework',
 #    'rest_framework_json_api',
+    "corsheaders",
     'django_bootstrap5',
     'django_bootstrap_input_group',
     'django_filters',
@@ -77,6 +79,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -201,7 +204,15 @@ BOOTSTRAP5 = {
     },
 }
 
+#### CORS
 
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_METHODS = (
+    *default_methods,
+)
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+)
 
 #### JSON API
 

@@ -12,7 +12,7 @@ from resolver.models import InChI, Structure, Organization, Publisher, EntryPoin
     StructureInChIAssociation, StructureParentStructure
 
 
-class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
+class StructureParentStructureSerializer(serializers.HyperlinkedModelSerializer):
 
     ficts_parent = relations.ResourceRelatedField(
         queryset=Structure.objects,
@@ -20,9 +20,9 @@ class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
     ficts_children = relations.ResourceRelatedField(
@@ -31,9 +31,9 @@ class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
     ficus_parent = relations.ResourceRelatedField(
@@ -42,9 +42,9 @@ class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
     ficus_children = relations.ResourceRelatedField(
@@ -53,9 +53,9 @@ class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
     uuuuu_parent = relations.ResourceRelatedField(
@@ -64,9 +64,9 @@ class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
     uuuuu_children = relations.ResourceRelatedField(
@@ -75,9 +75,9 @@ class StructureParentSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
     included_serializers = {
@@ -122,19 +122,20 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=False,
         required=False,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
-    inchis = relations.ResourceRelatedField(
+    structureinchiassociations = relations.ResourceRelatedField(
+        source='inchis',
         queryset=StructureInChIAssociation.objects,
         many=True,
         read_only=False,
         required=False,
-        related_link_view_name='structure-related',
+        related_link_view_name='structures-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structure-relationships',
+        self_link_view_name='structures-relationships',
     )
 
     included_serializers = {
@@ -145,10 +146,12 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         #'ficus_children': 'resolver.serializers.StructureSerializer',
         #'uuuuu_children': 'resolver.serializers.StructureSerializer',
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
-        'inchis': 'resolver.serializers.StructureInChIAssociationSerializer',
+        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     smiles = serializers.SerializerMethodField('serialize_minimol')
+    hashisy = serializers.SerializerMethodField('serialize_hashisy')
+
     #ficts = serializers.SerializerMethodField('get_ficts')
     #ficus = serializers.SerializerMethodField('get_ficus')
     #uuuuu = serializers.SerializerMethodField('get_uuuuu')
@@ -157,11 +160,14 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
     def serialize_minimol(self, obj):
         return obj.to_ens.get("E_SMILES")
 
+    def serialize_hashisy(self, obj):
+        return obj.hashisy_key.padded
+
     class Meta:
         model = Structure
         fields = (
             'url',
-            #'hashisy',
+            'hashisy',
             'smiles',
             #'ficts_parent',
             #'ficus_parent',
@@ -169,7 +175,7 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
             #'ficts_children',
             #'ficus_children',
             #'uuuuu_children',
-            'inchis',
+            'structureinchiassociations',
             'entrypoints',
             #'ficts',
             #'ficus',
@@ -195,13 +201,13 @@ class InChITypeSerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=False,
         required=False,
-        related_link_view_name='inchitype-related',
+        related_link_view_name='inchitypes-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='inchitype-relationships',
+        self_link_view_name='inchitypes-relationships',
     )
 
     included_serializers = {
-        'associations': 'resolver.serializers.StructureInChIAssociationSerializer',
+        'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     class Meta:
@@ -244,9 +250,9 @@ class InChISerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=False,
         required=False,
-        related_link_view_name='inchi-related',
+        related_link_view_name='inchis-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='inchi-relationships',
+        self_link_view_name='inchis-relationships',
     )
 
     structures = relations.ResourceRelatedField(
@@ -254,9 +260,9 @@ class InChISerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=False,
         required=False,
-        related_link_view_name='inchi-related',
+        related_link_view_name='inchis-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='inchi-relationships',
+        self_link_view_name='inchis-relationships',
     )
 
     included_serializers = {
@@ -321,9 +327,9 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
         many=False,
         read_only=False,
         required=True,
-        related_link_view_name='structureinchiassociation-related',
+        related_link_view_name='structureinchiassociations-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structureinchiassociation-relationships',
+        self_link_view_name='structureinchiassociations-relationships',
     )
 
     inchi = relations.ResourceRelatedField(
@@ -331,19 +337,20 @@ class StructureInChIAssociationSerializer(serializers.HyperlinkedModelSerializer
         many=False,
         read_only=False,
         required=True,
-        related_link_view_name='structureinchiassociation-related',
+        related_link_view_name='structureinchiassociations-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structureinchiassociation-relationships',
+        self_link_view_name='structureinchiassociations-relationships',
     )
 
     inchitype = relations.ResourceRelatedField(
+        source='inchi_type',
         queryset=InChIType.objects,
         many=False,
         read_only=False,
         required=True,
-        related_link_view_name='structureinchiassociation-related',
+        related_link_view_name='structureinchiassociations-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structureinchiassociation-relationships',
+        self_link_view_name='structureinchiassociations-relationships',
     )
 
     included_serializers = {
@@ -383,9 +390,9 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='organization-related',
+        related_link_view_name='organizations-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='organization-relationships',
+        self_link_view_name='organizations-relationships',
     )
 
     children = relations.ResourceRelatedField(
@@ -394,9 +401,9 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='organization-related',
+        related_link_view_name='organizations-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='organization-relationships',
+        self_link_view_name='organizations-relationships',
     )
 
     publishers = relations.ResourceRelatedField(
@@ -405,9 +412,9 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='organization-related',
+        related_link_view_name='organizations-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='organization-relationships',
+        self_link_view_name='organizations-relationships',
     )
 
     included_serializers = {
@@ -486,9 +493,9 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='publisher-related',
+        related_link_view_name='publishers-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='publisher-relationships',
+        self_link_view_name='publishers-relationships',
     )
 
     organizations = relations.ResourceRelatedField(
@@ -497,9 +504,9 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='publisher-related',
+        related_link_view_name='publishers-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='publisher-relationships',
+        self_link_view_name='publishers-relationships',
     )
 
     children = relations.ResourceRelatedField(
@@ -508,9 +515,9 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='publisher-related',
+        related_link_view_name='publishers-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='publisher-relationships',
+        self_link_view_name='publishers-relationships',
     )
 
     entrypoints = relations.ResourceRelatedField(
@@ -519,9 +526,9 @@ class PublisherSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='publisher-related',
+        related_link_view_name='publishers-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='publisher-relationships',
+        self_link_view_name='publishers-relationships',
     )
 
     included_serializers = {
@@ -615,9 +622,9 @@ class EntryPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='entrypoint-related',
+        related_link_view_name='entrypoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='entrypoint-relationships',
+        self_link_view_name='entrypoints-relationships',
     )
 
     publisher = relations.ResourceRelatedField(
@@ -626,9 +633,9 @@ class EntryPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='entrypoint-related',
+        related_link_view_name='entrypoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='entrypoint-relationships',
+        self_link_view_name='entrypoints-relationships',
     )
 
     children = relations.ResourceRelatedField(
@@ -637,9 +644,9 @@ class EntryPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='entrypoint-related',
+        related_link_view_name='entrypoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='entrypoint-relationships',
+        self_link_view_name='entrypoints-relationships',
     )
 
     endpoints = relations.ResourceRelatedField(
@@ -648,9 +655,9 @@ class EntryPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='entrypoint-related',
+        related_link_view_name='entrypoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='entrypoint-relationships',
+        self_link_view_name='entrypoints-relationships',
     )
 
     included_serializers = {
@@ -741,9 +748,9 @@ class EndPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='endpoint-related',
+        related_link_view_name='endpoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='endpoint-relationships',
+        self_link_view_name='endpoints-relationships',
     )
 
     content_media_types = relations.ResourceRelatedField(
@@ -752,9 +759,9 @@ class EndPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='endpoint-related',
+        related_link_view_name='endpoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='endpoint-relationships',
+        self_link_view_name='endpoints-relationships',
     )
 
     request_schema_endpoint = relations.ResourceRelatedField(
@@ -763,9 +770,9 @@ class EndPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='endpoint-related',
+        related_link_view_name='endpoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='endpoint-relationships',
+        self_link_view_name='endpoints-relationships',
     )
 
     response_schema_endpoint = relations.ResourceRelatedField(
@@ -774,9 +781,9 @@ class EndPointSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='endpoint-related',
+        related_link_view_name='endpoints-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='endpoint-relationships',
+        self_link_view_name='endpoints-relationships',
     )
 
     full_path_uri = serializers.CharField()
@@ -884,9 +891,9 @@ class MediaTypeSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='mediatype-related',
+        related_link_view_name='mediatypes-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='mediatype-relationships',
+        self_link_view_name='mediatypes-relationships',
     )
 
     delivering_endpoints = relations.ResourceRelatedField(
@@ -895,9 +902,9 @@ class MediaTypeSerializer(serializers.HyperlinkedModelSerializer):
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='mediatype-related',
+        related_link_view_name='mediatypes-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='mediatype-relationships',
+        self_link_view_name='mediatypes-relationships',
     )
 
     included_serializers = {

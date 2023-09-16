@@ -673,10 +673,9 @@ def init_inchi_type():
 
     original_inchi_type, created = InChIType.objects.get_or_create(
         title="original",
-
     )
-    original_inchi_type.software_version = "1.06",
-    original_inchi_type.description = "InChI with FixedH layer and RecMet option",
+    original_inchi_type.software_version = "1.06"
+    original_inchi_type.description = "InChI with FixedH layer and RecMet option"
     original_inchi_type.is_standard = False
     original_inchi_type.donotaddh = True
     original_inchi_type.fixedh = True
@@ -699,11 +698,10 @@ def init_inchi_type():
 
     tautox_inchi_type, created = InChIType.objects.get_or_create(
         title="xtautox",
-
     )
-    tautox_inchi_type.software_version = "1.06T",
+    tautox_inchi_type.software_version = "1.06T"
     tautox_inchi_type.description = "experimental InChI with FixedH layer, RecMet option and experimental tauto options " \
-                                    "KET, T15 including NCI tautomer options set",
+                                    "KET, T15 including NCI tautomer options set"
     tautox_inchi_type.is_standard = False
     tautox_inchi_type.donotaddh = True
     tautox_inchi_type.fixedh = True
