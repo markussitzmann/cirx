@@ -5,6 +5,7 @@ from rest_framework.fields import MultipleChoiceField
 from rest_framework_json_api import relations
 from rest_framework_json_api import serializers
 
+import resolver.serializers
 from structure.ncicadd.identifier import Identifier as NCICADDIdentifier
 from resolver import defaults
 from resolver.exceptions import ResourceExistsError
@@ -14,15 +15,27 @@ from resolver.models import InChI, Structure, Organization, Publisher, EntryPoin
 
 class StructureParentStructureSerializer(serializers.HyperlinkedModelSerializer):
 
-    ficts_parent = relations.ResourceRelatedField(
+    structure = relations.ResourceRelatedField(
         queryset=Structure.objects,
         many=False,
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structures-related',
+        related_link_view_name='structureparents-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structures-relationships',
+        self_link_view_name='structureparents-relationships',
+    )
+
+    fictsparent = relations.ResourceRelatedField(
+        source='ficts_parent',
+        queryset=Structure.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        default=None,
+        related_link_view_name='structureparents-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structureparents-relationships',
     )
 
     ficts_children = relations.ResourceRelatedField(
@@ -31,20 +44,21 @@ class StructureParentStructureSerializer(serializers.HyperlinkedModelSerializer)
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structures-related',
+        related_link_view_name='structureparents-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structures-relationships',
+        self_link_view_name='structureparents-relationships',
     )
 
-    ficus_parent = relations.ResourceRelatedField(
+    ficusparent = relations.ResourceRelatedField(
+        source='ficus_parent',
         queryset=Structure.objects,
         many=False,
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structures-related',
+        related_link_view_name='structureparents-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structures-relationships',
+        self_link_view_name='structureparents-relationships',
     )
 
     ficus_children = relations.ResourceRelatedField(
@@ -53,20 +67,21 @@ class StructureParentStructureSerializer(serializers.HyperlinkedModelSerializer)
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structures-related',
+        related_link_view_name='structureparents-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structures-relationships',
+        self_link_view_name='structureparents-relationships',
     )
 
-    uuuuu_parent = relations.ResourceRelatedField(
+    uuuuuparent = relations.ResourceRelatedField(
+        source='uuuuu_parent',
         queryset=Structure.objects,
         many=False,
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structures-related',
+        related_link_view_name='structureparents-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structures-relationships',
+        self_link_view_name='structureparents-relationships',
     )
 
     uuuuu_children = relations.ResourceRelatedField(
@@ -75,15 +90,16 @@ class StructureParentStructureSerializer(serializers.HyperlinkedModelSerializer)
         read_only=False,
         required=False,
         default=None,
-        related_link_view_name='structures-related',
+        related_link_view_name='structureparents-related',
         related_link_url_kwarg='pk',
-        self_link_view_name='structures-relationships',
+        self_link_view_name='structureparents-relationships',
     )
 
     included_serializers = {
-        'ficts_parent': 'resolver.serializers.StructureSerializer',
-        'ficus_parent': 'resolver.serializers.StructureSerializer',
-        'uuuuu_parent': 'resolver.serializers.StructureSerializer',
+        'structure': 'resolver.serializers.StructureSerializer',
+        'fictsparent': 'resolver.serializers.StructureSerializer',
+        'ficusparent': 'resolver.serializers.StructureSerializer',
+        'uuuuuparent': 'resolver.serializers.StructureSerializer',
         'ficts_children': 'resolver.serializers.StructureSerializer',
         'ficus_children': 'resolver.serializers.StructureSerializer',
         'uuuuu_children': 'resolver.serializers.StructureSerializer',
@@ -98,21 +114,45 @@ class StructureParentStructureSerializer(serializers.HyperlinkedModelSerializer)
 
     def get_ficts(self, obj: StructureParentStructure):
         if obj.ficts_parent:
-            return NCICADDIdentifier(hashcode=obj.ficts_parent.hashisy, identifier_type='FICTS').string
+            return NCICADDIdentifier(hashcode=obj.ficts_parent.hashisy.hashisy, identifier_type='FICTS').string
         else:
             None
 
     def get_ficus(self, obj: StructureParentStructure):
         if obj.ficus_parent:
-            return NCICADDIdentifier(hashcode=obj.ficus_parent.hashisy, identifier_type='FICuS').string
+            return NCICADDIdentifier(hashcode=obj.ficus_parent.hashisy.hashisy, identifier_type='FICuS').string
         else:
             None
 
     def get_uuuuu(self, obj: StructureParentStructure):
         if obj.uuuuu_parent:
-            return NCICADDIdentifier(hashcode=obj.uuuuu_parent.hashisy, identifier_type='uuuuu').string
+            return NCICADDIdentifier(hashcode=obj.uuuuu_parent.hashisy.hashisy, identifier_type='uuuuu').string
         else:
             None
+
+    class Meta:
+        model = Structure
+        fields = (
+            'id',
+            #'url',
+            #'hashisy',
+            #'smiles',
+            'structure',
+            'fictsparent',
+            'ficusparent',
+            'uuuuuparent',
+            'ficts_children',
+            'ficus_children',
+            'uuuuu_children',
+            #'structureinchiassociations',
+            #'entrypoints',
+            'ficts',
+            'ficus',
+            'uuuuu',
+            'added',
+        )
+        read_only_fields = ('id',)
+        #meta_fields = ('added',)
 
 
 class StructureSerializer(serializers.HyperlinkedModelSerializer):
@@ -127,6 +167,18 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         self_link_view_name='structures-relationships',
     )
 
+    structureparents = relations.ResourceRelatedField(
+        source='parents',
+        queryset=StructureParentStructure.objects,
+        many=False,
+        read_only=False,
+        required=False,
+        related_link_view_name='structures-related',
+        related_link_url_kwarg='pk',
+        self_link_view_name='structures-relationships',
+    )
+
+
     structureinchiassociations = relations.ResourceRelatedField(
         source='inchis',
         queryset=StructureInChIAssociation.objects,
@@ -139,23 +191,14 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     included_serializers = {
-        #'ficts_parent': 'resolver.serializers.StructureSerializer',
-        #'ficus_parent': 'resolver.serializers.StructureSerializer',
-        #'uuuuu_parent': 'resolver.serializers.StructureSerializer',
-        #'ficts_children': 'resolver.serializers.StructureSerializer',
-        #'ficus_children': 'resolver.serializers.StructureSerializer',
-        #'uuuuu_children': 'resolver.serializers.StructureSerializer',
+        'parents': 'resolver.serializers.StructureParentStructureSerializer',
         'entrypoints': 'resolver.serializers.EntryPointSerializer',
+        'structureparents': 'resolver.serializers.StructureParentStructureSerializer',
         'structureinchiassociations': 'resolver.serializers.StructureInChIAssociationSerializer',
     }
 
     smiles = serializers.SerializerMethodField('serialize_minimol')
     hashisy = serializers.SerializerMethodField('serialize_hashisy')
-
-    #ficts = serializers.SerializerMethodField('get_ficts')
-    #ficus = serializers.SerializerMethodField('get_ficus')
-    #uuuuu = serializers.SerializerMethodField('get_uuuuu')
-
 
     def serialize_minimol(self, obj):
         return obj.to_ens.get("E_SMILES")
@@ -169,17 +212,9 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
             'url',
             'hashisy',
             'smiles',
-            #'ficts_parent',
-            #'ficus_parent',
-            #'uuuuu_parent',
-            #'ficts_children',
-            #'ficus_children',
-            #'uuuuu_children',
+            'structureparents',
             'structureinchiassociations',
             'entrypoints',
-            #'ficts',
-            #'ficus',
-            #'uuuuu',
             'added',
         )
         read_only_fields = ('id',)

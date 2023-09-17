@@ -161,7 +161,7 @@ class StructureParentStructureViewSet(ResourceModelViewSet):
     #    .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints', 'ficts_children',
     #                      'ficus_children', 'uuuuu_children')
 
-    queryset = StructureParentStructure.objects
+    queryset = StructureParentStructure.objects.all()
     #    .prefetch_related('inchis', 'inchis__inchi_type', 'inchis__inchi', 'entrypoints')
 
     # select_for_includes = {
@@ -180,7 +180,7 @@ class StructureParentStructureViewSet(ResourceModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     filterset_fields = {
-        'id': ('exact', 'in'),
+        #'id': ('exact', 'in'),
         #'ficts_parent': ('exact', 'in'),
         #'ficus_parent': ('exact', 'in'),
         #'uuuuu_parent': ('exact', 'in'),
@@ -193,7 +193,7 @@ class StructureParentStructureViewSet(ResourceModelViewSet):
         #'inchis__inchi__string': ('icontains', 'iexact', 'contains', 'exact'),
     }
     search_fields = (
-        'id',
+        #'id',
         #'hashisy',
         #'ficts_parent',
         #'ficus_parent',
@@ -210,24 +210,9 @@ class StructureParentStructureRelationshipView(ResourceRelationshipView):
         self.name = "StructureParentStructure"
         super().__init__(*args, **kwargs)
 
-    queryset = Structure.objects
-    self_link_view_name = 'structures-relationships'
+    queryset = StructureParentStructure.objects.all()
+    self_link_view_name = 'structureparents-relationships'
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ### INCHI ###

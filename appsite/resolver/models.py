@@ -136,6 +136,8 @@ class StructureParentStructure(models.Model):
     
     class Meta:
         db_table = 'cir_structure_parent_structure'
+        verbose_name = "Structure Parent"
+        verbose_name_plural = "Structure Parents"
 
     def __str__(self):
         return "(StructureParentStructure=%s: ficts=%s, ficus=%s, uuuuu=%s)" % \

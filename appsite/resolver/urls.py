@@ -11,12 +11,13 @@ router.register('inchis', views.InChIViewSet)
 router.register('inchitypes', views.InChITypeViewSet)
 router.register('organizations', views.OrganizationViewSet)
 router.register('publishers', views.PublisherViewSet)
-router.register('entrypoints', views.EntryPointViewSet)
-router.register('endpoints', views.EndPointViewSet)
-router.register('mediatypes', views.MediaTypeViewSet)
 router.register('structures', views.StructureViewSet)
 router.register('structureparents', views.StructureParentStructureViewSet)
 router.register('structureinchiassociations', views.StructureInChIAssociationViewSet)
+router.register('entrypoints', views.EntryPointViewSet)
+router.register('endpoints', views.EndPointViewSet)
+router.register('mediatypes', views.MediaTypeViewSet)
+
 
 
 urlpatterns = [
