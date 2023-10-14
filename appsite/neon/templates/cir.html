@@ -46,43 +46,40 @@
     {#    </div>#}
     {#    </div>#}
     <div class="container-fluid p-5" id="getting-started-container">
-        <div class="card">
-            <div class="card-body">
-                <h1 class="display-6">Getting started.</h1>
-                <p class="lead">
-                    This service works as a resolver for different chemical structure identifiers and allows one to
-                    convert a
-                    given structure identifier into another representation or structure identifier. It can help you
-                    identify
-                    and find the chemical structure if you have an identifier such as an InChIKey. You can either use
-                    the resolver web form above or use the following simple URL API scheme:
-                </p>
+        <h1 class="display-6">Getting started.</h1>
+        <p class="lead">
+            This service works as a resolver for different chemical structure identifiers and allows one to
+            convert a
+            given structure identifier into another representation or structure identifier. It can help you
+            identify
+            and find the chemical structure if you have an identifier such as an InChIKey. You can either use
+            the resolver web form above or use the following simple URL API scheme:
+        </p>
 
-                <div class="bg-light border-start border-3 overflow-auto mt-3 mb-3">
-                    <p class="fs-2 p-3 pb-1">{{ host }}/chemical/structure/<strong
-                            class="text-secondary">identifier</strong>/<strong
-                            class="text-primary">representation</strong></p>
-                </div>
-
-                <p class="lead">
-                    The service returns the requested new structure representation with a corresponding MIME-Type
-                    specification
-                    (in most cases <span class="">MIME-Type: "text/plain"</span>). If a requested URL is not resolvable
-                    for
-                    the service a <span class="term">HTML 404 status</span> message is returned.
-                </p>
-                <p><small>
-                    <span class="badge bg-warning text-dark">Note:</span> Triple bonds in SMILES strings represented by
-                    '<em>#</em>' have to be URL-escaped as <span class="badge bg-dark-subtle text-dark">%23</span>
-                    (e.g. the
-                    SMILES string of '<em>ethyne</em>' has to be specified as
-                    <span class="badge bg-dark-subtle text-dark">C%23C</span> instead of '<em>C#C</em>' if
-                    encoded as part of a URL). Similarly, question marks, which can occur in InChI, need to be
-                    URL-escaped as <span class="badge bg-dark-subtle text-dark">%3F</span>.
-                </small></p>
-            </div>
+        <div class="bg-light border-start border-3 overflow-auto mt-3 mb-3">
+            <p class="fs-2 p-3 pb-1">{{ host }}/chemical/structure/<strong
+                    class="text-secondary">identifier</strong>/<strong
+                    class="text-primary">representation</strong></p>
         </div>
+
+        <p class="lead">
+            The service returns the requested new structure representation with a corresponding MIME-Type
+            specification
+            (in most cases <span class="">MIME-Type: "text/plain"</span>). If a requested URL is not resolvable
+            for
+            the service a <span class="term">HTML 404 status</span> message is returned.
+        </p>
+        <p><small>
+            <span class="badge bg-warning text-dark">Note:</span> Triple bonds in SMILES strings represented by
+            '<em>#</em>' have to be URL-escaped as <span class="badge bg-dark-subtle text-dark">%23</span>
+            (e.g. the
+            SMILES string of '<em>ethyne</em>' has to be specified as
+            <span class="badge bg-dark-subtle text-dark">C%23C</span> instead of '<em>C#C</em>' if
+            encoded as part of a URL). Similarly, question marks, which can occur in InChI, need to be
+            URL-escaped as <span class="badge bg-dark-subtle text-dark">%3F</span>.
+        </small></p>
     </div>
+
 {% endblock main %}
 
 {% block javascript %}
