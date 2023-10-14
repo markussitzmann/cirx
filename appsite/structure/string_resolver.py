@@ -277,7 +277,6 @@ class ChemicalString:
                 'description': compound.cid,
                 'compound': compound
             }
-
         )
         return [resolved, ] if resolved else list()
 
@@ -382,11 +381,11 @@ class ChemicalString:
         resolved = ChemicalStructure(
             ens=Ens(self.string),
             metadata={
-            'query_type': 'Cactvs-resolvable structure representation',
-            'query_search_string': 'structure representation',
-            'query_object': self.string,
-            'query_string': self.string,
-            'description': self.string
+                'query_type': 'Cactvs-resolvable structure representation',
+                'query_search_string': 'structure representation',
+                'query_object': self.string,
+                'query_string': self.string,
+                'description': self.string
             }
         )
         return [resolved, ]

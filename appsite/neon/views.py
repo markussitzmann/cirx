@@ -6,12 +6,31 @@ from django.shortcuts import render
 from pycactvs import Prop, Ens
 
 from core.common import NCICADD_TYPES
-from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Record
+from resolver.models import Compound, StructureNameAssociation, StructureInChIAssociation, Record, \
+    StructureParentStructure, Structure
 from structure.forms import ResolverInput
 # Create your views here.
 from structure.ncicadd.identifier import Identifier
 
 ParentData = namedtuple('ParentData', 'structure identifier children_count is_parent')
+
+def _prepare_parent_data_for_structure(structure: Structure, ncicadd_key_types=None):
+    if ncicadd_key_types is None:
+        ncicadd_key_types = ['FICTS', 'FICuS', 'uuuuu']
+    parents = {}
+    for parent_type in NCICADD_TYPES:
+        parents[parent_type.public_string] = ParentData(
+            structure=getattr(structure.parents, parent_type.attr),
+            identifier=Identifier(hashcode=p.hashisy_key.padded, identifier_type=parent_type.public_string)
+            if (p := getattr(structure.parents, parent_type.attr)) else None,
+            #children_count=getattr(compound, parent_type.key + '_children_count'),
+            children_count=0,
+            is_parent=structure.hashisy_key == p.hashisy_key
+            if (p := getattr(structure.parents, parent_type.attr)) else False
+        )
+
+    return {key: parents[key] for key in ncicadd_key_types}
+
 
 
 def _create_image(ens: Ens, svg_paramaters = None):
@@ -54,27 +73,20 @@ def cir(request: HttpRequest):
 
 def records(request, rid: int = None):
     record: Record = Record.with_related_objects.by_record_ids([rid, ]).first()
+
     return render(request, 'record.html', {
         'id': int,
         'host': request.scheme + "://" + request.get_host(),
         'record': record,
-        'source': record.structure_file_record.source.decode("UTF-8")
+        'source': record.structure_file_record.source.decode("UTF-8"),
+        'parents': _prepare_parent_data_for_structure(record.structure_file_record.structure)
+
     })
 
 
 def compounds(request, cid: int = None):
     compound: Compound = Compound.with_related_objects.by_compound_ids([cid, ]).first()
-    parents = {}
-    for parent_type in NCICADD_TYPES:
-        parents[parent_type.public_string] = ParentData(
-            structure=getattr(compound.structure.parents, parent_type.attr),
-            identifier=Identifier(hashcode=p.hashisy_key.padded, identifier_type=parent_type.public_string)
-                            if (p := getattr(compound.structure.parents, parent_type.attr)) else None,
-            children_count=getattr(compound, parent_type.key + '_children_count'),
-            is_parent=compound.structure.hashisy_key == p.hashisy_key
-                            if (p := getattr(compound.structure.parents, parent_type.attr)) else False
-        )
-
+    
     name_association_affinity_dict = defaultdict(list)
     _ = {
         n.affinity_class: name_association_affinity_dict[n.affinity_class.title].append(n)
@@ -89,14 +101,15 @@ def compounds(request, cid: int = None):
     }
 
     name_affinities = ['exact', 'narrow', 'broad', 'generic']
-    identifier_keys = ['FICTS', 'FICuS', 'uuuuu']
+    #identifier_keys = ['FICTS', 'FICuS', 'uuuuu']
     inchi_types = ['standard', 'original', 'xtauto', 'xtautox']
 
     return render(request, 'compound.html', {
         'id': int,
         'host': request.scheme + "://" + request.get_host(),
         'compound': compound,
-        'parents': {key: parents[key] for key in identifier_keys},
+        #'parents': {key: parents[key] for key in identifier_keys},
+        'parents': _prepare_parent_data_for_structure(compound.structure),
         'names': {key: name_association_affinity_dict[key] for key in name_affinities},
         'inchis': {t: inchi_associations[t] for t in inchi_types if t in inchi_associations},
         'formula': compound.structure.to_ens.get('E_FORMULA'),

@@ -54,20 +54,20 @@ ResolverResponse = namedtuple("ResolverResponse", "resolver expectations excepti
 #         logger.info("structure {} ens {} identifier {} x {}".format(cs.structure, cs.ens, cs.identifier, cs.metadata))
 
 
-class DispatcherTest(TestCase):
-    fixtures = FIXTURES
-
-    def setUp(self):
-        logger.info("cactvs version: %s", cactvs['version'])
-
-    def tearDown(self):
-        logger.info("------------- Tear Down -------------")
-        logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
-
-    @parameterized.expand([
-    ])
-    def test(self, resolver_test: ResolverTest):
-        dispatcher: Dispatcher
+# class DispatcherTest(TestCase):
+#     fixtures = FIXTURES
+#
+#     def setUp(self):
+#         logger.info("cactvs version: %s", cactvs['version'])
+#
+#     def tearDown(self):
+#         logger.info("------------- Tear Down -------------")
+#         logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
+#
+#     @parameterized.expand([
+#     ])
+#     def test(self, resolver_test: ResolverTest):
+#         dispatcher: Dispatcher
 
 
 class ChemicalStringTests(TestCase):
