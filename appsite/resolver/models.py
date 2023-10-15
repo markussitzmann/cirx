@@ -145,7 +145,6 @@ class StructureParentStructure(models.Model):
 
 
 class InChIManager(models.Manager):
-
     def bulk_get_from_objects(self, object_list: List['InChI']):
         inchi_list = []
         for o in object_list:
@@ -963,3 +962,29 @@ class Release(models.Model):
 
     def __str__(self):
         return "%s" % self.release_name
+
+
+class StructureFormula(models.Model):
+    formula = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        db_table = 'cir_structure_formula'
+
+
+class ResponseType(models.Model):
+    parent_type = models.ForeignKey('ResponseType', null=True, blank=True, on_delete=models.CASCADE)
+    url = models.CharField(max_length=128, unique=True)
+    method = models.CharField(max_length=255, null=True, blank=True)
+    parameter = models.CharField(max_length=1024, null=True, blank=True)
+    base_mime_type = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name = "Response Type"
+        verbose_name_plural = "Response Types"
+        db_table = 'cir_response_type'
+
+    def child_types(self):
+        return ResponseType.objects.get(parent_type=self.pk)
+
+    def __str__(self):
+        return self.url + ":" + self.method

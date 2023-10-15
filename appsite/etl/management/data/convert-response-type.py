@@ -1,4 +1,4 @@
-from structure.models import ResponseType
+from models import ResponseType
 
 import os
 print(os.getcwd())

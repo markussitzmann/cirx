@@ -1,181 +1,150 @@
-import json
-
-from django.db import models
-
-
-class StructureFormula(models.Model):
-    formula = models.CharField(max_length=50, unique=True)
-
-    class Meta:
-        db_table = 'cir_structure_formula'
-
-
-class ResponseType(models.Model):
-    parent_type = models.ForeignKey('ResponseType', null=True, blank=True, on_delete=models.CASCADE)
-    url = models.CharField(max_length=128, unique=True)
-    method = models.CharField(max_length=255, null=True, blank=True)
-    parameter = models.CharField(max_length=1024, null=True, blank=True)
-    base_mime_type = models.CharField(max_length=255)
-
-    class Meta:
-        verbose_name = "Response Type"
-        verbose_name_plural = "Response Types"
-        db_table = 'cir_response_type'
-
-    def child_types(self):
-        return ResponseType.objects.get(parent_type=self.pk)
-
-    def __str__(self):
-        return self.url + ":" + self.method
-
-
-class Access(models.Model):
-    #id = models.AutoField(primary_key=True)
-    host = models.ForeignKey('AccessHost', on_delete=models.CASCADE)
-    client = models.ForeignKey('AccessClient', on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now=True, db_column="dateTime")
-
-    class Meta:
-        db_table = 'cir_access'
-        #db_table = u'chemical_structure_access'
-
-
-class AccessClient(models.Model):
-    #id = models.AutoField(primary_key=True)
-    string = models.CharField(max_length=255, unique=True)
-
-    class Meta:
-        db_table = 'cir_access_client'
-        #db_table = u'chemical_structure_access_client'
-
-
-class AccessHost(models.Model):
-    #id = models.AutoField(primary_key=True)
-    string = models.CharField(max_length=255, unique=True)
-    blocked = models.IntegerField()
-    lock_timestamp = models.DateTimeField(db_column="lock_time")
-    current_sleep_period = models.IntegerField()
-    force_sleep_period = models.IntegerField()
-    force_block = models.IntegerField()
-    organization = models.ManyToManyField('AccessOrganization', through='AccessHostOrganization')
-
-    class Meta:
-        db_table = 'cir_access_host'
-        #db_table = u'chemical_structure_access_host'
-
-
-class AccessOrganization(models.Model):
-    #id = models.AutoField(primary_key=True)
-    string = models.CharField(max_length=255, unique=True)
-
-    class Meta:
-        db_table = u'cir_access_organization'
-        #db_table = u'chemical_structure_access_organization'
-
-
-class AccessHostOrganization(models.Model):
-    host = models.ForeignKey(AccessHost, on_delete=models.CASCADE)
-    organization = models.ForeignKey(AccessOrganization, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = (('host', 'organization'),)
-        db_table = u'cir_access_host_organization'
-        #db_table = u'chemical_structure_access_host_organization'
-
-
-
-
-
-class Response(models.Model):
-    #id = models.AutoField(primary_key=True)
-    type = models.ForeignKey('ResponseType', on_delete=models.CASCADE)
-    fromString = models.TextField()
-    response = models.TextField(db_column='string')
-    responseFile = models.FileField(max_length=255, upload_to="tmp")
-
-    class Meta:
-        db_table = u'cir_response'
-        #db_table = u'chemical_structure_response'
-
-
-    def json(self):
-        d = {'type': self.type, 'from': self.fromString, 'string': self.response}
-        return json.dumps(d)
-
-
-class UsageMonthList(models.Manager):
-    def get_query_set(self):
-        return super(UsageMonthList, self).get_query_set().order_by('-year', '-month')[1:13].values()
-
-
-class UsageMonth(models.Model):
-    month_year = models.CharField(primary_key=True, max_length=2)
-    month = models.IntegerField()
-    year = models.IntegerField()
-    requests = models.IntegerField()
-    ip_counts = models.IntegerField()
-    average = models.DecimalField(decimal_places=2, max_digits=5)
-
-    objects = models.Manager()
-    all_months_data = UsageMonthList()
-
-    @staticmethod
-    def get_data_dictionary():
-        data = UsageMonth.all_months_data.values()
-        data_dictionary = {'month_year': [], 'requests': [], 'ip_counts': []}
-        for element in data:
-            data_dictionary['month_year'].append(element['month_year'])
-            data_dictionary['requests'].append(element['requests'])
-            data_dictionary['ip_counts'].append(element['ip_counts'])
-        data_dictionary['month_year'].reverse()
-        data_dictionary['requests'].reverse()
-        data_dictionary['ip_counts'].reverse()
-        return data_dictionary
-
-    class Meta:
-        db_table = 'cir_usage_month'
-        #db_table = u'`chemical_structure_usage_month`'
-
-
-class UsageMonthDayList(models.Manager):
-    def get_query_set(self):
-        return super(UsageMonthDayList, self).get_query_set().order_by('month', 'day').values()
-
-
-class UsageMonthDay(models.Model):
-    month_day = models.CharField(primary_key=True, max_length=2)
-    month = models.IntegerField()
-    day = models.IntegerField()
-    requests = models.IntegerField()
-    ip_counts = models.IntegerField()
-
-    objects = models.Manager()
-    all_month_day_data = UsageMonthDayList()
-
-    @staticmethod
-    def get_data_dictionary():
-        data = UsageMonthDay.all_month_day_data.values()
-        data_dictionary = {'month_day': [], 'requests': [], 'ip_counts': []}
-        for element in data:
-            data_dictionary['month_day'].append(element['month_day'])
-            data_dictionary['requests'].append(element['requests'])
-            data_dictionary['ip_counts'].append(element['ip_counts'])
-        data_dictionary['month_day'].reverse()
-        data_dictionary['requests'].reverse()
-        data_dictionary['ip_counts'].reverse()
-        return data_dictionary
-
-    class Meta:
-        db_table = 'cir_usage_month_day'
-        #db_table = u'`chemical_structure_usage_month_day`'
-
-
-class UsageSeconds(models.Model):
-    requests = models.IntegerField(primary_key=True)
-
-    class Meta:
-        db_table = 'cir_usage_seconds'
-        #db_table = u'chemical_structure_usage_seconds'
+# class Access(models.Model):
+#     #id = models.AutoField(primary_key=True)
+#     host = models.ForeignKey('AccessHost', on_delete=models.CASCADE)
+#     client = models.ForeignKey('AccessClient', on_delete=models.CASCADE)
+#     timestamp = models.DateTimeField(auto_now=True, db_column="dateTime")
+#
+#     class Meta:
+#         db_table = 'cir_access'
+#         #db_table = u'chemical_structure_access'
+#
+#
+# class AccessClient(models.Model):
+#     #id = models.AutoField(primary_key=True)
+#     string = models.CharField(max_length=255, unique=True)
+#
+#     class Meta:
+#         db_table = 'cir_access_client'
+#         #db_table = u'chemical_structure_access_client'
+#
+#
+# class AccessHost(models.Model):
+#     #id = models.AutoField(primary_key=True)
+#     string = models.CharField(max_length=255, unique=True)
+#     blocked = models.IntegerField()
+#     lock_timestamp = models.DateTimeField(db_column="lock_time")
+#     current_sleep_period = models.IntegerField()
+#     force_sleep_period = models.IntegerField()
+#     force_block = models.IntegerField()
+#     organization = models.ManyToManyField('AccessOrganization', through='AccessHostOrganization')
+#
+#     class Meta:
+#         db_table = 'cir_access_host'
+#         #db_table = u'chemical_structure_access_host'
+#
+#
+# class AccessOrganization(models.Model):
+#     #id = models.AutoField(primary_key=True)
+#     string = models.CharField(max_length=255, unique=True)
+#
+#     class Meta:
+#         db_table = u'cir_access_organization'
+#         #db_table = u'chemical_structure_access_organization'
+#
+#
+# class AccessHostOrganization(models.Model):
+#     host = models.ForeignKey(AccessHost, on_delete=models.CASCADE)
+#     organization = models.ForeignKey(AccessOrganization, on_delete=models.CASCADE)
+#
+#     class Meta:
+#         unique_together = (('host', 'organization'),)
+#         db_table = u'cir_access_host_organization'
+#         #db_table = u'chemical_structure_access_host_organization'
+#
+#
+#
+#
+#
+# class Response(models.Model):
+#     #id = models.AutoField(primary_key=True)
+#     type = models.ForeignKey('ResponseType', on_delete=models.CASCADE)
+#     fromString = models.TextField()
+#     response = models.TextField(db_column='string')
+#     responseFile = models.FileField(max_length=255, upload_to="tmp")
+#
+#     class Meta:
+#         db_table = u'cir_response'
+#         #db_table = u'chemical_structure_response'
+#
+#
+#     def json(self):
+#         d = {'type': self.type, 'from': self.fromString, 'string': self.response}
+#         return json.dumps(d)
+#
+#
+# class UsageMonthList(models.Manager):
+#     def get_query_set(self):
+#         return super(UsageMonthList, self).get_query_set().order_by('-year', '-month')[1:13].values()
+#
+#
+# class UsageMonth(models.Model):
+#     month_year = models.CharField(primary_key=True, max_length=2)
+#     month = models.IntegerField()
+#     year = models.IntegerField()
+#     requests = models.IntegerField()
+#     ip_counts = models.IntegerField()
+#     average = models.DecimalField(decimal_places=2, max_digits=5)
+#
+#     objects = models.Manager()
+#     all_months_data = UsageMonthList()
+#
+#     @staticmethod
+#     def get_data_dictionary():
+#         data = UsageMonth.all_months_data.values()
+#         data_dictionary = {'month_year': [], 'requests': [], 'ip_counts': []}
+#         for element in data:
+#             data_dictionary['month_year'].append(element['month_year'])
+#             data_dictionary['requests'].append(element['requests'])
+#             data_dictionary['ip_counts'].append(element['ip_counts'])
+#         data_dictionary['month_year'].reverse()
+#         data_dictionary['requests'].reverse()
+#         data_dictionary['ip_counts'].reverse()
+#         return data_dictionary
+#
+#     class Meta:
+#         db_table = 'cir_usage_month'
+#         #db_table = u'`chemical_structure_usage_month`'
+#
+#
+# class UsageMonthDayList(models.Manager):
+#     def get_query_set(self):
+#         return super(UsageMonthDayList, self).get_query_set().order_by('month', 'day').values()
+#
+#
+# class UsageMonthDay(models.Model):
+#     month_day = models.CharField(primary_key=True, max_length=2)
+#     month = models.IntegerField()
+#     day = models.IntegerField()
+#     requests = models.IntegerField()
+#     ip_counts = models.IntegerField()
+#
+#     objects = models.Manager()
+#     all_month_day_data = UsageMonthDayList()
+#
+#     @staticmethod
+#     def get_data_dictionary():
+#         data = UsageMonthDay.all_month_day_data.values()
+#         data_dictionary = {'month_day': [], 'requests': [], 'ip_counts': []}
+#         for element in data:
+#             data_dictionary['month_day'].append(element['month_day'])
+#             data_dictionary['requests'].append(element['requests'])
+#             data_dictionary['ip_counts'].append(element['ip_counts'])
+#         data_dictionary['month_day'].reverse()
+#         data_dictionary['requests'].reverse()
+#         data_dictionary['ip_counts'].reverse()
+#         return data_dictionary
+#
+#     class Meta:
+#         db_table = 'cir_usage_month_day'
+#         #db_table = u'`chemical_structure_usage_month_day`'
+#
+#
+# class UsageSeconds(models.Model):
+#     requests = models.IntegerField(primary_key=True)
+#
+#     class Meta:
+#         db_table = 'cir_usage_seconds'
+#         #db_table = u'chemical_structure_usage_seconds'
 
 
 ############

@@ -7,8 +7,7 @@ from pycactvs import Ens
 
 from etl.models import StructureFileCollection, StructureFileCollectionPreprocessor, StructureFileField
 from resolver.models import InChI, Organization, Publisher, Structure, Name, NameType, StructureNameAssociation, \
-    ContextTag, Dataset, Release, InChIType, NameAffinityClass
-from structure.models import ResponseType
+    ContextTag, Dataset, Release, InChIType, NameAffinityClass, ResponseType
 
 logger = logging.getLogger('cirx')
 
@@ -489,7 +488,7 @@ def init_release(
             if init_nci_10000:
                 fname = "MINI/nci/NCI_DTP/NCI_DTP.*.10000.sdf.gz"
             else:
-                fname = "MINI/nci/NCI_DTP/NCI_DTP.2.error.sdf"
+                fname = "MINI/nci/NCI_DTP/NCI_DTP.sdf"
             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
                 release=open_nci_db,
                 file_location_pattern_string=fname

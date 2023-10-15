@@ -12,8 +12,7 @@ from django.http import HttpRequest
 from pycactvs import Dataset as CsDataset
 from pycactvs import Ens, Molfile, Prop
 
-from resolver.models import Record, StructureNameAssociation, NameAffinityClass
-from structure.models import ResponseType
+from resolver.models import Record, StructureNameAssociation, NameAffinityClass, ResponseType
 from structure.string_resolver import ChemicalString, ChemicalStructure, ResolverData, ResolverParams
 
 logger = logging.getLogger('cirx')
