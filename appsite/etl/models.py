@@ -113,7 +113,7 @@ class StructureFileNormalizationStatus(models.Model):
         )
 
 
-class StructureCalcInChIStatus(models.Model):
+class StructureFileCalcInChIStatus(models.Model):
     structure_file = models.OneToOneField(
         'StructureFile',
         primary_key=True,
@@ -156,6 +156,35 @@ class StructureFileLinkNameStatus(models.Model):
             self.structure_file,
             self.progress
         )
+
+
+class StructureFileTag(models.Model):
+    structure_file = models.ForeignKey(
+        'StructureFile',
+        blank=False,
+        null=False,
+        related_name='tags',
+        on_delete=models.CASCADE,
+    )
+    tag = models.CharField(max_length=16)
+    process = models.CharField(max_length=16, choices=(
+        ('addfiles', 'Add Files'),
+        ('register', 'Registation'),
+        ('normalize', 'Normalization'),
+        ('calcinchi', 'InChI Calculation'),
+        ('linkname', 'Name Linking'),
+        ('none', 'None'),
+    ), default='none')
+    updated = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['structure_file', 'tag', 'process'],
+                name='unique_structure_file_tag_constraint'
+            ),
+        ]
+        db_table = 'cir_structure_file_tag'
 
 
 class StructureFileField(models.Model):

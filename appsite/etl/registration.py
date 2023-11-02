@@ -23,7 +23,7 @@ from pycactvs import Molfile, Ens, Prop
 from core.common import NCICADD_TYPES, InChIAndSaveOpt, INCHI_TYPES
 from core.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureCalcInChIStatus, \
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileCalcInChIStatus, \
     StructureFileRecordNameAssociation, StructureFileSource, StructureFileLinkNameStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure, StructureNameAssociation, \
@@ -620,10 +620,10 @@ class StructureRegistry(object):
         except StructureFile.DoesNotExist:
             return None
         logger.info("calc inchi structure file %s", structure_file)
-        if hasattr(structure_file, 'inchi_status'):
+        if hasattr(structure_file, 'calcinchi_status'):
             status = structure_file.calcinchi_status
         else:
-            status = StructureCalcInChIStatus(structure_file=structure_file)
+            status = StructureFileCalcInChIStatus(structure_file=structure_file)
             status.save()
         if status.progress > 0.98:
             return None
@@ -771,7 +771,12 @@ class StructureRegistry(object):
             structure_count_with_inchi,
             structure_count
         ))
-        status, created = StructureCalcInChIStatus.objects.get_or_create(structure_file=structure_file)
+        logger.info("PROGRESS %s/%s %s" % (
+            structure_count_with_inchi,
+            structure_count,
+            structure_count_with_inchi / structure_count)
+        )
+        status, created = StructureFileCalcInChIStatus.objects.get_or_create(structure_file=structure_file)
         status.progress = structure_count_with_inchi / structure_count
         status.save()
 

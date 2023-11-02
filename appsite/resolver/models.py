@@ -305,7 +305,7 @@ class StructureInChIAssociationQuerySet(models.QuerySet):
     ):
         q = Q()
         for inchikey in inchikeys:
-            splitted_inchikey=inchikey.split("-")
+            splitted_inchikey = inchikey.split("-")
             number_of_elements = len(splitted_inchikey)
             if number_of_elements == 3:
                 q |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1], inchi__block3=splitted_inchikey[2])
