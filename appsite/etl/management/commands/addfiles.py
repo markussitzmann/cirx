@@ -25,8 +25,8 @@ class Command(BaseCommand):
         _addfiles(options)
 
 
-def _addfile(file, check):
-    task = add_file_task.delay(file, check)
+def _addfile(file, check, release):
+    task = add_file_task.delay(file, check, release)
     return task
 
 
@@ -40,12 +40,8 @@ def _addfiles(options):
     files = sorted(Path(instore_path).glob(pattern))
     for file in files:
         logger.info("submitting file %s", file)
-        _addfile(str(file), check)
-    if release:
-        StructureFileCollection.objects.get_or_create(
-            release_id=release,
-            file_location_pattern_string=pattern
-        )
+        _addfile(str(file), check, release)
+
     logger.info("done")
 
 

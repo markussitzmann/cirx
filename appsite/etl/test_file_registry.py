@@ -1,4 +1,8 @@
 import logging
+from pathlib import Path
+from unittest import skip
+
+from django.conf import settings
 from pycactvs import Ens
 
 from django.test import TestCase
@@ -12,62 +16,38 @@ logger = logging.getLogger('cirx')
 
 class FileRegistryTests(TestCase):
 
-    fixtures = ['init.json']
+    fixtures = ['sandbox.json']
 
     def setUp(self):
         logger.info("----- file registry set up ----")
-        self.structure_file_collection = StructureFileCollection.objects.get(id=2)
-        logger.info("COLLECTION %s", self.structure_file_collection)
-        for f in self.structure_file_collection.files.all():
-            logger.info("FILE %s", f)
-
-        for t in NameType.objects.all():
-            logger.info("NAME TYPE %s : %s :", t.id, t.parent)
-
-        for r in StructureFileRecord.objects.all():
-            logger.info("NAME TYPE %s : %s :", r.id, r)
 
     def tearDown(self):
         logger.info("----- file registry tear down ----")
-        logger.info("ENS COUNT: %s" % len(Ens.List()))
-        for n in Name.objects.all():
-            logger.info("NAME %s : %s", n.id, n)
-
-        for a in StructureFileRecordNameAssociation.objects.all():
-            logger.info("ASSOCIATIONS %s : %s", a.id, a)
-
-    def test_file_registry(self):
-        logger.info("----- file registry test ----")
-
-        registry = FileRegistry(self.structure_file_collection)
-        registry.register_files()
-
-        for file in self.structure_file_collection.files.all():
-            logger.info("----- %s ----", file)
-            FileRegistry.count_and_save_structure_file(file.id)
-            FileRegistry.register_structure_file_record_chunk(file.id, 0, 100)
-
-        structure_count = Structure.objects.count()
-        logger.info("STRUCTURE %s", structure_count)
-        #self.assertEqual(structure_count, 195)
-
-        structure_file_record_count = StructureFileRecord.objects.count()
-        logger.info("RECORD %s", structure_file_record_count)
-        #self.assertEqual(structure_file_record_count, 201)
-
-        dataset_count = Dataset.objects.count()
-        logger.info("DATASETS %s", dataset_count)
-
-        release_count = Release.objects.count()
-        logger.info("RELEASES %s", release_count)
-
-        for t in NameType.objects.all():
-            logger.info("NAME TYPE %s : %s", t.id, t.parent)
-
-        for r in StructureFileRecord.objects.all():
-            logger.info("NAME TYPE %s : %s", r.id, r)
 
 
+    def test_add_file(self):
+        logger.info("----- add file test ----")
+
+        pattern = "nci/NCI_DTP.sdf"
+        check = True
+        release = 1
+
+        instore_path = settings.CIR_INSTORE_ROOT
+        files = sorted(Path(instore_path).glob(pattern))
+        for file in files:
+            logger.info("submitting file %s", file)
+            FileRegistry.add_file(str(file), check, release)
+
+        collection: StructureFileCollection
+        for collection in StructureFileCollection.objects.all():
+            logger.info("Collection: ID %s RELEASE ID %s : %s : %s" % (
+                collection.id,
+                collection.release_id,
+                collection.file_location_pattern_string,
+                collection
+            ))
+
+        logger.info("done")
 
 
 

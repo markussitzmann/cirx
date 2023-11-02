@@ -90,9 +90,16 @@ class FileRegistry(object):
         self._file_list = list()
 
     @staticmethod
-    def add_file(file_path: str, check: bool):
-        file = PurePath(file_path)
+    def add_file(file_path: str, check: bool = False, release: int = 0):
+        file: PurePath = PurePath(file_path)
+        if release:
+            check = True
         outfile_path = FileRegistry._create_filestore_name(file, 0)[1].parent
+        logger.info("out file path: %s", outfile_path)
+
+        filestore_pattern = FileRegistry._create_filestore_pattern(file)
+        logger.info("pattern: %s", filestore_pattern)
+
         try:
             Path(outfile_path).mkdir(parents=True, exist_ok=False)
         except FileExistsError:
@@ -135,6 +142,12 @@ class FileRegistry(object):
                         logger.info("check passed")
                     except:
                         logger.critical("check failed")
+                if release:
+                    logger.info("linking dataset release")
+                    StructureFileCollection.objects.get_or_create(
+                        release_id=release,
+                        file_location_pattern_string=filestore_pattern
+                    )
                 molfile.close()
                 break
 
@@ -342,13 +355,11 @@ class FileRegistry(object):
                 name_type_list = []
                 for item in name_type_set:
                     name_type_list.append(NameType(title=item[0], parent=name_type_dict[item[1]]))
-                #name_type_list = [NameType(title=item[0], parent=name_types[item[1]]) for item in name_type_set]
                 NameType.objects.bulk_create(
                     name_type_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                #name_type_dict = {t.id: t for t in name_type_list}
                 name_type_dict = {name_type.title: name_type for name_type in NameType.objects.all()}
 
 
@@ -388,7 +399,7 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
                 time1 = time.perf_counter()
-                logging.info("RECORD BULK T: %s" % ((time1 - time0)))
+                logging.info("RECORD BULK T: %s" % (time1 - time0))
 
                 structure_file_record_name_objects = []
                 for record_data in record_data_list:
@@ -419,7 +430,7 @@ class FileRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def _create_filestore_name(file_path, index):
+    def _create_filestore_name(file_path: PurePath, index):
         parent = file_path.parent
         stem = file_path.stem
         suffixes = file_path.suffixes
@@ -432,14 +443,32 @@ class FileRegistry(object):
         new_name = "".join(name_elements)
         dir_name = name_elements[0]
 
+        logger.info(parent.parts)
         filestore_name = os.path.join(
             str(settings.CIR_FILESTORE_ROOT),
             *[str(p) for p in parent.parts[2:]],
             str(dir_name),
             str(new_name)
         )
-
         return filestore_name, Path(filestore_name)
+
+    @staticmethod
+    def _create_filestore_pattern(file_path: PurePath):
+        parent = file_path.parent
+        stem = file_path.stem
+        suffixes = file_path.suffixes
+        if suffixes[-1] != ".gz":
+            suffixes.append(".gz")
+
+        splitted_stem = stem.split(".", 1)
+        dir_name = splitted_stem[0]
+        file_pattern = os.path.join(
+            *[str(p) for p in parent.parts[2:]],
+            str(dir_name),
+            str(dir_name) + ".*" + "".join(suffixes)
+        )
+        logger.info(file_pattern)
+        return file_pattern
 
 
 class StructureRegistry(object):
