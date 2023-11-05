@@ -12,14 +12,11 @@ from resolver.models import InChI, Organization, Publisher, Structure, Name, Nam
 logger = logging.getLogger('cirx')
 
 MINI = False
-INIT_PUBCHEM_COMPOUND = False
-INIT_PUBCHEM_SUBSTANCE = False
+INIT_PUBCHEM_COMPOUND = True
+INIT_PUBCHEM_SUBSTANCE = True
 INIT_CHEMBL = True
 INIT_NCI = True
-INIT_TT = False
 INIT_SANDBOX = False
-
-INIT_FILE_COLLECTIONS = False
 
 # INIT_NCI must be True to use this option:
 INIT_NCI_10000 = False
@@ -327,9 +324,7 @@ def init_release(
         init_chembl=INIT_CHEMBL,
         init_nci=INIT_NCI,
         init_nci_10000=INIT_NCI_10000,
-        init_tt=INIT_TT,
-        init_sandbox=INIT_SANDBOX,
-        init_file_collections=INIT_FILE_COLLECTIONS
+        init_sandbox=INIT_SANDBOX
     ):
 
     if init_chembl:
@@ -352,22 +347,21 @@ def init_release(
         chembl_db.description = "ChEMBL database"
         chembl_db.save()
 
-        if init_file_collections:
-            if mini:
-                chembl_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=chembl_db,
-                    file_location_pattern_string="MINI/chembl/29/chembl_29.sdf"
-                )
-            else:
-                chembl_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=chembl_db,
-                    file_location_pattern_string="chembl/29/chembl_29/chembl_29.*.sdf.gz"
-                )
-                chembl_collection.save()
-            chembl_collection.preprocessors.add(
-                chembl_preprocessor
+        if mini:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="MINI/chembl/29/chembl_29.sdf"
+            )
+        else:
+            chembl_collection, created = StructureFileCollection.objects.get_or_create(
+                release=chembl_db,
+                file_location_pattern_string="chembl/29/chembl_29/chembl_29.*.sdf.gz"
             )
             chembl_collection.save()
+        chembl_collection.preprocessors.add(
+            chembl_preprocessor
+        )
+        chembl_collection.save()
 
     pubchem_ext_datasource_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
         name="pubchem_ext_datasource",
@@ -398,23 +392,23 @@ def init_release(
         pubchem_compound.description = "PubChem Compound database"
         pubchem_compound.save()
 
-        if init_file_collections:
-            if mini:
-                pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=pubchem_compound,
-                    file_location_pattern_string="MINI/pubchem/compound/Compound_*.sdf"
-                )
-            else:
-                pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=pubchem_compound,
-                    file_location_pattern_string="pubchem/compound/Compound_*/*.sdf.gz"
-                )
-            pubchem_compound_collection.preprocessors.add(
-                pubchem_compound_preprocessor
+        if mini:
+            pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_compound,
+                file_location_pattern_string="MINI/pubchem/compound/Compound_*.sdf"
             )
-            pubchem_compound_collection.save()
+        else:
+            pubchem_compound_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_compound,
+                file_location_pattern_string="pubchem/compound/Compound_*/*.sdf.gz"
+            )
+        pubchem_compound_collection.preprocessors.add(
+            pubchem_compound_preprocessor
+        )
+        pubchem_compound_collection.save()
 
     if init_pubchem_substance:
+
         pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
             params=json.dumps({
                 'regid': {'field': 'PUBCHEM_SUBSTANCE_ID', 'type': 'PUBCHEM_SID'},
@@ -437,22 +431,21 @@ def init_release(
         pubchem_substance.description = "PubChem Substance database"
         pubchem_substance.save()
 
-        if init_file_collections:
-            if mini:
-                pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=pubchem_substance,
-                    file_location_pattern_string="MINI/pubchem/substance/Substance_*.sdf"
-                )
-            else:
-                pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=pubchem_substance,
-                    file_location_pattern_string="pubchem/substance/Substance_*/*.sdf.gz"
-                )
-            pubchem_substance_collection.preprocessors.add(
-                pubchem_ext_datasource_preprocessor,
-                pubchem_substance_preprocessor
+        if mini:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="MINI/pubchem/substance/Substance_*.sdf"
             )
-            pubchem_substance_collection.save()
+        else:
+            pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
+                release=pubchem_substance,
+                file_location_pattern_string="pubchem/substance/Substance_*/*.sdf.gz"
+            )
+        pubchem_substance_collection.preprocessors.add(
+            pubchem_ext_datasource_preprocessor,
+            pubchem_substance_preprocessor
+        )
+        pubchem_substance_collection.save()
 
     if init_nci:
         nci_db_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
@@ -490,125 +483,27 @@ def init_release(
         open_nci_db.description = "NCI database"
         open_nci_db.save()
 
-        if init_file_collections:
-            if mini:
-                if init_nci_10000:
-                    fname = "MINI/nci/NCI_DTP/NCI_DTP.*.10000.sdf.gz"
-                else:
-                    fname = "MINI/nci/NCI_DTP/NCI_DTP.sdf"
-                open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=open_nci_db,
-                    file_location_pattern_string=fname
-                )
-                open_nci_db_collection.save()
+        if mini:
+            if init_nci_10000:
+                fname = "MINI/nci/NCI_DTP/NCI_DTP.*.10000.sdf.gz"
             else:
-                open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-                    release=open_nci_db,
-                    file_location_pattern_string="nci/NCI_DTP/*.sdf.gz"
-                )
-                open_nci_db_collection.save()
-
-            open_nci_db_collection.preprocessors.add(
-                nci_db_preprocessor
+                fname = "MINI/nci/NCI_DTP/NCI_DTP.sdf"
+            open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                release=open_nci_db,
+                file_location_pattern_string=fname
+            )
+            open_nci_db_collection.save()
+        else:
+            open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
+                release=open_nci_db,
+                file_location_pattern_string="nci/NCI_DTP/*.sdf.gz"
             )
             open_nci_db_collection.save()
 
-    # if init_tt:
-    #     pubchem_substance_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
-    #         params=json.dumps({
-    #             'regid': {'field': 'PUBCHEM_SUBSTANCE_ID', 'type': 'PUBCHEM_SID'},
-    #             'names': [
-    #                 {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
-    #                 {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
-    #             ]
-    #         })
-    #     )
-    #
-    #     pubchem_substance, created = Release.objects.get_or_create(
-    #         dataset=Dataset.objects.get(name="PubChem"),
-    #         publisher=Publisher.objects.get(name="PubChem"),
-    #         name="PubChem Substance",
-    #         released=None,
-    #         downloaded=datetime.datetime(2022, 2, 1),
-    #     )
-    #     pubchem_substance.classification = 'public'
-    #     pubchem_substance.status = 'active'
-    #     pubchem_substance.description = "PubChem Substance database"
-    #     pubchem_substance.save()
-    #
-    #     if mini:
-    #         pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
-    #             release=pubchem_substance,
-    #             file_location_pattern_string="MINI/pubchem/substance/Substance_*.sdf"
-    #         )
-    #     else:
-    #         pubchem_substance_collection, created = StructureFileCollection.objects.get_or_create(
-    #             release=pubchem_substance,
-    #             file_location_pattern_string="tt/*/Substance_*.sdf.gz"
-    #         )
-    #     pubchem_substance_collection.preprocessors.add(
-    #         pubchem_ext_datasource_preprocessor,
-    #         pubchem_substance_preprocessor
-    #     )
-    #     pubchem_substance_collection.save()
-    #
-    #     if init_nci:
-    #         nci_db_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
-    #             params=json.dumps({
-    #                 'regid': {'field': 'PUBCHEM_EXT_DATASOURCE_REGID', 'type': 'NSC_NUMBER'},
-    #                 'names': [
-    #                     {'field': 'PUBCHEM_SUBSTANCE_SYNONYM', 'type': 'PUBCHEM_SUBSTANCE_SYNONYM'},
-    #                     {'field': 'PUBCHEM_GENERIC_REGISTRY_NAME', 'type': 'PUBCHEM_GENERIC_REGISTRY_NAME'},
-    #                 ]
-    #             })
-    #         )
-    #
-    #         nci_db, created = Release.objects.get_or_create(
-    #             dataset=Dataset.objects.get(name="DTP/NCI"),
-    #             publisher=Publisher.objects.get(name="PubChem"),
-    #             name="DTP/NCI",
-    #             released=None,
-    #             downloaded=datetime.datetime(2022, 2, 1),
-    #         )
-    #         nci_db.description = 'NCI Database downloaded from PubChem'
-    #         nci_db.classification = 'public'
-    #         nci_db.status = 'active'
-    #         nci_db.description = "NCI database"
-    #         nci_db.save()
-    #
-    #         open_nci_db, created = Release.objects.get_or_create(
-    #             dataset=Dataset.objects.get(name="DTP/NCI"),
-    #             publisher=Publisher.objects.get(name="NCI Computer-Aided Drug Design (CADD) Group"),
-    #             released=None,
-    #             downloaded=datetime.datetime(2022, 2, 1),
-    #         )
-    #         open_nci_db.name = "Open NCI Database"
-    #         open_nci_db.classification = 'public'
-    #         open_nci_db.status = 'active'
-    #         open_nci_db.description = "NCI database"
-    #         open_nci_db.save()
-    #
-    #         if mini:
-    #             if init_nci_10000:
-    #                 fname = "MINI/nci/NCI_DTP/NCI_DTP.*.10000.sdf.gz"
-    #             else:
-    #                 fname = "MINI/nci/NCI_DTP/NCI_DTP.sdf"
-    #             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-    #                 release=open_nci_db,
-    #                 file_location_pattern_string=fname
-    #             )
-    #             open_nci_db_collection.save()
-    #         else:
-    #             open_nci_db_collection, created = StructureFileCollection.objects.get_or_create(
-    #                 release=open_nci_db,
-    #                 file_location_pattern_string="nci/NCI_DTP/NCI_DTP.26.sdf.gz"
-    #             )
-    #             open_nci_db_collection.save()
-    #
-    #         open_nci_db_collection.preprocessors.add(
-    #             nci_db_preprocessor
-    #         )
-    #         open_nci_db_collection.save()
+        open_nci_db_collection.preprocessors.add(
+            nci_db_preprocessor
+        )
+        open_nci_db_collection.save()
 
     if init_sandbox:
         sandbox_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(

@@ -75,6 +75,7 @@ class StructureFile(models.Model):
     )
     file = models.FileField(max_length=1024, upload_to="manual/", storage=fs)
     count = models.IntegerField(null=True, blank=True)
+    hash = models.CharField(max_length=32, null=True, blank=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -111,7 +112,6 @@ class StructureFileNormalizationStatus(models.Model):
             self.updated,
             self.progress
         )
-
 
 class StructureFileCalcInChIStatus(models.Model):
     structure_file = models.OneToOneField(

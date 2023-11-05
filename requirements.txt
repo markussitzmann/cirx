@@ -1,5 +1,6 @@
 ujson==5.8.0
 backports.zoneinfo
+shortuuid
 psycopg2-binary==2.9.6
 requests>=2.31
 django>=4.2

@@ -11,6 +11,9 @@ from dataclasses import dataclass, field
 from pathlib import PurePath, Path
 from typing import List, Optional, Dict
 
+from mmap import mmap, ACCESS_READ
+from hashlib import md5
+
 import pytz
 import ujson as json
 from celery import subtask, group
@@ -90,14 +93,19 @@ class FileRegistry(object):
         self._file_list = list()
 
     @staticmethod
-    def add_file(file_path: str, check: bool = False, release: int = 0):
+    def hash_file(file_path: str):
+        with open(file_path, 'rb') as file, mmap(file.fileno(),0, access=ACCESS_READ) as file:
+            return md5(file).hexdigest()
+
+    @staticmethod
+    def add_file(key: str, file_path: str, check: bool = False, release: int = 0, preprocessors: List[int] = None):
         file: PurePath = PurePath(file_path)
-        if release:
+        if release and preprocessors:
             check = True
-        outfile_path = FileRegistry._create_filestore_name(file, 0)[1].parent
+        outfile_path = FileRegistry._create_filestore_name(key, file, 0)[1].parent
         logger.info("out file path: %s", outfile_path)
 
-        filestore_pattern = FileRegistry._create_filestore_pattern(file)
+        filestore_pattern = FileRegistry._create_filestore_pattern(key, file)
         logger.info("pattern: %s", filestore_pattern)
 
         try:
@@ -116,7 +124,7 @@ class FileRegistry(object):
         chunk_sum_count = 0
         while i < FileRegistry.MAX_CHUNKS:
             i += 1
-            outfile_name_and_path = FileRegistry._create_filestore_name(file, i)
+            outfile_name_and_path = FileRegistry._create_filestore_name(key, file, i)
             outfile_name = outfile_name_and_path[0]
             temp_outfile_name = outfile_name + ".tmp"
             with open(temp_outfile_name, 'wb') as outfile:
@@ -142,12 +150,14 @@ class FileRegistry(object):
                         logger.info("check passed")
                     except:
                         logger.critical("check failed")
-                if release:
+                if release and preprocessors:
                     logger.info("linking dataset release")
-                    StructureFileCollection.objects.get_or_create(
+                    structure_file_collection, created = StructureFileCollection.objects.get_or_create(
                         release_id=release,
                         file_location_pattern_string=filestore_pattern
                     )
+                    structure_file_collection.preprocessors.add(*preprocessors)
+                    structure_file_collection.save()
                 molfile.close()
                 break
 
@@ -162,6 +172,12 @@ class FileRegistry(object):
             file=fname
         )
         if created:
+            try:
+                file_hash = FileRegistry.hash_file(fname)
+                structure_file.hash = file_hash
+                structure_file.save()
+            except Exception as e:
+                logging.warning("calculation of file hash failed for %s %s" % (fname, e))
             return Status(file=structure_file, created=True)
         if not force:
             logger.info("file '%s' had already been registered previously (%s records)" % (fname, structure_file.count))
@@ -430,7 +446,7 @@ class FileRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def _create_filestore_name(file_path: PurePath, index):
+    def _create_filestore_name(key: str, file_path: PurePath, index):
         parent = file_path.parent
         stem = file_path.stem
         suffixes = file_path.suffixes
@@ -447,13 +463,14 @@ class FileRegistry(object):
         filestore_name = os.path.join(
             str(settings.CIR_FILESTORE_ROOT),
             *[str(p) for p in parent.parts[2:]],
-            str(dir_name),
+            key,
+            #str(dir_name),
             str(new_name)
         )
         return filestore_name, Path(filestore_name)
 
     @staticmethod
-    def _create_filestore_pattern(file_path: PurePath):
+    def _create_filestore_pattern(key: str, file_path: PurePath):
         parent = file_path.parent
         stem = file_path.stem
         suffixes = file_path.suffixes
@@ -464,8 +481,9 @@ class FileRegistry(object):
         dir_name = splitted_stem[0]
         file_pattern = os.path.join(
             *[str(p) for p in parent.parts[2:]],
-            str(dir_name),
-            str(dir_name) + ".*" + "".join(suffixes)
+            key,
+            #str(dir_name),
+            "*" + "".join(suffixes)
         )
         logger.info(file_pattern)
         return file_pattern
