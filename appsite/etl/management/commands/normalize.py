@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('-t', '--tag', type=str, default=None)
-        parser.add_argument('-c', '--count', type=int, default=0)
+        parser.add_argument('-l', '--limit', type=int, default=0)
 
     def handle(self, *args, **options):
         logger.info("normalize")
@@ -30,19 +30,22 @@ def _normalize_structures(structure_file_id: int):
 
 def _normalize(options):
     tag = options['tag']
-    count = options['count']
+    limit = options['limit']
     files: QuerySet = StructureFile.objects.filter(
-        Q(normalization_status__isnull=True) | Q(normalization_status__progress__lte=0.98)
-    ).exclude(tags__tag=tag).all()[:count]
-    print("-->", files)
-    # files: QuerySet = StructureFile.objects.filter(
-    #     id=8
-    # ).all()
+        Q(normalization_status__isnull=True)
+        | Q(normalization_status__progress__lte=0.98)
+    ).exclude(tags__tag=tag, tags__process='normalize').all()
 
+    n = 0
     file: StructureFile
     for file in files:
+        if file.structure_file_records.count() < file.count:
+            continue
+        if n >= limit:
+            continue
         if tag:
             StructureFileTag.objects.get_or_create(structure_file=file, tag=tag, process='normalize')
-
         logger.info("normalize structure file %s" % file.id)
         _normalize_structures(file.id)
+        n += 1
+

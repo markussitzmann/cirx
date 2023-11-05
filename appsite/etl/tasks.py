@@ -10,8 +10,8 @@ logger = logging.getLogger('celery.task')
 
 
 @shared_task(name="add file", queue='register')
-def add_file_task(key: str, file_path: str, check: bool, release: int, preprocessors: List[int]):
-    return FileRegistry.add_file(key, file_path, check, release, preprocessors)
+def add_file_task(key: str, pattern: str, file_path: str, check: bool, release: int, preprocessors: List[int]):
+    return FileRegistry.add_file(key, pattern, file_path, check, release, preprocessors)
 
 
 @shared_task(name="register count", queue='register')

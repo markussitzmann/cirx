@@ -39,7 +39,7 @@ logger = logging.getLogger('celery.task')
 
 DEFAULT_CHUNK_SIZE = 10000
 DEFAULT_DATABASE_ROW_BATCH_SIZE = 1000
-DEFAULT_LOGGER_BLOCK = 100
+DEFAULT_LOGGER_BLOCK = 1000
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
 Status = namedtuple('Status', 'file created')
@@ -98,7 +98,7 @@ class FileRegistry(object):
             return md5(file).hexdigest()
 
     @staticmethod
-    def add_file(key: str, file_path: str, check: bool = False, release: int = 0, preprocessors: List[int] = None):
+    def add_file(key: str, pattern: str, file_path: str, check: bool = False, release: int = 0, preprocessors: List[int] = None):
         file: PurePath = PurePath(file_path)
         if release and preprocessors:
             check = True
@@ -109,10 +109,10 @@ class FileRegistry(object):
         logger.info("pattern: %s", filestore_pattern)
 
         try:
-            Path(outfile_path).mkdir(parents=True, exist_ok=False)
-        except FileExistsError:
-            logger.critical("target destination '%s' already exists - skipped" % outfile_path)
-            return
+            Path(outfile_path).mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+           logger.critical("SKIPPED - something went wrong creating the target directory %s %s" % (outfile_path, e))
+           return
         molfile: Molfile = Molfile.Open(str(file))
         if check:
             molfile_count = molfile.count()
@@ -152,11 +152,15 @@ class FileRegistry(object):
                         logger.critical("check failed")
                 if release and preprocessors:
                     logger.info("linking dataset release")
+                    description = ""
+                    if pattern:
+                        description = "addfile using file pattern %s with key %s" % (pattern, key)
                     structure_file_collection, created = StructureFileCollection.objects.get_or_create(
                         release_id=release,
                         file_location_pattern_string=filestore_pattern
                     )
                     structure_file_collection.preprocessors.add(*preprocessors)
+                    structure_file_collection.description = description
                     structure_file_collection.save()
                 molfile.close()
                 break
@@ -457,14 +461,11 @@ class FileRegistry(object):
         name_elements = [splitted_stem[0], "." + str(index)]
         name_elements.extend(suffixes)
         new_name = "".join(name_elements)
-        dir_name = name_elements[0]
 
-        logger.info(parent.parts)
         filestore_name = os.path.join(
             str(settings.CIR_FILESTORE_ROOT),
             *[str(p) for p in parent.parts[2:]],
             key,
-            #str(dir_name),
             str(new_name)
         )
         return filestore_name, Path(filestore_name)
@@ -478,11 +479,9 @@ class FileRegistry(object):
             suffixes.append(".gz")
 
         splitted_stem = stem.split(".", 1)
-        dir_name = splitted_stem[0]
         file_pattern = os.path.join(
             *[str(p) for p in parent.parts[2:]],
             key,
-            #str(dir_name),
             "*" + "".join(suffixes)
         )
         logger.info(file_pattern)

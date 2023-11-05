@@ -1,5 +1,7 @@
 import logging
 from pathlib import Path
+from typing import List
+
 import shortuuid
 
 from django.conf import settings
@@ -28,8 +30,8 @@ class Command(BaseCommand):
         _addfiles(options)
 
 
-def _addfile(key, file, check, release, preprocessors):
-    task = add_file_task.delay(key, file, check, release, preprocessors)
+def _addfile(key: str, pattern: str, file: str, check: bool, release: int, preprocessors: List[int]):
+    task = add_file_task.delay(key, pattern, file, check, release, preprocessors)
     return task
 
 
@@ -47,7 +49,7 @@ def _addfiles(options):
     key = shortuuid.uuid()[:8]
     for file in files:
         logger.info("submitting file %s %s", file, key)
-        _addfile(key, str(file), check, release, preprocessors)
+        _addfile(key, pattern, str(file), check, release, preprocessors)
 
     logger.info("done")
 
