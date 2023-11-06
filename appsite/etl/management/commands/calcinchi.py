@@ -42,7 +42,7 @@ def _calcinchi(options):
     for file in files:
         if file.structure_file_records.count() < file.count:
             continue
-        if n >= limit:
+        if limit and n >= limit:
             continue
         if tag:
             StructureFileTag.objects.get_or_create(structure_file=file, tag=tag, process='calcinchi')

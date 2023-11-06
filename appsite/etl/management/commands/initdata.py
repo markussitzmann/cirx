@@ -11,7 +11,7 @@ from resolver.models import InChI, Organization, Publisher, Structure, Name, Nam
 
 logger = logging.getLogger('cirx')
 
-MINI = False
+MINI = True
 INIT_PUBCHEM_COMPOUND = True
 INIT_PUBCHEM_SUBSTANCE = True
 INIT_CHEMBL = True
