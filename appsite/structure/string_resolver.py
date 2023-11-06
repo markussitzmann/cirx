@@ -21,7 +21,6 @@ ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
 ResolverParams = namedtuple("ResolverParams", "url_params resolver_list filter mode structure_index page columns rows")
 
 
-
 class ChemicalStructure:
     """Container class to keep a CACTVS ensemble and a Structure model object of the same chemical structure together"""
 
@@ -141,7 +140,9 @@ class ChemicalStructure:
         del self._ens
         #logger.info("DELETE WAS CALLED")
 
+
 class ChemicalString:
+
 
     def __init__(
             self,

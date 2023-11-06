@@ -2,6 +2,9 @@ import datetime
 import json
 import logging
 
+import urllib.request
+
+import requests
 from django.core.management.base import BaseCommand
 from pycactvs import Ens
 
@@ -12,9 +15,9 @@ from resolver.models import InChI, Organization, Publisher, Structure, Name, Nam
 logger = logging.getLogger('cirx')
 
 MINI = True
-INIT_PUBCHEM_COMPOUND = True
-INIT_PUBCHEM_SUBSTANCE = True
-INIT_CHEMBL = True
+INIT_PUBCHEM_COMPOUND = False
+INIT_PUBCHEM_SUBSTANCE = False
+INIT_CHEMBL = False
 INIT_NCI = True
 INIT_SANDBOX = False
 
@@ -40,15 +43,20 @@ def _loader():
     init_release()
     init_inchi_type()
     init_name_affinitiy_class()
-    #init_structures()
+    init_structures()
 
 
 def init_structures():
+
+
     names = ['ethanol', 'benzene', 'warfarin', 'guanine', 'tylenol', 'caffeine']
     name_type_obj = NameType.objects.get(id=7)
 
     for name in names:
-        ens = Ens(name)
+        url = 'https://cactus.nci.nih.gov/chemical/structure/%s/pack' % name
+        packed = requests.get(url)
+        ens = Ens(packed.content)
+        print(ens.get('E_SMILES'))
         logger.info("tuples: %s", name)
         name_obj, created = Name.objects.get_or_create(name=name)
 
@@ -57,12 +65,14 @@ def init_structures():
 
         structure_name_obj, name_created = StructureNameAssociation.objects.get_or_create(
             name=name_obj,
+            affinity_class_id=1,
             structure=structure_obj,
-            name_type=name_type_obj
+            name_type=name_type_obj,
+            confidence=100
         )
 
-        inchi_obj, inchi_created = InChI.objects.get_or_create(ens.get('E_STDINCHI'))
-        logger.info("InChI: %s %s" % (inchi_obj, inchi_created))
+        # inchi_obj, inchi_created = InChI.objects.get_or_create(ens.get('E_STDINCHI'))
+        # logger.info("InChI: %s %s" % (inchi_obj, inchi_created))
 
         # structure_inchi_obj, structure_inchi_created = StructureInChIs.objects.get_or_create(
         #     structure=structure_obj,
@@ -558,13 +568,14 @@ def init_name_affinitiy_class():
         c, created = NameAffinityClass.objects.get_or_create(
             title=item[0]
         )
-        c.description = item[1]
+        c.rank = item[1]
+        c.description = item[2]
         c.save()
 
 def init_inchi_type():
 
     standard_inchi_type, created = InChIType.objects.get_or_create(
-        title="standard",
+        title="standard"
     )
     standard_inchi_type.software_version = "1.06"
     standard_inchi_type.description = "Standard InChI"
@@ -573,7 +584,7 @@ def init_inchi_type():
     standard_inchi_type.save()
 
     original_inchi_type, created = InChIType.objects.get_or_create(
-        title="original",
+        title="original"
     )
     original_inchi_type.software_version = "1.06"
     original_inchi_type.description = "InChI with FixedH layer and RecMet option"
@@ -586,7 +597,7 @@ def init_inchi_type():
     tauto_inchi_type, created = InChIType.objects.get_or_create(
         title="xtauto"
     )
-    tauto_inchi_type.software_version = "1.06",
+    tauto_inchi_type.software_version = "1.06"
     tauto_inchi_type.description = "experimental InChI with FixedH layer, RecMet option and experimental tauto options" \
                                    "KET and T15 options set"
     tauto_inchi_type.is_standard = False
@@ -598,7 +609,7 @@ def init_inchi_type():
     tauto_inchi_type.save()
 
     tautox_inchi_type, created = InChIType.objects.get_or_create(
-        title="xtautox",
+        title="xtautox"
     )
     tautox_inchi_type.software_version = "1.06T"
     tautox_inchi_type.description = "experimental InChI with FixedH layer, RecMet option and experimental tauto options " \

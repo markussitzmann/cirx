@@ -15,7 +15,7 @@ from resolver.defaults import http_verbs
 class StructureManager(models.Manager):
 
     def get_or_create_from_ens(self, ens: Ens):
-        return self.get_or_create(hashisy=CactvsHash(ens), minimol=CactvsMinimol(ens))
+        return self.get_or_create(hashisy_key=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
 
 class StructureQuerySet(models.QuerySet):

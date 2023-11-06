@@ -5,8 +5,6 @@ import sys
 # Pycactvs needs that
 sys.setdlopenflags(os.RTLD_GLOBAL|os.RTLD_NOW)
 
-from identifier import InChIKey
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "appsite.settings")
 
 from django.conf import settings
@@ -20,6 +18,9 @@ settings.DEBUG = True
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cirx")
+
+from inchi.identifier import InChIKey
+
 
 reset_queries()
 

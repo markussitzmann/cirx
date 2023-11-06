@@ -87,25 +87,12 @@ class StructureViewSet(ResourceModelViewSet):
         self.name = "Structure"
         super().__init__(*args, **kwargs)
 
-    #queryset = Structure.objects.filter(compound__isnull=False, blocked__isnull=True)\
-    #    .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent', 'compound')\
-    #    .prefetch_related('inchis', 'inchis__inchitype', 'inchis__inchi', 'entrypoints', 'ficts_children',
-    #                      'ficus_children', 'uuuuu_children')
-
     queryset = Structure.objects.filter(blocked__isnull=True) \
         .prefetch_related('inchis', 'inchis__inchi_type', 'inchis__inchi', 'entrypoints')
 
-    # select_for_includes = {
-    #     'ficts_parent': ['ficts_parent'],
-    #     'ficus_parent': ['ficus_parent'],
-    #     'uuuuu_parent': ['uuuuu_parent'],
-    # }
     prefetch_for_includes = {
         '__all__': [],
         'inchis': ['inchis__structure', 'inchis__inchi'],
-        #'all_parents': [Prefetch('all_parents', queryset=Structure.objects
-        #                         .select_related('ficts_parent', 'ficus_parent', 'uuuuu_parent'))],
-        #'category.section': ['category']
     }
     serializer_class = StructureSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
