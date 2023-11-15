@@ -11,6 +11,7 @@ from structure.string_resolver import ChemicalString, ChemicalStructure
 from structure.dispatcher import Dispatcher
 
 from pycactvs import Ens, Dataset, cactvs
+
 CACTVS_SETTINGS = cactvs
 
 propertypath = list(CACTVS_SETTINGS['propertypath'])
@@ -20,7 +21,6 @@ CACTVS_SETTINGS['python_object_autodelete'] = True
 CACTVS_SETTINGS['lookup_hosts'] = []
 CACTVS_SETTINGS['propertypath'] = tuple(propertypath)
 
-
 logger = logging.getLogger('cirx')
 
 FIXTURES = ['sandbox.json']
@@ -28,6 +28,7 @@ RESOLVER_LIST = ["name", "smiles", "hashisy"]
 
 ResolverTest = namedtuple("ResolverTest", "request responses")
 ResolverResponse = namedtuple("ResolverResponse", "resolver expectations exception")
+
 
 # class ChemicalStructureTests(TestCase):
 #     fixtures = FIXTURES
@@ -78,16 +79,17 @@ class ChemicalStringTests(TestCase):
 
     def tearDown(self):
         logger.info("------------- Tear Down -------------")
-        logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()), Ens.List()))
+        logger.info("dataset list {} {} ens list {} {}".format(len(Dataset.List()), Dataset.List(), len(Ens.List()),
+                                                               Ens.List()))
 
     @parameterized.expand([
-        # [ResolverTest(
-        #     request="CCO",
-        #     responses=[
-        #         ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
-        #         ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-        #     ]
-        # )],
+        [ResolverTest(
+            request="CCO",
+            responses=[
+                ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+                ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+            ]
+        )],
         [ResolverTest(
             request="E174572A915E4471-FICTS-01-1A",
             responses=[
@@ -95,20 +97,20 @@ class ChemicalStringTests(TestCase):
                 ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
             ]
         )],
+        [ResolverTest(
+            request="1AD375920BE60DAD",
+            responses=[
+                ResolverResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            request="NCICADD:RID=102",
+            responses=[
+                ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None)
+            ],
+        )],
         # [ResolverTest(
-        #     request="1AD375920BE60DAD",
-        #     responses=[
-        #         ResolverResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None)
-        #     ],
-        # )],
-        # [ResolverTest(
-        #     request="NCICADD:CID=3",
-        #     responses=[
-        #         ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None)
-        #     ],
-        # )],
-        # [ResolverTest(
-        #     request="NCICADD:RID=4",
+        #     request="NCICADD:RID=104",
         #     responses=[
         #         ResolverResponse(resolver="ncicadd_rid", expectations={'1AD375920BE60DAD'}, exception=None)
         #     ],
@@ -177,6 +179,3 @@ class ChemicalStringTests(TestCase):
                 resolved = actual_data[resolver].resolved
                 logger.info("expected {} received {}".format(expectations, resolved))
                 self.assertEqual(set([structure.hashisy for structure in resolved]), expectations)
-
-
-

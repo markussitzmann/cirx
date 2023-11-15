@@ -19,7 +19,7 @@ INIT_PUBCHEM_COMPOUND = False
 INIT_PUBCHEM_SUBSTANCE = False
 INIT_CHEMBL = False
 INIT_NCI = True
-INIT_SANDBOX = False
+INIT_SANDBOX = True
 
 # INIT_NCI must be True to use this option:
 INIT_NCI_10000 = False
@@ -43,7 +43,7 @@ def _loader():
     init_release()
     init_inchi_type()
     init_name_affinitiy_class()
-    init_structures()
+    #init_structures()
 
 
 def init_structures():
