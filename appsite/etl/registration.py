@@ -38,7 +38,7 @@ logger = logging.getLogger('celery.task')
 
 
 DEFAULT_CHUNK_SIZE = 10000
-DEFAULT_DATABASE_ROW_BATCH_SIZE = 1000
+DEFAULT_DATABASE_ROW_BATCH_SIZE = 10000
 DEFAULT_LOGGER_BLOCK = 1000
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
@@ -324,12 +324,15 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
                 time1 = time.perf_counter()
-                logging.info("STRUCTURE BULK T: %s C: %s" % ((time1 - time0), len(structures)))
+                logging.info("STRUCTURE BULK Time: %s Count: %s" % ((time1 - time0), len(structures)))
 
+                time0 = time.perf_counter()
                 structure_hashkey_dict = StructureHashisy.objects.bulk_create_from_hash_list(
                     [record_data.hashisy_key for record_data in record_data_list],
                     FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
+                time1 = time.perf_counter()
+                logging.info("STRUCTURE HASHISY BULK Time: %s Count: %s" % ((time1 - time0), len(structure_hashkey_dict)))
 
                 logger.info("registering structure file records for '%s'" % (fname,))
                 sorted_record_data_structure_list = sorted(
