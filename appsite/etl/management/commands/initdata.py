@@ -14,11 +14,11 @@ from resolver.models import InChI, Organization, Publisher, Structure, Name, Nam
 
 logger = logging.getLogger('cirx')
 
-MINI = True
-INIT_PUBCHEM_COMPOUND = False
+MINI = False
+INIT_PUBCHEM_COMPOUND = True
 INIT_PUBCHEM_SUBSTANCE = False
 INIT_CHEMBL = False
-INIT_NCI = True
+INIT_NCI = False
 INIT_SANDBOX = True
 
 # INIT_NCI must be True to use this option:

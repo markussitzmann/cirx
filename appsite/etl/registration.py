@@ -34,11 +34,10 @@ from resolver.models import InChI, Structure, Compound, StructureInChIAssociatio
 from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
-#logger = get_task_logger('celery.tasks')
 
 
-DEFAULT_CHUNK_SIZE = 10000
-DEFAULT_DATABASE_ROW_BATCH_SIZE = 10000
+DEFAULT_CHUNK_SIZE = 25000
+DEFAULT_DATABASE_ROW_BATCH_SIZE = 25000
 DEFAULT_LOGGER_BLOCK = 1000
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
@@ -271,10 +270,8 @@ class FileRegistry(object):
             if not record % DEFAULT_LOGGER_BLOCK:
                 logger.info("processed record %s of %s", record, fname)
             try:
-                # TODO: registering structures needs improvement - hadd might do harm here
                 molfile.set('record', record)
                 ens: Ens = molfile.read()
-                #ens.hadd()
                 hashisy_key = CactvsHash(ens)
                 structure = Structure(
                     hashisy_key=hashisy_key,
@@ -384,7 +381,6 @@ class FileRegistry(object):
                     ignore_conflicts=True
                 )
                 name_type_dict = {name_type.title: name_type for name_type in NameType.objects.all()}
-
 
                 time0 = time.perf_counter()
                 name_list = [Name(name=name) for name in name_set]
@@ -1015,6 +1011,8 @@ class Preprocessors:
             logger.error("getting regid failed: %s", e)
         name_field_names = [n for n in params['names']]
         for name_field_name in name_field_names:
+            logger.info("name %s" % name_field_name)
+
             try:
                 name = ens.dget(name_field_name['field'], None)
                 if name:
@@ -1023,7 +1021,7 @@ class Preprocessors:
                     for n in add_names:
                         record_data.names.append(NameTriple(n, name_type, "NAME"))
             except Exception as e:
-                #logger.warning("getting name failed: %s", e)
+                logger.warning("getting name failed: %s", e)
                 pass
 
     @staticmethod
