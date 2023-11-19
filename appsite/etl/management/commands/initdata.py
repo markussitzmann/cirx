@@ -19,7 +19,7 @@ INIT_PUBCHEM_COMPOUND = True
 INIT_PUBCHEM_SUBSTANCE = False
 INIT_CHEMBL = False
 INIT_NCI = False
-INIT_SANDBOX = True
+INIT_SANDBOX = False
 
 # INIT_NCI must be True to use this option:
 INIT_NCI_10000 = False
@@ -44,6 +44,13 @@ def _loader():
     init_inchi_type()
     init_name_affinitiy_class()
     #init_structures()
+
+    temp = StructureFileCollection.objects.create(
+        file_location_pattern_string="pubchem/compound/LDt2PFyP/*.sdf.gz",
+        release_id=1
+    )
+    temp.preprocessors.add(2)
+    temp.save()
 
 
 def init_structures():
@@ -140,15 +147,13 @@ def init_name_type_data():
     name, _ = NameType.objects.get_or_create(title="NAME", public_string="Chemical Name or Synonym", parent_id=None)
 
     name_types = [
-       # ('REGID', None, 'Registration ID'),
-       # ('NAME', None, 'Chemical Name or Synonym'),
-        ('PUBCHEM_IUPAC_NAME', name, 'PubChem IUPAC NAME'),
-        ('PUBCHEM_IUPAC_OPENEYE_NAME', name, 'PubChem IUPAC OPENEYE NAME'),
-        ('PUBCHEM_IUPAC_CAS_NAME', name, 'PubChem IUPAC CAS NAME'),
-        ('PUBCHEM_IUPAC_TRADITIONAL_NAME', name, 'PubChem IUPAC TRADITIONAL NAME'),
-        ('PUBCHEM_IUPAC_SYSTEMATIC_NAME', name, 'PubChem IUPAC SYSTEMATIC NAME'),
-        ('PUBCHEM_GENERIC_REGISTRY_NAME', name, 'PubChem GENERIC REGISTRY NAME'),
-        ('PUBCHEM_SUBSTANCE_SYNONYM', name, 'PubChem SUBSTANCE SYNONYM'),
+        ('IUPAC_PREFERRED_NAME', name, 'IUPAC NAME'),
+        ('IUPAC_TRADITIONAL_NAME', name, 'IUPAC TRADITIONAL NAME'),
+        ('IUPAC_SYSTEMATIC_NAME', name, 'IUPAC Systematic Name'),
+        ('PUBCHEM_IUPAC_OPENEYE_NAME', name, 'PubChem IUPAC OPENEYE Name'),
+        ('PUBCHEM_IUPAC_CAS_NAME', name, 'PubChem IUPAC CAS NAme'),
+        ('PUBCHEM_GENERIC_REGISTRY_NAME', name, 'Generic Registry Name'),
+        ('PUBCHEM_SUBSTANCE_SYNONYM', name, 'PubChem Substance Synonym'),
         ('NSC_NUMBER', regid, 'NSC number'),
         ('NSC_NUMBER_PREFIXED', regid, 'NSC number prefixed'),
         ('PUBCHEM_SID', regid, 'PubChem SID'),
@@ -384,9 +389,9 @@ def init_release(
                 'names': [
                     {'field': 'PUBCHEM_IUPAC_OPENEYE_NAME', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
                     {'field': 'PUBCHEM_IUPAC_CAS_NAME', 'type': 'PUBCHEM_IUPAC_CAS_NAME'},
-                    {'field': 'PUBCHEM_IUPAC_NAME', 'type': 'PUBCHEM_IUPAC_NAME'},
-                    {'field': 'PUBCHEM_IUPAC_SYSTEMATIC_NAME', 'type': 'PUBCHEM_IUPAC_SYSTEMATIC_NAME'},
-                    {'field': 'PUBCHEM_IUPAC_TRADITIONAL_NAME', 'type': 'PUBCHEM_IUPAC_TRADITIONAL_NAME'},
+                    {'field': 'E_IUPAC_TRADITIONAL_NAME', 'type': 'IUPAC_TRADITIONAL_NAME'},
+                    {'field': 'E_IUPAC_PREFERRED_NAME', 'type': 'IUPAC_PREFERRED_NAME'},
+                    {'field': 'E_IUPAC_SYSTEMATIC_NAME', 'type': 'IUPAC_SYSTEMATIC_NAME'},
                 ]
             })
         )

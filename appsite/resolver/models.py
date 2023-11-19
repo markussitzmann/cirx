@@ -1,3 +1,4 @@
+import hashlib
 import operator
 from functools import reduce
 from typing import List, Dict, Union
@@ -499,13 +500,18 @@ class Record(models.Model):
 
 
 class Name(models.Model):
-    name = models.TextField(max_length=1500, unique=True)
+    hash = models.CharField(max_length=32, unique=True)
+    name = models.TextField(max_length=1500)
 
     class Meta:
         db_table = 'cir_structure_name'
 
+    def save(self, *args, **kwargs):
+        self.hash = hashlib.md5(self.name.encode("UTF-8")).hexdigest()
+        super(Name, self).save(*args, **kwargs)
+
     def __str__(self):
-        return "(Name='%s')" % (self.name, )
+        return "(Name=%s: hash=%s name=%s)" % (self.id, self.hash, self.name, )
 
     def __repr__(self):
         return self.name
@@ -521,7 +527,7 @@ class NameType(models.Model):
         db_table = 'cir_name_type'
 
     def __str__(self):
-        return "(NameType=%s: %s)" % (self.id, self.title, )
+        return "(NameType=%s: title=%s)" % (self.id, self.title, )
 
 
 class NameAffinityClass(models.Model):

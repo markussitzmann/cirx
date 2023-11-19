@@ -1,0 +1,1699 @@
+[
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 1,
+    "fields": {
+      "name": "generic",
+      "params": "{\"regid\": {\"field\": \"chembl_id\", \"type\": \"REGID\"}, \"names\": []}"
+    }
+  },
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 2,
+    "fields": {
+      "name": "pubchem_ext_datasource",
+      "params": {}
+    }
+  },
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 3,
+    "fields": {
+      "name": "generic",
+      "params": "{\"regid\": {\"field\": \"PUBCHEM_COMPOUND_CID\", \"type\": \"PUBCHEM_CID\"}, \"names\": [{\"field\": \"PUBCHEM_IUPAC_OPENEYE_NAME\", \"type\": \"PUBCHEM_IUPAC_OPENEYE_NAME\"}, {\"field\": \"PUBCHEM_IUPAC_CAS_NAME\", \"type\": \"PUBCHEM_IUPAC_CAS_NAME\"}, {\"field\": \"E_IUPAC_TRADITIONAL_NAME\", \"type\": \"IUPAC_TRADITIONAL_NAME\"}, {\"field\": \"E_IUPAC_PREFERRED_NAME\", \"type\": \"IUPAC_PREFERRED_NAME\"}, {\"field\": \"E_IUPAC_SYSTEMATIC_NAME\", \"type\": \"IUPAC_SYSTEMATIC_NAME\"}]}"
+    }
+  },
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 4,
+    "fields": {
+      "name": "generic",
+      "params": "{\"regid\": {\"field\": \"PUBCHEM_SUBSTANCE_ID\", \"type\": \"PUBCHEM_SID\"}, \"names\": [{\"field\": \"PUBCHEM_SUBSTANCE_SYNONYM\", \"type\": \"PUBCHEM_SUBSTANCE_SYNONYM\"}, {\"field\": \"PUBCHEM_GENERIC_REGISTRY_NAME\", \"type\": \"PUBCHEM_GENERIC_REGISTRY_NAME\"}]}"
+    }
+  },
+  {
+    "model": "etl.structurefilecollectionpreprocessor",
+    "pk": 5,
+    "fields": {
+      "name": "generic",
+      "params": "{\"regid\": {\"field\": \"PUBCHEM_EXT_DATASOURCE_REGID\", \"type\": \"NSC_NUMBER\"}, \"names\": [{\"field\": \"PUBCHEM_SUBSTANCE_SYNONYM\", \"type\": \"PUBCHEM_SUBSTANCE_SYNONYM\"}, {\"field\": \"PUBCHEM_GENERIC_REGISTRY_NAME\", \"type\": \"PUBCHEM_GENERIC_REGISTRY_NAME\"}]}"
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 1,
+    "fields": {
+      "release": 1,
+      "file_location_pattern_string": "MINI/chembl/29/chembl_29.sdf",
+      "description": null,
+      "added": "2023-11-19T10:25:01.384Z",
+      "modified": "2023-11-19T10:25:01.390Z",
+      "preprocessors": [
+        1
+      ]
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 2,
+    "fields": {
+      "release": 2,
+      "file_location_pattern_string": "MINI/pubchem/compound/Compound_*.sdf",
+      "description": null,
+      "added": "2023-11-19T10:25:01.411Z",
+      "modified": "2023-11-19T10:25:01.449Z",
+      "preprocessors": [
+        3
+      ]
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 3,
+    "fields": {
+      "release": 3,
+      "file_location_pattern_string": "MINI/pubchem/substance/Substance_*.sdf",
+      "description": null,
+      "added": "2023-11-19T10:25:01.502Z",
+      "modified": "2023-11-19T10:25:01.522Z",
+      "preprocessors": [
+        2,
+        4
+      ]
+    }
+  },
+  {
+    "model": "etl.structurefilecollection",
+    "pk": 4,
+    "fields": {
+      "release": 5,
+      "file_location_pattern_string": "MINI/nci/NCI_DTP/NCI_DTP.sdf",
+      "description": null,
+      "added": "2023-11-19T10:25:01.558Z",
+      "modified": "2023-11-19T10:25:01.565Z",
+      "preprocessors": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 1,
+    "fields": {
+      "title": "standard",
+      "software_version": "1.06",
+      "description": "Standard InChI",
+      "is_standard": true,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": false,
+      "fixedh": false,
+      "ket": false,
+      "t15": false,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2023-11-19T10:25:01.570Z",
+      "modified": "2023-11-19T10:25:01.573Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 2,
+    "fields": {
+      "title": "original",
+      "software_version": "1.06",
+      "description": "InChI with FixedH layer and RecMet option",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": false,
+      "t15": false,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2023-11-19T10:25:01.578Z",
+      "modified": "2023-11-19T10:25:01.580Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 3,
+    "fields": {
+      "title": "xtauto",
+      "software_version": "1.06",
+      "description": "experimental InChI with FixedH layer, RecMet option and experimental tauto optionsKET and T15 options set",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": true,
+      "t15": true,
+      "pt_22_00": false,
+      "pt_16_00": false,
+      "pt_06_00": false,
+      "pt_39_00": false,
+      "pt_13_00": false,
+      "pt_18_00": false,
+      "added": "2023-11-19T10:25:01.584Z",
+      "modified": "2023-11-19T10:25:01.591Z"
+    }
+  },
+  {
+    "model": "resolver.inchitype",
+    "pk": 4,
+    "fields": {
+      "title": "xtautox",
+      "software_version": "1.06T",
+      "description": "experimental InChI with FixedH layer, RecMet option and experimental tauto options KET, T15 including NCI tautomer options set",
+      "is_standard": false,
+      "newpsoff": false,
+      "donotaddh": true,
+      "snon": false,
+      "srel": false,
+      "srac": false,
+      "sucf": false,
+      "suu": false,
+      "sluud": false,
+      "recmet": true,
+      "fixedh": true,
+      "ket": true,
+      "t15": true,
+      "pt_22_00": true,
+      "pt_16_00": true,
+      "pt_06_00": true,
+      "pt_39_00": true,
+      "pt_13_00": true,
+      "pt_18_00": true,
+      "added": "2023-11-19T10:25:01.595Z",
+      "modified": "2023-11-19T10:25:01.606Z"
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 1,
+    "fields": {
+      "title": "REGID",
+      "parent": null,
+      "public_string": "Registration ID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 2,
+    "fields": {
+      "title": "NAME",
+      "parent": null,
+      "public_string": "Chemical Name or Synonym",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 3,
+    "fields": {
+      "title": "IUPAC_PREFFERED_NAME",
+      "parent": 2,
+      "public_string": "IUPAC NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 4,
+    "fields": {
+      "title": "PUBCHEM_IUPAC_OPENEYE_NAME",
+      "parent": 2,
+      "public_string": "PubChem IUPAC OPENEYE NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 5,
+    "fields": {
+      "title": "IUPAC_CAS_NAME",
+      "parent": 2,
+      "public_string": "PubChem IUPAC CAS NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 6,
+    "fields": {
+      "title": "IUPAC_TRADITIONAL_NAME",
+      "parent": 2,
+      "public_string": "IUPAC TRADITIONAL NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 7,
+    "fields": {
+      "title": "IUPAC_SYSTEMATIC_NAME",
+      "parent": 2,
+      "public_string": "IUPAC SYSTEMATIC NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 8,
+    "fields": {
+      "title": "PUBCHEM_GENERIC_REGISTRY_NAME",
+      "parent": 2,
+      "public_string": "PubChem GENERIC REGISTRY NAME",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 9,
+    "fields": {
+      "title": "PUBCHEM_SUBSTANCE_SYNONYM",
+      "parent": 2,
+      "public_string": "PubChem SUBSTANCE SYNONYM",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 10,
+    "fields": {
+      "title": "NSC_NUMBER",
+      "parent": 1,
+      "public_string": "NSC number",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 11,
+    "fields": {
+      "title": "NSC_NUMBER_PREFIXED",
+      "parent": 1,
+      "public_string": "NSC number prefixed",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 12,
+    "fields": {
+      "title": "PUBCHEM_SID",
+      "parent": 1,
+      "public_string": "PubChem SID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nametype",
+    "pk": 13,
+    "fields": {
+      "title": "PUBCHEM_CID",
+      "parent": 1,
+      "public_string": "PubChem CID",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 1,
+    "fields": {
+      "title": "exact",
+      "rank": 0,
+      "description": "Exact"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 2,
+    "fields": {
+      "title": "narrow",
+      "rank": 1,
+      "description": "Narrow"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 3,
+    "fields": {
+      "title": "broad",
+      "rank": 2,
+      "description": "Broad"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 4,
+    "fields": {
+      "title": "unknown",
+      "rank": 5,
+      "description": "Unknown"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 5,
+    "fields": {
+      "title": "unspecified",
+      "rank": 4,
+      "description": "Unspecified"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 6,
+    "fields": {
+      "title": "generic",
+      "rank": 3,
+      "description": "Generic"
+    }
+  },
+  {
+    "model": "resolver.nameaffinityclass",
+    "pk": 7,
+    "fields": {
+      "title": "related",
+      "rank": 3,
+      "description": "Related"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 1,
+    "fields": {
+      "parent": null,
+      "name": "U.S. National Institutes of Health",
+      "abbreviation": "NIH",
+      "category": "government",
+      "href": "https://www.nih.gov",
+      "added": "2023-11-19T10:25:01.238Z",
+      "modified": "2023-11-19T10:25:01.241Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 2,
+    "fields": {
+      "parent": 1,
+      "name": "U.S. National Cancer Institute",
+      "abbreviation": "NCI",
+      "category": "government",
+      "href": "https://www.cancer.gov",
+      "added": "2023-11-19T10:25:01.244Z",
+      "modified": "2023-11-19T10:25:01.247Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 3,
+    "fields": {
+      "parent": 1,
+      "name": "U.S. National Library of Medicine",
+      "abbreviation": "NLM",
+      "category": "government",
+      "href": "https://www.nlm.nih.gov",
+      "added": "2023-11-19T10:25:01.251Z",
+      "modified": "2023-11-19T10:25:01.254Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 4,
+    "fields": {
+      "parent": 3,
+      "name": "U.S. National Center for Biotechnology Information",
+      "abbreviation": "NCBI",
+      "category": "government",
+      "href": "https://www.ncbi.nlm.nih.gov",
+      "added": "2023-11-19T10:25:01.258Z",
+      "modified": "2023-11-19T10:25:01.260Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 5,
+    "fields": {
+      "parent": null,
+      "name": "FIZ Karlsruhe – Leibniz-Institut für Informationsinfrastruktur",
+      "abbreviation": "FIZ Karlsruhe",
+      "category": "public",
+      "href": "https://www.fiz-karlsruhe.de",
+      "added": "2023-11-19T10:25:01.264Z",
+      "modified": "2023-11-19T10:25:01.266Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 6,
+    "fields": {
+      "parent": null,
+      "name": "European Molecular Biology Laboratory",
+      "abbreviation": "EMBL",
+      "category": "public",
+      "href": "https://www.embl.org/",
+      "added": "2023-11-19T10:25:01.269Z",
+      "modified": "2023-11-19T10:25:01.271Z"
+    }
+  },
+  {
+    "model": "resolver.organization",
+    "pk": 7,
+    "fields": {
+      "parent": 6,
+      "name": "EMBL's European Bioinformatics Institute",
+      "abbreviation": "EMBL-EBI",
+      "category": "public",
+      "href": "https://www.ebi.ac.uk/",
+      "added": "2023-11-19T10:25:01.275Z",
+      "modified": "2023-11-19T10:25:01.277Z"
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 1,
+    "fields": {
+      "parent": null,
+      "category": "group",
+      "name": "NCI Computer-Aided Drug Design (CADD) Group",
+      "description": null,
+      "email": null,
+      "address": "Frederick, MD 21702-1201, USA",
+      "href": "https://cactus.nci.nih.gov",
+      "orcid": null,
+      "added": "2023-11-19T10:25:01.281Z",
+      "modified": "2023-11-19T10:25:01.286Z",
+      "organizations": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 2,
+    "fields": {
+      "parent": 1,
+      "category": "person",
+      "name": "Marc Nicklaus",
+      "description": null,
+      "email": "mn1ahelix@gmail.com",
+      "address": "Frederick, MD 21702-1201, USA",
+      "href": "https://ccr.cancer.gov/staff-directory/marc-c-nicklaus",
+      "orcid": "https://orcid.org/0000-0002-4775-7030",
+      "added": "2023-11-19T10:25:01.290Z",
+      "modified": "2023-11-19T10:25:01.295Z",
+      "organizations": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 3,
+    "fields": {
+      "parent": null,
+      "category": "person",
+      "name": "Markus Sitzmann",
+      "description": null,
+      "email": "markus.sitzmann@gmail.com",
+      "address": null,
+      "href": null,
+      "orcid": "https://orcid.org/0000-0001-5346-1298",
+      "added": "2023-11-19T10:25:01.299Z",
+      "modified": "2023-11-19T10:25:01.302Z",
+      "organizations": []
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 4,
+    "fields": {
+      "parent": null,
+      "category": "division",
+      "name": "PubChem",
+      "description": null,
+      "email": "pubchem-help@ncbi.nlm.nih.gov",
+      "address": "8600 Rockville Pike; Bethesda, MD  20894; USA",
+      "href": "https://pubchemdocs.ncbi.nlm.nih.gov/contact",
+      "orcid": null,
+      "added": "2023-11-19T10:25:01.305Z",
+      "modified": "2023-11-19T10:25:01.310Z",
+      "organizations": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 5,
+    "fields": {
+      "parent": null,
+      "category": "group",
+      "name": "ChEMBL Team",
+      "description": null,
+      "email": null,
+      "address": null,
+      "href": "https://chembl.gitbook.io/chembl-interface-documentation/about",
+      "orcid": null,
+      "added": "2023-11-19T10:25:01.313Z",
+      "modified": "2023-11-19T10:25:01.318Z",
+      "organizations": [
+        6,
+        7
+      ]
+    }
+  },
+  {
+    "model": "resolver.publisher",
+    "pk": 6,
+    "fields": {
+      "parent": null,
+      "category": "division",
+      "name": "DTP/NCI",
+      "description": null,
+      "email": null,
+      "address": null,
+      "href": "https://dtp.cancer.gov/",
+      "orcid": null,
+      "added": "2023-11-19T10:25:01.322Z",
+      "modified": "2023-11-19T10:25:01.326Z",
+      "organizations": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 1,
+    "fields": {
+      "tag": "other",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 2,
+    "fields": {
+      "tag": "screening",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 3,
+    "fields": {
+      "tag": "building blocks",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 4,
+    "fields": {
+      "tag": "toxicology",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 5,
+    "fields": {
+      "tag": "environmental",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 6,
+    "fields": {
+      "tag": "patent",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 7,
+    "fields": {
+      "tag": "journal",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 8,
+    "fields": {
+      "tag": "literature",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 9,
+    "fields": {
+      "tag": "natural product",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 10,
+    "fields": {
+      "tag": "imaging",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 11,
+    "fields": {
+      "tag": "contrast agent",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 12,
+    "fields": {
+      "tag": "meta",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 13,
+    "fields": {
+      "tag": "vendor",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 14,
+    "fields": {
+      "tag": "drug",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 15,
+    "fields": {
+      "tag": "SAR",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 16,
+    "fields": {
+      "tag": "QSAR",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 17,
+    "fields": {
+      "tag": "physicochemical property",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 18,
+    "fields": {
+      "tag": "ligand",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 19,
+    "fields": {
+      "tag": "small molecule",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.contexttag",
+    "pk": 20,
+    "fields": {
+      "tag": "crystal-structure",
+      "description": null
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 1,
+    "fields": {
+      "name": "PubChem",
+      "href": "https://pubchem.ncbi.nlm.nih.gov/",
+      "description": "PubChem is an open chemistry database at the National Institutes of Health (NIH)",
+      "publisher": 4,
+      "added": "2023-11-19T10:25:01.331Z",
+      "modified": "2023-11-19T10:25:01.338Z",
+      "context_tags": [
+        12
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 2,
+    "fields": {
+      "name": "ChEMBL",
+      "href": "https://www.ebi.ac.uk/chembl/",
+      "description": "ChEMBL is a manually curated database of bioactive molecules with drug-like properties",
+      "publisher": 5,
+      "added": "2023-11-19T10:25:01.342Z",
+      "modified": "2023-11-19T10:25:01.348Z",
+      "context_tags": [
+        14
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 3,
+    "fields": {
+      "name": "DTP/NCI",
+      "href": "https://dtp.cancer.gov/",
+      "description": "NCI database",
+      "publisher": 6,
+      "added": "2023-11-19T10:25:01.353Z",
+      "modified": "2023-11-19T10:25:01.359Z",
+      "context_tags": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.dataset",
+    "pk": 4,
+    "fields": {
+      "name": "SANDBOX",
+      "href": "https://sandbox.test/",
+      "description": "sandbox",
+      "publisher": 3,
+      "added": "2023-11-19T10:25:01.363Z",
+      "modified": "2023-11-19T10:25:01.368Z",
+      "context_tags": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": 1,
+    "fields": {
+      "parent": null,
+      "dataset": 2,
+      "publisher": 5,
+      "name": "",
+      "description": "ChEMBL database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "version": "29",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2023-11-19T10:25:01.378Z",
+      "modified": "2023-11-19T10:25:01.380Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": 2,
+    "fields": {
+      "parent": null,
+      "dataset": 1,
+      "publisher": 4,
+      "name": "PubChem Compound",
+      "description": "PubChem Compound database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "version": "0",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2023-11-19T10:25:01.402Z",
+      "modified": "2023-11-19T10:25:01.406Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": 3,
+    "fields": {
+      "parent": null,
+      "dataset": 1,
+      "publisher": 4,
+      "name": "PubChem Substance",
+      "description": "PubChem Substance database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "version": "0",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2023-11-19T10:25:01.488Z",
+      "modified": "2023-11-19T10:25:01.494Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": 4,
+    "fields": {
+      "parent": null,
+      "dataset": 3,
+      "publisher": 4,
+      "name": "DTP/NCI",
+      "description": "NCI database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "version": "0",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2023-11-19T10:25:01.533Z",
+      "modified": "2023-11-19T10:25:01.536Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.release",
+    "pk": 5,
+    "fields": {
+      "parent": null,
+      "dataset": 3,
+      "publisher": 1,
+      "name": "Open NCI Database",
+      "description": "NCI database",
+      "href": null,
+      "classification": "public",
+      "status": "active",
+      "version": "0",
+      "released": null,
+      "downloaded": "2022-02-01",
+      "added": "2023-11-19T10:25:01.550Z",
+      "modified": "2023-11-19T10:25:01.554Z",
+      "record_uri_pattern": []
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 1,
+    "fields": {
+      "parent_type": null,
+      "url": "ficts",
+      "method": "prop",
+      "parameter": "E_FICTS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 2,
+    "fields": {
+      "parent_type": null,
+      "url": "ficus",
+      "method": "prop",
+      "parameter": "E_FICUS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 3,
+    "fields": {
+      "parent_type": null,
+      "url": "fictu",
+      "method": "prop",
+      "parameter": "E_FICTU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 4,
+    "fields": {
+      "parent_type": null,
+      "url": "ficuu",
+      "method": "prop",
+      "parameter": "E_FICUU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 5,
+    "fields": {
+      "parent_type": null,
+      "url": "uuuts",
+      "method": "prop",
+      "parameter": "E_UUUTS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 6,
+    "fields": {
+      "parent_type": null,
+      "url": "uuuus",
+      "method": "prop",
+      "parameter": "E_UUUUS_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 7,
+    "fields": {
+      "parent_type": null,
+      "url": "uuutu",
+      "method": "prop",
+      "parameter": "E_UUUTU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 8,
+    "fields": {
+      "parent_type": null,
+      "url": "uuuuu",
+      "method": "prop",
+      "parameter": "E_UUUUU_ID",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 9,
+    "fields": {
+      "parent_type": 1,
+      "url": "ficts_structure",
+      "method": "prop",
+      "parameter": "E_FICTS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 10,
+    "fields": {
+      "parent_type": 2,
+      "url": "ficus_structure",
+      "method": "prop",
+      "parameter": "E_FICUS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 11,
+    "fields": {
+      "parent_type": 3,
+      "url": "fictu_structure",
+      "method": "prop",
+      "parameter": "E_FICTU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 12,
+    "fields": {
+      "parent_type": 4,
+      "url": "ficuu_structure",
+      "method": "prop",
+      "parameter": "E_FICUU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 13,
+    "fields": {
+      "parent_type": 5,
+      "url": "uuuts_structure",
+      "method": "prop",
+      "parameter": "E_UUUTS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 14,
+    "fields": {
+      "parent_type": 6,
+      "url": "uuuus_structure",
+      "method": "prop",
+      "parameter": "E_UUUUS_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 15,
+    "fields": {
+      "parent_type": 7,
+      "url": "uuutu_structure",
+      "method": "prop",
+      "parameter": "E_UUUTU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 16,
+    "fields": {
+      "parent_type": 8,
+      "url": "uuuuu_structure",
+      "method": "prop",
+      "parameter": "E_UUUUU_STRUCTURE",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 17,
+    "fields": {
+      "parent_type": null,
+      "url": "inchi",
+      "method": "prop",
+      "parameter": "E_INCHI",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 18,
+    "fields": {
+      "parent_type": 17,
+      "url": "inchikey",
+      "method": "prop",
+      "parameter": "E_INCHIKEY",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 19,
+    "fields": {
+      "parent_type": null,
+      "url": "smiles",
+      "method": "prop",
+      "parameter": "E_SMILES",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 20,
+    "fields": {
+      "parent_type": null,
+      "url": "pack",
+      "method": "prop",
+      "parameter": "packstring",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 21,
+    "fields": {
+      "parent_type": null,
+      "url": "names",
+      "method": "names",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 22,
+    "fields": {
+      "parent_type": null,
+      "url": "cas",
+      "method": "cas",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 23,
+    "fields": {
+      "parent_type": null,
+      "url": "stdinchi",
+      "method": "prop",
+      "parameter": "E_STDINCHI",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 24,
+    "fields": {
+      "parent_type": 23,
+      "url": "stdinchikey",
+      "method": "prop",
+      "parameter": "E_STDINCHIKEY",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 25,
+    "fields": {
+      "parent_type": null,
+      "url": "image",
+      "method": "structure_image",
+      "parameter": null,
+      "base_mime_type": "image"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 26,
+    "fields": {
+      "parent_type": null,
+      "url": "sdf",
+      "method": "molfile",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 27,
+    "fields": {
+      "parent_type": null,
+      "url": "molfile",
+      "method": "molfile",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 28,
+    "fields": {
+      "parent_type": null,
+      "url": "hashisy",
+      "method": "prop",
+      "parameter": "E_HASHISY",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 29,
+    "fields": {
+      "parent_type": null,
+      "url": "gif",
+      "method": "prop",
+      "parameter": "structure_image",
+      "base_mime_type": "image"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 30,
+    "fields": {
+      "parent_type": null,
+      "url": "iupac_name",
+      "method": "iupac_name",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 31,
+    "fields": {
+      "parent_type": null,
+      "url": "file",
+      "method": "molfile",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 32,
+    "fields": {
+      "parent_type": null,
+      "url": "twirl",
+      "method": "molfile",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 33,
+    "fields": {
+      "parent_type": null,
+      "url": "urls",
+      "method": "urls",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 34,
+    "fields": {
+      "parent_type": null,
+      "url": "weight",
+      "method": "prop",
+      "parameter": "E_WEIGHT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 35,
+    "fields": {
+      "parent_type": null,
+      "url": "mw",
+      "method": "prop",
+      "parameter": "E_WEIGHT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 36,
+    "fields": {
+      "parent_type": null,
+      "url": "formula",
+      "method": "prop",
+      "parameter": "E_FORMULA",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 37,
+    "fields": {
+      "parent_type": null,
+      "url": "monoisotopic_mass",
+      "method": "prop",
+      "parameter": "E_MONOISOTOPIC_MASS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 38,
+    "fields": {
+      "parent_type": null,
+      "url": "h_bond_donor_count",
+      "method": "prop",
+      "parameter": "E_NHDONORS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 39,
+    "fields": {
+      "parent_type": null,
+      "url": "h_bond_acceptor_count",
+      "method": "prop",
+      "parameter": "E_NHACCEPTORS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 40,
+    "fields": {
+      "parent_type": null,
+      "url": "effective_rotor_count",
+      "method": "prop",
+      "parameter": "E_EFFECTIVE_ROTOR_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 41,
+    "fields": {
+      "parent_type": null,
+      "url": "xlogp2",
+      "method": "prop",
+      "parameter": "E_XLOGP2",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 42,
+    "fields": {
+      "parent_type": null,
+      "url": "rule_of_5_violation_count",
+      "method": "prop",
+      "parameter": "E_RULE_OF_5_VIOLATIONS",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 43,
+    "fields": {
+      "parent_type": null,
+      "url": "h_bond_center_count",
+      "method": "prop",
+      "parameter": "E_HYDROGEN_BOND_CENTER_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 44,
+    "fields": {
+      "parent_type": null,
+      "url": "chemspider_id",
+      "method": "chemspider_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 45,
+    "fields": {
+      "parent_type": null,
+      "url": "rotor_count",
+      "method": "prop",
+      "parameter": "E_ROTOR_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 46,
+    "fields": {
+      "parent_type": null,
+      "url": "aromatic",
+      "method": "prop",
+      "parameter": "E_IS_AROMATIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 47,
+    "fields": {
+      "parent_type": null,
+      "url": "macrocyclic",
+      "method": "prop",
+      "parameter": "E_IS_MACROCYCLIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 48,
+    "fields": {
+      "parent_type": null,
+      "url": "is_aromatic",
+      "method": "prop",
+      "parameter": "E_IS_AROMATIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 49,
+    "fields": {
+      "parent_type": null,
+      "url": "is_macrocyclic",
+      "method": "prop",
+      "parameter": "E_IS_MACROCYCLIC",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 50,
+    "fields": {
+      "parent_type": null,
+      "url": "heteroatom_count",
+      "method": "prop",
+      "parameter": "E_HETERO_ATOM_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 51,
+    "fields": {
+      "parent_type": null,
+      "url": "hydrogen_atom_count",
+      "method": "prop",
+      "parameter": "E_HYDROGEN_ATOM_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 52,
+    "fields": {
+      "parent_type": null,
+      "url": "heavy_atom_count",
+      "method": "prop",
+      "parameter": "E_HEAVY_ATOM_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 53,
+    "fields": {
+      "parent_type": null,
+      "url": "deprotonable_group_count",
+      "method": "prop",
+      "parameter": "E_DEPROTONABLE_GROUP_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 54,
+    "fields": {
+      "parent_type": null,
+      "url": "protonable_group_count",
+      "method": "prop",
+      "parameter": "E_PROTONABLE_GROUP_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 55,
+    "fields": {
+      "parent_type": null,
+      "url": "ring_count",
+      "method": "prop",
+      "parameter": "E_RING_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 56,
+    "fields": {
+      "parent_type": null,
+      "url": "ringsys_count",
+      "method": "prop",
+      "parameter": "E_RINGSYS_COUNT",
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 57,
+    "fields": {
+      "parent_type": null,
+      "url": "ncicadd_sid",
+      "method": "ncicadd_structure_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 58,
+    "fields": {
+      "parent_type": null,
+      "url": "ncicadd_cid",
+      "method": "ncicadd_compound_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 59,
+    "fields": {
+      "parent_type": null,
+      "url": "ncicadd_rid",
+      "method": "ncicadd_record_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 60,
+    "fields": {
+      "parent_type": null,
+      "url": "chemnavigator_sid",
+      "method": "chemnavigator_sid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 61,
+    "fields": {
+      "parent_type": null,
+      "url": "pubchem_sid",
+      "method": "pubchem_sid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 62,
+    "fields": {
+      "parent_type": null,
+      "url": "emolecules_vid",
+      "method": "emolecules_vid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 63,
+    "fields": {
+      "parent_type": null,
+      "url": "emolecules_id",
+      "method": "emolecules_vid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 64,
+    "fields": {
+      "parent_type": null,
+      "url": "zinc_id",
+      "method": "zinc_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 65,
+    "fields": {
+      "parent_type": null,
+      "url": "zinc_code",
+      "method": "zinc_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 66,
+    "fields": {
+      "parent_type": null,
+      "url": "zinc",
+      "method": "zinc_id",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 67,
+    "fields": {
+      "parent_type": null,
+      "url": "chemnavigator_id",
+      "method": "chemnavigator_sid",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 68,
+    "fields": {
+      "parent_type": null,
+      "url": "nsc_number",
+      "method": "nsc_number",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  },
+  {
+    "model": "resolver.responsetype",
+    "pk": 69,
+    "fields": {
+      "parent_type": null,
+      "url": "nsc",
+      "method": "nsc_number",
+      "parameter": null,
+      "base_mime_type": "text"
+    }
+  }
+]

@@ -1,6 +1,7 @@
 import datetime
 import glob
 import gzip
+import hashlib
 import logging
 import math
 import os
@@ -26,7 +27,8 @@ from pycactvs import Molfile, Ens, Prop
 from core.common import NCICADD_TYPES, InChIAndSaveOpt, INCHI_TYPES
 from core.cactvs import CactvsHash, CactvsMinimol, SpecialCactvsHash
 from etl.models import StructureFileCollection, StructureFile, StructureFileField, StructureFileRecord, \
-    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, StructureFileCalcInChIStatus, \
+    ReleaseNameField, StructureFileCollectionPreprocessor, StructureFileNormalizationStatus, \
+    StructureFileCalcInChIStatus, \
     StructureFileRecordNameAssociation, StructureFileSource, StructureFileLinkNameStatus
 from resolver.models import InChI, Structure, Compound, StructureInChIAssociation, InChIType, Dataset, Publisher, \
     Release, NameType, Name, Record, StructureHashisy, StructureParentStructure, StructureNameAssociation, \
@@ -35,6 +37,11 @@ from structure.inchi.identifier import InChIString, InChIKey
 
 logger = logging.getLogger('celery.task')
 
+from pycactvs import cactvs
+
+CACTVS_SETTINGS = cactvs
+CACTVS_SETTINGS['python_object_autodelete'] = True
+CACTVS_SETTINGS['lookup_hosts'] = []
 
 DEFAULT_CHUNK_SIZE = 25000
 DEFAULT_DATABASE_ROW_BATCH_SIZE = 25000
@@ -50,10 +57,14 @@ PubChemDatasource = namedtuple('PubChemDatasource', 'name url')
 
 
 @dataclass(frozen=True)
-class NameTriple:
+class NameData:
     name: str = None
+    hash: str = None
     name_type: str = None
     parent: str = None
+
+    def __hash__(self):
+        return hash(self.hash)
 
 
 @dataclass
@@ -67,18 +78,19 @@ class RecordData:
     record_object: Record = None
     structure_file_record_object: StructureFileRecord = None
     regid: str = None
+    regid_hash: str = None
     version: int = 1
-    names: List[NameTriple] = field(default_factory=lambda: [])
+    names: List[NameData] = field(default_factory=lambda: [])
 
     def __str__(self):
-        return "RecordData[%s, %s]" % (self.index, self.release_object)
+        return "RecordData[index=%s, release=%s, regid=%s, regid_hash=%s]" % (
+        self.index, self.release_object, self.regid, self.regid_hash)
 
     def __hash__(self) -> int:
         return hash(repr(self.structure_file.id) + ":" + repr(self.index))
 
 
 class FileRegistry(object):
-
     CHUNK_SIZE = DEFAULT_CHUNK_SIZE
     MAX_CHUNKS = DEFAULT_MAX_CHUNK_NUMBER
     DATABASE_ROW_BATCH_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
@@ -93,11 +105,12 @@ class FileRegistry(object):
 
     @staticmethod
     def hash_file(file_path: str):
-        with open(file_path, 'rb') as file, mmap(file.fileno(),0, access=ACCESS_READ) as file:
+        with open(file_path, 'rb') as file, mmap(file.fileno(), 0, access=ACCESS_READ) as file:
             return md5(file).hexdigest()
 
     @staticmethod
-    def add_file(key: str, pattern: str, file_path: str, check: bool = False, release: int = 0, preprocessors: List[int] = None):
+    def add_file(key: str, pattern: str, file_path: str, check: bool = False, release: int = 0,
+                 preprocessors: List[int] = None):
         file: PurePath = PurePath(file_path)
         if release and preprocessors:
             check = True
@@ -110,8 +123,8 @@ class FileRegistry(object):
         try:
             Path(outfile_path).mkdir(parents=True, exist_ok=True)
         except Exception as e:
-           logger.critical("SKIPPED - something went wrong creating the target directory %s %s" % (outfile_path, e))
-           return
+            logger.critical("SKIPPED - something went wrong creating the target directory %s %s" % (outfile_path, e))
+            return
         molfile: Molfile = Molfile.Open(str(file))
         if check:
             molfile_count = molfile.count()
@@ -166,7 +179,7 @@ class FileRegistry(object):
 
     def register_files(self, force=False) -> List[StructureFile]:
         self._file_list = \
-                [status.file for fname in self._file_name_list if (status := self.register_file(fname, force)).created]
+            [status.file for fname in self._file_name_list if (status := self.register_file(fname, force)).created]
         return self._file_list
 
     def register_file(self, fname, force=False) -> Status:
@@ -234,12 +247,14 @@ class FileRegistry(object):
         logger.info("accepted task for registering file with id: %s chunk %s" % (structure_file_id, chunk_number))
         structure_file: StructureFile = StructureFile.objects.get(id=structure_file_id)
 
+        chunk_time0 = time.perf_counter()
         count: int
         if not structure_file.count:
-            count = Molfile.count()
+            count = Molfile.Count(structure_file.file.name)
+            logger.warning("no count provided, counted now %s", count)
         else:
             count = structure_file.count
-        file_records = range(1, count+1)
+        file_records = range(1, count + 1)
         chunks = [file_records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
         try:
             chunk_records = chunks[chunk_number]
@@ -263,6 +278,7 @@ class FileRegistry(object):
 
         structures: list = list()
         record_data_list: List[RecordData] = list()
+        release = structure_file.collection.release
 
         record -= 1
         while record < last_record:
@@ -288,7 +304,7 @@ class FileRegistry(object):
                 record_data_list.append(record_data)
                 preprocessor_callable = getattr(Preprocessors, preprocessor.name, None)
                 if callable(preprocessor_callable):
-                    preprocessor_callable(structure_file, preprocessor, ens, record_data)
+                    preprocessor_callable(release, structure_file, preprocessor, ens, record_data)
                 else:
                     logger.warning("preprocessor '%s' was not callable", preprocessor_callable)
             if max_records and record >= max_records:
@@ -296,9 +312,12 @@ class FileRegistry(object):
         molfile.close()
         logger.info("finished reading records")
 
+        # for record in record_data_list[0:100]:
+        #     logger.info("> %s" % record)
+
         structures = sorted(structures, key=lambda s: s.hashisy_key.int)
 
-        logger.info("adding registration data to database for file '%s'" % (fname, ))
+        logger.info("adding registration data to database for file '%s'" % (fname,))
         g0 = time.perf_counter()
         try:
             with transaction.atomic():
@@ -321,7 +340,7 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
                 time1 = time.perf_counter()
-                logging.info("STRUCTURE BULK Time: %s Count: %s" % ((time1 - time0), len(structures)))
+                logging.info("STRUCTURE BULK Time: %ss Count: %s" % ((time1 - time0), len(structures)))
 
                 time0 = time.perf_counter()
                 structure_hashkey_dict = StructureHashisy.objects.bulk_create_from_hash_list(
@@ -329,7 +348,8 @@ class FileRegistry(object):
                     FileRegistry.DATABASE_ROW_BATCH_SIZE
                 )
                 time1 = time.perf_counter()
-                logging.info("STRUCTURE HASHISY BULK Time: %s Count: %s" % ((time1 - time0), len(structure_hashkey_dict)))
+                logging.info(
+                    "STRUCTURE HASHISY BULK Time: %s Count: %s" % ((time1 - time0), len(structure_hashkey_dict)))
 
                 logger.info("registering structure file records for '%s'" % (fname,))
                 sorted_record_data_structure_list = sorted(
@@ -357,13 +377,13 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
                 time1 = time.perf_counter()
-                logging.info("STRUCTURE RECORD BULK T: %s C: %s" % ((time1 - time0), len(structure_file_records)))
+                logging.info("STRUCTURE RECORD BULK T: %ss C: %s" % ((time1 - time0), len(structure_file_records)))
 
                 name_set, name_type_set = set(), set()
                 for record_data in record_data_list:
-                    for triplet in record_data.names:
-                        name_set.add(triplet.name)
-                        name_type_set.add((triplet.name_type, triplet.parent))
+                    for name_data in record_data.names:
+                        name_set.add(name_data)
+                        name_type_set.add((name_data.name_type, name_data.parent))
 
                 NameType.objects.bulk_create(
                     [NameType(title=item[1]) for item in name_type_set],
@@ -383,15 +403,20 @@ class FileRegistry(object):
                 name_type_dict = {name_type.title: name_type for name_type in NameType.objects.all()}
 
                 time0 = time.perf_counter()
-                name_list = [Name(name=name) for name in name_set]
+                name_list = [Name(
+                    hash=data.hash,
+                    name=data.name
+                ) for data in name_set]
                 Name.objects.bulk_create(
                     name_list,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                names = Name.objects.in_bulk(name_set, field_name='name')
+                cc = Name.objects.count()
+                logger.info(cc)
+                names = Name.objects.in_bulk([n.hash for n in name_set], field_name='hash')
                 time1 = time.perf_counter()
-                logging.info("NAME BULK T: %s C: %s" % ((time1 - time0), len(names)))
+                logging.info("NAME BULK Time: %ss Count: %s" % ((time1 - time0), len(names)))
 
                 structure_file_record_dict = {
                     str(r.structure_file.id) + ":" + str(r.number): r for r in structure_file_records
@@ -402,7 +427,7 @@ class FileRegistry(object):
                     key = str(record_data.structure_file.id) + ":" + str(record_data.index)
                     sfr = structure_file_record_dict[key]
                     record_object = Record(
-                        name=names[str(record_data.regid)],
+                        name=names[str(record_data.regid_hash)],
                         regid=record_data.regid,
                         version=record_data.version,
                         release=record_data.release_object,
@@ -418,15 +443,15 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                 )
                 time1 = time.perf_counter()
-                logging.info("RECORD BULK T: %s" % (time1 - time0))
+                logging.info("RECORD BULK Time: %ss" % (time1 - time0))
 
                 structure_file_record_name_objects = []
                 for record_data in record_data_list:
                     for name in record_data.names:
                         sfr_name_association = StructureFileRecordNameAssociation(
-                           name=names[str(name.name)],
-                           structure_file_record=record_data.structure_file_record_object,
-                           name_type=name_type_dict[name.name_type]
+                            name=names[str(name.hash)],
+                            structure_file_record=record_data.structure_file_record_object,
+                            name_type=name_type_dict[name.name_type]
                         )
                         structure_file_record_name_objects.append(sfr_name_association)
 
@@ -438,13 +463,17 @@ class FileRegistry(object):
 
         except DatabaseError as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
-            raise(DatabaseError(e))
+            raise (DatabaseError(e))
         except Exception as e:
             logger.error("file record registration failed for '%s': %s" % (fname, e))
             raise Exception(e)
 
         g1 = time.perf_counter()
-        logging.info("TRANSACTION BULK T: %s" % (g1 - g0))
+        chunk_time1 = time.perf_counter()
+
+        logging.info("TRANSACTION BULK T: %ss" % (g1 - g0))
+        t = ((chunk_time1 - chunk_time0) * 1000) / DEFAULT_CHUNK_SIZE
+        logging.info("TIME PER RECORD: %.1fms" % t)
 
         return structure_file_id
 
@@ -472,12 +501,12 @@ class FileRegistry(object):
     @staticmethod
     def _create_filestore_pattern(key: str, file_path: PurePath):
         parent = file_path.parent
-        stem = file_path.stem
+        #stem = file_path.stem
         suffixes = file_path.suffixes
         if suffixes[-1] != ".gz":
             suffixes.append(".gz")
 
-        splitted_stem = stem.split(".", 1)
+        # splitted_stem = stem.split(".", 1)
         file_pattern = os.path.join(
             *[str(p) for p in parent.parts[2:]],
             key,
@@ -488,7 +517,6 @@ class FileRegistry(object):
 
 
 class StructureRegistry(object):
-
     CHUNK_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
 
     @staticmethod
@@ -516,14 +544,14 @@ class StructureRegistry(object):
                 .select_related('structure', 'structure__parents') \
                 .values('structure__id') \
                 .filter(
-                    structure_file=structure_file,
-                    structure__parents__isnull=True,
-                    structure__blocked__isnull=True,
-                ).exclude(
-                    structure__hashisy_key=SpecialCactvsHash.ZERO.hashisy
-                ).exclude(
-                    structure__hashisy_key=SpecialCactvsHash.MAGIC.hashisy
-                )
+                structure_file=structure_file,
+                structure__parents__isnull=True,
+                structure__blocked__isnull=True,
+            ).exclude(
+                structure__hashisy_key=SpecialCactvsHash.ZERO.hashisy
+            ).exclude(
+                structure__hashisy_key=SpecialCactvsHash.MAGIC.hashisy
+            )
         except Exception as e:
             logger.error("structure file and count not available")
             raise Exception(e)
@@ -543,7 +571,7 @@ class StructureRegistry(object):
 
         for structure_id, structure in source_structures.items():
             if structure.blocked:
-                logger.info("structure %s is blocked and has been skipped" % (structure_id, ))
+                logger.info("structure %s is blocked and has been skipped" % (structure_id,))
                 continue
             try:
                 related_hashes = {}
@@ -557,7 +585,7 @@ class StructureRegistry(object):
                         hashisy_key=hashisy_key,
                         minimol=CactvsMinimol(parent_ens)
                     )
-                    parent_structure_relationships\
+                    parent_structure_relationships \
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
                     relationships[identifier.attr] = hashisy_key
                     source_structure_relationships.append(StructureRelationships(structure, relationships))
@@ -628,7 +656,7 @@ class StructureRegistry(object):
 
         except DatabaseError as e:
             logger.error(e)
-            raise(DatabaseError(e))
+            raise (DatabaseError(e))
         except Exception as e:
             logger.error(e)
             raise Exception(e)
@@ -640,12 +668,12 @@ class StructureRegistry(object):
     def update_normalization_status(file_id):
         structure_file = StructureFile.objects.get(id=file_id)
         records: QuerySet = StructureFileRecord.objects \
-            .select_related('structure', 'structure__parents')\
-            .values('structure__id')\
+            .select_related('structure', 'structure__parents') \
+            .values('structure__id') \
             .filter(
-                structure_file=structure_file,
-                structure__parents__isnull=False,
-            )
+            structure_file=structure_file,
+            structure__parents__isnull=False,
+        )
         structure_file_count = structure_file.count
         records_count = records.count()
         logger.info("structure normalization progress for file %s: %s (%s : %s)" % (
@@ -683,10 +711,10 @@ class StructureRegistry(object):
                 .select_related('structure') \
                 .values('structure__id') \
                 .filter(
-                    structure_file=structure_file,
-                    structure__blocked__isnull=True,
-                    structure__inchis__isnull=True,
-                )
+                structure_file=structure_file,
+                structure__blocked__isnull=True,
+                structure__inchis__isnull=True,
+            )
         except Exception as e:
             logger.error("selecting structure records for InChI calculation failed")
             raise Exception(e)
@@ -707,7 +735,7 @@ class StructureRegistry(object):
         structure_to_inchi_relationships = []
         for structure_id, structure in source_structures.items():
             if structure.blocked:
-                logger.info("structure %s is blocked and has been skipped" % (structure_id, ))
+                logger.info("structure %s is blocked and has been skipped" % (structure_id,))
                 continue
             try:
                 inchi_relationships = {}
@@ -783,7 +811,8 @@ class StructureRegistry(object):
                             software_version=inchi_type.softwareversion
                         )
                         structure_inchi_associations.append(structure_inchi_association)
-                sorted_structure_inchi_associations = sorted(structure_inchi_associations, key=lambda item: (item.inchi_id, item.structure_id))
+                sorted_structure_inchi_associations = sorted(structure_inchi_associations,
+                                                             key=lambda item: (item.inchi_id, item.structure_id))
                 StructureInChIAssociation.objects.bulk_create(
                     sorted_structure_inchi_associations,
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -791,7 +820,7 @@ class StructureRegistry(object):
                 )
         except DatabaseError as e:
             logger.error(e)
-            raise(DatabaseError(e))
+            raise (DatabaseError(e))
         except Exception as e:
             logger.error(e)
             raise Exception(e)
@@ -803,13 +832,13 @@ class StructureRegistry(object):
         structure_file = StructureFile.objects.get(id=file_id)
         structure_count: int = StructureFileSource.objects \
             .filter(
-                structure_file=structure_file,
-            ).distinct().count()
+            structure_file=structure_file,
+        ).distinct().count()
         structure_count_with_inchi: int = StructureFileSource.objects \
             .filter(
-                structure_file=structure_file,
-                structure__inchis__isnull=False
-            ).distinct().count()
+            structure_file=structure_file,
+            structure__inchis__isnull=False
+        ).distinct().count()
         logger.info("inchi calculation progress file %s: %s (%s : %s)" % (
             structure_file.id,
             structure_count == structure_count_with_inchi,
@@ -820,7 +849,7 @@ class StructureRegistry(object):
             structure_count_with_inchi,
             structure_count,
             structure_count_with_inchi / structure_count)
-        )
+                    )
         status, created = StructureFileCalcInChIStatus.objects.get_or_create(structure_file=structure_file)
         status.progress = structure_count_with_inchi / structure_count
         status.save()
@@ -862,10 +891,10 @@ class StructureRegistry(object):
                 .select_related('structure') \
                 .values('structure__id') \
                 .filter(
-                    structure_file=structure_file,
-                    structure__blocked__isnull=True,
-                    structure__names__isnull=True,
-                )
+                structure_file=structure_file,
+                structure__blocked__isnull=True,
+                structure__names__isnull=True,
+            )
         except Exception as e:
             logger.error("selecting structures for name linking failed")
             raise Exception(e)
@@ -876,20 +905,24 @@ class StructureRegistry(object):
     def link_structure_names(arg_tuple):
         structure_file_id, structure_ids = arg_tuple
 
-        s = sorted(structure_ids)
-        logger.info("IN %s %s [%s, %s]" % (structure_file_id, len(structure_ids), s[0], s[-1]))
+        sorted_structure_ids = sorted(structure_ids)
+        logger.info("IN %s %s [%s, %s]" % (
+            structure_file_id,
+            len(structure_ids), sorted_structure_ids[0],
+            sorted_structure_ids[-1])
+                    )
 
-        query = Structure.objects\
-            .select_related('parents', 'structure_file_source')\
+        query = Structure.objects \
+            .select_related('parents', 'structure_file_source') \
             .filter(structure_file_source__structure_id__in=structure_ids) \
             .annotate(
-                record_names=ArrayAgg('structure_file_records__structure_file_record_name_associations'),
-                ficts=F('parents__ficts_parent'),
-                ficus=F('parents__ficus_parent'),
-                uuuuu=F('parents__uuuuu_parent'),
-            )
-        structures = query\
-            .values('id', 'record_names', 'ficts', 'ficus', 'uuuuu')\
+            record_names=ArrayAgg('structure_file_records__structure_file_record_name_associations'),
+            ficts=F('parents__ficts_parent'),
+            ficus=F('parents__ficus_parent'),
+            uuuuu=F('parents__uuuuu_parent'),
+        )
+        structures = query \
+            .values('id', 'record_names', 'ficts', 'ficus', 'uuuuu') \
             .all()
 
         structure_association_list = []
@@ -925,7 +958,8 @@ class StructureRegistry(object):
                         affinity_class=name_association_types['narrow'],
                         confidence=100
                     ))
-                if structure['uuuuu'] and not structure['uuuuu'] == structure['ficus'] and not structure['uuuuu'] == structure['ficts']:
+                if structure['uuuuu'] and not structure['uuuuu'] == structure['ficus'] and not structure['uuuuu'] == \
+                                                                                               structure['ficts']:
                     structure_association_list.append(StructureNameAssociation(
                         name_id=record_name_association.name_id,
                         structure_id=structure['uuuuu'],
@@ -942,7 +976,7 @@ class StructureRegistry(object):
                 )
         except DatabaseError as e:
             logger.error(e)
-            raise(DatabaseError(e))
+            raise (DatabaseError(e))
         except Exception as e:
             logger.error(e)
             raise Exception(e)
@@ -957,16 +991,16 @@ class StructureRegistry(object):
             .select_related('structure__structure_file_source') \
             .filter(structure__structure_file_source__structure_file=structure_file) \
             .filter(
-                Q(structure_id=F('ficts_parent_id'))
-                | Q(structure_id=F('ficus_parent_id'))
-                | Q(structure_id=F('uuuuu_parent_id'))
-            ).count()
+            Q(structure_id=F('ficts_parent_id'))
+            | Q(structure_id=F('ficus_parent_id'))
+            | Q(structure_id=F('uuuuu_parent_id'))
+        ).count()
 
         structure_count_with_name: int = StructureFileSource.objects \
             .filter(
-                structure_file=structure_file,
-                structure__names__isnull=False,
-            ).distinct().count()
+            structure_file=structure_file,
+            structure__names__isnull=False,
+        ).distinct().count()
 
         logger.info("link name progress file %s: %s (%s : %s)" % (
             structure_file.id,
@@ -991,6 +1025,7 @@ class Preprocessors:
 
     @staticmethod
     def generic(
+            release: Release,
             structure_file: StructureFile,
             preprocessor: StructureFileCollectionPreprocessor,
             ens: Ens,
@@ -1003,29 +1038,46 @@ class Preprocessors:
         try:
             regid = ens.dget(regid_field_name, None)
             record_data.regid = regid
-            release_object = structure_file.collection.release
-            record_data.release_name = release_object.name
-            record_data.release_object = release_object
-            record_data.names.append(NameTriple(regid, regid_field_type, "REGID"))
+            record_data.regid_hash = hashlib.md5(str(regid).encode("UTF-8")).hexdigest()
+            # release_object = structure_file.collection.release
+            record_data.release_name = release.name
+            record_data.release_object = release
+            record_data.names.append(NameData(
+                regid,
+                hashlib.md5(str(regid).encode("UTF-8")).hexdigest(),
+                regid_field_type,
+                "REGID"
+            ))
         except Exception as e:
-            logger.error("getting regid failed: %s", e)
+            logger.warning("getting regid failed: %s", e)
         name_field_names = [n for n in params['names']]
+        props = ens.props()
         for name_field_name in name_field_names:
-            logger.info("name %s" % name_field_name)
-
+            prop = name_field_name['field']
+            check = True in [prop in p for p in props]
+            if not check:
+                continue
             try:
-                name = ens.dget(name_field_name['field'], None)
-                if name:
-                    add_names = name.replace("\n", "\t").split("\t")
-                    name_type = name_field_name['type']
-                    for n in add_names:
-                        record_data.names.append(NameTriple(n, name_type, "NAME"))
+                name = ens.get(prop)
             except Exception as e:
-                logger.warning("getting name failed: %s", e)
-                pass
+                name = None
+            if name:
+                if type(name) is tuple:
+                    add_names = name[0].replace("\n", "\t").split("\t")
+                else:
+                    add_names = name.replace("\n", "\t").split("\t")
+                name_type = name_field_name['type']
+                for n in add_names:
+                    record_data.names.append(NameData(
+                        n,
+                        hashlib.md5(str(n).encode("UTF-8")).hexdigest(),
+                        name_type,
+                        "NAME"
+                    ))
 
     @staticmethod
     def pubchem_ext_datasource(
+            release: Release,
             structure_file: StructureFile,
             preprocessor: StructureFileCollectionPreprocessor,
             ens: Ens,
@@ -1042,8 +1094,14 @@ class Preprocessors:
             logger.error("getting URL failed: %s", e)
             datasource_name_url = None
         record_data.preprocessors['pubchem_ext_datasource'] = PubChemDatasource(datasource_name, datasource_name_url)
-        record_data.names = [NameTriple(datasource_regid, "E_PUBCHEM_EXT_DATASOURCE_REGID", "REGID"), ]
+        record_data.names = [NameData(
+            datasource_regid,
+            hashlib.md5(str(datasource_regid).encode("UTF-8")).hexdigest(),
+            "E_PUBCHEM_EXT_DATASOURCE_REGID",
+            "REGID")
+        ]
         record_data.regid = datasource_regid
+        record_data.regid_hash = hashlib.md5(str(datasource_regid).encode("UTF-8")).hexdigest()
 
     @staticmethod
     def generic_transaction(structure_file: StructureFile, record_data_list: List):
@@ -1100,7 +1158,7 @@ class Preprocessors:
                 released=pubchem_release_released
             )
             if created:
-                regid_id_field, created = StructureFileField.objects\
+                regid_id_field, created = StructureFileField.objects \
                     .get_or_create(field_name="E_PUBCHEM_EXT_DATASOURCE_REGID")
                 name_type, created = NameType.objects.get_or_create(title="REGID")
                 release.parent = pubchem_release
