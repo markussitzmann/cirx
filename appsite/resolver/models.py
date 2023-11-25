@@ -517,6 +517,24 @@ class Name(models.Model):
         return self.name
 
 
+class LoadName(models.Model):
+    hash = models.CharField(max_length=32, unique=True)
+    name = models.TextField(max_length=1500)
+
+    class Meta:
+        db_table = 'load_structure_name'
+
+    def save(self, *args, **kwargs):
+        self.hash = hashlib.md5(self.name.encode("UTF-8")).hexdigest()
+        super(Name, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return "(Name=%s: hash=%s name=%s)" % (self.id, self.hash, self.name, )
+
+    def __repr__(self):
+        return self.name
+
+
 class NameType(models.Model):
     title = models.CharField(max_length=64, unique=True, editable=False)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.SET_NULL, blank=True, null=True)

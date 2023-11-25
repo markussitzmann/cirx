@@ -164,3 +164,6 @@ Blog
 About
 
 /.bash_history
+/pubchem/CID-Synonym-filtered
+/pubchem/pubchem-names-hashed.txt
+/pubchem/SID-Map

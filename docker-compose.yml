@@ -52,6 +52,8 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
     shm_size: 8GB
+    command: >
+      -c max_wal_size=4GB
 
   cirx-cache:
     image: redis:6.2-bullseye
