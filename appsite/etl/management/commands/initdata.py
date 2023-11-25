@@ -387,10 +387,10 @@ def init_release(
             params=json.dumps({
                 'regid': {'field': 'PUBCHEM_COMPOUND_CID', 'type': 'PUBCHEM_CID'},
                 'names': [
-                    {'field': 'PUBCHEM_IUPAC_OPENEYE_NAME', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
-                    {'field': 'PUBCHEM_IUPAC_CAS_NAME', 'type': 'PUBCHEM_IUPAC_CAS_NAME'},
-                    {'field': 'E_IUPAC_TRADITIONAL_NAME', 'type': 'IUPAC_TRADITIONAL_NAME'},
-                    {'field': 'E_IUPAC_PREFERRED_NAME', 'type': 'IUPAC_PREFERRED_NAME'},
+                    #{'field': 'PUBCHEM_IUPAC_OPENEYE_NAME', 'type': 'PUBCHEM_IUPAC_OPENEYE_NAME'},
+                    #{'field': 'PUBCHEM_IUPAC_CAS_NAME', 'type': 'PUBCHEM_IUPAC_CAS_NAME'},
+                    #{'field': 'E_IUPAC_TRADITIONAL_NAME', 'type': 'IUPAC_TRADITIONAL_NAME'},
+                    #{'field': 'E_IUPAC_PREFERRED_NAME', 'type': 'IUPAC_PREFERRED_NAME'},
                     {'field': 'E_IUPAC_SYSTEMATIC_NAME', 'type': 'IUPAC_SYSTEMATIC_NAME'},
                 ]
             })

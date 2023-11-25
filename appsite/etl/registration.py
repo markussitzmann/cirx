@@ -44,7 +44,7 @@ CACTVS_SETTINGS['python_object_autodelete'] = True
 CACTVS_SETTINGS['lookup_hosts'] = []
 
 DEFAULT_CHUNK_SIZE = 10000
-DEFAULT_DATABASE_ROW_BATCH_SIZE = 10000
+DEFAULT_DATABASE_ROW_BATCH_SIZE = 50000
 DEFAULT_LOGGER_BLOCK = 1000
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
@@ -412,8 +412,6 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                cc = Name.objects.count()
-                logger.info(cc)
                 names = Name.objects.in_bulk([n.hash for n in name_set], field_name='hash')
                 time1 = time.perf_counter()
                 logging.info("NAME BULK Time: %ss Count: %s" % ((time1 - time0), len(names)))
