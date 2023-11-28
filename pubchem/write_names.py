@@ -9,12 +9,14 @@ with open('/home/app/pubchem/CID-Synonym-filtered') as f:
         name = "".join(line.split()[1:])
         if "InChI" in name:
             continue
+        if "UNII" in name:
+            continue
         name = name.replace("\\", "")
         hash = hashlib.md5(str(name).encode('UTF-8')).hexdigest()
         out.write("%s\t%s\n" % (hash, name))
         if not i % 1000:
             print(i)
-        if i >= 10000000:
+        if i >= 20000000:
            break
 
 out.close()

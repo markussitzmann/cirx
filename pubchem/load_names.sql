@@ -9,7 +9,7 @@ WITH NO DATA;
 COPY tmp_structure_name(hash,name) FROM '/home/app/pubchem/pubchem-names-hashed.txt';
 
 INSERT INTO cir_structure_name(hash,name)
-SELECT hash, name
+SELECT hash::uuid, name
 FROM tmp_structure_name
 ON CONFLICT DO NOTHING;
 COMMIT;
