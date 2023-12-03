@@ -14,6 +14,7 @@ from typing import List, Optional, Dict
 
 from mmap import mmap, ACCESS_READ
 from hashlib import md5
+from uuid import UUID
 
 import pytz
 import ujson as json
@@ -70,7 +71,7 @@ class NameData:
 @dataclass
 class RecordData:
     structure_file: StructureFile
-    hashisy_key: CactvsHash
+    hash: CactvsHash
     index: int
     preprocessors: defaultdict = field(default_factory=lambda: defaultdict(dict))
     release_name: str = None
@@ -288,9 +289,9 @@ class FileRegistry(object):
             try:
                 molfile.set('record', record)
                 ens: Ens = molfile.read()
-                hashisy_key = CactvsHash(ens)
+                hash = CactvsHash(ens)
                 structure = Structure(
-                    hashisy_key=hashisy_key,
+                    hash=hash,
                     minimol=CactvsMinimol(ens)
                 )
                 structures.append(structure)
@@ -300,7 +301,7 @@ class FileRegistry(object):
                 break
 
             for preprocessor in preprocessors:
-                record_data = RecordData(structure_file=structure_file, hashisy_key=hashisy_key, index=record)
+                record_data = RecordData(structure_file=structure_file, hash=hash, index=record)
                 record_data_list.append(record_data)
                 preprocessor_callable = getattr(Preprocessors, preprocessor.name, None)
                 if callable(preprocessor_callable):
@@ -312,10 +313,7 @@ class FileRegistry(object):
         molfile.close()
         logger.info("finished reading records")
 
-        # for record in record_data_list[0:100]:
-        #     logger.info("> %s" % record)
-
-        structures = sorted(structures, key=lambda s: s.hashisy_key.int)
+        structures = sorted(structures, key=lambda s: s.hash.int)
 
         logger.info("adding registration data to database for file '%s'" % (fname,))
         g0 = time.perf_counter()
@@ -344,8 +342,9 @@ class FileRegistry(object):
 
                 time0 = time.perf_counter()
                 structure_hashkey_dict = StructureHashisy.objects.bulk_create_from_hash_list(
-                    [record_data.hashisy_key for record_data in record_data_list],
-                    FileRegistry.DATABASE_ROW_BATCH_SIZE
+                    [record_data.hash for record_data in record_data_list],
+                    batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
+                    skip_hashisy_creation=True
                 )
                 time1 = time.perf_counter()
                 logging.info(
@@ -354,7 +353,7 @@ class FileRegistry(object):
                 logger.info("registering structure file records for '%s'" % (fname,))
                 sorted_record_data_structure_list = sorted(
                     [
-                        (record_data.index, record_data, structure_hashkey_dict[record_data.hashisy_key])
+                        (record_data.index, record_data, structure_hashkey_dict[record_data.hash])
                         for record_data in record_data_list
                     ],
                     key=lambda u: u[0]
@@ -404,7 +403,7 @@ class FileRegistry(object):
 
                 time0 = time.perf_counter()
                 name_list = [Name(
-                    hash=data.hash,
+                    hash=UUID(data.hash),
                     name=data.name
                 ) for data in name_set]
                 Name.objects.bulk_create(
@@ -412,7 +411,7 @@ class FileRegistry(object):
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
                     ignore_conflicts=True
                 )
-                names = Name.objects.in_bulk([n.hash for n in name_set], field_name='hash')
+                names = Name.objects.in_bulk([UUID(n.hash) for n in name_set], field_name='hash')
                 time1 = time.perf_counter()
                 logging.info("NAME BULK Time: %ss Count: %s" % ((time1 - time0), len(names)))
 
@@ -425,7 +424,7 @@ class FileRegistry(object):
                     key = str(record_data.structure_file.id) + ":" + str(record_data.index)
                     sfr = structure_file_record_dict[key]
                     record_object = Record(
-                        name=names[str(record_data.regid_hash)],
+                        name=names[UUID(record_data.regid_hash)],
                         regid=record_data.regid,
                         version=record_data.version,
                         release=record_data.release_object,
@@ -447,7 +446,7 @@ class FileRegistry(object):
                 for record_data in record_data_list:
                     for name in record_data.names:
                         sfr_name_association = StructureFileRecordNameAssociation(
-                            name=names[str(name.hash)],
+                            name=names[UUID(name.hash)],
                             structure_file_record=record_data.structure_file_record_object,
                             name_type=name_type_dict[name.name_type]
                         )
@@ -470,7 +469,7 @@ class FileRegistry(object):
         chunk_time1 = time.perf_counter()
 
         logging.info("TRANSACTION BULK T: %ss" % (g1 - g0))
-        t = ((chunk_time1 - chunk_time0) * 1000) / DEFAULT_CHUNK_SIZE
+        t = ((chunk_time1 - chunk_time0) * 1000) / chunk_size
         logging.info("TIME PER RECORD: %.1fms" % t)
 
         return structure_file_id
@@ -546,9 +545,9 @@ class StructureRegistry(object):
                 structure__parents__isnull=True,
                 structure__blocked__isnull=True,
             ).exclude(
-                structure__hashisy_key=SpecialCactvsHash.ZERO.hashisy
+                structure__hash=SpecialCactvsHash.ZERO.hashisy
             ).exclude(
-                structure__hashisy_key=SpecialCactvsHash.MAGIC.hashisy
+                structure__hash=SpecialCactvsHash.MAGIC.hashisy
             )
         except Exception as e:
             logger.error("structure file and count not available")
@@ -577,15 +576,15 @@ class StructureRegistry(object):
                     relationships = {}
                     ens = structure.to_ens
                     parent_ens = ens.get(identifier.parent_structure)
-                    hashisy_key: CactvsHash = CactvsHash(parent_ens)
-                    related_hashes[identifier.attr] = hashisy_key
+                    cactvs_hash: CactvsHash = CactvsHash(parent_ens)
+                    related_hashes[identifier.attr] = cactvs_hash
                     parent_structure: Structure = Structure(
-                        hashisy_key=hashisy_key,
+                        hash=cactvs_hash,
                         minimol=CactvsMinimol(parent_ens)
                     )
                     parent_structure_relationships \
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
-                    relationships[identifier.attr] = hashisy_key
+                    relationships[identifier.attr] = cactvs_hash
                     source_structure_relationships.append(StructureRelationships(structure, relationships))
                 if not structure_id % DEFAULT_LOGGER_BLOCK:
                     logger.info("finished normalizing structure %s" % structure_id)
@@ -594,12 +593,12 @@ class StructureRegistry(object):
                 structure.save()
                 logger.error("normalizing structure %s failed : %s" % (structure_id, e))
 
-        parent_structure_hash_list = list(set([p.structure.hashisy_key for p in parent_structure_relationships]))
+        parent_structure_hash_list = list(set([p.structure.hash for p in parent_structure_relationships]))
         try:
             with transaction.atomic():
                 # create parent structures in bulk
                 structures = sorted(
-                    [p.structure for p in parent_structure_relationships], key=lambda s: s.hashisy_key.int
+                    [p.structure for p in parent_structure_relationships], key=lambda s: s.hash.int
                 )
                 Structure.objects.bulk_create(
                     structures,
@@ -608,7 +607,7 @@ class StructureRegistry(object):
                 )
 
                 # fetch hashisy / parent structures in bulk (by that they have an id)
-                parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hashisy_key')
+                parent_structures = Structure.objects.in_bulk(parent_structure_hash_list, field_name='hash')
                 StructureHashisy.objects.bulk_create_from_hash_list(parent_structures.keys())
                 StructureFileSource.objects.bulk_create_from_structures(
                     parent_structures.values(),
@@ -617,7 +616,7 @@ class StructureRegistry(object):
                 )
 
                 # create compounds in bulk
-                compound_structures = sorted(parent_structures.values(), key=lambda s: s.hashisy_key.int)
+                compound_structures = sorted(parent_structures.values(), key=lambda s: s.hash.int)
                 Compound.objects.bulk_create(
                     [Compound(structure=compound_structure) for compound_structure in compound_structures],
                     batch_size=FileRegistry.DATABASE_ROW_BATCH_SIZE,
@@ -642,7 +641,7 @@ class StructureRegistry(object):
                     id: StructureParentStructure(structure=parent_structures[id]) for id in parent_structures
                 }
                 for relationship in parent_structure_relationships:
-                    parent = parent_structure_dict[relationship.structure.hashisy_key]
+                    parent = parent_structure_dict[relationship.structure.hash]
                     for attr, parent_hash in relationship.relationships.items():
                         setattr(parent, attr, parent_structures[parent_hash])
                 sorted_parent_structure = sorted(parent_structure_dict.values(), key=lambda p: p.structure_id)
@@ -722,8 +721,11 @@ class StructureRegistry(object):
     @staticmethod
     def calculate_inchi(structure_id_arg_tuples):
         structure_file_id, structure_ids = structure_id_arg_tuples
+        logger.info("---------- STARTED with file %s size %s" % (structure_file_id, len(structure_ids)))
 
         source_structures: Dict[int, Structure] = Structure.objects.in_bulk(structure_ids, field_name='id')
+
+        logger.info("source_structures %s", len(source_structures.keys()))
 
         for inchi_type in INCHI_TYPES:
             options = Prop(inchi_type.property).getparam("options")

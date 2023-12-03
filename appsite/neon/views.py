@@ -21,11 +21,11 @@ def _prepare_parent_data_for_structure(structure: Structure, ncicadd_key_types=N
     for parent_type in NCICADD_TYPES:
         parents[parent_type.public_string] = ParentData(
             structure=getattr(structure.parents, parent_type.attr),
-            identifier=Identifier(hashcode=p.hashisy_key.padded, identifier_type=parent_type.public_string)
+            identifier=Identifier(hashcode=p.hash.padded, identifier_type=parent_type.public_string)
             if (p := getattr(structure.parents, parent_type.attr)) else None,
             #children_count=getattr(compound, parent_type.key + '_children_count'),
             children_count=0,
-            is_parent=structure.hashisy_key == p.hashisy_key
+            is_parent=structure.hash == p.hash
             if (p := getattr(structure.parents, parent_type.attr)) else False
         )
 

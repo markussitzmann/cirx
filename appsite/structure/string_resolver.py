@@ -39,7 +39,7 @@ class ChemicalStructure:
             self._ens = ens
         elif ens and structure:
             hashcode = ens.get('E_HASHISY')
-            h1 = structure.hashisy_key.int
+            h1 = structure.hash.int
             h2 = Identifier(hashcode=hashcode).integer
             if not h1 == h2:
                 raise ChemicalStructureError('ens and object hashcode mismatch')

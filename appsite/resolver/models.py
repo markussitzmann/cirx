@@ -1,5 +1,7 @@
 import hashlib
+import logging
 import operator
+import time
 from functools import reduce
 from typing import List, Dict, Union
 
@@ -16,7 +18,7 @@ from resolver.defaults import http_verbs
 class StructureManager(models.Manager):
 
     def get_or_create_from_ens(self, ens: Ens):
-        return self.get_or_create(hashisy_key=CactvsHash(ens), minimol=CactvsMinimol(ens))
+        return self.get_or_create(hash=CactvsHash(ens), minimol=CactvsMinimol(ens))
 
 
 class StructureQuerySet(models.QuerySet):
@@ -43,12 +45,12 @@ class StructureQuerySet(models.QuerySet):
 
     def by_hashisy(self, hashisy_list: List[Union['CactvsHash', int, str, hex]], ):
         keys = [CactvsHash(h) for h in hashisy_list]
-        queryset = self._base_queryset().filter(hashisy_key__in=keys)
+        queryset = self._base_queryset().filter(hash__in=keys)
         return queryset
 
 
 class Structure(models.Model):
-    hashisy_key = CactvsHashField(unique=True)
+    hash = CactvsHashField(unique=True)
     minimol = CactvsMinimolField(null=False)
     entrypoints = models.ManyToManyField('EntryPoint', related_name='structures', blank=True)
     added = models.DateTimeField(auto_now_add=True)
@@ -74,7 +76,7 @@ class Structure(models.Model):
         return self.to_ens.get("E_SMILES")
 
     def __str__(self):
-        return "(Structure=%s: hashisy=%s smiles='%s')" % (self.id, self.hashisy_key.padded, self.smiles)
+        return "(Structure=%s: hashisy=%s smiles='%s')" % (self.id, self.hash.padded, self.smiles)
 
     def __repr__(self):
         return "NCICADD:SID={}".format(self.id)
@@ -82,19 +84,24 @@ class Structure(models.Model):
 
 class StructureHashisyManager(models.Manager):
 
-    def bulk_create_from_hash_list(self, hashisy_key_list: List[CactvsHash], batch_size=1000) -> Dict[CactvsHash, Structure]:
+    def bulk_create_from_hash_list(
+            self,
+            hash_list: List[CactvsHash],
+            skip_hashisy_creation=False, batch_size=1000
+    ) -> Dict[CactvsHash, Structure]:
         structure_hashkey_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(
-            hashisy_key_list, field_name='hashisy_key'
+            hash_list, field_name='hash'
         )
-        structure_hashisy_list = [
-            StructureHashisy(structure=structure_hashkey_dict[key], hashisy=key.padded)
-            for key in hashisy_key_list
-        ]
-        StructureHashisy.objects.bulk_create(
-            structure_hashisy_list,
-            batch_size=batch_size,
-            ignore_conflicts=True
-        )
+        if not skip_hashisy_creation:
+            structure_hashisy_list = [
+                StructureHashisy(structure=structure_hashkey_dict[key], hashisy=key.padded)
+                for key in hash_list
+            ]
+            StructureHashisy.objects.bulk_create(
+                structure_hashisy_list,
+                batch_size=batch_size,
+                ignore_conflicts=True
+            )
         return structure_hashkey_dict
 
 
@@ -133,8 +140,7 @@ class StructureParentStructure(models.Model):
 
     class JSONAPIMeta:
         resource_name = 'structureparents'
-    
-    
+
     class Meta:
         db_table = 'cir_structure_parent_structure'
         verbose_name = "Structure Parent"
@@ -142,7 +148,7 @@ class StructureParentStructure(models.Model):
 
     def __str__(self):
         return "(StructureParentStructure=%s: ficts=%s, ficus=%s, uuuuu=%s)" % \
-               (self.structure_id, self.ficts_parent_id, self.ficus_parent_id, self.uuuuu_parent_id)
+            (self.structure_id, self.ficts_parent_id, self.ficus_parent_id, self.uuuuu_parent_id)
 
 
 class InChIManager(models.Manager):
@@ -152,16 +158,19 @@ class InChIManager(models.Manager):
             if o.pk:
                 inchi_list.append(o)
             else:
+                hash = hashlib.md5(o.key.encode("UTF-8")).hexdigest()
                 i = InChI.objects.get(
-                    block1=o.block1,
-                    block2=o.block2,
-                    block3=o.block3
+                    hash=hash
+                    #block1=o.block1,
+                    #block2=o.block2,
+                    #block3=o.block3
                 )
                 inchi_list.append(i)
         return inchi_list
 
 
 class InChI(models.Model):
+    hash = models.UUIDField(null=False, blank=False, unique=True)
     version = models.IntegerField(default=1, blank=False, null=False)
     block1 = models.CharField(max_length=14, blank=False, null=False)
     block2 = models.CharField(max_length=10, blank=False, null=False)
@@ -183,12 +192,12 @@ class InChI(models.Model):
         resource_name = 'inchis'
 
     class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['block1', 'block2', 'block3', 'version'],
-                name='unique_inchi_constraint'
-            ),
-        ]
+        #constraints = [
+        #    UniqueConstraint(
+        #        fields=['block1', 'block2', 'block3', 'version'],
+        #        name='unique_inchi_constraint'
+        #    ),
+        #]
         verbose_name = "InChI"
         verbose_name_plural = "InChIs"
         db_table = 'cir_inchi'
@@ -197,6 +206,10 @@ class InChI(models.Model):
     def create(cls, *args, **kwargs):
         inchi = cls(*args, **kwargs)
         return inchi
+
+    def save(self, *args, **kwargs):
+        self.hash = hashlib.md5(self.key.encode("UTF-8")).hexdigest()
+        super(InChI, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.key
@@ -262,7 +275,7 @@ class InChIType(models.Model):
         db_table = 'cir_inchi_type'
 
     def __str__(self):
-        return "(InChIType=%s: %s)" % (self.id, self.title, )
+        return "(InChIType=%s: %s)" % (self.id, self.title,)
 
 
 class StructureInChIAssociationQuerySet(models.QuerySet):
@@ -309,7 +322,8 @@ class StructureInChIAssociationQuerySet(models.QuerySet):
             splitted_inchikey = inchikey.split("-")
             number_of_elements = len(splitted_inchikey)
             if number_of_elements == 3:
-                q |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1], inchi__block3=splitted_inchikey[2])
+                q |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1],
+                       inchi__block3=splitted_inchikey[2])
             elif number_of_elements == 2:
                 q |= Q(inchi__block1=splitted_inchikey[0], inchi__block2=splitted_inchikey[1])
             elif number_of_elements == 1:
@@ -332,7 +346,7 @@ class StructureInChIAssociationQuerySet(models.QuerySet):
         q = Q()
         for d in query_dicts:
             q |= d
-        #inchikeys = InChI.objects.filter(**inchikey_query)
+        # inchikeys = InChI.objects.filter(**inchikey_query)
         queryset = self._base_queryset().filter(q)
         if inchi_types:
             queryset = queryset.filter(
@@ -436,7 +450,6 @@ class Compound(models.Model):
 
 
 class RecordQuerySet(models.QuerySet):
-
     fetch_relations = [
         'structure_file_record',
         'structure_file_record__structure__parents',
@@ -511,32 +524,10 @@ class Name(models.Model):
         super(Name, self).save(*args, **kwargs)
 
     def __str__(self):
-        return "(Name=%s: hash=%s name=%s)" % (self.id, self.hash, self.name, )
+        return "(Name=%s: hash=%s name=%s)" % (self.id, self.hash, self.name,)
 
     def __repr__(self):
         return self.name
-
-
-# class LoadName(models.Model):
-#     hash = models.UUIDField(null=False, blank=False, unique=True)
-#     name = models.TextField(max_length=1500)
-# 
-#     class Meta:
-#         db_table = 'load_structure_name'
-#         # constraints = [
-#         #     UniqueConstraint(fields=['unique'], name='unique_record'),
-#         # ]
-# 
-#     def save(self, *args, **kwargs):
-#         self.hash = hashlib.md5(self.name.encode("UTF-8")).hexdigest()
-#         super(Name, self).save(*args, **kwargs)
-# 
-#     def __str__(self):
-#         return "(Name=%s: hash=%s name=%s)" % (self.id, self.hash, self.name, )
-# 
-#     def __repr__(self):
-#         return self.name
-
 
 class NameType(models.Model):
     title = models.CharField(max_length=64, unique=True, editable=False)
@@ -548,7 +539,7 @@ class NameType(models.Model):
         db_table = 'cir_name_type'
 
     def __str__(self):
-        return "(NameType=%s: title=%s)" % (self.id, self.title, )
+        return "(NameType=%s: title=%s)" % (self.id, self.title,)
 
 
 class NameAffinityClass(models.Model):
@@ -560,7 +551,7 @@ class NameAffinityClass(models.Model):
         db_table = 'cir_name_affinity_class'
 
     def __str__(self):
-        return "(NameAffinityClass=%s: %s)" % (self.id, self.title, )
+        return "(NameAffinityClass=%s: %s)" % (self.id, self.title,)
 
 
 class StructureNameAssociationQuerySet(models.QuerySet):
@@ -646,7 +637,7 @@ class StructureNameAssociation(models.Model):
 
     def __str__(self):
         return "(StructureNameAssociations=%s: name=%s, structure=%s, name_type=%s, affinity=%s, confidence=%s)" % \
-               (self.id, self.name_id, self.structure_id, self.name_type_id, self.affinity_class, self.confidence)
+            (self.id, self.name_id, self.structure_id, self.name_type_id, self.affinity_class, self.confidence)
 
 
 class Organization(models.Model):
@@ -992,6 +983,7 @@ class Release(models.Model):
 
 
 class StructureFormula(models.Model):
+    hash = models.UUIDField(null=False, blank=False, unique=True)
     formula = models.CharField(max_length=50, unique=True)
 
     class Meta:

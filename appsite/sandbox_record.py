@@ -59,9 +59,9 @@ reset_queries()
 m = Molfile.Open("/home/app/error.2.sdf")
 ens = m.read()
 
-hashisy_key = CactvsHash(ens)
+hashisy = CactvsHash(ens)
 structure = Structure(
-    hashisy_key=hashisy_key,
+    hash=hashisy,
     minimol=CactvsMinimol(ens)
 )
 

@@ -36,7 +36,7 @@ for structure in structures:
     logger.info("SID %s : CID %s : int %s : FICTS %s FICUS %s UUUUU %s" % (
         structure.id,
         structure.compound.id,
-        structure.hashisy_key.int,
+        structure.hash.int,
         structure.parents.ficts_parent,
         structure.parents.ficus_parent,
         structure.parents.uuuuu_parent

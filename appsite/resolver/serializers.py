@@ -204,7 +204,7 @@ class StructureSerializer(serializers.HyperlinkedModelSerializer):
         return obj.to_ens.get("E_SMILES")
 
     def serialize_hashisy(self, obj):
-        return obj.hashisy_key.padded
+        return obj.hash.padded
 
     class Meta:
         model = Structure

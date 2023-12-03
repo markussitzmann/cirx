@@ -113,6 +113,7 @@ class StructureFileNormalizationStatus(models.Model):
             self.progress
         )
 
+
 class StructureFileCalcInChIStatus(models.Model):
     structure_file = models.OneToOneField(
         'StructureFile',
@@ -346,9 +347,9 @@ class StructureFileSourceManager(models.Manager):
 
     def bulk_create_from_structures(self, structures: List[Structure], structure_file: StructureFile, batch_size=1000):
 
-        hashisy_key_list = [structure.hashisy_key for structure in structures]
+        hashisy_key_list = [structure.hash for structure in structures]
         structure_hash_dict: Dict[CactvsHash, Structure] = Structure.objects.in_bulk(
-            hashisy_key_list, field_name='hashisy_key'
+            hashisy_key_list, field_name='hash'
         )
 
         structure_source_file_objects = [
