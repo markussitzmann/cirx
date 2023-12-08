@@ -1,0 +1,1 @@
+./psql -c "\copy cir_structure_name to '/filestore/cir_structure_name.table'"
