@@ -14,12 +14,12 @@ from resolver.models import InChI, Organization, Publisher, Structure, Name, Nam
 
 logger = logging.getLogger('cirx')
 
-MINI = False
-INIT_PUBCHEM_COMPOUND = True
+MINI = True
+INIT_PUBCHEM_COMPOUND = False
 INIT_PUBCHEM_SUBSTANCE = False
 INIT_CHEMBL = False
-INIT_NCI = False
-INIT_SANDBOX = False
+INIT_NCI = True
+INIT_SANDBOX = True
 
 # INIT_NCI must be True to use this option:
 INIT_NCI_10000 = False
@@ -45,12 +45,12 @@ def _loader():
     init_name_affinitiy_class()
     #init_structures()
 
-    temp = StructureFileCollection.objects.create(
-        file_location_pattern_string="pubchem/compound/LDt2PFyP/*.sdf.gz",
-        release_id=1
-    )
-    temp.preprocessors.add(2)
-    temp.save()
+    # temp = StructureFileCollection.objects.create(
+    #     file_location_pattern_string="pubchem/compound/LDt2PFyP/*.sdf.gz",
+    #     release_id=1
+    # )
+    # temp.preprocessors.add(2)
+    # temp.save()
 
 
 def init_structures():

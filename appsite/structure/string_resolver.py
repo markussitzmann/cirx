@@ -154,7 +154,7 @@ class ChemicalString:
             debug: bool = False
     ):
         self.string = string.strip()
-        self._resolver_data: Dict[str, ResolverData] = dict()
+        self._resolver_data: Dict[str, List[ResolverData]] = dict()
         if resolver_list:
             pass
         else:
@@ -191,6 +191,7 @@ class ChemicalString:
 
         i = 0
         for resolver in resolver_list:
+            self._resolver_data[resolver] = []
             try:
                 resolver_method = getattr(self, '_resolver_' + resolver)
                 data: List[ChemicalStructure] = resolver_method()
@@ -202,32 +203,32 @@ class ChemicalString:
                     if self.operator:
                         operator_method = getattr(self, '_operator_' + self.operator)
                         resolved = operator_method(chemical_structure)
-                        self._resolver_data[resolver] = ResolverData(
-                            id=i,
-                            resolver=resolver,
-                            resolved=resolved,
-                            exception=None
-                        )
+                        self._resolver_data[resolver].append(ResolverData(
+                                id=i,
+                                resolver=resolver,
+                                resolved=resolved,
+                                exception=None
+                        ))
                     else:
-                        self._resolver_data[resolver] = ResolverData(
+                        self._resolver_data[resolver].append(ResolverData(
                             id=i,
                             resolver=resolver,
                             resolved=[chemical_structure, ],
                             exception=None
-                        )
+                        ))
             except Exception as e:
-                self._resolver_data[resolver] = ResolverData(
+                self._resolver_data[resolver].append(ResolverData(
                     id=None,
                     resolver=resolver,
                     resolved=None,
                     exception=ValueError('string not resolvable', e)
-                )
+                ))
             if simple and len(self._resolver_data):
                 break
         return
 
     @property
-    def resolver_data(self) -> Dict[str, ResolverData]:
+    def resolver_data(self) -> Dict[str, List[ResolverData]]:
         return self._resolver_data
 
     def _resolver_hashisy(self):
@@ -302,8 +303,8 @@ class ChemicalString:
 
     def _resolver_ncicadd_identifier(self) -> List[ChemicalStructure]:
         identifier = Identifier(string=self.string)
-        hashisy_key = CactvsHash(identifier.hashcode)
-        structure = Structure.objects.get(hashisy_key=hashisy_key)
+        cactvs_hash = CactvsHash(identifier.hashcode)
+        structure = Structure.objects.get(hash=cactvs_hash)
         identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
         resolved: ChemicalStructure = ChemicalStructure(
             structure=structure,

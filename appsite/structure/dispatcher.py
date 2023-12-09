@@ -43,7 +43,8 @@ def dispatcher_method(_func=None, *, as_list=False):
         def dispatcher_method_wrapper(self, string, *args, **kwargs):
             params: ResolverParams = self._params
             chemical_string: ChemicalString = ChemicalString(string=string, resolver_list=params.resolver_list)
-            resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
+            #resolver_data = [data for data in chemical_string.resolver_data.values() if data.resolved]
+            resolver_data = [data for v in chemical_string.resolver_data.values() for data in v if data.resolved]
 
             if not self.output_format == 'xml' and len(resolver_data) and params.mode == 'simple':
                 resolver_data = [resolver_data[0], ]

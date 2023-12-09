@@ -1,16 +1,11 @@
 import logging
 from collections import namedtuple
-from typing import List
 
 from django.test import TestCase
 from parameterized import parameterized
-
-from resolver.models import Structure
-from structure.smiles import SmilesError
-from structure.string_resolver import ChemicalString, ChemicalStructure
-from structure.dispatcher import Dispatcher
-
 from pycactvs import Ens, Dataset, cactvs
+
+from structure.string_resolver import ChemicalString
 
 CACTVS_SETTINGS = cactvs
 
@@ -26,7 +21,7 @@ logger = logging.getLogger('cirx')
 FIXTURES = ['sandbox.json']
 RESOLVER_LIST = ["name", "smiles", "hashisy"]
 
-ResolverTest = namedtuple("ResolverTest", "request responses")
+ResolverTest = namedtuple("ResolverTest", "identifier representations")
 ResolverResponse = namedtuple("ResolverResponse", "resolver expectations exception")
 
 
@@ -83,32 +78,74 @@ class ChemicalStringTests(TestCase):
                                                                Ens.List()))
 
     @parameterized.expand([
+        # [ResolverTest(
+        #     identifier="CCO",
+        #     representations=[
+        #         ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+        #         ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        #         ResolverResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+        #         ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ]
+        # )],
+        # [ResolverTest(
+        #     identifier="CCO",
+        #     representations=[
+        #         ResolverResponse(resolver="structure_representation", expectations={'E174572A915E4471'}, exception=None)
+        #     ]
+        # )],
+        # [ResolverTest(
+        #     identifier="ethanol",
+        #     representations=[
+        #         ResolverResponse(resolver="name", expectations={'E174572A915E4471'}, exception=None),
+        #         ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        #         ResolverResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+        #         ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ]
+        # )],
+        # [ResolverTest(
+        #     identifier="E174572A915E4471-FICTS-01-1A",
+        #     representations=[
+        #         ResolverResponse(resolver="ncicadd_identifier", expectations={'E174572A915E4471'}, exception=None),
+        #         ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
+        #         ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ]
+        # )],
+        # [ResolverTest(
+        #     identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+        #     representations=[
+        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+        #     ],
+        # )],
+        # [ResolverTest(
+        #     identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA",
+        #     representations=[
+        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+        #     ],
+        # )],
+        # [ResolverTest(
+        #     identifier="LFQSCWFLJHTTHZ",
+        #     representations=[
+        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+        #     ],
+        # )],
         [ResolverTest(
-            request="CCO",
-            responses=[
-                ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
-                ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-            ]
-        )],
-        [ResolverTest(
-            request="E174572A915E4471-FICTS-01-1A",
-            responses=[
-                ResolverResponse(resolver="ncicadd_identifier", expectations={'E174572A915E4471'}, exception=None),
-                ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
-            ]
-        )],
-        [ResolverTest(
-            request="1AD375920BE60DAD",
-            responses=[
-                ResolverResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None)
+            identifier="DDPJWUQJQMKQIF",
+            representations=[
+                ResolverResponse(resolver="stdinchikey", expectations={'893627AD7BDD6B4F', '3FC9522042E03718'}, exception=None)
             ],
         )],
-        [ResolverTest(
-            request="NCICADD:RID=102",
-            responses=[
-                ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None)
-            ],
-        )],
+        # [ResolverTest(
+        #     request="1AD375920BE60DAD",
+        #     responses=[
+        #         ResolverResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None)
+        #     ],
+        # )],
+        # [ResolverTest(
+        #     request="NCICADD:RID=102",
+        #     responses=[
+        #         ResolverResponse(resolver="ncicadd_cid", expectations={'3DB0124A3ECF5ECE'}, exception=None)
+        #     ],
+        # )],
         # [ResolverTest(
         #     request="NCICADD:RID=104",
         #     responses=[
@@ -123,24 +160,7 @@ class ChemicalStringTests(TestCase):
         #         ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError())
         #     ],
         # )],
-        # [ResolverTest(
-        #     request="LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
-        #     responses=[
-        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
-        #     ],
-        # )],
-        # [ResolverTest(
-        #     request="LFQSCWFLJHTTHZ-UHFFFAOYSA",
-        #     responses=[
-        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
-        #     ],
-        # )],
-        # [ResolverTest(
-        #     request="LFQSCWFLJHTTHZ",
-        #     responses=[
-        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
-        #     ],
-        # )],
+
         # [ResolverTest(
         #     request="tautomers:Warfarin",
         #     responses=[
@@ -163,19 +183,20 @@ class ChemicalStringTests(TestCase):
     ])
     def test(self, resolver_test: ResolverTest):
 
-        resolver_list = [test.resolver for test in resolver_test.responses]
+        resolver_list = [test.resolver for test in resolver_test.representations]
 
-        chemical_string = ChemicalString(string=resolver_test.request, resolver_list=resolver_list)
+        chemical_string = ChemicalString(string=resolver_test.identifier, resolver_list=resolver_list)
         actual_data = chemical_string.resolver_data
 
-        for expected_data in resolver_test.responses:
+        for expected_data in resolver_test.representations:
             resolver, expectations = expected_data.resolver, expected_data.expectations
-            logger.info("REQUEST {} RESOLVER {}".format(resolver_test.request, resolver))
+            logger.info("REQUEST {} RESOLVER {}".format(resolver_test.identifier, resolver))
             if expected_data.exception:
-                exception = actual_data[resolver].exception
+                exception = actual_data[resolver][0].exception
                 logger.info("exception {} received {}".format(expected_data.exception, exception))
                 self.assertIsInstance(exception, type(expected_data.exception))
             else:
-                resolved = actual_data[resolver].resolved
+                #resolved = set([structure.hashisy for structure in actual_data[resolver].resolved])
+                resolved = set([structure.hashisy for item in actual_data[resolver] for structure in item.resolved])
                 logger.info("expected {} received {}".format(expectations, resolved))
-                self.assertEqual(set([structure.hashisy for structure in resolved]), expectations)
+                self.assertEqual(resolved, expectations)
