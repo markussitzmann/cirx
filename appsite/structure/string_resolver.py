@@ -319,27 +319,41 @@ class ChemicalString:
         return [resolved, ] if resolved else list()
 
     def _resolver_stdinchikey(self) -> List[ChemicalStructure]:
-        inchi_type = InChIType.objects.get(title="standard")
-        associations = StructureInChIAssociation.with_related_objects.by_partial_inchikey(
-            inchikeys=[self.string, ],
-            inchi_types=[inchi_type, ]
-        ).all()
-        resolved_list = list()
-        for association in associations:
-            structure = association.structure
-            identifier = InChIKey(key=association.inchi.key)
-            resolved = ChemicalStructure(
-                structure=structure,
-                metadata={
-                    'query_type': 'stdinchikey',
-                    'query_search_string': 'Standard InChIKey',
-                    'query_object': identifier,
-                    'query_string': self.string,
-                    'description': identifier.element['well_formatted']
-                }
-            )
-            resolved_list.append(resolved)
-        return resolved_list
+
+        inchikey_string = self.string.replace("InChIKey=", "")
+
+        pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PARTIAL_PATTERN_STRING_1, InChIKey.PARTIAL_PATTERN_STRING_2]
+        matched = False
+        for pattern_string in pattern_list:
+            pattern = re.compile(pattern_string)
+            match = pattern.search(inchikey_string)
+            if match:
+                matched = True
+
+        resolved = None
+        if matched:
+            inchi_type = InChIType.objects.get(title="standard")
+            associations = StructureInChIAssociation.with_related_objects.by_partial_inchikey(
+                inchikeys=[inchikey_string, ],
+                inchi_types=[inchi_type, ]
+            ).all()
+            resolved_list = list()
+            for association in associations:
+                structure = association.structure
+                identifier = InChIKey(key=association.inchi.key)
+                resolved = ChemicalStructure(
+                    structure=structure,
+                    metadata={
+                        'query_type': 'stdinchikey',
+                        'query_search_string': 'Standard InChIKey',
+                        'query_object': identifier,
+                        'query_string': self.string,
+                        'description': identifier.element['well_formatted']
+                    }
+                )
+                resolved_list.append(resolved)
+            return resolved_list
+        return list()
 
     def _resolver_stdinchi(self) -> List[ChemicalStructure]:
         inchi = InChIString(string=self.string)
@@ -347,7 +361,7 @@ class ChemicalString:
             resolved = ChemicalStructure(
                 ens=Ens(inchi.string),
                 metadata={
-                    'query_type': 'smiles',
+                    'query_type': 'stdinchi',
                     'query_search_string': 'Standard InChI',
                     'query_object': inchi,
                     'query_string': self.string,
@@ -511,20 +525,20 @@ class ChemicalString:
         return list()
 
     def _resolver_cas_number(self) -> List[ChemicalStructure]:
-        cas_number = CASNumber(string=self.string)
-        name = Name.objects.get(name=self.string)
-        if name:
-            structure = name.get_structure()
-            chemical_structure = ChemicalStructure(structure=structure)
-            chemical_structure._metadata = {
-                'query_type': 'cas_number',
-                'query_search_string': 'CAS Registry Number',
-                'query_object': name,
-                'query_string': self.string,
-                'description': name.name
-            }
-            #representation.structures.append(chemical_structure)
-            return [chemical_structure, ]
+        if CASNumber(string=self.string):
+            name = Name.objects.get(name=self.string)
+            if name:
+                structure = name.get_structure()
+                chemical_structure = ChemicalStructure(structure=structure)
+                chemical_structure._metadata = {
+                    'query_type': 'cas_number',
+                    'query_search_string': 'CAS Registry Number',
+                    'query_object': name,
+                    'query_string': self.string,
+                    'description': name.name
+                }
+                #representation.structures.append(chemical_structure)
+                return [chemical_structure, ]
         return list()
 
     def _resolver_name_by_database(self) -> List[ChemicalStructure]:

@@ -19,7 +19,7 @@ class String:
         self.checkdigit = None
 
     def _test_cas(self, string):
-        pattern = re.compile('(?P<part1>^\d{1,7})-(?P<part2>\d{2})-(?P<checkdigit>\d{1}$)')
+        pattern = re.compile(r'(?P<part1>^\d{1,7})-(?P<part2>\d{2})-(?P<checkdigit>\d{1}$)')
         match = pattern.search(string)
         if match:
             number = match.groupdict()
@@ -28,10 +28,10 @@ class String:
             self.checkdigit = int(number["checkdigit"])
             n = str(self.part1) + str(self.part2)
             l = range(len(n))
-            l.reverse()
+            #l.reverse()
             f = 1
             c = 0
-            for i in l:
+            for i in reversed(l):
                 m = int(n[i]) * f
                 c = c + m
                 f = f + 1

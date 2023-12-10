@@ -910,7 +910,7 @@ class StructureRegistry(object):
             structure_file_id,
             len(structure_ids), sorted_structure_ids[0],
             sorted_structure_ids[-1])
-                    )
+        )
 
         query = Structure.objects \
             .select_related('parents', 'structure_file_source') \

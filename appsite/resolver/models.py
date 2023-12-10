@@ -44,8 +44,8 @@ class StructureQuerySet(models.QuerySet):
         return queryset
 
     def by_hashisy(self, hashisy_list: List[Union['CactvsHash', int, str, hex]], ):
-        keys = [CactvsHash(h) for h in hashisy_list]
-        queryset = self._base_queryset().filter(hash__in=keys)
+        hashs = [CactvsHash(h) for h in hashisy_list]
+        queryset = self._base_queryset().filter(hash__in=hashs)
         return queryset
 
 

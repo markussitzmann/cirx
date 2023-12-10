@@ -9,6 +9,8 @@ class InChIKey:
 
     DEFAULT_PREFIX = "InChIKey="
     PATTERN_STRING = '(?P<block1>[A-Z]{14})-(?P<block2>[A-Z]{8}(S|N)[A-Z]{1})-(?P<block3>[A-Z]{1}$)'
+    PARTIAL_PATTERN_STRING_1 = '(?P<block1>[A-Z]{14})-(?P<block2>[A-Z]{8}(S|N)[A-Z]{1}$)'
+    PARTIAL_PATTERN_STRING_2 = '(?P<block1>[A-Z]{14}$)'
     PATTERN_STRING_WITH_PREFIX = \
         '(?P<prefix>^%s)(?P<block1>[A-Z]{14})-(?P<block2>[A-Z]{8}(S|N)[A-Z]{1})-(?P<block3>[A-Z]{1}$)' % DEFAULT_PREFIX
 
