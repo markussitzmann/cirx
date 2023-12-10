@@ -78,62 +78,63 @@ class ChemicalStringTests(TestCase):
                                                                Ens.List()))
 
     @parameterized.expand([
-        # [ResolverTest(
-        #     identifier="CCO",
-        #     representations=[
-        #         ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
-        #         ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-        #         ResolverResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-        #         ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-        #     ]
-        # )],
-        # [ResolverTest(
-        #     identifier="CCO",
-        #     representations=[
-        #         ResolverResponse(resolver="structure_representation", expectations={'E174572A915E4471'}, exception=None)
-        #     ]
-        # )],
-        # [ResolverTest(
-        #     identifier="ethanol",
-        #     representations=[
-        #         ResolverResponse(resolver="name", expectations={'E174572A915E4471'}, exception=None),
-        #         ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-        #         ResolverResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-        #         ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-        #     ]
-        # )],
-        # [ResolverTest(
-        #     identifier="E174572A915E4471-FICTS-01-1A",
-        #     representations=[
-        #         ResolverResponse(resolver="ncicadd_identifier", expectations={'E174572A915E4471'}, exception=None),
-        #         ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
-        #         ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-        #     ]
-        # )],
-        # [ResolverTest(
-        #     identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
-        #     representations=[
-        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
-        #     ],
-        # )],
-        # [ResolverTest(
-        #     identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA",
-        #     representations=[
-        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
-        #     ],
-        # )],
-        # [ResolverTest(
-        #     identifier="LFQSCWFLJHTTHZ",
-        #     representations=[
-        #         ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
-        #     ],
-        # )],
+        [ResolverTest(
+            identifier="CCO",
+            representations=[
+                ResolverResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+                ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+                ResolverResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+                ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+            ]
+        )],
+        [ResolverTest(
+            identifier="CCO",
+            representations=[
+                ResolverResponse(resolver="structure_representation", expectations={'E174572A915E4471'}, exception=None)
+            ]
+        )],
+        [ResolverTest(
+            identifier="ethanol",
+            representations=[
+                ResolverResponse(resolver="name", expectations={'E174572A915E4471'}, exception=None),
+                ResolverResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+                ResolverResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+                ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+            ]
+        )],
+        [ResolverTest(
+            identifier="E174572A915E4471-FICTS-01-1A",
+            representations=[
+                ResolverResponse(resolver="ncicadd_identifier", expectations={'E174572A915E4471'}, exception=None),
+                ResolverResponse(resolver="smiles", expectations=None, exception=ValueError()),
+                ResolverResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+            ]
+        )],
+        [ResolverTest(
+            identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+            representations=[
+                ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA",
+            representations=[
+                ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+            ],
+        )],
+        [ResolverTest(
+            identifier="LFQSCWFLJHTTHZ",
+            representations=[
+                ResolverResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+            ],
+        )],
         [ResolverTest(
             identifier="DDPJWUQJQMKQIF",
             representations=[
                 ResolverResponse(resolver="stdinchikey", expectations={'893627AD7BDD6B4F', '3FC9522042E03718'}, exception=None)
             ],
         )],
+        #######################################################
         # [ResolverTest(
         #     request="1AD375920BE60DAD",
         #     responses=[

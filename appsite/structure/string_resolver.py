@@ -378,7 +378,10 @@ class ChemicalString:
             this is a special resolver, it only attempts to resolver if there hasn't been found anything by other
             resolver modules
         """
-        if len(self._resolver_data):
+        if (len(self._resolver_data.keys()) > 1
+                or ("_resolver_structure_representation" in self._resolver_data.keys()
+                    and len(self._resolver_data['structure_representation']) > 1)
+        ):
             return list()
         resolved = ChemicalStructure(
             ens=Ens(self.string),
