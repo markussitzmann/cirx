@@ -46,7 +46,7 @@ CACTVS_SETTINGS['lookup_hosts'] = []
 
 DEFAULT_CHUNK_SIZE = 10000
 DEFAULT_DATABASE_ROW_BATCH_SIZE = 50000
-DEFAULT_LOGGER_BLOCK = 1000
+DEFAULT_LOGGER_BLOCK = 1
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
 Status = namedtuple('Status', 'file created')
@@ -556,6 +556,8 @@ class StructureRegistry(object):
 
     @staticmethod
     def normalize_structures(structure_id_arg_tuples):
+        logger.info("ens %s dataset %s" % (cactvs['ens_count'], cactvs['dataset_count']))
+
         structure_file_id, structure_ids = structure_id_arg_tuples
 
         structure_file = StructureFile.objects.get(id=structure_file_id)
@@ -566,7 +568,9 @@ class StructureRegistry(object):
         parent_structure_relationships = []
         source_structure_relationships = []
 
+        local_index: int = 0
         for structure_id, structure in source_structures.items():
+            local_index += 1
             if structure.blocked:
                 logger.info("structure %s is blocked and has been skipped" % (structure_id,))
                 continue
@@ -586,8 +590,12 @@ class StructureRegistry(object):
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
                     relationships[identifier.attr] = cactvs_hash
                     source_structure_relationships.append(StructureRelationships(structure, relationships))
-                if not structure_id % DEFAULT_LOGGER_BLOCK:
-                    logger.info("finished normalizing structure %s" % structure_id)
+                if not local_index % DEFAULT_LOGGER_BLOCK:
+                    logger.info("finished normalizing structure %s (structure_file_id %s structure_id %s) ens %s dataset %s" % (
+                            local_index, structure_file_id, structure_id, cactvs['ens_count'], cactvs['dataset_count']
+                        )
+                    )
+                    logger.info(">>> %s", Ens.List())
             except Exception as e:
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()

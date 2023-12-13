@@ -130,7 +130,7 @@ services:
     command: ['nice', '-n', '20', 'celery', '-A', 'appsite',
               'worker', '-l', 'info', '-Q', 'normalize', '-c', '2',
               '--logfile=/logging/cirx-normalize-worker.%h.%i.log',
-              '-n', 'normalize@%h']
+              '-n', 'normalize@%h', '--max-tasks-per-child', '1']
     restart: on-failure
     depends_on:
       - cirx-cache
