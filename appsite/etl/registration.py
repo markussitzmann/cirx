@@ -46,7 +46,7 @@ CACTVS_SETTINGS['lookup_hosts'] = []
 
 DEFAULT_CHUNK_SIZE = 10000
 DEFAULT_DATABASE_ROW_BATCH_SIZE = 50000
-DEFAULT_LOGGER_BLOCK = 1
+DEFAULT_LOGGER_BLOCK = 100
 DEFAULT_MAX_CHUNK_NUMBER = 1000
 
 Status = namedtuple('Status', 'file created')
@@ -85,7 +85,7 @@ class RecordData:
 
     def __str__(self):
         return "RecordData[index=%s, release=%s, regid=%s, regid_hash=%s]" % (
-        self.index, self.release_object, self.regid, self.regid_hash)
+            self.index, self.release_object, self.regid, self.regid_hash)
 
     def __hash__(self) -> int:
         return hash(repr(self.structure_file.id) + ":" + repr(self.index))
@@ -498,7 +498,7 @@ class FileRegistry(object):
     @staticmethod
     def _create_filestore_pattern(key: str, file_path: PurePath):
         parent = file_path.parent
-        #stem = file_path.stem
+        # stem = file_path.stem
         suffixes = file_path.suffixes
         if suffixes[-1] != ".gz":
             suffixes.append(".gz")
@@ -514,7 +514,7 @@ class FileRegistry(object):
 
 
 class StructureRegistry(object):
-    CHUNK_SIZE = DEFAULT_DATABASE_ROW_BATCH_SIZE
+    CHUNK_SIZE = 1000
 
     @staticmethod
     def fetch_structure_file_for_normalization(structure_file_id: int) -> Optional[int]:
@@ -541,14 +541,14 @@ class StructureRegistry(object):
                 .select_related('structure', 'structure__parents') \
                 .values('structure__id') \
                 .filter(
-                structure_file=structure_file,
-                structure__parents__isnull=True,
-                structure__blocked__isnull=True,
-            ).exclude(
-                structure__hash=SpecialCactvsHash.ZERO.hashisy
-            ).exclude(
-                structure__hash=SpecialCactvsHash.MAGIC.hashisy
-            )
+                    structure_file=structure_file,
+                    structure__parents__isnull=True,
+                    structure__blocked__isnull=True,
+                ).exclude(
+                    structure__hash=SpecialCactvsHash.ZERO.hashisy
+                ).exclude(
+                    structure__hash=SpecialCactvsHash.MAGIC.hashisy
+                )
         except Exception as e:
             logger.error("structure file and count not available")
             raise Exception(e)
@@ -576,6 +576,7 @@ class StructureRegistry(object):
                 continue
             try:
                 related_hashes = {}
+                t0 = time.perf_counter()
                 for identifier in identifiers:
                     relationships = {}
                     ens = structure.to_ens
@@ -590,12 +591,26 @@ class StructureRegistry(object):
                         .append(StructureRelationships(parent_structure, related_hashes.copy()))
                     relationships[identifier.attr] = cactvs_hash
                     source_structure_relationships.append(StructureRelationships(structure, relationships))
+                t1 = time.perf_counter()
                 if not local_index % DEFAULT_LOGGER_BLOCK:
-                    logger.info("finished normalizing structure %s (structure_file_id %s structure_id %s) ens %s dataset %s" % (
-                            local_index, structure_file_id, structure_id, cactvs['ens_count'], cactvs['dataset_count']
-                        )
+                    ens0 = structure.to_ens
+                    natoms = len([a.get('A_SYMBOL') for a in ens0.atoms() if a.get('A_SYMBOL') != 'H'])
+                    complexity = ens0.get('E_COMPLEXITY')
+                    Ens.Delete(ens0)
+                    logger.info("finished normalizing structure %s (%s atoms, %s) after %.2f "
+                                "(structure_file_id %s structure_id %s) "
+                                "ens %s dataset %s" %
+                                (
+                                    local_index,
+                                    natoms,
+                                    complexity,
+                                    (t1 - t0),
+                                    structure_file_id,
+                                    structure_id,
+                                    cactvs['ens_count'],
+                                    cactvs['dataset_count']
+                                )
                     )
-                    logger.info(">>> %s", Ens.List())
             except Exception as e:
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()
@@ -666,7 +681,7 @@ class StructureRegistry(object):
             logger.error(e)
             raise Exception(e)
         StructureRegistry.update_normalization_status(structure_file_id)
-        StructureRegistry.update_calcinchi_progress(structure_file_id)
+        StructureRegistry.update_calcinchi_progress(structure_file_id, silent=True)
         return True
 
     @staticmethod
@@ -741,12 +756,15 @@ class StructureRegistry(object):
             Prop(inchi_type.property).setparam("options", options)
 
         structure_to_inchi_relationships = []
+        local_index: int = 0
         for structure_id, structure in source_structures.items():
+            local_index += 1
             if structure.blocked:
                 logger.info("structure %s is blocked and has been skipped" % (structure_id,))
                 continue
             try:
                 inchi_relationships = {}
+                t0 = time.perf_counter()
                 for inchi_type in INCHI_TYPES:
                     inchi_property = Prop.Ref(inchi_type.property)
                     inchi_property.setparam("options", inchi_type.options)
@@ -770,6 +788,21 @@ class StructureRegistry(object):
                     inchi: InChI = InChI(**inchi_string.model_dict)
                     inchi_relationships[inchi_type] = InChIAndSaveOpt(inchi, inchi_saveopt)
                 structure_to_inchi_relationships.append(StructureRelationships(structure_id, inchi_relationships))
+                t1 = time.perf_counter()
+
+                if not local_index % DEFAULT_LOGGER_BLOCK:
+                    logger.info("finished calculating inchi %s after %.2f "
+                                "(structure_file_id %s structure_id %s) "
+                                "ens %s dataset %s" %
+                                (
+                                    local_index,
+                                    (t1 - t0),
+                                    structure_file_id,
+                                    structure_id,
+                                    cactvs['ens_count'],
+                                    cactvs['dataset_count']
+                                )
+                    )
             except Exception as e:
                 structure.blocked = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE))
                 structure.save()
@@ -836,7 +869,7 @@ class StructureRegistry(object):
         return True
 
     @staticmethod
-    def update_calcinchi_progress(file_id):
+    def update_calcinchi_progress(file_id, silent=False):
         structure_file = StructureFile.objects.get(id=file_id)
         structure_count: int = StructureFileSource.objects \
             .filter(
@@ -847,17 +880,18 @@ class StructureRegistry(object):
             structure_file=structure_file,
             structure__inchis__isnull=False
         ).distinct().count()
-        logger.info("inchi calculation progress file %s: %s (%s : %s)" % (
-            structure_file.id,
-            structure_count == structure_count_with_inchi,
-            structure_count_with_inchi,
-            structure_count
-        ))
-        logger.info("PROGRESS %s/%s %s" % (
-            structure_count_with_inchi,
-            structure_count,
-            structure_count_with_inchi / structure_count)
-                    )
+        if not silent:
+            logger.info("inchi calculation progress file %s: %s (%s : %s)" % (
+                structure_file.id,
+                structure_count == structure_count_with_inchi,
+                structure_count_with_inchi,
+                structure_count
+            ))
+            logger.info("PROGRESS %s/%s %s" % (
+                structure_count_with_inchi,
+                structure_count,
+                structure_count_with_inchi / structure_count)
+                        )
         status, created = StructureFileCalcInChIStatus.objects.get_or_create(structure_file=structure_file)
         status.progress = structure_count_with_inchi / structure_count
         status.save()
@@ -918,7 +952,7 @@ class StructureRegistry(object):
             structure_file_id,
             len(structure_ids), sorted_structure_ids[0],
             sorted_structure_ids[-1])
-        )
+                    )
 
         query = Structure.objects \
             .select_related('parents', 'structure_file_source') \
