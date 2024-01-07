@@ -41557,6 +41557,14 @@
     }
   },
   {
+    "model": "resolver.name",
+    "pk": 329,
+    "fields": {
+      "hash": "d55c5c61-e2e8-f6f2-1b41-7ee5dc6a8ca2",
+      "name": "64-17-5"
+    }
+  },
+  {
     "model": "resolver.nametype",
     "pk": 1,
     "fields": {
@@ -46465,6 +46473,17 @@
       "structure": 414,
       "name_type": 9,
       "affinity_class": 2,
+      "confidence": 100
+    }
+  },
+  {
+    "model": "resolver.structurenameassociation",
+    "pk": 430,
+    "fields": {
+      "name": 329,
+      "structure": 8,
+      "name_type": 8,
+      "affinity_class": 1,
       "confidence": 100
     }
   },

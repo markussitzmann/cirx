@@ -127,7 +127,6 @@ class ChemicalStructure:
         except Exception as e:
             logger.error("creating parent structure failed: {}".format(e))
 
-
     def __del__(self):
         self._structure: Structure = None
         self._ens: Ens = None
@@ -138,11 +137,9 @@ class ChemicalStructure:
         self._ficus_parent = None
         self._uuuuu_parent = None
         del self._ens
-        #logger.info("DELETE WAS CALLED")
 
 
 class ChemicalString:
-
 
     def __init__(
             self,
@@ -193,7 +190,7 @@ class ChemicalString:
         for resolver in resolver_list:
             self._resolver_data[resolver] = []
             try:
-                resolver_method = getattr(self, '_resolver_' + resolver)
+                resolver_method = getattr(self, '_resolve_' + resolver)
                 data: List[ChemicalStructure] = resolver_method()
                 chemical_structure: ChemicalStructure
                 if not len(data):
@@ -231,10 +228,15 @@ class ChemicalString:
     def resolver_data(self) -> Dict[str, List[ResolverData]]:
         return self._resolver_data
 
-    def _resolver_hashisy(self):
+    def _is_hashisy(self) -> str:
         pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
         match = pattern.search(self.string)
-        hashcode = match.group('hashcode')
+        return match.group('hashcode')
+
+    def _resolve_hashisy(self) -> List[ChemicalStructure]:
+        #pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
+        #match = pattern.search(self.string)
+        hashcode = self._is_hashisy()
         structure = Structure.with_related_objects.by_hashisy(hashisy_list=[hashcode, ]).first()
         resolved = ChemicalStructure(
             structure=structure,
@@ -248,7 +250,7 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _resolver_ncicadd_rid(self) -> List[ChemicalStructure]:
+    def _resolve_ncicadd_rid(self) -> List[ChemicalStructure]:
         record_id = RecordID(string=self.string)
         record: Record = Record.with_related_objects.by_record_ids([record_id.rid, ]).first()
         structure: Structure = record.structure_file_record.structure
@@ -266,7 +268,7 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _resolver_ncicadd_cid(self) -> List[ChemicalStructure]:
+    def _resolve_ncicadd_cid(self) -> List[ChemicalStructure]:
         compound = CompoundID(string=self.string)
         structure = Structure.with_related_objects.by_compound(compounds=[compound.cid, ]).first()
         resolved = ChemicalStructure(
@@ -282,7 +284,7 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _resolver_ncicadd_sid(self) -> List[ChemicalStructure]:
+    def _resolve_ncicadd_sid(self) -> List[ChemicalStructure]:
         pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
         match = pattern.search(self.string)
         resolved = None
@@ -301,7 +303,7 @@ class ChemicalString:
             )
         return [resolved, ] if resolved else list()
 
-    def _resolver_ncicadd_identifier(self) -> List[ChemicalStructure]:
+    def _resolve_ncicadd_identifier(self) -> List[ChemicalStructure]:
         identifier = Identifier(string=self.string)
         cactvs_hash = CactvsHash(identifier.hashcode)
         structure = Structure.objects.get(hash=cactvs_hash)
@@ -318,7 +320,7 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _resolver_stdinchikey(self) -> List[ChemicalStructure]:
+    def _resolve_stdinchikey(self) -> List[ChemicalStructure]:
 
         inchikey_string = self.string.replace("InChIKey=", "")
 
@@ -355,7 +357,7 @@ class ChemicalString:
             return resolved_list
         return list()
 
-    def _resolver_stdinchi(self) -> List[ChemicalStructure]:
+    def _resolve_stdinchi(self) -> List[ChemicalStructure]:
         inchi = InChIString(string=self.string)
         if inchi.string:
             resolved = ChemicalStructure(
@@ -371,7 +373,7 @@ class ChemicalString:
             return [resolved, ]
         return list()
 
-    def _resolver_smiles(self) -> List[ChemicalStructure]:
+    def _resolve_smiles(self) -> List[ChemicalStructure]:
         smiles = SMILES(string=self.string, strict_testing=True)
         if smiles.string:
             resolved = ChemicalStructure(
@@ -387,7 +389,70 @@ class ChemicalString:
             return [resolved, ]
         return list()
 
-    def _resolver_structure_representation(self) -> List[ChemicalStructure]:
+    def _resolve_name(self) -> List[ChemicalStructure]:
+        try:
+            pattern = re.compile('(?P<nsc>^NSC\d+$)', re.IGNORECASE)
+            match = pattern.search(self.string)
+            if match:
+                return False
+            pattern = re.compile('(?P<zinc>^ZINC\d+$)', re.IGNORECASE)
+            match = pattern.search(self.string)
+            if match:
+                return False
+            _ = CASNumber(string=self.string)
+            return False
+        except:
+            pass
+        #name = Name.objects.get(name=self.string)
+
+        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+        associations = StructureNameAssociation\
+            .with_related_objects\
+            .by_name(names=[self.string, ], affinity_classes=[affinity['exact'], affinity['narrow']])
+
+        resolved_list = []
+        for association in associations.all():
+            structure: Structure = association.structure
+            resolved: ChemicalStructure = ChemicalStructure(
+                structure=structure,
+                metadata={
+                    'query_type': 'name_by_cir',
+                    'query_search_string': 'chemical name (CIR)',
+                    'query_object': association.name.name,
+                    'query_string': self.string,
+                    'description': association.name.name
+                }
+            )
+            resolved_list.append(resolved)
+        return resolved_list
+
+    def _resolve_cas_number(self) -> List[ChemicalStructure]:
+        cas_number = CASNumber(string=self.string)
+        if cas_number:
+            affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+            associations = StructureNameAssociation \
+                .with_related_objects \
+                .by_name(names=[self.string, ], affinity_classes=[affinity['exact']])
+
+            for association in associations.all():
+                structure: Structure = association.structure
+
+            # name = Name.objects.get(name=self.string)
+            # if name:
+            #     structure = name.get_structure()
+                chemical_structure = ChemicalStructure(structure=structure)
+                chemical_structure._metadata = {
+                    'query_type': 'cas_number',
+                    'query_search_string': 'CAS Registry Number',
+                    'query_object': association.name.name,
+                    'query_string': self.string,
+                    'description': association.name.name
+                }
+                #representation.structures.append(chemical_structure)
+                return [chemical_structure, ]
+        return list()
+
+    def _resolve_structure_representation(self) -> List[ChemicalStructure]:
         """
             this is a special resolver, it only attempts to resolver if there hasn't been found anything by other
             resolver modules
@@ -437,7 +502,7 @@ class ChemicalString:
     #         return True
     #     return False
 
-    def _resolver_chemnavigator_sid(self) -> List[ChemicalStructure]:
+    def _resolve_chemnavigator_sid(self) -> List[ChemicalStructure]:
         pattern = re.compile('^ChemNavigator(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
         match = pattern.search(self.string)
         if match:
@@ -459,7 +524,7 @@ class ChemicalString:
                 return [chemical_structure, ]
         return list()
 
-    def _resolver_pubchem_sid(self) -> List[ChemicalStructure]:
+    def _resolve_pubchem_sid(self) -> List[ChemicalStructure]:
         pattern = re.compile('^PubChem(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
         match = pattern.search(self.string)
         if match:
@@ -481,7 +546,7 @@ class ChemicalString:
                 return [chemical_structure, ]
         return list()
 
-    def _resolver_nsc_number(self) -> List[ChemicalStructure]:
+    def _resolve_nsc_number(self) -> List[ChemicalStructure]:
         pattern = re.compile('^(NSC_Number=NSC|NSC_Number=|NSC=|NSC)(?P<nsc>\d+)$', re.IGNORECASE)
         match = pattern.search(self.string)
         if match:
@@ -504,7 +569,7 @@ class ChemicalString:
                 return [chemical_structure, ]
         return list()
 
-    def _resolver_zinc_code(self) -> List[ChemicalStructure]:
+    def _resolve_zinc_code(self) -> List[ChemicalStructure]:
         pattern = re.compile('^(zinc_code=|)(?P<zinc>ZINC\d+$)', re.IGNORECASE)
         match = pattern.search(self.string)
         if match:
@@ -524,65 +589,15 @@ class ChemicalString:
                 return [chemical_structure, ]
         return list()
 
-    def _resolver_cas_number(self) -> List[ChemicalStructure]:
-        if CASNumber(string=self.string):
-            name = Name.objects.get(name=self.string)
-            if name:
-                structure = name.get_structure()
-                chemical_structure = ChemicalStructure(structure=structure)
-                chemical_structure._metadata = {
-                    'query_type': 'cas_number',
-                    'query_search_string': 'CAS Registry Number',
-                    'query_object': name,
-                    'query_string': self.string,
-                    'description': name.name
-                }
-                #representation.structures.append(chemical_structure)
-                return [chemical_structure, ]
-        return list()
 
-    def _resolver_name_by_database(self) -> List[ChemicalStructure]:
+
+    def _resolve_name_by_database(self) -> List[ChemicalStructure]:
         return self._resolver_name()
 
-    def _resolver_name_by_cir(self) -> List[ChemicalStructure]:
+    def _resolve_name_by_cir(self) -> List[ChemicalStructure]:
         return self._resolver_name()
 
-    def _resolver_name(self) -> List[ChemicalStructure]:
-        try:
-            pattern = re.compile('(?P<nsc>^NSC\d+$)', re.IGNORECASE)
-            match = pattern.search(self.string)
-            if match:
-                return False
-            pattern = re.compile('(?P<zinc>^ZINC\d+$)', re.IGNORECASE)
-            match = pattern.search(self.string)
-            if match:
-                return False
-            _ = CASNumber(string=self.string)
-            return False
-        except:
-            pass
-        #name = Name.objects.get(name=self.string)
 
-        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
-        associations = StructureNameAssociation\
-            .with_related_objects\
-            .by_name(names=[self.string, ], affinity_classes=[affinity['exact'], affinity['narrow']])
-
-        resolved_list = []
-        for association in associations.all():
-            structure: Structure = association.structure
-            resolved: ChemicalStructure = ChemicalStructure(
-                structure=structure,
-                metadata={
-                    'query_type': 'name_by_cir',
-                    'query_search_string': 'chemical name (CIR)',
-                    'query_object': association.name.name,
-                    'query_string': self.string,
-                    'description': association.name.name
-                }
-            )
-            resolved_list.append(resolved)
-        return resolved_list
 
 
     #### OPERATORS ####

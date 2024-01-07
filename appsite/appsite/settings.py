@@ -28,6 +28,8 @@ propertypath.insert(1, '/home/app/cactvsenv/prop')
 
 CACTVS_SETTINGS['python_object_autodelete'] = True
 CACTVS_SETTINGS['lookup_hosts'] = []
+CACTVS_SETTINGS['internet_lookup_level'] = 0
+CACTVS_SETTINGS['lookup_timeout'] = 1
 CACTVS_SETTINGS['propertypath'] = tuple(propertypath)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

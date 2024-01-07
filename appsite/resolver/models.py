@@ -161,9 +161,9 @@ class InChIManager(models.Manager):
                 hash = hashlib.md5(o.key.encode("UTF-8")).hexdigest()
                 i = InChI.objects.get(
                     hash=hash
-                    #block1=o.block1,
-                    #block2=o.block2,
-                    #block3=o.block3
+                    # block1=o.block1,
+                    # block2=o.block2,
+                    # block3=o.block3
                 )
                 inchi_list.append(i)
         return inchi_list
@@ -192,12 +192,12 @@ class InChI(models.Model):
         resource_name = 'inchis'
 
     class Meta:
-        #constraints = [
+        # constraints = [
         #    UniqueConstraint(
         #        fields=['block1', 'block2', 'block3', 'version'],
         #        name='unique_inchi_constraint'
         #    ),
-        #]
+        # ]
         verbose_name = "InChI"
         verbose_name_plural = "InChIs"
         db_table = 'cir_inchi'
@@ -520,14 +520,19 @@ class Name(models.Model):
         db_table = 'cir_structure_name'
 
     def save(self, *args, **kwargs):
-        self.hash = hashlib.md5(self.name.encode("UTF-8")).hexdigest()
+        self.hash = self.calculate_hash()
         super(Name, self).save(*args, **kwargs)
+
+    def calculate_hash(self):
+        print(self.name)
+        return hashlib.md5(self.name.encode("UTF-8")).hexdigest()
 
     def __str__(self):
         return "(Name=%s: hash=%s name=%s)" % (self.id, self.hash, self.name,)
 
     def __repr__(self):
         return self.name
+
 
 class NameType(models.Model):
     title = models.CharField(max_length=64, unique=True, editable=False)
@@ -590,7 +595,16 @@ class StructureNameAssociationQuerySet(models.QuerySet):
             affinity_classes: List[Union['NameAffinityClass', int]] = None,
             minimum_confidence: float = 100
     ):
-        name_filter = reduce(operator.or_, (Q(name__name__iexact=n) for n in names))
+        name_hashes = []
+        for name in names:
+            print(isinstance(name, str))
+            if isinstance(name, str):
+                name_hashes.append(Name(name=name).calculate_hash())
+            else:
+                name_hashes.append(name.calculate_hash())
+        # name_hashes = [hashlib.md5(name.encode("UTF-8")).hexdigest() for name in names]
+        print(name_hashes)
+        name_filter = reduce(operator.or_, (Q(name__hash=h) for h in name_hashes))
         queryset = self._base_queryset().filter(name_filter).filter(confidence__gte=minimum_confidence)
 
         if affinity_classes:

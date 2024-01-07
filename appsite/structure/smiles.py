@@ -5,7 +5,6 @@ from structure import formula
 
 class SMILES:
     character_set = {
-
         'special': ['([\[\]\.\(\)\\\/#=@\-\+\%\|\?])', ],
         'numbers': ['\d'],
         'element_list': [
@@ -24,13 +23,13 @@ class SMILES:
 
     def __init__(self, string=None, strict_testing=False):
         self.string = None
-        if strict_testing and not self._test_smiles(string=string):
+        if strict_testing and not SMILES._test_smiles(string=string):
             raise SmilesError('no valid SMILES string')
         self.string = string
         self.html_formatted = self.string.replace('CC', 'C<wbr>C')
 
-    def _test_smiles(self, string):
-
+    @staticmethod
+    def _test_smiles(string):
         # strings with the following pattern can be SMILES or Formula
         pattern = re.compile('^[A-Z][A-Z][a-z]$')
         if pattern.match(string):
@@ -41,20 +40,26 @@ class SMILES:
         if not special_case and len(string) > 2:
             try:
                 formula.Formula(string=string)
-            except:
+            except Exception as e:
                 pass
             else:
                 return False
-        pattern_list = []
-        for s in SMILES.character_set.values():
-            pattern_list += s
-        for p in pattern_list:
+        pattern_list = [
+            (pattern_type, p) for (pattern_type, pattern_list) in SMILES.character_set.items() for p in pattern_list
+        ]
+        counter = {
+            'special': 0,
+            'numbers': 0,
+            'element_list': 0
+        }
+        for item in pattern_list:
+            t, p = item
             pattern = re.compile(p)
             string = pattern.sub('.', string)
-            # print string
+            counter[t] += 1
             exit_pattern = re.compile('^\.+$')
             if exit_pattern.match(string):
-                return True
+                return counter['element_list'] >= 1
         return False
 
 

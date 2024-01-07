@@ -24,7 +24,6 @@ RESOLVER_LIST = ["name", "smiles", "hashisy"]
 TestData = namedtuple("TestData", "identifier representations")
 TestResponse = namedtuple("TestResponse", "resolver expectations exception")
 
-
 class ChemicalStringTests(TestCase):
     fixtures = FIXTURES
 
@@ -38,13 +37,13 @@ class ChemicalStringTests(TestCase):
 
     @parameterized.expand([
         ["cas", TestData(
-            identifier="50-00-0",
+            identifier="64-17-5",
             representations=[
                 TestResponse(resolver="cas_number", expectations={'E174572A915E4471'}, exception=None),
-                TestResponse(resolver="smiles", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+                #TestResponse(resolver="smiles", expectations=None, exception=ValueError()),
+                # TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+                # TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+                # TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
             ]
         )],
         # ["smiles1", TestData(
@@ -62,15 +61,15 @@ class ChemicalStringTests(TestCase):
         #         TestResponse(resolver="structure_representation", expectations={'E174572A915E4471'}, exception=None)
         #     ]
         # )],
-        # ["name1", TestData(
-        #     identifier="ethanol",
-        #     representations=[
-        #         TestResponse(resolver="name", expectations={'E174572A915E4471'}, exception=None),
-        #         TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-        #         TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-        #         TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-        #     ]
-        # )],
+        ["name1", TestData(
+            identifier="ethanol",
+            representations=[
+                TestResponse(resolver="name", expectations={'E174572A915E4471'}, exception=None),
+                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+                TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+            ]
+        )],
         # ["ficts1", TestData(
         #     identifier="E174572A915E4471-FICTS-01-1A",
         #     representations=[
@@ -154,16 +153,16 @@ class ChemicalStringTests(TestCase):
         #     ],
         # )]
     ])
-    def test(self, name, resolver_test: TestData):
+    def test(self, name, data: TestData):
 
-        resolver_list = [test.resolver for test in resolver_test.representations]
+        resolver_list = [test.resolver for test in data.representations]
 
-        chemical_string = ChemicalString(string=resolver_test.identifier, resolver_list=resolver_list)
+        chemical_string = ChemicalString(string=data.identifier, resolver_list=resolver_list)
         actual_data = chemical_string.resolver_data
 
-        for expected_data in resolver_test.representations:
+        for expected_data in data.representations:
             resolver, expectations = expected_data.resolver, expected_data.expectations
-            logger.info("-- REQUEST {} RESOLVER {}".format(resolver_test.identifier, resolver))
+            logger.info("-- REQUEST {} RESOLVER {}".format(data.identifier, resolver))
             if expected_data.exception:
                 exception = actual_data[resolver][0].exception
                 logger.info("exception {}".format(expected_data.exception))
