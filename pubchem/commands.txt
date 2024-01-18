@@ -1,1 +1,7 @@
 ./psql -c "\copy cir_structure_name to '/filestore/cir_structure_name.table'"
+
+# Write names
+docker-compose run cirx python /home/app/pubchem/write_names.py
+
+
+./psql -f /home/app/pubchem/load_names.sql

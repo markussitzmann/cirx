@@ -1,3 +1,4 @@
+*.tar.gz
 tmp/*
 .project/*
 *.pyc
