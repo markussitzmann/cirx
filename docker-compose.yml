@@ -43,6 +43,8 @@ services:
     container_name: ${APP_NAME}-postgres
     volumes:
       - ${APP_HOME}:/home/app
+      - ${APP_FILESTORE}:/filestore
+      - ${APP_INSTORE}:/instore
       - postgres_db_volume:/var/lib/postgresql
     ports:
       - "5432:5432"
@@ -111,9 +113,9 @@ services:
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
     command: ['nice', '-n', '20', 'celery', '-A', 'appsite',
-              'worker', '-l', 'info', '-Q', 'register', '-c', '3',
+              'worker', '-l', 'info', '-Q', 'register', '-c', '10',
               "--logfile=/logging/cirx-register-worker.%h.%i.log",
-              '-n', 'register@%h']
+              '-n', 'register@%h', '--max-tasks-per-child', '1']
     restart: on-failure
     depends_on:
       - cirx-cache
@@ -147,7 +149,7 @@ services:
     command: ['nice', '-n', '20', 'celery', '-A', 'appsite',
               'worker', '-l', 'info', '-Q', 'calcinchi', '-c', '2',
               "--logfile=/logging/cirx-calcinchi-worker.%h.%i.log",
-              '-n', 'calcinchi@%h']
+              '-n', 'calcinchi@%h', '--max-tasks-per-child', '1']
     restart: on-failure
     depends_on:
       - cirx-cache

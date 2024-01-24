@@ -34,6 +34,10 @@ class Command(BaseCommand):
 
 
 def _loader():
+
+
+
+
     #init_structure_fields()
     init_name_type_data()
     init_response_type_data()
@@ -45,12 +49,27 @@ def _loader():
     init_name_affinitiy_class()
     #init_structures()
 
-    # temp = StructureFileCollection.objects.create(
-    #     file_location_pattern_string="pubchem/compound/LDt2PFyP/*.sdf.gz",
-    #     release_id=1
-    # )
-    # temp.preprocessors.add(2)
-    # temp.save()
+    patterns = [
+        '7fQrrTuU',
+        '8pQVnsaj',
+        'BmKU8pqx',
+        'EbSN59AF',
+        'fQRKcXSz',
+        'Q3JMX5Cq',
+        'R8JdDjYi',
+        'VTy9Bcn6',
+        'VWaxGENd',
+        'Wraqo42Y'
+    ]
+
+    for pattern in patterns:
+        temp = StructureFileCollection.objects.create(
+            file_location_pattern_string="pubchem/compound/%s/*.sdf.gz" % pattern,
+            release_id=1
+        )
+        temp.preprocessors.add(2)
+        temp.save()
+
 
 
 def init_structures():

@@ -3,6 +3,5 @@ set -e
 
 source .env
 
-docker-compose run cirx python /home/app/pubchem/write_names.py
-
+./psql -f /home/app/pubchem/load_names.sql
 
