@@ -35,9 +35,6 @@ class Command(BaseCommand):
 
 def _loader():
 
-
-
-
     #init_structure_fields()
     init_name_type_data()
     init_response_type_data()
@@ -50,17 +47,22 @@ def _loader():
     #init_structures()
 
     patterns = [
-        '7fQrrTuU',
-        '8pQVnsaj',
-        'BmKU8pqx',
-        'EbSN59AF',
-        'fQRKcXSz',
-        'Q3JMX5Cq',
-        'R8JdDjYi',
-        'VTy9Bcn6',
-        'VWaxGENd',
-        'Wraqo42Y'
+        '2t5pmMX5'
     ]
+
+
+    # patterns = [
+    #     '7fQrrTuU',
+    #     '8pQVnsaj',
+    #     'BmKU8pqx',
+    #     'EbSN59AF',
+    #     'fQRKcXSz',
+    #     'Q3JMX5Cq',
+    #     'R8JdDjYi',
+    #     'VTy9Bcn6',
+    #     'VWaxGENd',
+    #     'Wraqo42Y'
+    # ]
 
     for pattern in patterns:
         temp = StructureFileCollection.objects.create(
