@@ -24,6 +24,7 @@ RESOLVER_LIST = ["name", "smiles", "hashisy"]
 TestData = namedtuple("TestData", "identifier representations")
 TestResponse = namedtuple("TestResponse", "resolver expectations exception")
 
+
 class ChemicalStringTests(TestCase):
     fixtures = FIXTURES
 
@@ -133,7 +134,7 @@ class ChemicalStringTests(TestCase):
             ],
         )],
         ["tautomers", TestData(
-            identifier="tautomers:Warfarin",
+            identifier="tautomers:warfarin",
             representations=[
                 TestResponse(
                     resolver="name",
