@@ -113,7 +113,7 @@ services:
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
     command: ['nice', '-n', '20', 'celery', '-A', 'appsite',
-              'worker', '-l', 'info', '-Q', 'register', '-c', '10',
+              'worker', '-l', 'info', '-Q', 'register', '-c', '8',
               "--logfile=/logging/cirx-register-worker.%h.%i.log",
               '-n', 'register@%h', '--max-tasks-per-child', '1']
     restart: on-failure
@@ -130,7 +130,7 @@ services:
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
     command: ['nice', '-n', '20', 'celery', '-A', 'appsite',
-              'worker', '-l', 'info', '-Q', 'normalize', '-c', '16',
+              'worker', '-l', 'info', '-Q', 'normalize', '-c', '8',
               '--logfile=/logging/cirx-normalize-worker.%h.%i.log',
               '-n', 'normalize@%h', '--max-tasks-per-child', '1']
     restart: on-failure

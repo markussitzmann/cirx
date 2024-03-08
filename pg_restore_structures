@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+source .env
+
+docker-compose exec cirx-postgres /bin/bash -c "gunzip -c /home/app/cir_structure.sql.gz | psql -d postgres -U postgres"
+
+

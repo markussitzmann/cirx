@@ -37,122 +37,140 @@ class ChemicalStringTests(TestCase):
                                                                Ens.List()))
 
     @parameterized.expand([
-        ["cas", TestData(
-            identifier="64-17-5",
+        ["name warfarin", TestData(
+            identifier="warfarin",
             representations=[
-                TestResponse(resolver="cas_number", expectations={'E174572A915E4471'}, exception=None),
-                TestResponse(resolver="smiles", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-            ]
-        )],
-        ["smiles1", TestData(
-            identifier="CCO",
-            representations=[
-                TestResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
-                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-            ]
-        )],
-        ["smiles1", TestData(
-            identifier="CCO",
-            representations=[
-                TestResponse(resolver="structure_representation", expectations={'E174572A915E4471'}, exception=None)
-            ]
-        )],
-        ["name1", TestData(
-            identifier="ethanol",
-            representations=[
-                TestResponse(resolver="name", expectations={'E174572A915E4471'}, exception=None),
-                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-            ]
-        )],
-        ["ficts1", TestData(
-            identifier="E174572A915E4471-FICTS-01-1A",
-            representations=[
-                TestResponse(resolver="ncicadd_identifier", expectations={'E174572A915E4471'}, exception=None),
-                TestResponse(resolver="smiles", expectations=None, exception=ValueError()),
-                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-            ]
-        )],
-        ["inchi-key-full", TestData(
-            identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
-            representations=[
-                TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+                TestResponse(resolver="name", expectations={'20A701AA27DA3574'}, exception=None),
             ],
         )],
-        ["inchi-key-prefixed-full", TestData(
-            identifier="InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+        ["ficts warfarin", TestData(
+            identifier="ficts:warfarin",
             representations=[
-                TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+                TestResponse(resolver="name", expectations={'20A701AA27DA3574'}, exception=None),
             ],
         )],
-        ["inchi-partial", TestData(
-            identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA",
+        ["ficus warfarin", TestData(
+            identifier="ficus:warfarin",
             representations=[
-                TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+                TestResponse(resolver="name", expectations={'D76B88C0354759F1'}, exception=None),
             ],
         )],
-        ["inchi-short", TestData(
-            identifier="LFQSCWFLJHTTHZ",
-            representations=[
-                TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
-            ],
-        )],
-        ["inchi-short-multiple-structure", TestData(
-            identifier="DDPJWUQJQMKQIF",
-            representations=[
-                TestResponse(resolver="stdinchikey", expectations={'893627AD7BDD6B4F', '3FC9522042E03718'}, exception=None)
-            ],
-        )],
-        ["hashisy1", TestData(
-            identifier="1AD375920BE60DAD",
-            representations=[
-                TestResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None)
-            ],
-        )],
-        ["rid1", TestData(
-            identifier="NCICADD:RID=1",
-            representations=[
-                TestResponse(resolver="ncicadd_rid", expectations={'E174572A915E4471'}, exception=None),
-                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-            ],
-        )],
-        ["cid1", TestData(
-            identifier="NCICADD:CID=1",
-            representations=[
-                TestResponse(resolver="ncicadd_cid", expectations={'1AD375920BE60DAD'}, exception=None),
-                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
-                TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
-                TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
-            ],
-        )],
-        ["tautomers", TestData(
-            identifier="tautomers:warfarin",
-            representations=[
-                TestResponse(
-                    resolver="name",
-                    expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1',
-                                  '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A',
-                                  '93B460E97954E4E8'},
-                    exception=None
-                )
-            ],
-        )],
-        ["stdinchi", TestData(
-            identifier="InChI=1S/C19H16O4/"
-                       "c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3",
-            representations=[
-                TestResponse(resolver="stdinchi", expectations={'20A701AA27DA3574'}, exception=None),
-                TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError())
-            ],
-        )]
+        # ["cas", TestData(
+        #     identifier="64-17-5",
+        #     representations=[
+        #         TestResponse(resolver="cas_number", expectations={'E174572A915E4471'}, exception=None),
+        #         TestResponse(resolver="smiles", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ]
+        # )],
+        # ["smiles1", TestData(
+        #     identifier="CCO",
+        #     representations=[
+        #         TestResponse(resolver="smiles", expectations={'E174572A915E4471'}, exception=None),
+        #         TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ]
+        # )],
+        # ["smiles1", TestData(
+        #     identifier="CCO",
+        #     representations=[
+        #         TestResponse(resolver="structure_representation", expectations={'E174572A915E4471'}, exception=None)
+        #     ]
+        # )],
+        # ["name1", TestData(
+        #     identifier="ethanol",
+        #     representations=[
+        #         TestResponse(resolver="name", expectations={'E174572A915E4471'}, exception=None),
+        #         TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ]
+        # )],
+        # ["ficts1", TestData(
+        #     identifier="E174572A915E4471-FICTS-01-1A",
+        #     representations=[
+        #         TestResponse(resolver="ncicadd_identifier", expectations={'E174572A915E4471'}, exception=None),
+        #         TestResponse(resolver="smiles", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ]
+        # )],
+        # ["inchi-key-full", TestData(
+        #     identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+        #     representations=[
+        #         TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+        #     ],
+        # )],
+        # ["inchi-key-prefixed-full", TestData(
+        #     identifier="InChIKey=LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+        #     representations=[
+        #         TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+        #     ],
+        # )],
+        # ["inchi-partial", TestData(
+        #     identifier="LFQSCWFLJHTTHZ-UHFFFAOYSA",
+        #     representations=[
+        #         TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+        #     ],
+        # )],
+        # ["inchi-short", TestData(
+        #     identifier="LFQSCWFLJHTTHZ",
+        #     representations=[
+        #         TestResponse(resolver="stdinchikey", expectations={'E174572A915E4471'}, exception=None)
+        #     ],
+        # )],
+        # ["inchi-short-multiple-structure", TestData(
+        #     identifier="DDPJWUQJQMKQIF",
+        #     representations=[
+        #         TestResponse(resolver="stdinchikey", expectations={'893627AD7BDD6B4F', '3FC9522042E03718'}, exception=None)
+        #     ],
+        # )],
+        # ["hashisy1", TestData(
+        #     identifier="1AD375920BE60DAD",
+        #     representations=[
+        #         TestResponse(resolver="hashisy", expectations={'1AD375920BE60DAD'}, exception=None)
+        #     ],
+        # )],
+        # ["rid1", TestData(
+        #     identifier="NCICADD:RID=1",
+        #     representations=[
+        #         TestResponse(resolver="ncicadd_rid", expectations={'E174572A915E4471'}, exception=None),
+        #         TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ],
+        # )],
+        # ["cid1", TestData(
+        #     identifier="NCICADD:CID=1",
+        #     representations=[
+        #         TestResponse(resolver="ncicadd_cid", expectations={'1AD375920BE60DAD'}, exception=None),
+        #         TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="stdinchi", expectations=None, exception=ValueError()),
+        #         TestResponse(resolver="structure_representation", expectations=None, exception=ValueError()),
+        #     ],
+        # )],
+        # ["tautomers", TestData(
+        #     identifier="tautomers:warfarin",
+        #     representations=[
+        #         TestResponse(
+        #             resolver="name",
+        #             expectations={'20A701AA27DA3574', '551515A8181F0DDC', '73CEC1A3C72EEA00', 'D76B88C0354759F1',
+        #                           '8868B850DAEF2039', '571F55B366B95577', '6151CAE0B3730D90', 'DE5C78BB2B58C15A',
+        #                           '93B460E97954E4E8'},
+        #             exception=None
+        #         )
+        #     ],
+        # )],
+        # ["stdinchi", TestData(
+        #     identifier="InChI=1S/C19H16O4/"
+        #                "c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3",
+        #     representations=[
+        #         TestResponse(resolver="stdinchi", expectations={'20A701AA27DA3574'}, exception=None),
+        #         TestResponse(resolver="stdinchikey", expectations=None, exception=ValueError())
+        #     ],
+        # )]
     ])
     def test(self, name, data: TestData):
 

@@ -47,7 +47,7 @@ def _loader():
     #init_structures()
 
     patterns = [
-        '2t5pmMX5'
+        'LDt2PFyP'
     ]
 
 

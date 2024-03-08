@@ -406,9 +406,16 @@ class ChemicalString:
         #name = Name.objects.get(name=self.string)
 
         affinity = {a.title: a for a in NameAffinityClass.objects.all()}
-        associations = StructureNameAssociation\
-            .with_related_objects\
-            .by_name(names=[self.string, ], affinity_classes=[affinity['exact'], affinity['narrow']])
+        # associations = StructureNameAssociation\
+        #     .with_related_objects\
+        #     .by_name(names=[self.string, ], affinity_classes=[affinity['exact'], affinity['narrow']])
+        associations = StructureNameAssociation \
+            .with_related_objects \
+            .by_name(names=[self.string, ], affinity_classes=[affinity['exact']])
+        if not associations:
+            associations = StructureNameAssociation \
+                .with_related_objects \
+                .by_name(names=[self.string, ], affinity_classes=[affinity['narrow']])
 
         resolved_list = []
         for association in associations.all():
@@ -436,10 +443,6 @@ class ChemicalString:
 
             for association in associations.all():
                 structure: Structure = association.structure
-
-            # name = Name.objects.get(name=self.string)
-            # if name:
-            #     structure = name.get_structure()
                 chemical_structure = ChemicalStructure(structure=structure)
                 chemical_structure._metadata = {
                     'query_type': 'cas_number',
@@ -448,7 +451,6 @@ class ChemicalString:
                     'query_string': self.string,
                     'description': association.name.name
                 }
-                #representation.structures.append(chemical_structure)
                 return [chemical_structure, ]
         return list()
 
