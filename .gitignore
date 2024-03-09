@@ -168,3 +168,8 @@ About
 /pubchem/CID-Synonym-filtered
 /pubchem/pubchem-names-hashed.txt
 /pubchem/SID-Map
+
+*.psql.bin
+*.tar
+cir_structure.psql.bin
+cir_structure.tar

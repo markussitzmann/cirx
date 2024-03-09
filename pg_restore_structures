@@ -5,4 +5,6 @@ source .env
 
 docker-compose exec cirx-postgres /bin/bash -c "gunzip -c /home/app/cir_structure.sql.gz | psql -d postgres -U postgres"
 
+#docker-compose exec cirx-postgres /bin/bash -c "pg_restore -d postgres -t cir_structure -t cir_structure_parent_structure -Ft /home/app/cir_structure.tar"
+
 
