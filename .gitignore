@@ -173,3 +173,4 @@ About
 *.tar
 cir_structure.psql.bin
 cir_structure.tar
+cir_structure.sql.gz

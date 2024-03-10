@@ -3,14 +3,6 @@ set -e
 
 source .env
 
-PGPASSWORD="Arg0"
-
 docker-compose exec cirx-postgres pg_dump -h $POSTGRES_HOST -U $POSTGRES_USER $POSTGRES_NAME "$@"
-
-docker-compose exec db pg_dump -U postgres postgres --no-owner | gzip -9  > db-backup-$(date +%d-%m-%y).sql.gz
-
-
-
-#docker exec -i pg_container_name /bin/bash -c "PGPASSWORD=pg_password pg_dump --username pg_username database_name" > /desired/path/on/your/machine/dump.sql
 
 
