@@ -8,7 +8,7 @@ date=$(date +"%Y-%m-%d")
 destination=backup/partial/cir_structure.sql.gz.${date}
 
 docker-compose exec cirx-postgres /bin/bash -c "
-    PGPASSWORD=$POSTGRES_PASSWORD pg_dump -h $POSTGRES_HOST -U $POSTGRES_USER $POSTGRES_NAME
-    -a -t cir_structure -t cir_structure_parent_structure" | gzip -9  > ${destination}
+    PGPASSWORD=$POSTGRES_PASSWORD pg_dump --data-only -h $POSTGRES_HOST -U $POSTGRES_USER $POSTGRES_NAME
+    -t cir_structure -t cir_structure_parent_structure" | gzip -9  > ${destination}
 
 echo 'wrote backup to destination:' ${destination}

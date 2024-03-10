@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+source .env
+
+#date=$(date +"%Y-%m-%d")
+
+for table in "cir_structure" "cir_structure_parent_structure"
+do
+  source=backup/partial/${table}.copy.gz
+  docker-compose exec cirx-postgres /bin/bash -c "gunzip -c /home/app/${source} | PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER $POSTGRES_NAME -c \"\copy ${table} from STDIN\""
+  echo 'played back:' ${source}
+done
+
+echo 'done'
