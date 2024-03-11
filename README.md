@@ -24,6 +24,8 @@ and run the following command (it is important that you do this from inside the 
     ./init
 
 
+test
+
 Markus Sitzmann
 2024/01/14
 
