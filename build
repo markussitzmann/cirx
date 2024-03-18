@@ -12,7 +12,7 @@ if [ -z $(docker network ls --filter name=^${APP_NAME}-backend$ --format="{{ .Na
 fi
 
 ./docker-build
-#./django-init
+./django-init
 #./django-manage-py initdata
 #./django-manage-py loaddata structure
 

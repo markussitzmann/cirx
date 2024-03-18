@@ -7,13 +7,15 @@ source .env
 #  gunzip -c /home/app/backup/full/cir_database.sql.gz | psql -d postgres -U postgres
 #"
 
-source=/home/app/backup/dump
+SOURCE=/home/app/backup/dump
 
-echo $source
+echo $SOURCE
 echo $POSTGRES_NAME
 
-docker-compose exec cirx-postgres /bin/bash -c "PGPASSWORD=$POSTGRES_PASSWORD pg_restore --clean  -j 5 -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_USER /home/app/backup/dump"
+docker-compose exec cirx-postgres /bin/bash -c "\
+  PGPASSWORD=$POSTGRES_PASSWORD\
+  pg_restore --clean -j 8 -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_USER $SOURCE\
+"
 
-#pg_restore -d postgres --clean --create db.dump
 
 echo "done"
