@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import logging
 
@@ -23,6 +24,8 @@ for infile in ins:
             splitted = line.strip('\n').split("\t")
             if len(splitted) == 4:
                 sid, source, regid, cid = splitted
+                if source == 'ChemExper Chemical Directory':
+                    regid = hashlib.md5(bytes(regid, "utf-8")).hexdigest()
             else:
                 continue
                 #sid, source, regid = splitted

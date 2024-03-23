@@ -6,18 +6,8 @@ source .env
 SUID=$(id -u)
 SGUID=$(id -g)
 
-#DATE=$(date +"%Y-%m-%d")
-#DESTINATION=backup/full/cir_database.sql.gz.${DATE}
-
-DESTINATION=/home/app/backup/dump
+DESTINATION=/home/app/backup/full
 CHOWNER="${SUID}:${SGUID}"
-
-#docker-compose exec cirx-postgres /bin/bash -c "
-#  PGPASSWORD=$POSTGRES_PASSWORD pg_dump -h $POSTGRES_HOST -U $POSTGRES_USER $POSTGRES_NAME
-#" | gzip -9  > "${DESTINATION}"
-
-echo $CHOWNER
-
 
 docker-compose exec cirx-postgres /bin/bash -c "\
   PGPASSWORD=$POSTGRES_PASSWORD\

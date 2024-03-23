@@ -1,6 +1,6 @@
 BEGIN;
 
-COPY cir_pubchem_sid_map(sid,source_id, regid, cid) FROM '/filestore/pubchem/SID-Map' NULL '';
+COPY cir_pubchem_sid_map(sid,source_id, regid, cid) FROM '/filestore/pubchem/sid-map-cleaned.txt' NULL '';
 
 -- INSERT INTO cir_structure_name(hash,name)
 -- SELECT hash::uuid, name
