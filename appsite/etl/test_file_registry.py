@@ -3,13 +3,10 @@ from pathlib import Path
 from unittest import skip
 
 from django.conf import settings
-from pycactvs import Ens
-
 from django.test import TestCase
 
-from etl.models import StructureFileCollection, StructureFileRecord, StructureFileRecordNameAssociation, StructureFile
+from etl.models import StructureFileCollection, StructureFile
 from registration import FileRegistry
-from resolver.models import Structure, Dataset, Release, NameType, Name
 
 logger = logging.getLogger('cirx')
 

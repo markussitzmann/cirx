@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'neon.apps.NeonConfig',
     'resolver.apps.ResolverConfig',
     'etl.apps.ETLConfig',
+    'pubchem.apps.PubchemConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

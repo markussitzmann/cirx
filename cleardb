@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cp app.env .env
+source .env
+
+./django-manage-py flush --noinput
+./django-manage-py initdata
+
+echo "done"
+
+
+exit 0

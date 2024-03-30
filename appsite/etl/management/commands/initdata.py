@@ -343,14 +343,14 @@ def init_dataset():
     ncidb.context_tags.add(ContextTag.objects.get(tag="screening"))
     ncidb.save()
 
-    sandbox, created = Dataset.objects.get_or_create(
-        name="SANDBOX",
-        publisher=Publisher.objects.get(name="Markus Sitzmann"),
-    )
-    sandbox.href = "https://sandbox.test/"
-    sandbox.description = "sandbox"
-    sandbox.context_tags.add(ContextTag.objects.get(tag="screening"))
-    sandbox.save()
+    # sandbox, created = Dataset.objects.get_or_create(
+    #     name="SANDBOX",
+    #     publisher=Publisher.objects.get(name="Markus Sitzmann"),
+    # )
+    # sandbox.href = "https://sandbox.test/"
+    # sandbox.description = "sandbox"
+    # sandbox.context_tags.add(ContextTag.objects.get(tag="screening"))
+    # sandbox.save()
 
 
 def init_release(
@@ -421,7 +421,7 @@ def init_release(
             dataset=Dataset.objects.get(name="PubChem"),
             publisher=Publisher.objects.get(name="PubChem"),
             name="PubChem Compound",
-            downloaded=datetime.datetime(2022, 2, 1),
+            downloaded=datetime.datetime(2023, 11, 1),
         )
         pubchem_compound.classification = 'public'
         pubchem_compound.status = 'active'
@@ -541,41 +541,41 @@ def init_release(
         )
         open_nci_db_collection.save()
 
-    if init_sandbox:
-        sandbox_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
-            params=json.dumps({
-                'regid': {'field': 'E_ID', 'type': 'REGID'},
-                'names': [
-                    {'field': 'E_NAME', 'type': 'NAME'},
-                    {'field': 'E_SYNONYM', 'type': 'NAME'},
-                    {'field': 'E_ZINC_ID', 'type': 'REGID'},
-                    {'field': 'E_NSC_NUMBER', 'type': 'NSC_NUMBER'},
-                ]
-            })
-        )
-
-        sandbox_db, created = Release.objects.get_or_create(
-            dataset=Dataset.objects.get(name="SANDBOX"),
-            publisher=Publisher.objects.get(name="Markus Sitzmann"),
-            name="Sandbox Release",
-            released=None,
-            downloaded=datetime.datetime(2023, 5, 1),
-        )
-        sandbox_db.description = 'Sandbox'
-        sandbox_db.classification = 'public'
-        sandbox_db.status = 'active'
-        sandbox_db.save()
-
-        sandbox_db_collection, created = StructureFileCollection.objects.get_or_create(
-            release=sandbox_db,
-            file_location_pattern_string="sandbox/structures.sdf"
-        )
-        sandbox_db_collection.save()
-
-        sandbox_db_collection.preprocessors.add(
-            sandbox_preprocessor
-        )
-        sandbox_db_collection.save()
+    # if init_sandbox:
+    #     sandbox_preprocessor, created = StructureFileCollectionPreprocessor.objects.get_or_create(
+    #         params=json.dumps({
+    #             'regid': {'field': 'E_ID', 'type': 'REGID'},
+    #             'names': [
+    #                 {'field': 'E_NAME', 'type': 'NAME'},
+    #                 {'field': 'E_SYNONYM', 'type': 'NAME'},
+    #                 {'field': 'E_ZINC_ID', 'type': 'REGID'},
+    #                 {'field': 'E_NSC_NUMBER', 'type': 'NSC_NUMBER'},
+    #             ]
+    #         })
+    #     )
+    #
+    #     sandbox_db, created = Release.objects.get_or_create(
+    #         dataset=Dataset.objects.get(name="SANDBOX"),
+    #         publisher=Publisher.objects.get(name="Markus Sitzmann"),
+    #         name="Sandbox Release",
+    #         released=None,
+    #         downloaded=datetime.datetime(2023, 5, 1),
+    #     )
+    #     sandbox_db.description = 'Sandbox'
+    #     sandbox_db.classification = 'public'
+    #     sandbox_db.status = 'active'
+    #     sandbox_db.save()
+    #
+    #     sandbox_db_collection, created = StructureFileCollection.objects.get_or_create(
+    #         release=sandbox_db,
+    #         file_location_pattern_string="sandbox/structures.sdf"
+    #     )
+    #     sandbox_db_collection.save()
+    #
+    #     sandbox_db_collection.preprocessors.add(
+    #         sandbox_preprocessor
+    #     )
+    #     sandbox_db_collection.save()
 
 
 def init_name_affinitiy_class():

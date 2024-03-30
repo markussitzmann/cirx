@@ -13,7 +13,7 @@ fi
 
 ./docker-build
 ./django-init
-#./django-manage-py initdata
+./django-manage-py initdata
 #./django-manage-py loaddata structure
 
 
