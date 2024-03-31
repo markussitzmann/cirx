@@ -2,7 +2,7 @@ import csv
 import logging
 import re
 
-from typing import Dict
+from typing import Dict, Tuple
 
 from django.core.management.base import BaseCommand
 
@@ -20,6 +20,25 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info("init PubChem data sources")
         _initpubchemsources()
+
+
+def create_organization(name, category, abbreviation=None, href=None, added=None, updated=None) -> Tuple[Organization, bool]:
+    print(name, category)
+    organization_obj, created = Organization.objects.get_or_create(
+        name=name, abbreviation=abbreviation
+    )
+    if created:
+        organization_obj.abbreviation = abbreviation
+        organization_obj.category = category
+        organization_obj.href = href
+        if added:
+            organization_obj.added = added
+        if updated:
+            organization_obj.updated = updated
+        organization_obj.save()
+    print(organization_obj, created)
+    return organization_obj, created
+
 
 def create_acronym(phrase):
     acronym = ""
@@ -48,7 +67,7 @@ def _initpubchemsources():
     for column0, row in sources.items():
 
         i += 1
-        #if i != 98: continue
+        #if i != 194: continue
 
         row_organization = row['Organization']
         if row['Organization'].strip() == '':
@@ -59,14 +78,14 @@ def _initpubchemsources():
             if row_organization in item.variation_dict().keys():
                 standard = item.variation_dict()[row_organization]
         if standard:
-            organization, organization_created = Organization.objects.get_or_create(**standard)
+            organization, organization_created = create_organization(**standard)
         else:
             for pattern in standardized_organization_type_strings:
                 for old, new in pattern.variation_dict().items():
                     if row_organization.endswith(old):
                         row_organization = re.sub(old + '$', new, row_organization)
                         break
-            organization, organization_created = Organization.objects.get_or_create(name=row_organization)
+            organization, organization_created = create_organization(name=row_organization, category='none')
 
         print(row['Organization'], " : ", row['Source Name'])
         print("%s | ORGANIZATION %s" % (i, organization))

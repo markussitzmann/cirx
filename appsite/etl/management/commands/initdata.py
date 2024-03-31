@@ -243,7 +243,7 @@ def init_organization_and_publisher_data():
 
     ebi, created = Organization.objects.get_or_create(
         parent=embl,
-        name="EMBL's European Bioinformatics Institute",
+        name="European Bioinformatics Institute",
     )
     ebi.abbreviation = "EMBL-EBI"
     ebi.category = "public"
