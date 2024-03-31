@@ -670,6 +670,7 @@ class Organization(models.Model):
         ('public', 'Public'),
         ('society', 'Society'),
         ('charity', 'Charity'),
+        ('non-profit', 'Non-Profit'),
         ('other', 'Other'),
         ('none', 'None'),
         ('generic', 'Generic'),
