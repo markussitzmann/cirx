@@ -44,11 +44,11 @@ organization_type_strings: List[StandardDataItem] = [
             ', Ltd',
             ', Ltd',
             ', LTD.',
-            'LTD',
+            ' LTD',
             ' ltd',
             ' Ltd',
             ' Ltd.',
-            'Limited'
+            ' Limited'
 
         ]
     ),
@@ -70,7 +70,8 @@ organization_type_strings: List[StandardDataItem] = [
             'Co., LTD.',
             'Co.,ltd.',
             'Co.,Ltd.',
-            'Co., Limited'
+            'Co., Limited',
+            'Co.,, Ltd.',
         ]
     ),
     StandardDataItem(
@@ -123,7 +124,8 @@ organizations: List[OrganizationItem] = [
             'U.S. Environmental Protection Agency',
             'U.S. Environmental Protection Agency (EPA) Research',
             'EPA Chemical Information and Testing Branch', #check
-            'Office of Pollution Prevention and Toxics (7403M), US EPA'
+            'Office of Pollution Prevention and Toxics (7403M), US EPA',
+            'National Center for Computational Toxicology (NCCT) Office of Research and Development, US EPA'
         ]
     ),
     OrganizationItem(
@@ -286,7 +288,7 @@ organizations: List[OrganizationItem] = [
         variations=[
             'National Institute of Standards and Technology (NIST)',
             'NIST',
-            'NIST  Physical Measurement Laboratorys'
+            'NIST  Physical Measurement Laboratory'
         ]
     ),
     OrganizationItem(
@@ -403,6 +405,15 @@ organizations: List[OrganizationItem] = [
         },
         variations=[
             'ETH Zurich',
+        ]
+    ),
+    OrganizationItem(
+        standard={
+            'name': 'Shanghai Changyuhe Pharmaceutical Technology Co., Ltd.',
+            'category': 'none',
+        },
+        variations=[
+            'Shanghai changyuhe pharmaceutical technology co., LTD',
         ]
     ),
     #### CHECK: gehört zu Cambridge University
@@ -817,6 +828,7 @@ organizations: List[OrganizationItem] = [
         },
         variations=[
             'Department of Computational and Biological Sciences',
+            'Wishart Research Group, University of Alberta'
         ]
     ),
     ### Check
