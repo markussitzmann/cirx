@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 
-docker-compose exec app bash -c "cat /tmp/app.log"
+docker compose exec app bash -c "cat /tmp/app.log"
 
 

@@ -3,4 +3,4 @@ set -e
 
 source .env
 
-docker-compose --f docker-compose.python.yml run --rm cirx-python "$@"
+docker compose --f docker-compose.python.yml run --rm cirx-python "$@"
