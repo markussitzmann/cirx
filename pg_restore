@@ -12,7 +12,7 @@ SOURCE=/home/app/backup/dump
 echo $SOURCE
 echo $POSTGRES_NAME
 
-docker-compose exec cirx-postgres /bin/bash -c "\
+docker compose exec cirx-postgres /bin/bash -c "\
   PGPASSWORD=$POSTGRES_PASSWORD\
   pg_restore --clean -j 8 -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_USER $SOURCE\
 "

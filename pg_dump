@@ -9,7 +9,7 @@ SGUID=$(id -g)
 DESTINATION=/home/app/backup/full
 CHOWNER="${SUID}:${SGUID}"
 
-docker-compose exec cirx-postgres /bin/bash -c "\
+docker compose exec cirx-postgres /bin/bash -c "\
   PGPASSWORD=$POSTGRES_PASSWORD\
   pg_dump -h $POSTGRES_HOST -U $POSTGRES_USER $POSTGRES_NAME\
   -Fd $POSTGRES_NAME -j 8 -f ${DESTINATION};\
