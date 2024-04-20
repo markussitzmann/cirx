@@ -16,6 +16,21 @@ CREATE TABLE if not EXISTS cir_pubchem_sid_map(
     UNIQUE(sid, cid)
 );
 
+CREATE TABLE IF NOT EXISTS cir_pubchem_cid_parent(
+    id bigserial PRIMARY KEY,
+    cid bigint NOT NULL,
+    cid_parent bigint NOT NULL,
+    UNIQUE(cid, cid_parent)
+);
+
+CREATE TABLE IF NOT EXISTS cir_pubchem_cid_structure(
+    id bigserial PRIMARY KEY,
+    cid bigint NOT NULL,
+    structure_id bigint NOT NULL,
+    ficts_parent_id bigint,
+    UNIQUE(cid, structure_id)
+);
+
 COMMIT;
 
 
