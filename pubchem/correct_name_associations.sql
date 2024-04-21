@@ -1,0 +1,15 @@
+BEGIN;
+
+SELECT aa.id FROM
+(SELECT * FROM cir_structure_name_associations WHERE name_id IN (
+SELECT name_id FROM
+    (SELECT name_id, count(structure_id) as scount
+    FROM cir_structure_name_associations a
+    WHERE affinity_class_id=1
+    GROUP BY name_id
+    ) AS ngroup
+WHERE ngroup.scount > 1 LIMIT 10)
+order by name_id) as aa;
+
+COMMIT;
+
