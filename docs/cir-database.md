@@ -42,6 +42,43 @@ The table is unique by _release_id_ and _file_location_pattern_
 
 ### cir_structure_file
 
-stores all files 
+This table contains every structure file available at the filestore and links it to a file collection. The file name is 
+referenced starting from the /filestore root mounting point inside the DOCKER container (usually /filestore), which can 
+be mounted to a directory outside the container (see app.env). During the (regular) file registering process structure 
+files are chunked up into blocks of 10000 records and packed.
 
+The table is unique by _collection_id and _file_
 
+### cir_record
+
+This table stores uniquely every record available from a structure file. Most importantly it stores the REGID and the
+name_id (referring to table _cir_structure_name_ of the regid). It also links a record to its dataset and release as
+well as its structure_file_record. The table can be used to references more than one version of the same structure
+file record. This file is filled during the file register process.
+
+The table is unique by _name_id_, _version_ and _release_id_.
+
+### cir_structure
+
+This table stores all available structures as CACTVS minimols unique by CACTVS E_HASHISY. Because this is a
+Postgres database the CACTVS hash value has been shifted from 64-bit unsigned to 64-bit signed. The table contains
+all original file record structures which are added during the file registration process and also all structures
+which are created during structure normalization process (see table _cir_structure_parent_structure_).
+
+This table is unique by _hash_.
+
+### cir_structure_parent_structure
+
+This table creates a link between a structure from table _cir_structure_ and its NCI/CADD parent structure (FICTS, 
+FICuS, uuuuu). If a _structure_id_ refers to itself, it is a parent structure and registered as compound (see table 
+_cir_compound_). NULL values for higher order parent structure (FICTS or FICuS) means, the structure is also a either
+a FICuS parent structure in itself (FICTS is NULL) pr a uuuuu parent structure (FICTS and uuuuu are NULL).
+
+The table is unique by _structure_id_
+
+### cir_compound
+
+Whenever a structure has been the result of NCI/CADD parent structure calculation or normalization, respectively, it is
+registered as a compound, hence its structure_id is assigned a compund ID in this table.
+
+The table is unique by _id_
