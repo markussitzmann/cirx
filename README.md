@@ -58,19 +58,23 @@ it connects via docker to the database in the CIR postgres database in Docker im
 
     ./psql
 
-and look for the table cir_dataset_release)
+and look for the table cir_dataset_release, see also database descriptions at [docs/postgres.md](docs/postgres.md))
 
-Running the "addfile" command will process all files matching the provided filepattern, count their size, chunk them
-in blocks and will store packed SDF blocks in the /filestore directory. It will also create the necessary entries in
-the cir_structure_file_collection table which are needed for the further processing (if you want to skip the "instore"
-and organize your files directly in "filestore", you have to fill in the entries into this table manually).
+Running the _addfile_ command will process all files matching the provided filepattern, i.e. they are chunked into
+blocks of 10000 records, zipped, and organized as file collections in the _filestore_ directory of CIR. Additionally, 
+some initial entries are added to database table _cir_structure_file_collection_ facilitating further processing. 
+However, the _addfile_ command can be skipped and everything can be organized in the _filestore_ directory (this 
+requires manual configuration of the _cir_structure_file_collection_ table).
 
-IF the addfile process is finished, your original files are organized as file cellections in the "filestore".
 
 Next step is registering all file records, i.e. the existence of the record, its ID, is structure, names  
 
+, count their size, chunk them
+in blocks and will store packed SDF blocks in the /filestore directory. It will also create the necessary entries in
+the cir_structure_file_collection table which are needed for the further processing
 
 
+## Dataabase Backups
 
 
 Markus Sitzmann
