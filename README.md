@@ -91,6 +91,9 @@ used:
     ./cirx addfiles 
         --filepattern {the file filepattern of your SDF file starting from instore root} 
         --release 1 (this is is an example release created by the init process of the CIR build)
+        --preprocessors 1 (unfortunately not so well defined yet, the initdata process specifies exemplary preprocessors
+                           which are stored in table cir_structure_file_collection_preprocessor and  
+                            cir_structure_file_collection_preprocessors) 
 
 (Needs improvement: to add own releases, access the database from inside the cirx home directory the following way
 it connects via docker to the database in the CIR postgres database in Docker image
@@ -108,7 +111,12 @@ requires manual configuration of the _cir_structure_file_collection_ table).
 ### Register command
 
 If all files have been organized as file collections (either by the addfile command or directly inside the instore and
-database configuration, see above addfile command), the files can be registered 
+database configuration, see above addfile command), the files can be registered running the command
+
+    ./cirx register --file_collection_id  (or ./cirx register -c)
+
+This starts counting the files in the filestore, reading the structures, adding them to the database 
+(_cir_structure_ table) 
 
 
 
