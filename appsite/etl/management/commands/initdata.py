@@ -2,8 +2,6 @@ import datetime
 import json
 import logging
 
-import urllib.request
-
 import requests
 from django.core.management.base import BaseCommand
 from pycactvs import Ens

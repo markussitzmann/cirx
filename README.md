@@ -35,6 +35,31 @@ should run then at
 
     localhost:8000
 
+
+The build script calls the falling scripts as subscripts
+
+    ./docker-build
+    ./django-init
+    ./django-manage-py initdata
+
+The first one of these scripts runs the build of all Docker images, the second one initializes the Django system
+(database structure and Django setup), and the third script initializes the fresh system with some initial data in
+the database.
+
+The initdata command is run by the general Django management script manage.py, however, since CIR is running inside
+a docker container, the wrapper script django-manage-py has been created for CIR.
+
+The definition of the initdata process is available at following script
+    
+    appsite/etl/management/commands/initdata.py
+
+inside the CIR root directory. It performs some exemplary data initialization processes in the CIR database.
+
+A short version of the django-manage-py command is available as 
+
+    ./cirx
+
+
 ## Building the database
 
 The CIR ETL process expects data in its so called _instore_, this can be a loose or organized collection of (SDF) files.
