@@ -99,3 +99,9 @@ a confidence level (currently by default 100), the affinity class (these are cre
 been found via FICTS, FICuS or uuuuu parent structure), and the _name_type_id_.
 
 The table is unique by _name_id, _structure_id_, _name_type_id_, amd _affinity_class_id_)
+
+### cir_name_type
+
+
+
+The table is unique by _title_
