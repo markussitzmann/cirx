@@ -46,6 +46,8 @@ The first one of these scripts runs the build of all Docker images, the second o
 (database structure and Django setup), and the third script initializes the fresh system with some initial data in
 the database.
 
+### initdata command
+
 The initdata command is run by the general Django management script manage.py, however, since CIR is running inside
 a docker container, the wrapper script django-manage-py has been created for CIR.
 
@@ -55,10 +57,19 @@ The definition of the initdata process is available at following script
 
 inside the CIR root directory. It performs some exemplary data initialization processes in the CIR database.
 
-A short version of the django-manage-py command is available as 
+A short version of the django-manage-py or Django manage.py command, respectively, is available as 
 
-    ./cirx
+    ./cirx [management command], e.g. ./cirx initdata
 
+### Other useful commands
+
+Reset rebuilds the whole system (WARNING: all data in the database is lost)
+
+    ./reset 
+
+Cleans the database (WARNING: all data in the database is lost)
+
+    ./cleardb
 
 ## Building the database
 
@@ -123,7 +134,7 @@ In order to restore a database use
 
 or use a specific dump with 
 
-    ./cirx debrestore -i some.dump
+    ./cirx dbrestore -i some.dump
 
 If no dump file name is provided, the most recent (generically named) dump file is used.
 
