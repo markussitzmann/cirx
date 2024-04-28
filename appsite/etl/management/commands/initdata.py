@@ -46,9 +46,9 @@ def _loader():
     init_name_affinitiy_class()
     #init_structures()
 
-    patterns = [
-        'LDt2PFyP'
-    ]
+    # patterns = [
+    #     'LDt2PFyP'
+    # ]
 
 
     # patterns = [
@@ -64,13 +64,13 @@ def _loader():
     #     'Wraqo42Y'
     # ]
 
-    for pattern in patterns:
-        temp = StructureFileCollection.objects.create(
-            file_location_pattern_string="pubchem/compound/%s/*.sdf.gz" % pattern,
-            release_id=1
-        )
-        temp.preprocessors.add(2)
-        temp.save()
+    # for pattern in patterns:
+    #     temp = StructureFileCollection.objects.create(
+    #         file_location_pattern_string="pubchem/compound/%s/*.sdf.gz" % pattern,
+    #         release_id=1
+    #     )
+    #     temp.preprocessors.add(2)
+    #     temp.save()
 
 
 

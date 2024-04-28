@@ -37,21 +37,24 @@ should run then at
 
 ## Building the database
 
-The CIR ETL process expects data in its so called "instore", this can be a loose or organized collection of (SDF) files.
-With a helper script "addfiles" the files can be transfered to the CIR "filestore". The files in the "filestore" are
+The CIR ETL process expects data in its so called _instore_, this can be a loose or organized collection of (SDF) files.
+With a helper script _addfiles_ the files can be transfered to the CIR "filestore". The files in the "filestore" are
 organized in a way the ETL processes needs and reads them, however, the files can also be directly organized in the
-"filestore" (under circumvention of the "instore"). 
+_filestore_ (under circumvention of the _instore_). 
 
-The location of both file stores is set in the central app.env configuration file:
+The location of both file stores is set in the central _app.env_ configuration file:
 
 APP_FILESTORE=/home/sitzmann/filestore
 APP_INSTORE=/home/sitzmann/instore
 
-If you start from addstore, put some SDF files there and do
+### Addfiles command
+
+If the process is started from the _instore_, some SDF files have to be put there and then the addfile command has to be 
+used:
 
     ./cirx addfiles 
         --filepattern {the file filepattern of your SDF file starting from instore root} 
-        --release 1 (this is is an example release created by the init process)
+        --release 1 (this is is an example release created by the init process of the CIR build)
 
 (Needs improvement: to add own releases, access the database from inside the cirx home directory the following way
 it connects via docker to the database in the CIR postgres database in Docker image
@@ -66,12 +69,12 @@ some initial entries are added to database table _cir_structure_file_collection_
 However, the _addfile_ command can be skipped and everything can be organized in the _filestore_ directory (this 
 requires manual configuration of the _cir_structure_file_collection_ table).
 
+### Register command
 
-Next step is registering all file records, i.e. the existence of the record, its ID, is structure, names  
+If all files have been organized as file collections (either by the addfile command or directly inside the instore and
+database configuration, see above addfile command), the files can be registered 
 
-, count their size, chunk them
-in blocks and will store packed SDF blocks in the /filestore directory. It will also create the necessary entries in
-the cir_structure_file_collection table which are needed for the further processing
+
 
 
 ## Database Backups
