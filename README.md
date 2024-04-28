@@ -115,8 +115,10 @@ database configuration, see above addfile command), the files can be registered 
 
     ./cirx register --file_collection_id  (or ./cirx register -c)
 
-This starts counting the files in the filestore, reading the structures, adding them to the database 
-(_cir_structure_ table) 
+This starts counting the files in the filestore, reading all structures, adding them to the database 
+(_cir_structure_ table), creating entries in table _cir_structure_file_record_ (reference to the file record) and 
+_cir_record_ (register REGID provided by the original database provider) and read name entries provided in the original
+database records.
 
 
 
