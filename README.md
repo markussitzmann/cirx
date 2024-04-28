@@ -120,6 +120,23 @@ This starts counting the files in the filestore, reading all structures, adding 
 _cir_record_ (register REGID provided by the original database provider) and read name entries provided in the original
 database records.
 
+This process is run by a Python Celery based worker named _cirx-register-worker_. It is specified in the 
+docker-compose.yml file of the CIR project. It is capable of running parallel workers consuming the submitted list
+of structure files, however, it is necessary to pay attention to whether the database system or the whole server
+system is not overwhelmed if too many parallel processes are running.
+
+The progress of the registration progres can be observed by means of the log files at the CIR logging directory at
+the root directory of the CIR directory.
+
+### Normalize command
+
+
+### Calcinchi command
+
+
+
+### Linkname command
+
 
 
 
@@ -151,5 +168,5 @@ If no dump file name is provided, the most recent (generically named) dump file 
 
 
 Markus Sitzmann
-2024/01/14
+2024/04/28
 
