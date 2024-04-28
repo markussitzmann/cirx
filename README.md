@@ -74,7 +74,31 @@ in blocks and will store packed SDF blocks in the /filestore directory. It will 
 the cir_structure_file_collection table which are needed for the further processing
 
 
-## Dataabase Backups
+## Database Backups
+
+The database backup process is based on the django dbbackup package.
+
+The CIR database backups can be created by 
+
+    ./cirx dbbackup
+
+If no outputfile name is provided using the -o option, the database us dumped to the backup/ directory of the CIR
+root directory. Nameing the dump file
+
+    ./cirx dbbackup -o test.dump
+
+writes the backup as test.dump to the backup directory.
+
+In order to restore a database use
+
+    ./cirx dbrestore
+
+or use a specific dump with 
+
+    ./cirx debrestore -i some.dump
+
+If no dump file name is provided, the most recent (generically named) dump file is used.
+
 
 
 Markus Sitzmann
