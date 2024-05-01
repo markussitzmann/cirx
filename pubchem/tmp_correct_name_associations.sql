@@ -11,7 +11,14 @@ SELECT * FROM cir_structure_name_associations WHERE name_id IN
     GROUP BY name_id) AS ngroup
 WHERE ngroup.scount > 1);
 
-SELECT count(*) from tmp_cir_structure_name_associations;
+--SELECT count(*) from tmp_cir_structure_name_associations;
+
+CREATE TABLE IF NOT EXISTS tmp_cir_new_confidence AS
+SELECT
+    a.id,
+    ceil(100/(SELECT count(*) as ncount FROM tmp_cir_structure_name_associations i where i.name_id = a.name_id)) as i
+FROM tmp_cir_structure_name_associations a;
+
 
 --UPDATE cir_structure_name_associations set confidence=1 WHERE id IN (
 -- SELECT count(aa.id) FROM
