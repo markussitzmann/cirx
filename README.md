@@ -130,6 +130,32 @@ the root directory of the CIR directory.
 
 ### Normalize command
 
+After registration of structure records (in fact, also while it runs, but this not well tested), structure normalization
+can be started. This done by running
+
+    ./cirx normalize
+
+and will start the Python Celery based worker named _cirx-normalization-worker_. It will submit the structure index
+of CIR (in table _cir_structure_) chunkwise separated by their file record ids in the CIR _filestore_ (by default 10000
+records). Additionally, these 10000-sized chunks of structures are also divided into virtual blocks of 1000 and submitted
+to the CELERY queue and processed by the number of configured workers running the structure normalization. For this,
+the FICTS, FICuS and uuuuu parent structures are calculated. If a new structure is created it is added to table
+_cir_structure_. In table _cir_structure_parent_structure the linkage between structures and their
+parent structure is registered. Each structure which has been recognized as a parent structure is assigned a compound id
+in table _cir_compound_.
+
+Since for very large databases it is to be expected a large number of structure files has to be submitted the submission
+process can be controlled with two parameters
+
+    ./cirx normalize 
+        --tag {some string} 
+        --limit {max number of files for this block submission}
+
+allowing for a blockwise submission of files. As long as the tag string doesn't change the submission process makes sure
+each structure file block is submitted in one of the block submissions. It ends, if each file has been submitted.
+
+The easiest way to check how the structure normalization process is progressing file block-wise, check content of 
+table _cir_structure_file_normalization_status_
 
 ### Calcinchi command
 
