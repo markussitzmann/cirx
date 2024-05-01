@@ -43,7 +43,7 @@ SELECT name_id,
     structure_file_record_id
 FROM cir_record WHERE release_id=2;
 
--- 6 **** insert PubChem SIDS into cir_record_names table !!! Check if Publisher 4 is Pubchem, this is used for preliminary set uo
+-- 6 **** insert PubChem SIDS into cir_dataset table !!! Check if Publisher 4 is Pubchem, this is used for preliminary set uo
 -- INSERT INTO cir_dataset(name, modified, added, publisher_id)
 -- SELECT source_id as name, now(), now(), 4 FROM cir_pubchem_sid_map group by source_id
 -- ON CONFLICT DO NOTHING;

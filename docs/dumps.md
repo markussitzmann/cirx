@@ -6,6 +6,8 @@
 
 * pubchem-sid-records-added.psql.bin contains the full build with PubChem SIDS merged into cir_structure_names
 
+* pubchem-sid-records-added-4-5-cid-names-raw.psql.bin contains step 4 and 5 from file and as names from Pubchem CID added
+
 
 # Broken names
 
