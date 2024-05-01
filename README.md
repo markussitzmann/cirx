@@ -155,11 +155,22 @@ allowing for a blockwise submission of files. As long as the tag string doesn't 
 each structure file block is submitted in one of the block submissions. It ends, if each file has been submitted.
 
 The easiest way to check how the structure normalization process is progressing file block-wise, check content of 
-table _cir_structure_file_normalization_status_
+table _cir_structure_file_normalization_status_.
 
 ### Calcinchi command
 
+The submission for the calculation of InChIs works quite similar to the structure normalization process. It is started
+with
+    
+    ,/cirx calcinchi
+        
+and blockwise
 
+    ,/cirx calcinchi
+        --tag {some string} 
+        --limit {max number of files for this block submission}
+
+Progess can be checked in _table_ _cir_structure_file_calcinchi_status_.
 
 ### Linkname command
 
