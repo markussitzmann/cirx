@@ -13,12 +13,14 @@ WHERE ngroup.scount > 1);
 
 --SELECT count(*) from tmp_cir_structure_name_associations;
 
-CREATE TABLE IF NOT EXISTS tmp_cir_new_confidence AS
-SELECT
-    a.id,
-    ceil(100/(SELECT count(*) as ncount FROM tmp_cir_structure_name_associations i where i.name_id = a.name_id)) as i
-FROM tmp_cir_structure_name_associations a;
-
+--CREATE TABLE IF NOT EXISTS tmp_cir_new_confidence AS
+-- SELECT a.id, ceil(100/(SELECT count(*) as ncount FROM tmp_cir_structure_name_associations i where i.name_id = a.name_id)) as i
+-- FROM tmp_cir_structure_name_associations a WHERE name_id=229;
+UPDATE tmp_cir_structure_name_associations as m SET confidence = o.confidence FROM
+(SELECT i.name_id, ceil(100/i.c) as confidence FROM
+    (SELECT name_id, count(*) as c FROM tmp_cir_structure_name_associations group by name_id) as i
+) as o
+WHERE o.name_id = m.name_id;
 
 --UPDATE cir_structure_name_associations set confidence=1 WHERE id IN (
 -- SELECT count(aa.id) FROM
