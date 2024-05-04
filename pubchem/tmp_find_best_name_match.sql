@@ -9,5 +9,7 @@ SELECT count(*), count(distinct name_id) FROM cir_structure_name_associations a
             and name_type_id = 3;
 
 
+
+
 COMMIT;
 
