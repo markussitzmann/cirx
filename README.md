@@ -5,8 +5,8 @@
 ## Requirements
 
 Please have at least [Docker CE 20.10](<https://docs.docker.com/engine/installation/>) and 
-[Docker Compose 1.29](<https://docs.docker.com/compose/install/>) installed on your system.
-Installation of this packages also requires full installation and successful build of the Docker Cactvs package 
+Docker Compose V2 installed on your system.
+Installation of the CIR package also requires full installation and successful build of the Docker Cactvs package 
 (see https://github.com/markussitzmann/docker-cactvs) 
 
 ## Installation
@@ -19,8 +19,8 @@ Then, change into the newly created directory ::
 
     cd cirx/
 
-and edit the central app.env file according to your needs. Most importanlty here are the settings of the
-variables before starting any build:
+and edit the central app.env file according to your needs. Most important here are the settings of the
+following variables before starting any build:
 
     APP_HOME=/home/sitzmann/projects/cirx
     APP_UID=1000
@@ -34,7 +34,6 @@ This builds all image, starts the system and fills the database with some initia
 should run then at 
 
     localhost:8000
-
 
 The build script calls the falling scripts as subscripts
 
@@ -170,16 +169,16 @@ and blockwise
         --tag {some string} 
         --limit {max number of files for this block submission}
 
-Progess can be checked in _table_ _cir_structure_file_calcinchi_status_.
+Progress can be checked in _table_ _cir_structure_file_calcinchi_status_.
 
 ### Linkname command
 
-
+The 
 
 
 ## Database Backups
 
-The database backup process is based on the django dbbackup package.
+The database backup process is based on the Django dbbackup package.
 
 The CIR database backups can be created by 
 

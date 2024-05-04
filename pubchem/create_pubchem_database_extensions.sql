@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS cir_pubchem_cid_structure(
     UNIQUE(cid, structure_id)
 );
 
+CREATE INDEX IF NOT EXISTS cir_pubchem_cid_structure_cid_index ON cir_pubchem_cid_structure(cid);
+CREATE INDEX IF NOT EXISTS cir_pubchem_cid_structure_structure_id_index ON cir_pubchem_cid_structure(structure_id);
+
+
 COMMIT;
 
 
