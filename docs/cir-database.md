@@ -93,7 +93,7 @@ The table is unique by _id_.
 ### cir_structure_name
 
 The table contains all names and REGIDs collected during file record registration process. Each name string is MD5 
-hashed and casted into the Postgres type UUID which is used as the name hash.
+hashed and cast into the Postgres type UUID which is used as the name hash.
 
 The table is unique by _hash_.
 
@@ -101,12 +101,23 @@ The table is unique by _hash_.
 
 This table creates all associations between an entry of table _cir_structure_ and _cir_structure_name_. It also includes
 a confidence level (currently by default 100 for most entries), the affinity class (these are created from whether the 
-association has been found via FICTS, FICuS or uuuuu parent structure), and the _name_type_id_.
+association has been found via FICTS, FICuS or uuuuu parent structure, see also table _cir_name_affinity_class_), and 
+the _name_type_id_.
 
 The table is unique by _name_id, _structure_id_, _name_type_id_, amd _affinity_class_id_)
 
 ### cir_name_type
 
-
+This table references all name types used in table _cir_structure_name_associations_. 
 
 The table is unique by _title_
+
+### cir_name_affinity_class
+
+The classes listed in this table are used in table _cir_structure_name_association_ for describing how closely a 
+name association links a nme to a structure. These values are set during the linkname process when registering structures
+to the database, for instance, if a name is linked on basis of FICTS parent structure, the name affinity class is 
+set to 'exact'.
+
+The table is unique by _title_
+
