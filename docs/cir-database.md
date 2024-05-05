@@ -130,8 +130,17 @@ hash has been used for calculating uniqueness.
 
 The table is unique by column _hash_.
 
-
 ### cir_structure_inchi_associations
 
+This table creates the associtions between the structures available in table _cir_structure_ and their calculated
+InChIs in table _cir_inchi_. The association also includes the software version of the InChI library, the applied 
+save_opts (except for Standard InChI) as well as the InChI Type used for the calculation (see next table).
+
+This table is unique by columns _structure_id_, _inchi_id, _inchi_type_id_ and _save_opts_. 
 
 ### cir_inchi_type
+
+This table stores the available InChI types 
+
+
+
