@@ -66,10 +66,11 @@ The table is unique by _name_id_, _version_ and _release_id_.
 
 ### cir_structure
 
-This table stores all available structures as CACTVS minimols unique by CACTVS E_HASHISY. Because this is a
-Postgres database the CACTVS hash value has been shifted from 64-bit unsigned to 64-bit signed. The table contains
-all original file record structures which are added during the file registration process and also all structures
-which are created during structure normalization process (see table _cir_structure_parent_structure_).
+This table stores all available structures as CACTVS minimols unique by CACTVS E_HASHISY. The CACTVS hash values have 
+been shifted from 64-bit unsigned to 64-bit signed (because Postgres supports only this int datatype). The table 
+contains all original file record structures which have been added during the file registration 
+process and additionally all (new) structures which have been created during structure normalization process 
+(see table _cir_structure_parent_structure_).
 
 This table is unique by _hash_.
 
@@ -78,14 +79,14 @@ This table is unique by _hash_.
 This table creates a link between a structure from table _cir_structure_ and its NCI/CADD parent structure (FICTS, 
 FICuS, uuuuu). If a _structure_id_ refers to itself, it is a parent structure and registered as compound (see table 
 _cir_compound_). NULL values for higher order parent structure (FICTS or FICuS) means, the structure is also a either
-a FICuS parent structure in itself (FICTS is NULL) pr a uuuuu parent structure (FICTS and uuuuu are NULL).
+a FICuS parent structure in itself (FICTS is NULL) or a uuuuu parent structure (FICTS and uuuuu are NULL).
 
 The table is unique by _structure_id_.
 
 ### cir_compound
 
 Whenever a structure has been the result of NCI/CADD parent structure calculation or normalization, respectively, it is
-registered as a compound, hence its structure_id is assigned a compund ID in this table.
+registered as a compound, hence its structure_id is assigned a compound ID in this table.
 
 The table is unique by _id_.
 
@@ -99,8 +100,8 @@ The table is unique by _hash_.
 ### cir_structure_name_associations
 
 This table creates all associations between an entry of table _cir_structure_ and _cir_structure_name_. It also includes
-a confidence level (currently by default 100), the affinity class (these are created from whether the association has
-been found via FICTS, FICuS or uuuuu parent structure), and the _name_type_id_.
+a confidence level (currently by default 100 for most entries), the affinity class (these are created from whether the 
+association has been found via FICTS, FICuS or uuuuu parent structure), and the _name_type_id_.
 
 The table is unique by _name_id, _structure_id_, _name_type_id_, amd _affinity_class_id_)
 
