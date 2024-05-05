@@ -21,7 +21,7 @@ stores the available datasets or databases, respectively, for instance, PubChem 
 publisher can be reference (table _cir_publisher_). A dataset can be organized as dataset releases which is organized
 in table _cir_dataset_release_. 
 
-The table is unique by _name_ and _publisher_id_
+The table is unique by column _name_ and _publisher_id_.
 
 ### cir_dataset_release
 
@@ -31,7 +31,7 @@ _parent_id_). Another example is the NCI/DTP database which has a release by Pub
 dataset release can have another publisher than the original dataset. For that this table provides a reference to table 
 _cir_publisher_ like table _cir_dataset_, too. 
 
-The table is unique by _dataset_id_, _publisher_id_, _name_, _version_, _downloaded_ and _released_
+The table is unique by columns _dataset_id_, _publisher_id_, _name_, _version_, _downloaded_ and _released_.
 
 ### cir_structure_file_collection
 
@@ -42,7 +42,7 @@ _file_location_pattern_. The file name patterns are created or have to be config
 by column _release_id_. Alternatively, a (very large) database can be also organized by more than one file pattern 
 which might advantageous later during file processing.
 
-The table is unique by _release_id_ and _file_location_pattern_
+The table is unique by columns _release_id_ and _file_location_pattern_.
 
 ### cir_structure_file
 
@@ -52,7 +52,7 @@ belongs to. The file  name is referenced starting from the /filestore root mount
 file registering process structure files are chunked up into blocks of 10000 records and packed (see also
 [README.md](../README.md)).
 
-The table is unique by _collection_id and _file_
+The table is unique by columns _collection_id and _file_
 
 ### cir_record
 
@@ -62,7 +62,7 @@ It also links a record to its dataset and release as well as its structure_file_
 references more than one version of the same structure file record. This file is filled during the file register 
 process (see also [README.md](../README.md)).
 
-The table is unique by _name_id_, _version_ and _release_id_.
+The table is unique by columns _name_id_, _version_ and _release_id_.
 
 ### cir_structure
 
@@ -72,7 +72,7 @@ contains all original file record structures which have been added during the fi
 process and additionally all (new) structures which have been created during structure normalization process 
 (see table _cir_structure_parent_structure_).
 
-This table is unique by _hash_.
+This table is unique by column _hash_.
 
 ### cir_structure_parent_structure
 
@@ -81,21 +81,21 @@ FICuS, uuuuu). If a _structure_id_ refers to itself, it is a parent structure an
 _cir_compound_). NULL values for higher order parent structure (FICTS or FICuS) means, the structure is also a either
 a FICuS parent structure in itself (FICTS is NULL) or a uuuuu parent structure (FICTS and uuuuu are NULL).
 
-The table is unique by _structure_id_.
+The table is unique by column _structure_id_.
 
 ### cir_compound
 
 Whenever a structure has been the result of NCI/CADD parent structure calculation or normalization, respectively, it is
 registered as a compound, hence its structure_id is assigned a compound ID in this table.
 
-The table is unique by _id_.
+The table is unique by column _id_.
 
 ### cir_structure_name
 
 The table contains all names and REGIDs collected during file record registration process. Each name string is MD5 
 hashed and cast into the Postgres type UUID which is used as the name hash.
 
-The table is unique by _hash_.
+The table is unique by column _hash_.
 
 ### cir_structure_name_associations
 
@@ -104,13 +104,13 @@ a confidence level (currently by default 100 for most entries), the affinity cla
 association has been found via FICTS, FICuS or uuuuu parent structure, see also table _cir_name_affinity_class_), and 
 the _name_type_id_.
 
-The table is unique by _name_id, _structure_id_, _name_type_id_, amd _affinity_class_id_)
+The table is unique by columns _name_id, _structure_id_, _name_type_id_, amd _affinity_class_id_)
 
 ### cir_name_type
 
 This table references all name types used in table _cir_structure_name_associations_. 
 
-The table is unique by _title_
+The table is unique by column _title_.
 
 ### cir_name_affinity_class
 
@@ -119,5 +119,19 @@ name association links a nme to a structure. These values are set during the lin
 to the database, for instance, if a name is linked on basis of FICTS parent structure, the name affinity class is 
 set to 'exact'.
 
-The table is unique by _title_
+The table is unique by column _title_.
 
+### cir_inchi
+
+This table stores all InChIs calculated for the structures in table _cir_structure_. Each entry contains the 
+InChI string, the InChI key in full length, the InChI key blockwise in columns and the version string. The table also 
+contains a hash of the InChIKey which is the MD5 value of the InChIKey cast into the UUID data type of Postgres. The
+hash has been used for calculating uniqueness.
+
+The table is unique by column _hash_.
+
+
+### cir_structure_inchi_associations
+
+
+### cir_inchi_type
