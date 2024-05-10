@@ -41,7 +41,7 @@ WHERE ngroup.scount > 1);
 UPDATE cir_structure_name_associations t
 SET confidence = s.confidence
 FROM
-(select id, confidence from tmp_cir_structure_name_associations) as s
+(select id, confidence from tmp_cir_structure_name_associations order by id LIMIT 10000000 OFFSET 50000000) as s
 WHERE t.id = s.id;
 
 COMMIT;
