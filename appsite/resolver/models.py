@@ -597,13 +597,13 @@ class StructureNameAssociationQuerySet(models.QuerySet):
     ):
         name_hashes = []
         for name in names:
-            print(isinstance(name, str))
+            #print(isinstance(name, str))
             if isinstance(name, str):
                 name_hashes.append(Name(name=name).calculate_hash())
             else:
                 name_hashes.append(name.calculate_hash())
         # name_hashes = [hashlib.md5(name.encode("UTF-8")).hexdigest() for name in names]
-        print(name_hashes)
+        #print(name_hashes)
         name_filter = reduce(operator.or_, (Q(name__hash=h) for h in name_hashes))
         queryset = self._base_queryset().filter(name_filter).filter(confidence__gte=minimum_confidence)
 

@@ -39,11 +39,6 @@ def create_acronym(phrase):
     return acronym
 
 
-# input_phrase = "Python is Amazing"
-# result = create_acronym(input_phrase)
-# print(result)
-
-
 infile = "/filestore/pubchem/data-sources.csv"
 
 source_categories = set()
