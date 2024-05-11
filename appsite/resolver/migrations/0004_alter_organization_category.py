@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('resolver', '0003_delete_pubchemstructurenamecids'),
+        ('resolver', '0001_initial'),
     ]
 
     operations = [
