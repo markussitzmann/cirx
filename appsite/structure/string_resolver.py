@@ -403,19 +403,22 @@ class ChemicalString:
             return False
         except:
             pass
-        #name = Name.objects.get(name=self.string)
+
+        names = [self.string, ]
+        if len(self.string) >= 3:
+            names.append(self.string.lower())
+            names.append(self.string.upper())
+            names.append(self.string.capitalize())
+            names = list(set(names))
 
         affinity = {a.title: a for a in NameAffinityClass.objects.all()}
-        # associations = StructureNameAssociation\
-        #     .with_related_objects\
-        #     .by_name(names=[self.string, ], affinity_classes=[affinity['exact'], affinity['narrow']])
         associations = StructureNameAssociation \
             .with_related_objects \
-            .by_name(names=[self.string, ], affinity_classes=[affinity['exact']])
+            .by_name(names=names, affinity_classes=[affinity['exact']])
         if not associations:
             associations = StructureNameAssociation \
                 .with_related_objects \
-                .by_name(names=[self.string, ], affinity_classes=[affinity['narrow']])
+                .by_name(names=names, affinity_classes=[affinity['narrow']])
 
         resolved_list = []
         for association in associations.all():

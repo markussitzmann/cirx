@@ -524,7 +524,6 @@ class Name(models.Model):
         super(Name, self).save(*args, **kwargs)
 
     def calculate_hash(self):
-        print(self.name)
         return hashlib.md5(self.name.encode("UTF-8")).hexdigest()
 
     def __str__(self):
@@ -597,7 +596,6 @@ class StructureNameAssociationQuerySet(models.QuerySet):
     ):
         name_hashes = []
         for name in names:
-            #print(isinstance(name, str))
             if isinstance(name, str):
                 name_hashes.append(Name(name=name).calculate_hash())
             else:

@@ -53,7 +53,6 @@ def dispatcher_method(_func=None, *, as_list=False):
             index = 1
             data: ResolverData
             for data in resolver_data:
-                #response_list = []
                 if params.structure_index > -1:
                     resolved_items = [data.resolved[params.structure_index], ]
                 else:
@@ -74,12 +73,12 @@ def dispatcher_method(_func=None, *, as_list=False):
                         representation_list.append(representation)
                         index += 1
                     except Exception as msg:
+                        logger.error(msg)
                         pass
                 else:
                     for item in resolved_items:
                         try:
                             response: DispatcherMethodResponse = func(self, item, self.representation_param)
-                            #response_list.append(response)
                             representation = {
                                 'id': index,
                                 'string': string,

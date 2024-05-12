@@ -163,6 +163,26 @@ class ChemicalStringTests(TestCase):
                 )
             ],
         )],
+        ["warfarin", TestData(
+            identifier="warfarin",
+            representations=[
+                TestResponse(
+                    resolver="name",
+                    expectations={'20A701AA27DA3574'},
+                    exception=None
+                )
+            ],
+        )],
+        ["Warfarin", TestData(
+            identifier="Warfarin",
+            representations=[
+                TestResponse(
+                    resolver="name",
+                    expectations={'20A701AA27DA3574'},
+                    exception=None
+                )
+            ],
+        )],
         ["stdinchi", TestData(
             identifier="InChI=1S/C19H16O4/"
                        "c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3",
