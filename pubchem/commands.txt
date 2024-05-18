@@ -1,7 +1,17 @@
-./psql -c "\copy cir_structure_name to '/filestore/cir_structure_name.table'"
 
-# Write names
-docker-compose run cirx python /home/app/pubchem/write_names.py
+1. prepare names (needs the CID-filtered-synonym file as input)
+docker-compose run cirx python /home/app/pubchem/prepare_names.py (or ./pubchem_prepare_names.sh
 
-./psql -f /home/app/pubchem/create_pubchem_database_extensions.sql
-./psql -f /home/app/pubchem/load_names.sql
+2. creates additional aux tables for adding PubChem data by "side loading" to the CIR schema
+./psql -f /home/app/pubchem/create_pubchem_database_extensions.sql (or ./pubchem_create_database_extension.sh)
+
+3. fills table cir_pubchem_structure_name_cid (relationship between cid and CIR name_id
+./psql -f /home/app/pubchem/load_names.sql (or ./pubchem_load_names.sh)
+
+4. creates structure name associations from 1-3
+./psql -f /home/app/pubchem/add_pubchem_cid_name_associations.sql (or ./pubchem_add_pubchem_cid_name_associations.sh)
+
+
+
+
+###./psql -c "\copy cir_structure_name to '/filestore/cir_structure_name.table'"

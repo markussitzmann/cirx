@@ -9,8 +9,8 @@ out = open("/filestore/pubchem/pubchem-names-hashed.txt", "w")
 # ]
 
 ins = [
-    '/instore/pubchem/CID-IUPAC.100000',
-#    '/instore/pubchem/extras/compound/CID-Synonym-filtered'
+    #'/instore/pubchem/CID-IUPAC.100000',
+    '/instore/pubchem/CID-Synonym-filtered'
 ]
 
 for infile in ins:
@@ -22,7 +22,7 @@ for infile in ins:
             i += 1
             splitted = line.split()
             #print(splitted)
-            name = "".join(splitted[1:])
+            name = " ".join(splitted[1:])
             cid = splitted[0]
             if "InChI" in name:
                 continue
