@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import namedtuple
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 
 from django.conf import settings
 from pycactvs import Ens, Dataset
@@ -309,7 +309,7 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_ncicadd_sid(self):
+    def _is_ncicadd_sid(self) -> Optional[Any]:
         try:
             pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
             match = pattern.search(self.string)
@@ -340,7 +340,7 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_ncicadd_identifier(self):
+    def _is_ncicadd_identifier(self) -> Optional[Any]:
         try:
             return Identifier(string=self.string)
         except Exception:
@@ -366,7 +366,7 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_stdinchikey(self):
+    def _is_stdinchikey(self) -> Optional[Any]:
         try:
             inchikey_string = self.string.replace("InChIKey=", "")
 
@@ -424,12 +424,11 @@ class ChemicalString:
         return resolved_list
         #return list()
 
-    def _is_stdinchi(self):
+    def _is_stdinchi(self) -> Optional[Any]:
         try:
             return InChIString(string=self.string)
         except Exception:
             return None
-
 
     def _resolve_stdinchi(self) -> List[ChemicalStructure]:
         #inchi = InChIString(string=self.string)
@@ -450,7 +449,7 @@ class ChemicalString:
         return [resolved, ]
         #return list()
 
-    def _is_smiles(self):
+    def _is_smiles(self) -> Optional[Any]:
         try:
             return SMILES(string=self.string, strict_testing=True)
         except Exception:
@@ -475,22 +474,59 @@ class ChemicalString:
         return [resolved, ]
         #return list()
 
-    def _resolve_name(self) -> List[ChemicalStructure]:
+    def _is_cas_number(self) -> Optional[Any]:
         try:
-            pattern = re.compile('(?P<nsc>^NSC\d+$)', re.IGNORECASE)
-            match = pattern.search(self.string)
-            if match:
-                return False
-            pattern = re.compile('(?P<zinc>^ZINC\d+$)', re.IGNORECASE)
-            match = pattern.search(self.string)
-            if match:
-                return False
-            _ = CASNumber(string=self.string)
-            return False
-        except:
-            pass
+            return CASNumber(string=self.string)
+        except Exception:
+            return None
 
-        names = [self.string, ]
+    def _resolve_cas_number(self) -> List[ChemicalStructure]:
+        cas_number = CASNumber(string=self.string)
+        cas_number = self._is_cas_number()
+        if not cas_number:
+            return list()
+        #if cas_number:
+        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+        associations = StructureNameAssociation \
+            .with_related_objects \
+            .by_name(names=[self.string, ], affinity_classes=[affinity['exact']])
+
+        for association in associations.all():
+            structure: Structure = association.structure
+            chemical_structure = ChemicalStructure(structure=structure)
+            chemical_structure._metadata = {
+                'query_type': 'cas_number',
+                'query_search_string': 'CAS Registry Number',
+                'query_object': association.name.name,
+                'query_string': self.string,
+                'description': association.name.name
+            }
+            return [chemical_structure, ]
+        #return list()
+
+    def _is_name(self) -> Optional[Any]:
+        return self.string
+
+    def _resolve_name(self) -> List[ChemicalStructure]:
+        # try:
+        #     pattern = re.compile('(?P<nsc>^NSC\d+$)', re.IGNORECASE)
+        #     match = pattern.search(self.string)
+        #     if match:
+        #         return False
+        #     pattern = re.compile('(?P<zinc>^ZINC\d+$)', re.IGNORECASE)
+        #     match = pattern.search(self.string)
+        #     if match:
+        #         return False
+        #     _ = CASNumber(string=self.string)
+        #     return False
+        # except:
+        #     pass
+
+        name = self._is_name()
+        if not name:
+            return list()
+
+        names = [name, ]
         if len(self.string) >= 3:
             names.append(self.string.lower())
             names.append(self.string.upper())
@@ -522,26 +558,7 @@ class ChemicalString:
             resolved_list.append(resolved)
         return resolved_list
 
-    def _resolve_cas_number(self) -> List[ChemicalStructure]:
-        cas_number = CASNumber(string=self.string)
-        if cas_number:
-            affinity = {a.title: a for a in NameAffinityClass.objects.all()}
-            associations = StructureNameAssociation \
-                .with_related_objects \
-                .by_name(names=[self.string, ], affinity_classes=[affinity['exact']])
 
-            for association in associations.all():
-                structure: Structure = association.structure
-                chemical_structure = ChemicalStructure(structure=structure)
-                chemical_structure._metadata = {
-                    'query_type': 'cas_number',
-                    'query_search_string': 'CAS Registry Number',
-                    'query_object': association.name.name,
-                    'query_string': self.string,
-                    'description': association.name.name
-                }
-                return [chemical_structure, ]
-        return list()
 
     def _resolve_structure_representation(self) -> List[ChemicalStructure]:
         """
@@ -785,6 +802,33 @@ class ChemicalString:
     def _operator_normalize(structure: ChemicalStructure) -> List[ChemicalStructure]:
         return ChemicalString._operator_ficus(structure)
 
+    @staticmethod
+    def _operator_no_stereo(structure: ChemicalStructure):
+
+        def _no_stereo_structure(ens: Ens):
+            for prop in ['A_LABEL_STEREO', 'B_LABEL_STEREO', 'A_CIP_STEREO', 'B_CIP_STEREO', 'A_HSPECIAL']:
+                ens.purge(prop)
+            return Ens(ens.new('E_SMILES'))
+
+        structures = []
+        description_list = []
+        metadata = structure.metadata.copy()
+
+        no_stereo_structure = _no_stereo_structure(structure.ens)
+        chemical_structure = ChemicalStructure(ens=no_stereo_structure)
+        no_stereo_string = 'no stereo'
+        description_string = str(metadata['description']) + " " + no_stereo_string \
+            if 'description' in metadata else no_stereo_string
+        chemical_structure._metadata = {
+            'description': description_string,
+            'query_type': metadata['query_type'] if 'query_type' in metadata else None,
+            'query_search_string': metadata['query_search_string'] if 'query_search_string' in metadata else None
+        }
+        structures.append(chemical_structure)
+        description_list.append(description_string)
+
+        return structures if structures else list()
+
 
     def _operator_remove_hydrogens(self, representation):
         enslist = []
@@ -846,157 +890,41 @@ class ChemicalString:
         representation.with_related_objects = structures
         return representation
 
-    def _operator_no_stereo(self, representation):
-        enslist = []
-        dataset_list = []
-        for structure in representation.structures:
-            enslist.append(structure._ens)
-        dataset = Dataset(self.cactvs, enslist=enslist)
-        dataset_list.append((dataset, structure._metadata))
-        structures = []
-        description_list = []
-        index = 1
-        for dataset, metadata in dataset_list:
-            #no_stereo = dataset.get_no_stereo()
-            count = 1
-            for ens in no_stereo.get_enslist():
-                structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-                description_string = 'no_stereo %s' % count
-                structure._metadata = {
-                    'description': description_string,
-                    'query_type': metadata['query_type'],
-                    'query_search_string': metadata['query_search_string']
-                }
-                structures.append(structure)
-                index += 1
-                count += 1
-        representation._reference_dataset = dataset_list
-        representation.no_stereo = no_stereo
-        representation.description_list = description_list
-        representation.with_related_objects = structures
-        return representation
-
-    # def _operator_ficts(self, representation):
-    #     enslist = []
-    #     dataset_list = []
-    #     for structure in representation.structures:
-    #         enslist.append(structure._ens)
-    #     dataset = Dataset(self.cactvs, enslist=enslist)
-    #     dataset_list.append((dataset, structure._metadata))
-    #     structures = []
-    #     description_list = []
-    #     index = 1
-    #     for dataset, metadata in dataset_list:
-    #         ficts = dataset.get_ficts_parent_structure()
-    #         count = 1
-    #         for ens in ficts.get_enslist():
-    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-    #             description_string = 'ficts %s' % count
-    #             structure._metadata = {
-    #                 'description': description_string,
-    #                 'query_type': metadata['query_type'],
-    #                 'query_search_string': metadata['query_search_string']
-    #             }
-    #             structures.append(structure)
-    #             index += 1
-    #             count += 1
-    #     representation._reference_dataset = dataset_list
-    #     representation.ficts = ficts
-    #     representation.description_list = description_list
-    #     representation.with_related_objects = structures
-    #     return representation
 
 
 
-    # def _operator_ficus(self, representation):
-    #     enslist = []
-    #     dataset_list = []
-    #     for structure in representation.structures:
-    #         enslist.append(structure._ens)
-    #     dataset = Dataset(self.cactvs, enslist=enslist)
-    #     dataset_list.append((dataset, structure._metadata))
-    #     structures = []
-    #     description_list = []
-    #     index = 1
-    #     for dataset, metadata in dataset_list:
-    #         ficus = dataset.get_ficus_parent_structure()
-    #         count = 1
-    #         for ens in ficus.get_enslist():
-    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-    #             description_string = 'ficus %s' % count
-    #             structure._metadata = {
-    #                 'description': description_string,
-    #                 'query_type': metadata['query_type'],
-    #                 'query_search_string': metadata['query_search_string']
-    #             }
-    #             structures.append(structure)
-    #             index += 1
-    #             count += 1
-    #     representation._reference_dataset = dataset_list
-    #     representation.ficus = ficus
-    #     representation.description_list = description_list
-    #     representation.with_related_objects = structures
-    #     return representation
-    #
-    # def _operator_uuuuu(self, representation):
-    #     enslist = []
-    #     dataset_list = []
-    #     for structure in representation.with_related_objects:
-    #         enslist.append(structure._ens)
-    #     dataset = Dataset(self.cactvs, enslist=enslist)
-    #     dataset_list.append((dataset, structure._metadata))
-    #     structures = []
-    #     description_list = []
-    #     index = 1
-    #     for dataset, metadata in dataset_list:
-    #         uuuuu = dataset.get_uuuuu_parent_structure()
-    #         count = 1
-    #         for ens in uuuuu.get_enslist():
-    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-    #             description_string = 'uuuuu %s' % count
-    #             structure._metadata = {
-    #                 'description': description_string,
-    #                 'query_type': metadata['query_type'],
-    #                 'query_search_string': metadata['query_search_string']
-    #             }
-    #             structures.append(structure)
-    #             index += 1
-    #             count += 1
-    #     representation._reference_dataset = dataset_list
-    #     representation.uuuuu = uuuuu
-    #     representation.description_list = description_list
-    #     representation.with_related_objects = structures
-    #     return representation
 
-    # def _operator_stereoisomers(self, representation):
-    #     enslist = []
-    #     dataset_list = []
-    #     for structure in representation.with_related_objects:
-    #         enslist.append(structure._ens)
-    #     dataset = Dataset(self.cactvs, enslist=enslist)
-    #     dataset_list.append((dataset, structure._metadata))
-    #     structures = []
-    #     description_list = []
-    #     index = 1
-    #     for dataset, metadata in dataset_list:
-    #         #stereoisomers = dataset.get_stereoisomers()
-    #         count = 1
-    #         for ens in stereoisomers.get_enslist():
-    #             structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
-    #             description_string = 'stereoisomer %s' % count
-    #             structure._metadata = {
-    #                 'description': description_string,
-    #                 'query_type': metadata['query_type'],
-    #                 'query_search_string': metadata['query_search_string']
-    #             }
-    #             structures.append(structure)
-    #             index += 1
-    #             count += 1
-    #     representation._reference_dataset = dataset_list
-    #     representation.stereoisomers = stereoisomers
-    #     representation.description_list = description_list
-    #     representation.with_related_objects = structures
-    #     return representation
+
+        # enslist = []
+        # dataset_list = []
+        # for structure in representation.structures:
+        #     enslist.append(structure._ens)
+        # dataset = Dataset(self.cactvs, enslist=enslist)
+        # dataset_list.append((dataset, structure._metadata))
+        # structures = []
+        # description_list = []
+        # index = 1
+        # for dataset, metadata in dataset_list:
+        #     #no_stereo = dataset.get_no_stereo()
+        #     count = 1
+        #     for ens in no_stereo.get_enslist():
+        #         structure = ChemicalStructure(ens=ens, cactvs=self.cactvs)
+        #         description_string = 'no_stereo %s' % count
+        #         structure._metadata = {
+        #             'description': description_string,
+        #             'query_type': metadata['query_type'],
+        #             'query_search_string': metadata['query_search_string']
+        #         }
+        #         structures.append(structure)
+        #         index += 1
+        #         count += 1
+        # representation._reference_dataset = dataset_list
+        # representation.no_stereo = no_stereo
+        # representation.description_list = description_list
+        # representation.with_related_objects = structures
+        # return representation
+
+
 
     def _operator_scaffold_sequence(self, representation):
         enslist = []

@@ -17,6 +17,7 @@ class String:
         self.part1 = None
         self.part2 = None
         self.checkdigit = None
+        self.string = None
 
     def _test_cas(self, string):
         pattern = re.compile(r'(?P<part1>^\d{1,7})-(?P<part2>\d{2})-(?P<checkdigit>\d{1}$)')
@@ -26,6 +27,7 @@ class String:
             self.part1 = int(number["part1"])
             self.part2 = int(number["part2"])
             self.checkdigit = int(number["checkdigit"])
+            self.string = str(self.part1) + "-" + str(self.part2) + "-" + str(self.checkdigit)
             n = str(self.part1) + str(self.part2)
             l = range(len(n))
             #l.reverse()

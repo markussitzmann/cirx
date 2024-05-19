@@ -173,6 +173,26 @@ class ChemicalStringTests(TestCase):
                 )
             ],
         )],
+        ["stereoisomers", TestData(
+            identifier="stereoisomers:F[C@H](Cl)Br",
+            representations=[
+                TestResponse(
+                    module="smiles",
+                    expectations={'66DAC3DEE25DE645', '88967B9483C4898C', 'A7C644ED537F940E'},
+                    exception=None
+                )
+            ],
+        )],
+        ["no stereo", TestData(
+            identifier="no_stereo:F[C@H](Cl)Br",
+            representations=[
+                TestResponse(
+                    module="smiles",
+                    expectations={'88967B9483C4898C'},
+                    exception=None
+                )
+            ],
+        )],
         ["warfarin", TestData(
             identifier="warfarin",
             representations=[
@@ -316,7 +336,7 @@ class ChemicalStringTests(TestCase):
                        "c1-12(20)11-15(13-7-3-2-4-8-13)17-18(21)14-9-5-6-10-16(14)23-19(17)22/h2-10,15,22H,11H2,1H3",
             representations=[
                 TestResponse(module="stdinchi", expectations=True, exception=None),
-                TestResponse(module="smiles", expectations=True, exception=None),
+                TestResponse(module="smiles", expectations=False, exception=None),
                 TestResponse(module="ncicadd_sid", expectations=False, exception=None),
                 TestResponse(module="ncicadd_cid", expectations=False, exception=None),
                 TestResponse(module="ncicadd_rid", expectations=False, exception=None),
@@ -349,6 +369,29 @@ class ChemicalStringTests(TestCase):
             identifier="LFQSCWFLJHTTHZ",
             representations=[
                 TestResponse(module="stdinchikey", expectations=True, exception=None),
+                TestResponse(module="hashisy", expectations=False, exception=None),
+                TestResponse(module="ncicadd_rid", expectations=False, exception=None),
+                TestResponse(module="ncicadd_cid", expectations=False, exception=None),
+                TestResponse(module="ncicadd_identifier", expectations=False, exception=None),
+            ],
+        )],
+        ["is CAS number ", TestData(
+            identifier="50-00-0",
+            representations=[
+                TestResponse(module="cas_number", expectations=True, exception=None),
+                TestResponse(module="stdinchikey", expectations=False, exception=None),
+                TestResponse(module="hashisy", expectations=False, exception=None),
+                TestResponse(module="ncicadd_rid", expectations=False, exception=None),
+                TestResponse(module="ncicadd_cid", expectations=False, exception=None),
+                TestResponse(module="ncicadd_identifier", expectations=False, exception=None),
+            ],
+        )],
+        ["is name ", TestData(
+            identifier="50-00-0",
+            representations=[
+                TestResponse(module="name", expectations=True, exception=None),
+                TestResponse(module="cas_number", expectations=True, exception=None),
+                TestResponse(module="stdinchikey", expectations=False, exception=None),
                 TestResponse(module="hashisy", expectations=False, exception=None),
                 TestResponse(module="ncicadd_rid", expectations=False, exception=None),
                 TestResponse(module="ncicadd_cid", expectations=False, exception=None),
