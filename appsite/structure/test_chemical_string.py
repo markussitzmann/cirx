@@ -193,6 +193,26 @@ class ChemicalStringTests(TestCase):
                 )
             ],
         )],
+        ["add hydrogens", TestData(
+            identifier="add_hydrogens:[C][C]",
+            representations=[
+                TestResponse(
+                    module="smiles",
+                    expectations={'48F6C98BB4B46628'},
+                    exception=None
+                )
+            ],
+        )],
+        ["remove hydrogens", TestData(
+            identifier="remove_hydrogens:CCO",
+            representations=[
+                TestResponse(
+                    module="smiles",
+                    expectations={'145B9F9381F3C5E0'},
+                    exception=None
+                )
+            ],
+        )],
         ["warfarin", TestData(
             identifier="warfarin",
             representations=[
