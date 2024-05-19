@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import namedtuple
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 from django.conf import settings
 from pycactvs import Ens, Dataset
@@ -228,15 +228,21 @@ class ChemicalString:
     def resolver_data(self) -> Dict[str, List[ResolverData]]:
         return self._resolver_data
 
-    def _is_hashisy(self) -> str:
-        pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
-        match = pattern.search(self.string)
-        return match.group('hashcode')
+    def _is_hashisy(self) -> Optional[str]:
+        try:
+            pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
+            match = pattern.search(self.string)
+            return match.group('hashcode')
+        except Exception:
+            return None
+
 
     def _resolve_hashisy(self) -> List[ChemicalStructure]:
         #pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
         #match = pattern.search(self.string)
         hashcode = self._is_hashisy()
+        if not hashcode:
+            return list()
         structure = Structure.with_related_objects.by_hashisy(hashisy_list=[hashcode, ]).first()
         resolved = ChemicalStructure(
             structure=structure,
@@ -250,8 +256,18 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
+    def _is_ncicadd_rid(self):
+        try:
+            record_id = RecordID(string=self.string)
+            return record_id
+        except Exception:
+            return None
+
     def _resolve_ncicadd_rid(self) -> List[ChemicalStructure]:
-        record_id = RecordID(string=self.string)
+        #record_id = RecordID(string=self.string)
+        record_id = self._is_ncicadd_rid()
+        if not record_id:
+            return list()
         record: Record = Record.with_related_objects.by_record_ids([record_id.rid, ]).first()
         structure: Structure = record.structure_file_record.structure
         resolved = ChemicalStructure(
@@ -268,8 +284,17 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
+    def _is_ncicadd_cid(self):
+        try:
+            compound = CompoundID(string=self.string)
+            return compound
+        except Exception:
+            return None
+
     def _resolve_ncicadd_cid(self) -> List[ChemicalStructure]:
-        compound = CompoundID(string=self.string)
+        compound = self._is_ncicadd_cid()
+        if not compound:
+            return list()
         structure = Structure.with_related_objects.by_compound(compounds=[compound.cid, ]).first()
         resolved = ChemicalStructure(
             structure=structure,
@@ -284,27 +309,48 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
+    def _is_ncicadd_sid(self):
+        try:
+            pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
+            match = pattern.search(self.string)
+            return match.group('sid')
+        except Exception:
+            return None
+
+
     def _resolve_ncicadd_sid(self) -> List[ChemicalStructure]:
-        pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
-        match = pattern.search(self.string)
-        resolved = None
-        if match:
-            structure_id = match.group('sid')
-            structure = Structure.objects.get(id=structure_id)
-            resolved = ChemicalStructure(
-                structure=structure,
-                metadata={
-                    'query_type': 'ncicadd_sid',
-                    'query_search_string': 'NCI/CADD Structure ID',
-                    'query_object': structure.id,
-                    'query_string': self.string,
-                    'description': self.string,
-                }
-            )
+        # pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
+        # match = pattern.search(self.string)
+        # resolved = None
+        structure_id = self._is_ncicadd_sid()
+        if not structure_id:
+            return list()
+        #if match:
+        #structure_id = match.group('sid')
+        structure = Structure.objects.get(id=structure_id)
+        resolved = ChemicalStructure(
+            structure=structure,
+            metadata={
+                'query_type': 'ncicadd_sid',
+                'query_search_string': 'NCI/CADD Structure ID',
+                'query_object': structure.id,
+                'query_string': self.string,
+                'description': self.string,
+            }
+        )
         return [resolved, ] if resolved else list()
 
+    def _is_ncicadd_identifier(self):
+        try:
+            return Identifier(string=self.string)
+        except Exception:
+            return None
+
     def _resolve_ncicadd_identifier(self) -> List[ChemicalStructure]:
-        identifier = Identifier(string=self.string)
+        #identifier = Identifier(string=self.string)
+        identifier = self._is_ncicadd_identifier()
+        if not identifier:
+            return list()
         cactvs_hash = CactvsHash(identifier.hashcode)
         structure = Structure.objects.get(hash=cactvs_hash)
         identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
@@ -320,74 +366,114 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
+    def _is_stdinchikey(self):
+        try:
+            inchikey_string = self.string.replace("InChIKey=", "")
+
+            pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PARTIAL_PATTERN_STRING_1,
+                            InChIKey.PARTIAL_PATTERN_STRING_2]
+            matched = False
+            for pattern_string in pattern_list:
+                pattern = re.compile(pattern_string)
+                match = pattern.search(inchikey_string)
+                if match:
+                    return inchikey_string
+            return None
+        except Exception:
+            return None
+
     def _resolve_stdinchikey(self) -> List[ChemicalStructure]:
 
-        inchikey_string = self.string.replace("InChIKey=", "")
+        # inchikey_string = self.string.replace("InChIKey=", "")
+        #
+        # pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PARTIAL_PATTERN_STRING_1, InChIKey.PARTIAL_PATTERN_STRING_2]
+        # matched = False
+        # for pattern_string in pattern_list:
+        #     pattern = re.compile(pattern_string)
+        #     match = pattern.search(inchikey_string)
+        #     if match:
+        #         matched = True
 
-        pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PARTIAL_PATTERN_STRING_1, InChIKey.PARTIAL_PATTERN_STRING_2]
-        matched = False
-        for pattern_string in pattern_list:
-            pattern = re.compile(pattern_string)
-            match = pattern.search(inchikey_string)
-            if match:
-                matched = True
+        # resolved = None
+        # if matched:
 
-        resolved = None
-        if matched:
-            inchi_type = InChIType.objects.get(title="standard")
-            associations = StructureInChIAssociation.with_related_objects.by_partial_inchikey(
-                inchikeys=[inchikey_string, ],
-                inchi_types=[inchi_type, ]
-            ).all()
-            resolved_list = list()
-            for association in associations:
-                structure = association.structure
-                identifier = InChIKey(key=association.inchi.key)
-                resolved = ChemicalStructure(
-                    structure=structure,
-                    metadata={
-                        'query_type': 'stdinchikey',
-                        'query_search_string': 'Standard InChIKey',
-                        'query_object': identifier,
-                        'query_string': self.string,
-                        'description': identifier.element['well_formatted']
-                    }
-                )
-                resolved_list.append(resolved)
-            return resolved_list
-        return list()
+        inchikey_string = self._is_stdinchikey()
+        if not inchikey_string:
+            return list()
+
+        inchi_type = InChIType.objects.get(title="standard")
+        associations = StructureInChIAssociation.with_related_objects.by_partial_inchikey(
+            inchikeys=[inchikey_string, ],
+            inchi_types=[inchi_type, ]
+        ).all()
+        resolved_list = list()
+        for association in associations:
+            structure = association.structure
+            identifier = InChIKey(key=association.inchi.key)
+            resolved = ChemicalStructure(
+                structure=structure,
+                metadata={
+                    'query_type': 'stdinchikey',
+                    'query_search_string': 'Standard InChIKey',
+                    'query_object': identifier,
+                    'query_string': self.string,
+                    'description': identifier.element['well_formatted']
+                }
+            )
+            resolved_list.append(resolved)
+        return resolved_list
+        #return list()
+
+    def _is_stdinchi(self):
+        try:
+            return InChIString(string=self.string)
+        except Exception:
+            return None
+
 
     def _resolve_stdinchi(self) -> List[ChemicalStructure]:
-        inchi = InChIString(string=self.string)
-        if inchi.string:
-            resolved = ChemicalStructure(
-                ens=Ens(inchi.string),
-                metadata={
-                    'query_type': 'stdinchi',
-                    'query_search_string': 'Standard InChI',
-                    'query_object': inchi,
-                    'query_string': self.string,
-                    'description': inchi.string
-                }
-            )
-            return [resolved, ]
-        return list()
+        #inchi = InChIString(string=self.string)
+        inchi = self._is_stdinchi()
+        if not inchi:
+            return list()
+        #if inchi.string:
+        resolved = ChemicalStructure(
+            ens=Ens(inchi.string),
+            metadata={
+                'query_type': 'stdinchi',
+                'query_search_string': 'Standard InChI',
+                'query_object': inchi,
+                'query_string': self.string,
+                'description': inchi.string
+            }
+        )
+        return [resolved, ]
+        #return list()
+
+    def _is_smiles(self):
+        try:
+            return SMILES(string=self.string, strict_testing=True)
+        except Exception:
+            return None
 
     def _resolve_smiles(self) -> List[ChemicalStructure]:
-        smiles = SMILES(string=self.string, strict_testing=True)
-        if smiles.string:
-            resolved = ChemicalStructure(
-                ens=Ens(smiles.string),
-                metadata={
-                    'query_type': 'smiles',
-                    'query_search_string': 'SMILES string',
-                    'query_object': smiles,
-                    'query_string': self.string,
-                    'description': smiles.string
-                }
-            )
-            return [resolved, ]
-        return list()
+        #smiles = SMILES(string=self.string, strict_testing=True)
+        smiles = self._is_smiles()
+        if not smiles:
+            return list()
+        #if smiles.string:
+        resolved = ChemicalStructure(
+            ens=Ens(smiles.string),
+            metadata={
+                'query_type': 'smiles',
+                'query_search_string': 'SMILES string',
+                'query_object': smiles,
+                'query_string': self.string,
+                'description': smiles.string
+            }
+        )
+        return [resolved, ]
+        #return list()
 
     def _resolve_name(self) -> List[ChemicalStructure]:
         try:

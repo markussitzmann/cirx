@@ -4,7 +4,6 @@ import uuid
 from pycactvs import Ens
 from typing import Dict
 
-
 class InChIKey:
 
     DEFAULT_PREFIX = "InChIKey="
