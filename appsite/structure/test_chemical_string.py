@@ -450,7 +450,7 @@ class ChemicalStringTests(TestCase):
             #     self.fail()
             # else:
             test_data = (getattr(chemical_string, function_name)())
-            resolved = test_data is not None
+            resolved = test_data
             logger.info("expected {}".format(expected_data.expectations)),
             logger.info("received {}".format(resolved))
             self.assertEqual(resolved, expected_data.expectations)

@@ -231,20 +231,21 @@ class ChemicalString:
     def resolver_data(self) -> Dict[str, List[ResolverData]]:
         return self._resolver_data
 
-    def _is_hashisy(self) -> Optional[str]:
+    def _is_hashisy(self) -> bool:
         try:
             pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
             match = pattern.search(self.string)
-            return match.group('hashcode')
+            _ = match.group('hashcode')
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_hashisy(self) -> List[ChemicalStructure]:
-        # pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
-        # match = pattern.search(self.string)
-        hashcode = self._is_hashisy()
-        if not hashcode:
+        if not self._is_hashisy():
             return list()
+        pattern = re.compile('(?P<hashcode>^[0-9a-fA-F]{16}$)', re.IGNORECASE)
+        match = pattern.search(self.string)
+        hashcode = match.group('hashcode')
         structure = Structure.with_related_objects.by_hashisy(hashisy_list=[hashcode, ]).first()
         resolved = ChemicalStructure(
             structure=structure,
@@ -258,18 +259,17 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_ncicadd_rid(self):
+    def _is_ncicadd_rid(self) -> bool:
         try:
-            record_id = RecordID(string=self.string)
-            return record_id
+            _ = RecordID(string=self.string)
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_ncicadd_rid(self) -> List[ChemicalStructure]:
-        # record_id = RecordID(string=self.string)
-        record_id = self._is_ncicadd_rid()
-        if not record_id:
+        if not self._is_ncicadd_rid():
             return list()
+        record_id = RecordID(string=self.string)
         record: Record = Record.with_related_objects.by_record_ids([record_id.rid, ]).first()
         structure: Structure = record.structure_file_record.structure
         resolved = ChemicalStructure(
@@ -286,17 +286,17 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_ncicadd_cid(self):
+    def _is_ncicadd_cid(self) -> bool:
         try:
-            compound = CompoundID(string=self.string)
-            return compound
+            _ = CompoundID(string=self.string)
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_ncicadd_cid(self) -> List[ChemicalStructure]:
-        compound = self._is_ncicadd_cid()
-        if not compound:
+        if not self._is_ncicadd_cid():
             return list()
+        compound = CompoundID(string=self.string)
         structure = Structure.with_related_objects.by_compound(compounds=[compound.cid, ]).first()
         resolved = ChemicalStructure(
             structure=structure,
@@ -311,23 +311,21 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_ncicadd_sid(self) -> Optional[Any]:
+    def _is_ncicadd_sid(self) -> bool:
         try:
             pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
             match = pattern.search(self.string)
-            return match.group('sid')
+            _ = match.group('sid')
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_ncicadd_sid(self) -> List[ChemicalStructure]:
-        # pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
-        # match = pattern.search(self.string)
-        # resolved = None
-        structure_id = self._is_ncicadd_sid()
-        if not structure_id:
+        if not self._is_ncicadd_sid():
             return list()
-        # if match:
-        # structure_id = match.group('sid')
+        pattern = re.compile('^NCICADD(_|:)SID=(?P<sid>\d+$)', re.IGNORECASE)
+        match = pattern.search(self.string)
+        structure_id = match.group('sid')
         structure = Structure.objects.get(id=structure_id)
         resolved = ChemicalStructure(
             structure=structure,
@@ -341,17 +339,17 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_ncicadd_identifier(self) -> Optional[Any]:
+    def _is_ncicadd_identifier(self) -> bool:
         try:
-            return Identifier(string=self.string)
+            _ = Identifier(string=self.string)
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_ncicadd_identifier(self) -> List[ChemicalStructure]:
-        # identifier = Identifier(string=self.string)
-        identifier = self._is_ncicadd_identifier()
-        if not identifier:
+        if not self._is_ncicadd_identifier():
             return list()
+        identifier = Identifier(string=self.string)
         cactvs_hash = CactvsHash(identifier.hashcode)
         structure = Structure.objects.get(hash=cactvs_hash)
         identifier_search_type_string = 'NCI/CADD Identifier (%s)' % identifier.type
@@ -367,23 +365,25 @@ class ChemicalString:
         )
         return [resolved, ] if resolved else list()
 
-    def _is_stdinchikey(self) -> Optional[Any]:
+    def _is_stdinchikey(self) -> bool:
         try:
             inchikey_string = self.string.replace("InChIKey=", "")
 
             pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PARTIAL_PATTERN_STRING_1,
                             InChIKey.PARTIAL_PATTERN_STRING_2]
-            matched = False
             for pattern_string in pattern_list:
                 pattern = re.compile(pattern_string)
                 match = pattern.search(inchikey_string)
                 if match:
-                    return inchikey_string
-            return None
+                    return True
+            return False
         except Exception:
-            return None
+            return False
 
     def _resolve_stdinchikey(self) -> List[ChemicalStructure]:
+
+        if not self._is_stdinchikey():
+            return list()
 
         # inchikey_string = self.string.replace("InChIKey=", "")
         #
@@ -398,13 +398,13 @@ class ChemicalString:
         # resolved = None
         # if matched:
 
-        inchikey_string = self._is_stdinchikey()
-        if not inchikey_string:
-            return list()
+
+
+        inchikey = self.string.replace("InChIKey=", "")
 
         inchi_type = InChIType.objects.get(title="standard")
         associations = StructureInChIAssociation.with_related_objects.by_partial_inchikey(
-            inchikeys=[inchikey_string, ],
+            inchikeys=[inchikey, ],
             inchi_types=[inchi_type, ]
         ).all()
         resolved_list = list()
@@ -423,20 +423,20 @@ class ChemicalString:
             )
             resolved_list.append(resolved)
         return resolved_list
-        # return list()
 
-    def _is_stdinchi(self) -> Optional[Any]:
+    def _is_stdinchi(self) -> bool:
         try:
-            return InChIString(string=self.string)
+            _ = InChIString(string=self.string)
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_stdinchi(self) -> List[ChemicalStructure]:
         # inchi = InChIString(string=self.string)
-        inchi = self._is_stdinchi()
-        if not inchi:
+        if not self._is_stdinchi():
             return list()
         # if inchi.string:
+        inchi = InChIString(string=self.string)
         resolved = ChemicalStructure(
             ens=Ens(inchi.string),
             metadata={
@@ -444,24 +444,25 @@ class ChemicalString:
                 'query_search_string': 'Standard InChI',
                 'query_object': inchi,
                 'query_string': self.string,
-                'description': inchi.string
+                'description': inchi
             }
         )
         return [resolved, ]
         # return list()
 
-    def _is_smiles(self) -> Optional[Any]:
+    def _is_smiles(self) -> bool:
         try:
-            return SMILES(string=self.string, strict_testing=True)
+            _ = SMILES(string=self.string, strict_testing=True)
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_smiles(self) -> List[ChemicalStructure]:
         # smiles = SMILES(string=self.string, strict_testing=True)
-        smiles = self._is_smiles()
-        if not smiles:
+        if not self._is_smiles():
             return list()
         # if smiles.string:
+        smiles = SMILES(string=self.string, strict_testing=True)
         resolved = ChemicalStructure(
             ens=Ens(smiles.string),
             metadata={
@@ -475,16 +476,16 @@ class ChemicalString:
         return [resolved, ]
         # return list()
 
-    def _is_cas_number(self) -> Optional[Any]:
+    def _is_cas_number(self) -> bool:
         try:
-            return CASNumber(string=self.string)
+            _ = CASNumber(string=self.string)
+            return True
         except Exception:
-            return None
+            return False
 
     def _resolve_cas_number(self) -> List[ChemicalStructure]:
-        cas_number = CASNumber(string=self.string)
-        cas_number = self._is_cas_number()
-        if not cas_number:
+        #cas_number = self._is_cas_number()
+        if not self._is_cas_number():
             return list()
         # if cas_number:
         affinity = {a.title: a for a in NameAffinityClass.objects.all()}
@@ -505,8 +506,8 @@ class ChemicalString:
             return [chemical_structure, ]
         # return list()
 
-    def _is_name(self) -> Optional[Any]:
-        return self.string
+    def _is_name(self) -> bool:
+        return True
 
     def _resolve_name(self) -> List[ChemicalStructure]:
         # try:
@@ -523,11 +524,10 @@ class ChemicalString:
         # except:
         #     pass
 
-        name = self._is_name()
-        if not name:
+        if not self._is_name():
             return list()
 
-        names = [name, ]
+        names = [self.string, ]
         if len(self.string) >= 3:
             names.append(self.string.lower())
             names.append(self.string.upper())
