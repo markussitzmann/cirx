@@ -935,7 +935,7 @@ class StructureRegistry(object):
                 .filter(
                 structure_file=structure_file,
                 structure__blocked__isnull=True,
-                structure__names__isnull=True,
+                #structure__names__isnull=True,
             )
         except Exception as e:
             logger.error("selecting structures for name linking failed")
