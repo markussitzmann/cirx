@@ -645,7 +645,7 @@ class StructureNameAssociation(models.Model):
                 check=models.Q(confidence__range=(1, 100)),
             ),
         ]
-        db_table = 'cir_structure_name_associations'
+        db_table = 'tmp_cir_structure_name_associations'
 
     def __str__(self):
         return "(StructureNameAssociations=%s: name=%s, structure=%s, name_type=%s, affinity=%s, confidence=%s)" % \

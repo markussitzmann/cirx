@@ -20,9 +20,9 @@ def count_and_save_file_task(file_id: int):
 
 
 @shared_task(name="register mapper", queue='register')
-def register_file_record_chunk_mapper(file_id: int, callback):
-    logger.info("args %s %s" % (file_id, callback))
-    return FileRegistry.register_structure_file_record_chunk_mapper(file_id, callback)
+def register_file_record_chunk_mapper(file_id: int, chunk_task):
+    logger.info("args %s %s" % (file_id, chunk_task))
+    return FileRegistry.register_structure_file_record_chunk_mapper(file_id, chunk_task)
 
 
 @shared_task(name="register", queue='register')
@@ -42,9 +42,9 @@ def fetch_structure_file_for_normalization_task(file_id: int):
 
 
 @shared_task(name="normalize mapper", queue='normalize')
-def normalize_chunk_mapper(file_id: int, callback):
-    logger.info("args %s %s" % (file_id, callback))
-    return StructureRegistry.normalize_chunk_mapper(file_id, callback)
+def normalize_chunk_mapper(file_id: int, chunk_task):
+    logger.info("args %s %s" % (file_id, chunk_task))
+    return StructureRegistry.normalize_chunk_mapper(file_id, chunk_task)
 
 
 @shared_task(name="normalize", queue='normalize')
@@ -86,9 +86,9 @@ def fetch_structure_file_for_linkname_task(file_id: int):
 
 
 @shared_task(name="linkname mapper", queue='linkname')
-def linkname_chunk_mapper(file_id: int, callback):
-    logger.info("args %s %s" % (file_id, callback))
-    return StructureRegistry.linkname_chunk_mapper(file_id, callback)
+def linkname_chunk_mapper(file_id: int, chunk_task):
+    logger.info("args %s %s" % (file_id, chunk_task))
+    return StructureRegistry.linkname_chunk_mapper(file_id, chunk_task)
 
 
 @shared_task(name="linkname", queue='linkname')
