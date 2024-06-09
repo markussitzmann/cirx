@@ -33,7 +33,7 @@ def _linkname(options):
     limit = options['limit']
     files: QuerySet = StructureFile.objects.filter(
         Q(linkname_status__isnull=True)
-        | Q(linkname_status__progress__lte=0.98)
+        | Q(linkname_status__progress__lte=0.999)
     ).exclude(tags__tag=tag, tags__process='linkname').all()
 
     n = 0

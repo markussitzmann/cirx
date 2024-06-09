@@ -164,7 +164,7 @@ services:
     entrypoint: [ "/home/app/docker-entrypoint.worker.sh" ]
     working_dir: "/home/app/appsite"
     command: [ 'nice', '-n', '20', 'celery', '-A', 'appsite',
-               'worker', '-l', 'info', '-Q', 'linkname', '-c', '1',
+               'worker', '-l', 'info', '-Q', 'linkname', '-c', '4',
                "--logfile=/logging/cirx-linkname-worker.%h.%i.log",
               '-n', 'linkname@%h']
     restart: on-failure

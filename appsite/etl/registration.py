@@ -533,7 +533,7 @@ class StructureRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def normalize_chunk_mapper(structure_file_id: int, callback):
+    def normalize_chunk_mapper(structure_file_id: int, chunk_task):
         try:
             logger.info("normalize chunk mapper for structure file id %s" % structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
@@ -552,7 +552,7 @@ class StructureRegistry(object):
         except Exception as e:
             logger.error("structure file and count not available")
             raise Exception(e)
-        return StructureRegistry.structure_records_to_chunk_callbacks(records, structure_file_id, callback)
+        return StructureRegistry.structure_records_to_chunk_callbacks(records, structure_file_id, chunk_task)
 
     @staticmethod
     def normalize_structures(structure_id_arg_tuples):
@@ -723,7 +723,7 @@ class StructureRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def calcinchi_chunk_mapper(structure_file_id: int, callback):
+    def calcinchi_chunk_mapper(structure_file_id: int, chunk_task):
         try:
             logger.info("calcinchi chunk mapper for structure file id %s" % structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
@@ -739,7 +739,7 @@ class StructureRegistry(object):
             logger.error("selecting structure records for InChI calculation failed")
             raise Exception(e)
 
-        return StructureRegistry.structure_records_to_chunk_callbacks(structure_id_list, structure_file_id, callback)
+        return StructureRegistry.structure_records_to_chunk_callbacks(structure_id_list, structure_file_id, chunk_task)
 
     @staticmethod
     def calculate_inchi(structure_id_arg_tuples):
@@ -897,14 +897,14 @@ class StructureRegistry(object):
         status.save()
 
     @staticmethod
-    def structure_records_to_chunk_callbacks(records: QuerySet, structure_file_id: int, callback):
+    def structure_records_to_chunk_callbacks(records: QuerySet, structure_file_id: int, chunk_task):
         count = len(records)
         chunk_size = StructureRegistry.CHUNK_SIZE
         chunks = [records[i:i + min(chunk_size, count)] for i in range(0, count, chunk_size)]
-        callback = subtask(callback)
-        callback_args = [[r['structure__id'] for r in chunk] for chunk in chunks]
-        callbacks = [callback.clone(((structure_file_id, args,),), ) for args in callback_args]
-        return group(callbacks)()
+        chunk_subtask = subtask(chunk_task)
+        chunk_task_args = [[r['structure__id'] for r in chunk] for chunk in chunks]
+        chunk_tasks = [chunk_subtask.clone(((structure_file_id, args,),), ) for args in chunk_task_args]
+        return group(chunk_tasks)()
 
     #########
 
@@ -925,7 +925,7 @@ class StructureRegistry(object):
         return structure_file_id
 
     @staticmethod
-    def linkname_chunk_mapper(structure_file_id: int, callback):
+    def linkname_chunk_mapper(structure_file_id: int, chunk_task):
         try:
             logger.info("linkname chunk mapper for structure file id %s" % structure_file_id)
             structure_file = StructureFile.objects.get(id=structure_file_id)
@@ -935,13 +935,13 @@ class StructureRegistry(object):
                 .filter(
                 structure_file=structure_file,
                 structure__blocked__isnull=True,
-                structure__names__isnull=True,
+                #structure__names__isnull=True,
             )
         except Exception as e:
             logger.error("selecting structures for name linking failed")
             raise Exception(e)
 
-        return StructureRegistry.structure_records_to_chunk_callbacks(structure_id_list, structure_file_id, callback)
+        return StructureRegistry.structure_records_to_chunk_callbacks(structure_id_list, structure_file_id, chunk_task)
 
     @staticmethod
     def link_structure_names(arg_tuple):
