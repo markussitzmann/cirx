@@ -78,7 +78,7 @@ INSTALLED_APPS = [
     'multiselectfield',
     'dbbackup',
     'compressor',
-    'debug_toolbar',
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -90,7 +90,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'appsite.urls'
@@ -327,33 +327,47 @@ CELERYD_MAX_TASKS_PER_CHILD = 1
 
 # CIR Settings
 
-CIR_AVAILABLE_RESOLVERS = [
-    'smiles',
-    'stdinchikey',
-    'stdinchi',
-    #'ncicadd_identifier',
-    'hashisy',
-    #'chemspider_id',
-    #'chemnavigator_sid',
-    #'pubchem_sid',
-    #'emolecules_vid',
-    'ncicadd_rid',
-    'ncicadd_cid',
-    'ncicadd_sid',
-    #'cas_number',
-    #'nsc_number',
-    #'zinc_code',
-    #'opsin',
-    #'name_pattern',
-    'name',
-    #'SDFile',
-    #'minimol',
-    'packstring',
-    #'structure_representation'
-]
+# CIR_AVAILABLE_RESOLVERS = [
+#     'smiles',
+#     'stdinchikey',
+#     'stdinchi',
+#     #'ncicadd_identifier',
+#     'hashisy',
+#     #'chemspider_id',
+#     #'chemnavigator_sid',
+#     #'pubchem_sid',
+#     #'emolecules_vid',
+#     'ncicadd_rid',
+#     'ncicadd_cid',
+#     'ncicadd_sid',
+#     'cas_number',
+#     #'nsc_number',
+#     #'zinc_code',
+#     #'opsin',
+#     #'name_pattern',
+#     'name',
+#     #'SDFile',
+#     #'minimol',
+#     'packstring',
+#     #'structure_representation'
+# ]
+#
+# CIR_AVAILABLE_RESOLVER_OPERATORS = [
+#     'tautomers',
+#     'remove_hydrogens',
+#     'add_hydrogens',
+#     'ficts',
+#     'ficus',
+#     'uuuuu',
+#     'parent',
+#     'normalize',
+#     'stereoisomers',
+#     'no_stereo',
+#     # 'scaffold_sequence',
+# ]
 
-CIR_FILESTORE_ROOT = os.path.join("/filestore")
-CIR_INSTORE_ROOT = os.path.join("/instore")
+# CIR_FILESTORE_ROOT = os.path.join("/filestore")
+# CIR_INSTORE_ROOT = os.path.join("/instore")
 
 
 ### THE WE HAVE TO GET RID OF THIS SECTION
@@ -369,6 +383,19 @@ DBBACKUP_STORAGE_OPTIONS = {'location': '/home/app/backup/'}
 #    'SHOW_TOOLBAR_CALLBACK': lambda r: False,  # disables it
 #    # '...
 #}
+
+TESTING = "test" in sys.argv
+
+if not TESTING:
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "debug_toolbar",
+    ]
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        *MIDDLEWARE,
+    ]
+
 
 if DEBUG:
     import os  # only if you haven't already imported this

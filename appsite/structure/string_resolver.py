@@ -1,10 +1,12 @@
 import logging
 import re
 from collections import namedtuple
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional
 
 from django.conf import settings
 from pycactvs import Ens, Dataset
+
+from resolver import settings as resolver_settings
 
 from core.cactvs import CactvsHash
 from core.common import NCICADD_TYPES
@@ -19,21 +21,6 @@ logger = logging.getLogger('cirx')
 
 ResolverData = namedtuple("ResolverData", "id resolver resolved exception")
 ResolverParams = namedtuple("ResolverParams", "url_params resolver_list filter mode structure_index page columns rows")
-
-OPERATOR_LIST = [
-    'tautomers',
-    'remove_hydrogens',
-    'add_hydrogens',
-    'ficts',
-    'ficus',
-    'uuuuu',
-    'parent',
-    'normalize',
-    'stereoisomers',
-    'scaffold_sequence',
-    'no_stereo'
-]
-
 
 class ChemicalStructure:
     """Container class to keep a CACTVS ensemble and a Structure model object of the same chemical structure together"""
@@ -170,12 +157,12 @@ class ChemicalString:
         if resolver_list:
             pass
         else:
-            resolver_list = settings.CIR_AVAILABLE_RESOLVERS
+            resolver_list = resolver_settings.CIR_AVAILABLE_RESOLVERS
 
         if operator_list:
             pass
         else:
-            operator_list = OPERATOR_LIST
+            operator_list = resolver_settings.CIR_AVAILABLE_RESOLVER_OPERATORS
         self.operator = None
         if not operator:
             for o in operator_list:
@@ -385,21 +372,6 @@ class ChemicalString:
         if not self._is_stdinchikey():
             return list()
 
-        # inchikey_string = self.string.replace("InChIKey=", "")
-        #
-        # pattern_list = [InChIKey.PATTERN_STRING, InChIKey.PARTIAL_PATTERN_STRING_1, InChIKey.PARTIAL_PATTERN_STRING_2]
-        # matched = False
-        # for pattern_string in pattern_list:
-        #     pattern = re.compile(pattern_string)
-        #     match = pattern.search(inchikey_string)
-        #     if match:
-        #         matched = True
-
-        # resolved = None
-        # if matched:
-
-
-
         inchikey = self.string.replace("InChIKey=", "")
 
         inchi_type = InChIType.objects.get(title="standard")
@@ -432,10 +404,8 @@ class ChemicalString:
             return False
 
     def _resolve_stdinchi(self) -> List[ChemicalStructure]:
-        # inchi = InChIString(string=self.string)
         if not self._is_stdinchi():
             return list()
-        # if inchi.string:
         inchi = InChIString(string=self.string)
         resolved = ChemicalStructure(
             ens=Ens(inchi.string),
@@ -448,7 +418,6 @@ class ChemicalString:
             }
         )
         return [resolved, ]
-        # return list()
 
     def _is_smiles(self) -> bool:
         try:
@@ -458,10 +427,8 @@ class ChemicalString:
             return False
 
     def _resolve_smiles(self) -> List[ChemicalStructure]:
-        # smiles = SMILES(string=self.string, strict_testing=True)
         if not self._is_smiles():
             return list()
-        # if smiles.string:
         smiles = SMILES(string=self.string, strict_testing=True)
         resolved = ChemicalStructure(
             ens=Ens(smiles.string),
@@ -474,7 +441,6 @@ class ChemicalString:
             }
         )
         return [resolved, ]
-        # return list()
 
     def _is_cas_number(self) -> bool:
         try:
@@ -484,10 +450,8 @@ class ChemicalString:
             return False
 
     def _resolve_cas_number(self) -> List[ChemicalStructure]:
-        #cas_number = self._is_cas_number()
         if not self._is_cas_number():
             return list()
-        # if cas_number:
         affinity = {a.title: a for a in NameAffinityClass.objects.all()}
         associations = StructureNameAssociation \
             .with_related_objects \
@@ -504,9 +468,10 @@ class ChemicalString:
                 'description': association.name.name
             }
             return [chemical_structure, ]
-        # return list()
 
     def _is_name(self) -> bool:
+        if self._is_cas_number():
+            return False
         return True
 
     def _resolve_name(self) -> List[ChemicalStructure]:

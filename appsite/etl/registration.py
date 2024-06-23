@@ -36,6 +36,8 @@ from resolver.models import InChI, Structure, Compound, StructureInChIAssociatio
     NameAffinityClass
 from structure.inchi.identifier import InChIString, InChIKey
 
+from resolver import settings as resolver_settings
+
 logger = logging.getLogger('celery.task')
 
 from pycactvs import cactvs
@@ -99,7 +101,7 @@ class FileRegistry(object):
     def __init__(self, file_collection: StructureFileCollection):
         self.file_collection = file_collection
         self._file_name_list = glob.glob(
-            os.path.join(settings.CIR_FILESTORE_ROOT, file_collection.file_location_pattern_string),
+            os.path.join(resolver_settings.CIR_FILESTORE_ROOT, file_collection.file_location_pattern_string),
             recursive=True
         )
         self._file_list = list()
@@ -488,7 +490,7 @@ class FileRegistry(object):
         new_name = "".join(name_elements)
 
         filestore_name = os.path.join(
-            str(settings.CIR_FILESTORE_ROOT),
+            str(resolver_settings.CIR_FILESTORE_ROOT),
             *[str(p) for p in parent.parts[2:]],
             key,
             str(new_name)

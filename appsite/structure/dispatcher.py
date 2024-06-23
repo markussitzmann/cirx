@@ -4,15 +4,15 @@ import io
 import logging
 from collections import namedtuple
 from distutils.util import strtobool
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
-from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpRequest
 from pycactvs import Dataset as CsDataset
 from pycactvs import Ens, Molfile, Prop
 
 from resolver.models import Record, StructureNameAssociation, NameAffinityClass, ResponseType
+from settings import CIR_AVAILABLE_RESPONSE_TYPES
 from structure.string_resolver import ChemicalString, ChemicalStructure, ResolverData, ResolverParams
 
 logger = logging.getLogger('cirx')
@@ -114,19 +114,25 @@ def dispatcher_method(_func=None, *, as_list=False):
 class Dispatcher:
 
     def __init__(self, request, representation_type, representation_param=None, output_format='plain'):
-        response_type = ResponseType.objects.get(url=representation_type)
-        self.base_content_type = response_type.base_mime_type
+        # response_type = ResponseType.objects.get(url=representation_type)
+        # self.base_content_type = response_type.base_mime_type
+        filtered_response_types = list(filter(lambda r: r.get('name') == representation_type, CIR_AVAILABLE_RESPONSE_TYPES))
+        if len(filtered_response_types):
+            response_type = filtered_response_types[0]
+        else:
+            raise ValueError("response type not available")
+        self.base_content_type = response_type.get('base_content_type')
         self.url_parameters: HttpRequest.GET = request.GET.copy() if request else None
         self.representation_type = representation_type
         self.output_format = output_format
         #self.simple_mode: bool = self._use_simple_mode(output_format)
 
         if not representation_param:
-            self.representation_param = response_type.parameter
+            self.representation_param = response_type.get('parameter')
         else:
             self.representation_param = representation_param
 
-        self.method = getattr(self, response_type.method, self.representation_param)
+        self.method = getattr(self, response_type.get('method'), self.representation_param)
 
     def parse(self, string) -> DispatcherData:
         response: DispatcherResponse = self.method(string)
@@ -182,6 +188,30 @@ class Dispatcher:
             compounds,
             affinity_classes = [affinity['exact'],]
         ).filter(name_type__parent__title='NAME').all().order_by('name__name')
+        association: StructureNameAssociation
+        names = [association.name.name for association in associations]
+        if len(names) == 0:
+            raise ValueError("no names available")
+        return DispatcherMethodResponse(
+            content=names,
+            content_type="text/plain"
+        )
+
+    @dispatcher_method
+    def xnames(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
+        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+
+        compounds = []
+        ficts_parent = resolved.ficts_parent(only_lookup=False)
+        if ficts_parent and ficts_parent.structure:
+            compounds.append(ficts_parent.structure.compound)
+        ficus_parent = resolved.ficus_parent(only_lookup=False)
+        if not len(compounds) and ficus_parent and ficus_parent.structure:
+            compounds.append(ficus_parent.structure.compound)
+        associations = StructureNameAssociation.with_related_objects.by_compound(
+            compounds,
+            affinity_classes = [affinity['exact'],]
+        ).filter(name_type__parent__title='NAME').order_by('confidence').all()
         association: StructureNameAssociation
         names = [association.name.name for association in associations]
         if len(names) == 0:

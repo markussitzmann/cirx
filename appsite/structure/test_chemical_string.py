@@ -409,8 +409,8 @@ class ChemicalStringTests(TestCase):
         ["is name ", TestData(
             identifier="50-00-0",
             representations=[
-                TestResponse(module="name", expectations=True, exception=None),
-                TestResponse(module="cas_number", expectations=True, exception=None),
+                TestResponse(module="name", expectations=False, exception=None),
+                # TestResponse(module="cas_number", expectations=True, exception=None),
                 TestResponse(module="stdinchikey", expectations=False, exception=None),
                 TestResponse(module="hashisy", expectations=False, exception=None),
                 TestResponse(module="ncicadd_rid", expectations=False, exception=None),

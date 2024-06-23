@@ -10,7 +10,9 @@ from django.core.files.storage import FileSystemStorage
 from core.cactvs import CactvsHash
 from resolver.models import Structure, Release, Name, NameType
 
-fs = FileSystemStorage(location=settings.CIR_FILESTORE_ROOT)
+from resolver import settings as resolver_settings
+
+fs = FileSystemStorage(location=resolver_settings.CIR_FILESTORE_ROOT)
 
 
 class StructureFileCollectionPreprocessor(models.Model):
