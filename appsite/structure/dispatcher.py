@@ -187,7 +187,7 @@ class Dispatcher:
         associations = StructureNameAssociation.with_related_objects.by_compound(
             compounds,
             affinity_classes = [affinity['exact'],]
-        ).filter(name_type__parent__title='NAME').all().order_by('name__name')
+        ).filter(name_type__parent__title='NAME').all().order_by('name__id')
         association: StructureNameAssociation
         names = [association.name.name for association in associations]
         if len(names) == 0:
@@ -211,7 +211,7 @@ class Dispatcher:
         associations = StructureNameAssociation.with_related_objects.by_compound(
             compounds,
             affinity_classes = [affinity['exact'],]
-        ).filter(name_type__parent__title='NAME').order_by('confidence').all()
+        ).filter(name_type__parent__title='NAME').order_by('name__id').all()
         association: StructureNameAssociation
         names = [association.name.name for association in associations]
         if len(names) == 0:
