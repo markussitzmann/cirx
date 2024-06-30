@@ -12,7 +12,7 @@ from pycactvs import Dataset as CsDataset
 from pycactvs import Ens, Molfile, Prop
 
 from resolver.models import Record, StructureNameAssociation, NameAffinityClass, ResponseType
-from settings import CIR_AVAILABLE_RESPONSE_TYPES
+from resolver.settings import CIR_AVAILABLE_RESPONSE_TYPES
 from structure.string_resolver import ChemicalString, ChemicalStructure, ResolverData, ResolverParams
 
 logger = logging.getLogger('cirx')
