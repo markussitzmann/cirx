@@ -199,7 +199,14 @@ CIR_AVAILABLE_RESPONSE_TYPES = [
     },
     {
         "name": "cas",
-        "method": "cas",
+        "method": "cas_numbers",
+        "parameter": None,
+        "base_content_type": "text",
+        "parent": None
+    },
+    {
+        "name": "cas_numbers",
+        "method": "cas_numbers",
         "parameter": None,
         "base_content_type": "text",
         "parent": None
@@ -274,13 +281,13 @@ CIR_AVAILABLE_RESPONSE_TYPES = [
         "base_content_type": "text",
         "parent": None
     },
-    {
-        "name": "urls",
-        "method": "urls",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
+    # {
+    #     "name": "urls",
+    #     "method": "urls",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
     {
         "name": "weight",
         "method": "prop",
@@ -463,13 +470,13 @@ CIR_AVAILABLE_RESPONSE_TYPES = [
         "base_content_type": "text",
         "parent": None
     },
-    {
-        "name": "chemnavigator_sid",
-        "method": "chemnavigator_sid",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
+    # {
+    #     "name": "chemnavigator_sid",
+    #     "method": "chemnavigator_sid",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
     {
         "name": "pubchem_sid",
         "method": "pubchem_sid",
@@ -477,48 +484,48 @@ CIR_AVAILABLE_RESPONSE_TYPES = [
         "base_content_type": "text",
         "parent": None
     },
-    {
-        "name": "emolecules_vid",
-        "method": "emolecules_vid",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
-    {
-        "name": "emolecules_id",
-        "method": "emolecules_vid",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
-    {
-        "name": "zinc_id",
-        "method": "zinc_id",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
-    {
-        "name": "zinc_code",
-        "method": "zinc_id",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
-    {
-        "name": "zinc",
-        "method": "zinc_id",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
-    {
-        "name": "chemnavigator_id",
-        "method": "chemnavigator_sid",
-        "parameter": None,
-        "base_content_type": "text",
-        "parent": None
-    },
+    # {
+    #     "name": "emolecules_vid",
+    #     "method": "emolecules_vid",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
+    # {
+    #     "name": "emolecules_id",
+    #     "method": "emolecules_vid",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
+    # {
+    #     "name": "zinc_id",
+    #     "method": "zinc_id",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
+    # {
+    #     "name": "zinc_code",
+    #     "method": "zinc_id",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
+    # {
+    #     "name": "zinc",
+    #     "method": "zinc_id",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
+    # {
+    #     "name": "chemnavigator_id",
+    #     "method": "chemnavigator_sid",
+    #     "parameter": None,
+    #     "base_content_type": "text",
+    #     "parent": None
+    # },
     {
         "name": "nsc_number",
         "method": "nsc_number",

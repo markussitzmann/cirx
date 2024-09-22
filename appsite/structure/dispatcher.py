@@ -14,6 +14,8 @@ from pycactvs import Ens, Molfile, Prop
 from resolver.models import Record, StructureNameAssociation, NameAffinityClass, ResponseType
 from resolver.settings import CIR_AVAILABLE_RESPONSE_TYPES
 from structure.string_resolver import ChemicalString, ChemicalStructure, ResolverData, ResolverParams
+from structure.cas.number import String as CASNumber
+
 
 logger = logging.getLogger('cirx')
 
@@ -143,6 +145,26 @@ class Dispatcher:
             response=response
         )
 
+    @staticmethod
+    def _names(resolved: ChemicalStructure):
+        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+        # url_params = self._params.url_params
+        compounds = []
+        ficts_parent = resolved.ficts_parent(only_lookup=False)
+        if ficts_parent and ficts_parent.structure:
+            compounds.append(ficts_parent.structure.compound)
+        ficus_parent = resolved.ficus_parent(only_lookup=False)
+        if not len(compounds) and ficus_parent and ficus_parent.structure:
+            compounds.append(ficus_parent.structure.compound)
+
+        associations = StructureNameAssociation.with_related_objects.by_compound(
+            compounds,
+            affinity_classes=[affinity['exact'], ]
+        ).filter(name_type__parent__title='NAME').all().order_by('name__id')
+        association: StructureNameAssociation
+        names = [association.name.name for association in associations]
+        return names
+
     @dispatcher_method
     def ncicadd_compound_id(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
         if not resolved.structure or not resolved.structure.compound:
@@ -171,25 +193,11 @@ class Dispatcher:
             content_type="text/plain"
         )
 
+
+
     @dispatcher_method
     def names(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
-        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
-        #url_params = self._params.url_params
-
-        compounds = []
-        ficts_parent = resolved.ficts_parent(only_lookup=False)
-        if ficts_parent and ficts_parent.structure:
-            compounds.append(ficts_parent.structure.compound)
-        ficus_parent = resolved.ficus_parent(only_lookup=False)
-        if not len(compounds) and ficus_parent and ficus_parent.structure:
-            compounds.append(ficus_parent.structure.compound)
-
-        associations = StructureNameAssociation.with_related_objects.by_compound(
-            compounds,
-            affinity_classes = [affinity['exact'],]
-        ).filter(name_type__parent__title='NAME').all().order_by('name__id')
-        association: StructureNameAssociation
-        names = [association.name.name for association in associations]
+        names = Dispatcher._names(resolved)
         if len(names) == 0:
             raise ValueError("no names available")
         return DispatcherMethodResponse(
@@ -198,24 +206,18 @@ class Dispatcher:
         )
 
     @dispatcher_method
-    def xnames(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
-        affinity = {a.title: a for a in NameAffinityClass.objects.all()}
+    def cas_numbers(self, resolved: ChemicalStructure, *args, **kwargs) -> DispatcherMethodResponse:
 
-        compounds = []
-        ficts_parent = resolved.ficts_parent(only_lookup=False)
-        if ficts_parent and ficts_parent.structure:
-            compounds.append(ficts_parent.structure.compound)
-        ficus_parent = resolved.ficus_parent(only_lookup=False)
-        if not len(compounds) and ficus_parent and ficus_parent.structure:
-            compounds.append(ficus_parent.structure.compound)
-        associations = StructureNameAssociation.with_related_objects.by_compound(
-            compounds,
-            affinity_classes = [affinity['exact'],]
-        ).filter(name_type__parent__title='NAME').order_by('name__id').all()
-        association: StructureNameAssociation
-        names = [association.name.name for association in associations]
+        def _is_cas_number(string) -> bool:
+            try:
+                _ = CASNumber(string=string)
+                return True
+            except Exception:
+                return False
+
+        names = [name for name in Dispatcher._names(resolved) if _is_cas_number(name)]
         if len(names) == 0:
-            raise ValueError("no names available")
+            raise ValueError("no CAS number available")
         return DispatcherMethodResponse(
             content=names,
             content_type="text/plain"
